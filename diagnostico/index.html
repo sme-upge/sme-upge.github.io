@@ -25,21 +25,21 @@
             margin-right: 0.5rem;
             border-radius: 0.25rem;
         }
-        #participationTable th {
+        .sortable-th {
             cursor: pointer;
             position: sticky;
             top: 0;
-            background-color: #f8fafc;
+            background-color: #f8fafc; /* Tailwind's gray-50 */
             z-index: 10;
         }
-        #participationTable th:hover {
-            background-color: #e2e8f0;
+        .sortable-th:hover {
+            background-color: #e2e8f0; /* Tailwind's gray-200 */
         }
-        #participationTable .sort-asc::after {
+        .sortable-th .sort-asc::after {
             content: ' ▲';
             font-size: 0.8em;
         }
-        #participationTable .sort-desc::after {
+        .sortable-th .sort-desc::after {
             content: ' ▼';
             font-size: 0.8em;
         }
@@ -65,7 +65,7 @@
                     <select id="question-select" class="w-full p-2 border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"></select>
                 </div>
                 <div>
-                    <label for="location-select" class="block text-sm font-medium text-gray-700 mb-1">Selecione um Local para comparar:</label>
+                    <label for="location-select" class="block text-sm font-medium text-gray-700 mb-1">Selecione um Local para análise:</label>
                     <select id="location-select" class="w-full p-2 border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"></select>
                 </div>
             </div>
@@ -73,16 +73,14 @@
             <div class="grid grid-cols-1 mt-8">
                 <div class="bg-gray-50 p-4 rounded-xl">
                     <h3 id="local-chart-title" class="text-lg font-semibold text-center mb-1"></h3>
-                    <!-- *** INÍCIO DA ALTERAÇÃO HTML *** -->
                     <p id="local-chart-subtitle" class="text-sm text-center text-red-600 italic font-bold mb-2"></p>
-                    <!-- *** FIM DA ALTERAÇÃO HTML *** -->
                     <div style="height: 975px;" class="w-full">
                         <canvas id="localComparisonChart"></canvas>
                     </div>
                 </div>
             </div>
             
-            <div class="mt-6 flex justify-center items-center space-x-6 text-xs text-gray-600">
+            <div id="comparison-legend" class="mt-6 flex justify-center items-center space-x-6 text-xs text-gray-600">
                 <div class="chart-legend-item">
                     <div class="chart-legend-color-box" style="background-color: #d32f2f;"></div>
                     <span>Item 20% ou mais ACIMA da média da Rede</span>
@@ -91,6 +89,35 @@
                     <div class="chart-legend-color-box" style="background-color: #388e3c;"></div>
                     <span>Item 20% ou mais ABAIXO da média da Rede</span>
                 </div>
+            </div>
+        </section>
+        
+        <section id="suggestions-section" class="bg-white p-6 rounded-2xl shadow-lg mb-8">
+            <h2 class="text-2xl font-semibold mb-4">Sugestões abertas</h2>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                <div>
+                    <label for="suggestion-location-select" class="block text-sm font-medium text-gray-700 mb-1">Filtrar por Local:</label>
+                    <select id="suggestion-location-select" class="w-full p-2 border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"></select>
+                </div>
+                <div>
+                    <label for="suggestion-eixo-select" class="block text-sm font-medium text-gray-700 mb-1">Filtrar por Eixo:</label>
+                    <select id="suggestion-eixo-select" class="w-full p-2 border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"></select>
+                </div>
+            </div>
+            
+            <div class="overflow-y-auto" style="max-height: 500px;">
+                <table id="suggestionsTable" class="w-full text-sm text-left text-gray-500">
+                    <thead class="text-xs text-gray-700 uppercase">
+                        <tr>
+                            <th scope="col" class="py-3 px-6 sortable-th" data-column-key="local" style="width: 10%;">Local <span class="sort-icon"></span></th>
+                            <th scope="col" class="py-3 px-6 sortable-th" data-column-key="eixo" style="width: 30%;">Eixo <span class="sort-icon"></span></th>
+                            <th scope="col" class="py-3 px-6 sortable-th" data-column-key="sugestao" style="width: 60%;">Sugestão <span class="sort-icon"></span></th>
+                        </tr>
+                    </thead>
+                    <tbody id="suggestions-table-body">
+                    </tbody>
+                </table>
             </div>
         </section>
         
@@ -107,10 +134,10 @@
                 <table id="participationTable" class="w-full text-sm text-left text-gray-500">
                     <thead class="text-xs text-gray-700 uppercase">
                         <tr>
-                            <th scope="col" class="py-3 px-6" data-column-index="0" data-column-type="string">Unidade</th>
-                            <th scope="col" class="py-3 px-6 text-right" data-column-index="1" data-column-type="number">Respostas</th>
-                            <th scope="col" class="py-3 px-6 text-right" data-column-index="2" data-column-type="number">Total esperado</th>
-                            <th scope="col" class="py-3 px-6 text-right" data-column-index="3" data-column-type="percentage">Participação</th>
+                            <th scope="col" class="py-3 px-6 sortable-th" data-column-index="0" data-column-type="string">Unidade <span class="sort-icon"></span></th>
+                            <th scope="col" class="py-3 px-6 text-right sortable-th" data-column-index="1" data-column-type="number">Respostas <span class="sort-icon"></span></th>
+                            <th scope="col" class="py-3 px-6 text-right sortable-th" data-column-index="2" data-column-type="number">Total esperado <span class="sort-icon"></span></th>
+                            <th scope="col" class="py-3 px-6 text-right sortable-th" data-column-index="3" data-column-type="percentage">Participação <span class="sort-icon"></span></th>
                         </tr>
                     </thead>
                     <tbody>
@@ -146,14 +173,14 @@ const surveyData = {
         "DRE-SA": "#FFA000",
         "DRE-SM": "#616161",
         "DRE-MP": "#455A64",
-        "SME/COCEU": "#3974a2",
-        "SME/CODAE": "#eef99c",
-        "SME/COGEP": "#20dea7",
-        "SME/COMAPRE": "#a03003",
-        "SME/COMPS": "#60060c",
-        "SME/COPED": "#2bb16f",
-        "SME/COSERV": "#82433c",
-        "SME/GAB": "#4fe100"
+        "SME/COCEU": "#70ade1",
+        "SME/CODAE": "#8ac482",
+        "SME/COGEP": "#0dd22e",
+        "SME/COMAPRE": "#e69a96",
+        "SME/COMPS": "#f2d46f",
+        "SME/COPED": "#d23ee3",
+        "SME/COSERV": "#fb24cb",
+        "SME/GAB": "#be1f7a"
     },
     "responsesByLocation": {
         "SME": 408,
@@ -172,6 +199,8 @@ const surveyData = {
         "DRE-IP": 81
     },
     "allComparableLocations": [
+        "Rede",
+        "SME",
         "DRE-BT",
         "DRE-CL",
         "DRE-CS",
@@ -185,7 +214,6 @@ const surveyData = {
         "DRE-PJ",
         "DRE-SA",
         "DRE-SM",
-        "SME",
         "SME/COCEU",
         "SME/CODAE",
         "SME/COGEP",
@@ -222,6 +250,17 @@ const surveyData = {
                     "Melhoria da qualidade do Transporte Escolar Gratuito (TEG)": 807,
                     "Outras respostas": 135
                 }
+            },
+            "SME": {
+                "totalRespondents": 408,
+                "items": {
+                    "Realização de busca ativa para alcançar crianças em situação de vulnerabilidade social e/ou com deficiência não inscritas para atendimento": 304,
+                    "Ampliação de matrículas em unidades mais próximas dos endereços de referência fornecidos pelas famílias": 254,
+                    "Ampliação de oferta de matrículas em unidades de preferência das famílias": 202,
+                    "Melhoria da qualidade do Transporte Escolar Gratuito (TEG)": 179,
+                    "Outras respostas": 20
+                },
+                "showOtherResponsesWarning": false
             },
             "DRE-BT": {
                 "totalRespondents": 114,
@@ -366,17 +405,6 @@ const surveyData = {
                 },
                 "showOtherResponsesWarning": false
             },
-            "SME": {
-                "totalRespondents": 408,
-                "items": {
-                    "Realização de busca ativa para alcançar crianças em situação de vulnerabilidade social e/ou com deficiência não inscritas para atendimento": 304,
-                    "Ampliação de matrículas em unidades mais próximas dos endereços de referência fornecidos pelas famílias": 254,
-                    "Ampliação de oferta de matrículas em unidades de preferência das famílias": 202,
-                    "Melhoria da qualidade do Transporte Escolar Gratuito (TEG)": 179,
-                    "Outras respostas": 20
-                },
-                "showOtherResponsesWarning": false
-            },
             "SME/COCEU": {
                 "totalRespondents": 37,
                 "items": {
@@ -484,6 +512,27 @@ const surveyData = {
                     "Fortalecimento do monitoramento da frequência dos estudantes": 137,
                     "Fortalecimento do uso de indicadores quantitativos e qualitativos da educação infantil": 112
                 }
+            },
+            "SME": {
+                "totalRespondents": 408,
+                "items": {
+                    "Ampliação dos profissionais do quadro de apoio da educação infantil": 183,
+                    "Fortalecimento das políticas intersetoriais de educação, saúde, assistência social, esporte e cultura, com foco no desenvolvimento integral de bebês e crianças": 178,
+                    "Ampliação da oferta de formações específicas para professores/as da educação infantil": 94,
+                    "Diversificação dos materiais e recursos pedagógicos adequados à proposta curricular disponíveis para uso com as crianças": 81,
+                    "Promoção de ações com vistas à redução de desigualdades e fortalecimento da diversidade": 81,
+                    "Fortalecimento da integração do atendimento realizado por CEIs e EMEIs na passagem entre as etapas da educação infantil": 79,
+                    "Ampliação da oferta de formações específicas para o quadro de apoio da educação infantil": 74,
+                    "Fortalecimento das práticas de leitura literária e cultura escrita": 68,
+                    "Ampliação do acompanhamento pedagógico das unidades educacionais": 63,
+                    "Fortalecimento do monitoramento das unidades parceiras": 62,
+                    "Ampliação da oferta de formações relacionadas à prática da educação infantil": 57,
+                    "Outras respostas": 47,
+                    "Ampliação da oferta de formações específicas para equipe gestora": 37,
+                    "Fortalecimento do uso de indicadores quantitativos e qualitativos da educação infantil": 31,
+                    "Fortalecimento do monitoramento da frequência dos estudantes": 25
+                },
+                "showOtherResponsesWarning": false
             },
             "DRE-BT": {
                 "totalRespondents": 114,
@@ -753,27 +802,6 @@ const surveyData = {
                 },
                 "showOtherResponsesWarning": false
             },
-            "SME": {
-                "totalRespondents": 408,
-                "items": {
-                    "Ampliação dos profissionais do quadro de apoio da educação infantil": 183,
-                    "Fortalecimento das políticas intersetoriais de educação, saúde, assistência social, esporte e cultura, com foco no desenvolvimento integral de bebês e crianças": 178,
-                    "Ampliação da oferta de formações específicas para professores/as da educação infantil": 94,
-                    "Diversificação dos materiais e recursos pedagógicos adequados à proposta curricular disponíveis para uso com as crianças": 81,
-                    "Promoção de ações com vistas à redução de desigualdades e fortalecimento da diversidade": 81,
-                    "Fortalecimento da integração do atendimento realizado por CEIs e EMEIs na passagem entre as etapas da educação infantil": 79,
-                    "Ampliação da oferta de formações específicas para o quadro de apoio da educação infantil": 74,
-                    "Fortalecimento das práticas de leitura literária e cultura escrita": 68,
-                    "Ampliação do acompanhamento pedagógico das unidades educacionais": 63,
-                    "Fortalecimento do monitoramento das unidades parceiras": 62,
-                    "Ampliação da oferta de formações relacionadas à prática da educação infantil": 57,
-                    "Outras respostas": 47,
-                    "Ampliação da oferta de formações específicas para equipe gestora": 37,
-                    "Fortalecimento do uso de indicadores quantitativos e qualitativos da educação infantil": 31,
-                    "Fortalecimento do monitoramento da frequência dos estudantes": 25
-                },
-                "showOtherResponsesWarning": false
-            },
             "SME/COCEU": {
                 "totalRespondents": 37,
                 "items": {
@@ -910,6 +938,22 @@ const surveyData = {
                     "Ampliação de formações para uso de resultados de avaliações de alfabetização na atuação pedagógica": 274,
                     "Outras respostas": 131
                 }
+            },
+            "SME": {
+                "totalRespondents": 408,
+                "items": {
+                    "Fortalecimento das políticas de acesso e permanência de crianças em vulnerabilidade social do ciclo de alfabetização": 192,
+                    "Ampliação do quadro de professores/as com especialização em alfabetização": 185,
+                    "Ampliação da oferta de formações específicas para professores/as do ciclo de alfabetização": 155,
+                    "Promoção de ações com vistas à redução de desigualdades e fortalecimento da diversidade no ciclo de alfabetização": 146,
+                    "Fortalecimento da permanência de professores/as no ciclo de alfabetização": 130,
+                    "Ampliação das estratégias do uso do material pedagógico do ciclo de alfabetização": 78,
+                    "Fortalecimento do alinhamento entre o Currículo da Cidade e Orientações Curriculares com a BNCC e matrizes do SAEB": 73,
+                    "Fortalecimento do uso das Sondagens para tomada de decisões sobre as situações didáticas cotidianas": 66,
+                    "Ampliação de formações para uso de resultados de avaliações de alfabetização na atuação pedagógica": 65,
+                    "Outras respostas": 27
+                },
+                "showOtherResponsesWarning": false
             },
             "DRE-BT": {
                 "totalRespondents": 114,
@@ -1119,22 +1163,6 @@ const surveyData = {
                 },
                 "showOtherResponsesWarning": false
             },
-            "SME": {
-                "totalRespondents": 408,
-                "items": {
-                    "Fortalecimento das políticas de acesso e permanência de crianças em vulnerabilidade social do ciclo de alfabetização": 192,
-                    "Ampliação do quadro de professores/as com especialização em alfabetização": 185,
-                    "Ampliação da oferta de formações específicas para professores/as do ciclo de alfabetização": 155,
-                    "Promoção de ações com vistas à redução de desigualdades e fortalecimento da diversidade no ciclo de alfabetização": 146,
-                    "Fortalecimento da permanência de professores/as no ciclo de alfabetização": 130,
-                    "Ampliação das estratégias do uso do material pedagógico do ciclo de alfabetização": 78,
-                    "Fortalecimento do alinhamento entre o Currículo da Cidade e Orientações Curriculares com a BNCC e matrizes do SAEB": 73,
-                    "Fortalecimento do uso das Sondagens para tomada de decisões sobre as situações didáticas cotidianas": 66,
-                    "Ampliação de formações para uso de resultados de avaliações de alfabetização na atuação pedagógica": 65,
-                    "Outras respostas": 27
-                },
-                "showOtherResponsesWarning": false
-            },
             "SME/COCEU": {
                 "totalRespondents": 37,
                 "items": {
@@ -1259,6 +1287,20 @@ const surveyData = {
                     "Ampliação da oferta de vagas de Ensino Fundamental II": 265,
                     "Outras respostas": 152
                 }
+            },
+            "SME": {
+                "totalRespondents": 408,
+                "items": {
+                    "Fortalecimento das políticas de acesso e permanência de estudantes de Ensino Fundamental e Médio": 255,
+                    "Ampliação das estratégias de promoção de melhorias no clima escolar": 208,
+                    "Ampliação das estratégias de monitoramento da trajetória e evasão escolar": 199,
+                    "Ampliação da oferta de vagas em territórios com alta demanda de vagas": 175,
+                    "Reavaliação da organização dos ciclos no ensino fundamental (Alfabetização, Interdisciplinar e Autoral)": 103,
+                    "Fomento às políticas de transporte para estudantes de Ensino Fundamental II e Médio": 65,
+                    "Ampliação da oferta de vagas de Ensino Fundamental II": 52,
+                    "Outras respostas": 29
+                },
+                "showOtherResponsesWarning": false
             },
             "DRE-BT": {
                 "totalRespondents": 114,
@@ -1442,20 +1484,6 @@ const surveyData = {
                 },
                 "showOtherResponsesWarning": false
             },
-            "SME": {
-                "totalRespondents": 408,
-                "items": {
-                    "Fortalecimento das políticas de acesso e permanência de estudantes de Ensino Fundamental e Médio": 255,
-                    "Ampliação das estratégias de promoção de melhorias no clima escolar": 208,
-                    "Ampliação das estratégias de monitoramento da trajetória e evasão escolar": 199,
-                    "Ampliação da oferta de vagas em territórios com alta demanda de vagas": 175,
-                    "Reavaliação da organização dos ciclos no ensino fundamental (Alfabetização, Interdisciplinar e Autoral)": 103,
-                    "Fomento às políticas de transporte para estudantes de Ensino Fundamental II e Médio": 65,
-                    "Ampliação da oferta de vagas de Ensino Fundamental II": 52,
-                    "Outras respostas": 29
-                },
-                "showOtherResponsesWarning": false
-            },
             "SME/COCEU": {
                 "totalRespondents": 37,
                 "items": {
@@ -1578,6 +1606,27 @@ const surveyData = {
                     "Outras respostas": 139,
                     "Ampliação do incentivo à participação na Prova São Paulo e no SAEB para aferição de resultados": 127
                 }
+            },
+            "SME": {
+                "totalRespondents": 408,
+                "items": {
+                    "Fortalecimento das políticas de acesso e permanência de estudantes em vulnerabilidade social": 165,
+                    "Fortalecimento das estratégias de apoio pedagógico e recuperação das aprendizagens": 148,
+                    "Fortalecimento do alinhamento entre currículo, material pedagógico, avaliações e replanejamento": 141,
+                    "Ampliação da oferta de formações específicas para professores/as de Ensino Fundamental e Médio": 95,
+                    "Ampliação da oferta de vagas em territórios com alta demanda de vagas": 75,
+                    "Ampliação da oferta de formações relacionadas à prática do Ensino Fundamental e Médio": 73,
+                    "Ampliação da oferta de formações específicas para equipe gestora e equipe de apoio": 69,
+                    "Fortalecimento do uso de evidências no planejamento de formações dos profissionais de Ensino Fundamental e Médio": 64,
+                    "Ampliação das estratégias do uso do material pedagógico de Ensino Fundamental e Médio": 64,
+                    "Fortalecimento do alinhamento entre o Currículo da Cidade e Orientações Curriculares com a BNCC e matrizes do SAEB": 54,
+                    "Fortalecimento da atuação da supervisão nas unidades educacionais": 51,
+                    "Fortalecimento do monitoramento da frequência dos estudantes": 44,
+                    "Ampliação do uso de resultados da Prova São Paulo e do SAEB no planejamento pedagógico": 42,
+                    "Outras respostas": 24,
+                    "Ampliação do incentivo à participação na Prova São Paulo e no SAEB para aferição de resultados": 20
+                },
+                "showOtherResponsesWarning": false
             },
             "DRE-BT": {
                 "totalRespondents": 114,
@@ -1850,27 +1899,6 @@ const surveyData = {
                 },
                 "showOtherResponsesWarning": false
             },
-            "SME": {
-                "totalRespondents": 408,
-                "items": {
-                    "Fortalecimento das políticas de acesso e permanência de estudantes em vulnerabilidade social": 165,
-                    "Fortalecimento das estratégias de apoio pedagógico e recuperação das aprendizagens": 148,
-                    "Fortalecimento do alinhamento entre currículo, material pedagógico, avaliações e replanejamento": 141,
-                    "Ampliação da oferta de formações específicas para professores/as de Ensino Fundamental e Médio": 95,
-                    "Ampliação da oferta de vagas em territórios com alta demanda de vagas": 75,
-                    "Ampliação da oferta de formações relacionadas à prática do Ensino Fundamental e Médio": 73,
-                    "Ampliação da oferta de formações específicas para equipe gestora e equipe de apoio": 69,
-                    "Fortalecimento do uso de evidências no planejamento de formações dos profissionais de Ensino Fundamental e Médio": 64,
-                    "Ampliação das estratégias do uso do material pedagógico de Ensino Fundamental e Médio": 64,
-                    "Fortalecimento do alinhamento entre o Currículo da Cidade e Orientações Curriculares com a BNCC e matrizes do SAEB": 54,
-                    "Fortalecimento da atuação da supervisão nas unidades educacionais": 51,
-                    "Fortalecimento do monitoramento da frequência dos estudantes": 44,
-                    "Ampliação do uso de resultados da Prova São Paulo e do SAEB no planejamento pedagógico": 42,
-                    "Outras respostas": 24,
-                    "Ampliação do incentivo à participação na Prova São Paulo e no SAEB para aferição de resultados": 20
-                },
-                "showOtherResponsesWarning": false
-            },
             "SME/COCEU": {
                 "totalRespondents": 37,
                 "items": {
@@ -2003,6 +2031,20 @@ const surveyData = {
                     "Ampliação da jornada escolar (7 horas) de tempo integral": 282,
                     "Outras respostas": 128
                 }
+            },
+            "SME": {
+                "totalRespondents": 408,
+                "items": {
+                    "Melhoria na infraestrutura para a expansão da educação em tempo integral": 275,
+                    "Diversificação dos materiais e recursos pedagógicos adequados à proposta curricular da educação integral": 209,
+                    "Promoção de parcerias com demais órgãos e secretarias voltadas à diversificação das atividades ofertadas aos estudantes durante a expansão da jornada": 182,
+                    "Ampliação gradativa da oferta de vagas de educação em tempo integral": 125,
+                    "Ampliação das jornadas de trabalho de docentes para expansão da educação em tempo integral": 94,
+                    "Fortalecimento do modelo de educação do Programa São Paulo Integral": 80,
+                    "Ampliação da jornada escolar (7 horas) de tempo integral": 71,
+                    "Outras respostas": 21
+                },
+                "showOtherResponsesWarning": false
             },
             "DRE-BT": {
                 "totalRespondents": 114,
@@ -2186,20 +2228,6 @@ const surveyData = {
                 },
                 "showOtherResponsesWarning": false
             },
-            "SME": {
-                "totalRespondents": 408,
-                "items": {
-                    "Melhoria na infraestrutura para a expansão da educação em tempo integral": 275,
-                    "Diversificação dos materiais e recursos pedagógicos adequados à proposta curricular da educação integral": 209,
-                    "Promoção de parcerias com demais órgãos e secretarias voltadas à diversificação das atividades ofertadas aos estudantes durante a expansão da jornada": 182,
-                    "Ampliação gradativa da oferta de vagas de educação em tempo integral": 125,
-                    "Ampliação das jornadas de trabalho de docentes para expansão da educação em tempo integral": 94,
-                    "Fortalecimento do modelo de educação do Programa São Paulo Integral": 80,
-                    "Ampliação da jornada escolar (7 horas) de tempo integral": 71,
-                    "Outras respostas": 21
-                },
-                "showOtherResponsesWarning": false
-            },
             "SME/COCEU": {
                 "totalRespondents": 37,
                 "items": {
@@ -2320,6 +2348,23 @@ const surveyData = {
                     "Fortalecimento do uso do Sistema de Gestão da Aprendizagem (SGA)": 161,
                     "Outras respostas": 96
                 }
+            },
+            "SME": {
+                "totalRespondents": 408,
+                "items": {
+                    "Ampliação da velocidade de conexão à internet das unidades educacionais": 167,
+                    "Fortalecimento do uso de Tecnologias para Aprendizagem": 160,
+                    "Ampliação da oferta de formação digital para professores": 158,
+                    "Fortalecimento da utilização da infraestrutura tecnológica": 133,
+                    "Formação para uso das salas de aula digitais": 126,
+                    "Ampliação da oferta de computadores por estudante": 123,
+                    "Ampliação da oferta de formação de uso de sistemas da SME": 76,
+                    "Melhoria da confiabilidade de dados dos sistemas": 72,
+                    "Fortalecimento do uso do Sistema de Gestão Pedagógica (SGP)": 55,
+                    "Fortalecimento do uso do Sistema de Gestão da Aprendizagem (SGA)": 42,
+                    "Outras respostas": 17
+                },
+                "showOtherResponsesWarning": false
             },
             "DRE-BT": {
                 "totalRespondents": 114,
@@ -2542,23 +2587,6 @@ const surveyData = {
                 },
                 "showOtherResponsesWarning": false
             },
-            "SME": {
-                "totalRespondents": 408,
-                "items": {
-                    "Ampliação da velocidade de conexão à internet das unidades educacionais": 167,
-                    "Fortalecimento do uso de Tecnologias para Aprendizagem": 160,
-                    "Ampliação da oferta de formação digital para professores": 158,
-                    "Fortalecimento da utilização da infraestrutura tecnológica": 133,
-                    "Formação para uso das salas de aula digitais": 126,
-                    "Ampliação da oferta de computadores por estudante": 123,
-                    "Ampliação da oferta de formação de uso de sistemas da SME": 76,
-                    "Melhoria da confiabilidade de dados dos sistemas": 72,
-                    "Fortalecimento do uso do Sistema de Gestão Pedagógica (SGP)": 55,
-                    "Fortalecimento do uso do Sistema de Gestão da Aprendizagem (SGA)": 42,
-                    "Outras respostas": 17
-                },
-                "showOtherResponsesWarning": false
-            },
             "SME/COCEU": {
                 "totalRespondents": 37,
                 "items": {
@@ -2693,6 +2721,24 @@ const surveyData = {
                     "Outras respostas": 113,
                     "Fortalecimento da atuação das equipes do NAAPA na perspectiva da educação inclusiva e da educação bilíngue para surdos": 35
                 }
+            },
+            "SME": {
+                "totalRespondents": 408,
+                "items": {
+                    "Ampliação do quadro de Auxiliares de Vida Escolar (AVEs)": 192,
+                    "Ampliação do quadro de professores/as com especialização em educação especial e em Libras na perspectiva da educação inclusiva e da educação bilíngue para surdos": 155,
+                    "Ampliação do quadro de Auxiliares Técnicos de Educação (ATEs)": 139,
+                    "Aumento da oferta de formações específicas para professores/as da educação especial e em Libras na perspectiva da educação inclusiva e da educação bilíngue para surdos": 118,
+                    "Fortalecimento da atuação das equipes do CEFAI na perspectiva da educação inclusiva e da educação bilíngue para surdos": 111,
+                    "Ampliação da acessibilidade na infraestrutura nas unidades educacionais": 111,
+                    "Aumento da oferta de formações específicas para ATEs na perspectiva da educação inclusiva e da educação bilíngue para surdos": 100,
+                    "Ampliação da oferta de materiais pedagógicos acessíveis": 87,
+                    "Ampliação da oferta de formações específicas para equipe gestora em educação especial na perspectiva da educação inclusiva e da educação bilíngue para surdos": 67,
+                    "Ampliação da oferta de transporte gratuito do TEG Acessível": 49,
+                    "Outras respostas": 15,
+                    "Fortalecimento da atuação das equipes do NAAPA na perspectiva da educação inclusiva e da educação bilíngue para surdos": 9
+                },
+                "showOtherResponsesWarning": false
             },
             "DRE-BT": {
                 "totalRespondents": 114,
@@ -2915,24 +2961,6 @@ const surveyData = {
                 },
                 "showOtherResponsesWarning": false
             },
-            "SME": {
-                "totalRespondents": 408,
-                "items": {
-                    "Ampliação do quadro de Auxiliares de Vida Escolar (AVEs)": 192,
-                    "Ampliação do quadro de professores/as com especialização em educação especial e em Libras na perspectiva da educação inclusiva e da educação bilíngue para surdos": 155,
-                    "Ampliação do quadro de Auxiliares Técnicos de Educação (ATEs)": 139,
-                    "Aumento da oferta de formações específicas para professores/as da educação especial e em Libras na perspectiva da educação inclusiva e da educação bilíngue para surdos": 118,
-                    "Fortalecimento da atuação das equipes do CEFAI na perspectiva da educação inclusiva e da educação bilíngue para surdos": 111,
-                    "Ampliação da acessibilidade na infraestrutura nas unidades educacionais": 111,
-                    "Aumento da oferta de formações específicas para ATEs na perspectiva da educação inclusiva e da educação bilíngue para surdos": 100,
-                    "Ampliação da oferta de materiais pedagógicos acessíveis": 87,
-                    "Ampliação da oferta de formações específicas para equipe gestora em educação especial na perspectiva da educação inclusiva e da educação bilíngue para surdos": 67,
-                    "Ampliação da oferta de transporte gratuito do TEG Acessível": 49,
-                    "Outras respostas": 15,
-                    "Fortalecimento da atuação das equipes do NAAPA na perspectiva da educação inclusiva e da educação bilíngue para surdos": 9
-                },
-                "showOtherResponsesWarning": false
-            },
             "SME/COCEU": {
                 "totalRespondents": 37,
                 "items": {
@@ -3074,6 +3102,26 @@ const surveyData = {
                     "Fortalecimento do modelo de educação de jovens e adultos do CMCT": 130,
                     "Outras respostas": 79
                 }
+            },
+            "SME": {
+                "totalRespondents": 408,
+                "items": {
+                    "Fortalecimento de estratégias de acesso e permanência de jovens e adultos": 191,
+                    "Criação de estratégias de busca ativa de jovens e adultos": 126,
+                    "Ampliação da oferta de formações específicas para professores/as da educação de jovens e adultos": 107,
+                    "Diversificação dos materiais e recursos pedagógicos adequados à proposta curricular": 106,
+                    "Fortalecimento do modelo de educação de jovens e adultos do CIEJA": 85,
+                    "Promoção de ações articuladas com a saúde para viabilizar o atendimento oftalmológico e o fornecimento de óculos aos estudantes": 81,
+                    "Fortalecimento da oferta de alimentação escolar para os estudantes da EJA": 74,
+                    "Ampliação das estratégias do uso do material pedagógico de Educação de Jovens e Adultos": 70,
+                    "Adequação do espaço físico e mobiliário para atendimento de jovens e adultos": 68,
+                    "Fortalecimento do modelo de educação de jovens e adultos da EJA Regular": 61,
+                    "Fortalecimento do modelo de educação de jovens e adultos da EJA Modular": 50,
+                    "Fortalecimento do modelo de educação de jovens e adultos do MOVA": 34,
+                    "Fortalecimento do modelo de educação de jovens e adultos do CMCT": 26,
+                    "Outras respostas": 19
+                },
+                "showOtherResponsesWarning": false
             },
             "DRE-BT": {
                 "totalRespondents": 114,
@@ -3331,26 +3379,6 @@ const surveyData = {
                 },
                 "showOtherResponsesWarning": false
             },
-            "SME": {
-                "totalRespondents": 408,
-                "items": {
-                    "Fortalecimento de estratégias de acesso e permanência de jovens e adultos": 191,
-                    "Criação de estratégias de busca ativa de jovens e adultos": 126,
-                    "Ampliação da oferta de formações específicas para professores/as da educação de jovens e adultos": 107,
-                    "Diversificação dos materiais e recursos pedagógicos adequados à proposta curricular": 106,
-                    "Fortalecimento do modelo de educação de jovens e adultos do CIEJA": 85,
-                    "Promoção de ações articuladas com a saúde para viabilizar o atendimento oftalmológico e o fornecimento de óculos aos estudantes": 81,
-                    "Fortalecimento da oferta de alimentação escolar para os estudantes da EJA": 74,
-                    "Ampliação das estratégias do uso do material pedagógico de Educação de Jovens e Adultos": 70,
-                    "Adequação do espaço físico e mobiliário para atendimento de jovens e adultos": 68,
-                    "Fortalecimento do modelo de educação de jovens e adultos da EJA Regular": 61,
-                    "Fortalecimento do modelo de educação de jovens e adultos da EJA Modular": 50,
-                    "Fortalecimento do modelo de educação de jovens e adultos do MOVA": 34,
-                    "Fortalecimento do modelo de educação de jovens e adultos do CMCT": 26,
-                    "Outras respostas": 19
-                },
-                "showOtherResponsesWarning": false
-            },
             "SME/COCEU": {
                 "totalRespondents": 37,
                 "items": {
@@ -3493,6 +3521,26 @@ const surveyData = {
                     "Aprimoramento dos processos de planejamento e distribuição de profissionais da educação nas unidades educacionais": 175,
                     "Outras respostas": 87
                 }
+            },
+            "SME": {
+                "totalRespondents": 408,
+                "items": {
+                    "Redução do número de educandos por turma e professor na educação básica": 218,
+                    "Melhoria dos incentivos nas carreiras de profissionais da educação básica": 162,
+                    "Ampliação de incentivos para a especialização nas carreiras (mestrado, doutorado)": 107,
+                    "Promoção de ações voltadas à melhoria da infraestrutura do ambiente de trabalho": 94,
+                    "Promoção de formação continuada, com vistas a atender às especificidades de cada nível e modalidade de ensino": 94,
+                    "Fortalecimento da Gratificação por Local de Trabalho (GLT), de forma a promover a permanência dos profissionais nas unidades consideradas de difícil lotação": 93,
+                    "Incentivo à redução do acúmulo de cargos dos professores": 65,
+                    "Promoção de iniciativas que favoreçam a troca de experiências e práticas entre os profissionais da educação": 61,
+                    "Aprimoramento dos processos de planejamento e distribuição de profissionais da educação nas unidades educacionais": 54,
+                    "Promoção de ações voltadas à melhoria do clima no ambiente de trabalho": 53,
+                    "Fortalecimento de política de incentivos orientada ao desempenho educacional (PDE)": 46,
+                    "Fortalecimento do estágio probatório, visando melhorar a qualificação dos profissionais ingressantes, por meio de formações específicas, supervisão e acompanhamento de profissionais experientes": 44,
+                    "Fomento às políticas de melhoria de qualidade dos cursos de nível superior": 36,
+                    "Outras respostas": 21
+                },
+                "showOtherResponsesWarning": false
             },
             "DRE-BT": {
                 "totalRespondents": 114,
@@ -3753,26 +3801,6 @@ const surveyData = {
                 },
                 "showOtherResponsesWarning": false
             },
-            "SME": {
-                "totalRespondents": 408,
-                "items": {
-                    "Redução do número de educandos por turma e professor na educação básica": 218,
-                    "Melhoria dos incentivos nas carreiras de profissionais da educação básica": 162,
-                    "Ampliação de incentivos para a especialização nas carreiras (mestrado, doutorado)": 107,
-                    "Promoção de ações voltadas à melhoria da infraestrutura do ambiente de trabalho": 94,
-                    "Promoção de formação continuada, com vistas a atender às especificidades de cada nível e modalidade de ensino": 94,
-                    "Fortalecimento da Gratificação por Local de Trabalho (GLT), de forma a promover a permanência dos profissionais nas unidades consideradas de difícil lotação": 93,
-                    "Incentivo à redução do acúmulo de cargos dos professores": 65,
-                    "Promoção de iniciativas que favoreçam a troca de experiências e práticas entre os profissionais da educação": 61,
-                    "Aprimoramento dos processos de planejamento e distribuição de profissionais da educação nas unidades educacionais": 54,
-                    "Promoção de ações voltadas à melhoria do clima no ambiente de trabalho": 53,
-                    "Fortalecimento de política de incentivos orientada ao desempenho educacional (PDE)": 46,
-                    "Fortalecimento do estágio probatório, visando melhorar a qualificação dos profissionais ingressantes, por meio de formações específicas, supervisão e acompanhamento de profissionais experientes": 44,
-                    "Fomento às políticas de melhoria de qualidade dos cursos de nível superior": 36,
-                    "Outras respostas": 21
-                },
-                "showOtherResponsesWarning": false
-            },
             "SME/COCEU": {
                 "totalRespondents": 37,
                 "items": {
@@ -3907,6 +3935,22 @@ const surveyData = {
                     "Fortalecimento do CRECE Central e dos CRECEs Regionais": 186,
                     "Outras respostas": 41
                 }
+            },
+            "SME": {
+                "totalRespondents": 408,
+                "items": {
+                    "Fomento da participação de familiares e responsáveis em reuniões, Conselhos de Escola e Associações de Pais e Mestres": 175,
+                    "Incentivo à participação da comunidade escolar na elaboração e acompanhamento do Projeto Político-Pedagógico (PPP)": 160,
+                    "Diversificação das estratégias de comunicação com as famílias": 151,
+                    "Diversificação das estratégias de escuta da comunidade na formulação de políticas": 144,
+                    "Fortalecimento da atuação das Comissões de Mediação de Conflitos (CMCs)": 127,
+                    "Fortalecimento da atuação dos Conselhos de Escola e Associações de Pais e Mestres": 126,
+                    "Fortalecimento da atuação de Grêmios Estudantis": 116,
+                    "Ampliação do Projeto Grêmio Mirim": 49,
+                    "Fortalecimento do CRECE Central e dos CRECEs Regionais": 33,
+                    "Outras respostas": 7
+                },
+                "showOtherResponsesWarning": false
             },
             "DRE-BT": {
                 "totalRespondents": 114,
@@ -4114,22 +4158,6 @@ const surveyData = {
                 },
                 "showOtherResponsesWarning": false
             },
-            "SME": {
-                "totalRespondents": 408,
-                "items": {
-                    "Fomento da participação de familiares e responsáveis em reuniões, Conselhos de Escola e Associações de Pais e Mestres": 175,
-                    "Incentivo à participação da comunidade escolar na elaboração e acompanhamento do Projeto Político-Pedagógico (PPP)": 160,
-                    "Diversificação das estratégias de comunicação com as famílias": 151,
-                    "Diversificação das estratégias de escuta da comunidade na formulação de políticas": 144,
-                    "Fortalecimento da atuação das Comissões de Mediação de Conflitos (CMCs)": 127,
-                    "Fortalecimento da atuação dos Conselhos de Escola e Associações de Pais e Mestres": 126,
-                    "Fortalecimento da atuação de Grêmios Estudantis": 116,
-                    "Ampliação do Projeto Grêmio Mirim": 49,
-                    "Fortalecimento do CRECE Central e dos CRECEs Regionais": 33,
-                    "Outras respostas": 7
-                },
-                "showOtherResponsesWarning": false
-            },
             "SME/COCEU": {
                 "totalRespondents": 37,
                 "items": {
@@ -4255,6 +4283,21 @@ const surveyData = {
                     "Fomento ao uso de evidências na priorização dos investimentos": 408,
                     "Outras respostas": 104
                 }
+            },
+            "SME": {
+                "totalRespondents": 408,
+                "items": {
+                    "Fortalecimento da integração entre planejamento estratégico e orçamentário": 167,
+                    "Aprimoramento das ferramentas de gestão da infraestrutura": 155,
+                    "Fortalecimento da fiscalização das obras nas escolas": 145,
+                    "Fortalecimento dos mecanismos de acompanhamento de uso dos recursos de financiamento da educação": 145,
+                    "Ampliação da transparência no uso dos recursos do PTRF pelas unidades educacionais": 125,
+                    "Fortalecimento das parcerias com outros entes federativos (Estado e União) para captação de recursos": 102,
+                    "Fomento ao uso de evidências na priorização dos investimentos": 97,
+                    "Fortalecimento do Programa Grupo de Manutenção Escolar (GME)": 91,
+                    "Outras respostas": 16
+                },
+                "showOtherResponsesWarning": false
             },
             "DRE-BT": {
                 "totalRespondents": 114,
@@ -4451,21 +4494,6 @@ const surveyData = {
                 },
                 "showOtherResponsesWarning": false
             },
-            "SME": {
-                "totalRespondents": 408,
-                "items": {
-                    "Fortalecimento da integração entre planejamento estratégico e orçamentário": 167,
-                    "Aprimoramento das ferramentas de gestão da infraestrutura": 155,
-                    "Fortalecimento da fiscalização das obras nas escolas": 145,
-                    "Fortalecimento dos mecanismos de acompanhamento de uso dos recursos de financiamento da educação": 145,
-                    "Ampliação da transparência no uso dos recursos do PTRF pelas unidades educacionais": 125,
-                    "Fortalecimento das parcerias com outros entes federativos (Estado e União) para captação de recursos": 102,
-                    "Fomento ao uso de evidências na priorização dos investimentos": 97,
-                    "Fortalecimento do Programa Grupo de Manutenção Escolar (GME)": 91,
-                    "Outras respostas": 16
-                },
-                "showOtherResponsesWarning": false
-            },
             "SME/COCEU": {
                 "totalRespondents": 37,
                 "items": {
@@ -4592,6 +4620,25 @@ const surveyData = {
                     "Promoção de ações de melhoria do preenchimento do quesito raça/cor nos dados dos estudantes e profissionais da educação": 161,
                     "Outras respostas": 41
                 }
+            },
+            "SME": {
+                "totalRespondents": 408,
+                "items": {
+                    "Fortalecimento das estratégias de redução da desigualdade nos resultados educacionais entre grupos sociais": 151,
+                    "Fortalecimento da atuação das equipes do NAAPA": 129,
+                    "Fortalecimento de procedimentos para prevenção e enfrentamento aos casos de racismo e xenofobia": 120,
+                    "Fortalecimento das estratégias para acolhimento, acesso e permanência de estudantes migrantes e indígenas": 117,
+                    "Fortalecimento das políticas, programas e projetos intersecretariais": 106,
+                    "Fortalecimento das políticas para implementação da educação de gênero e diversidade": 100,
+                    "Fortalecimento de ações formativas para o ensino da temática História e Cultura Afro-Brasileira e Indígena": 88,
+                    "Melhoria na integração de sistemas informáticos da educação com sistemas de outras políticas": 79,
+                    "Fortalecimento das iniciativas interseccionais de raça e gênero": 71,
+                    "Fortalecimento das ações de apoio da educação indígena, considerados os aspectos culturais, linguísticos e educacionais das comunidades em que estão inseridas": 48,
+                    "Fortalecimento das parcerias com outros entes federativos (Estado e União)": 47,
+                    "Promoção de ações de melhoria do preenchimento do quesito raça/cor nos dados dos estudantes e profissionais da educação": 44,
+                    "Outras respostas": 4
+                },
+                "showOtherResponsesWarning": false
             },
             "DRE-BT": {
                 "totalRespondents": 114,
@@ -4839,25 +4886,6 @@ const surveyData = {
                 },
                 "showOtherResponsesWarning": false
             },
-            "SME": {
-                "totalRespondents": 408,
-                "items": {
-                    "Fortalecimento das estratégias de redução da desigualdade nos resultados educacionais entre grupos sociais": 151,
-                    "Fortalecimento da atuação das equipes do NAAPA": 129,
-                    "Fortalecimento de procedimentos para prevenção e enfrentamento aos casos de racismo e xenofobia": 120,
-                    "Fortalecimento das estratégias para acolhimento, acesso e permanência de estudantes migrantes e indígenas": 117,
-                    "Fortalecimento das políticas, programas e projetos intersecretariais": 106,
-                    "Fortalecimento das políticas para implementação da educação de gênero e diversidade": 100,
-                    "Fortalecimento de ações formativas para o ensino da temática História e Cultura Afro-Brasileira e Indígena": 88,
-                    "Melhoria na integração de sistemas informáticos da educação com sistemas de outras políticas": 79,
-                    "Fortalecimento das iniciativas interseccionais de raça e gênero": 71,
-                    "Fortalecimento das ações de apoio da educação indígena, considerados os aspectos culturais, linguísticos e educacionais das comunidades em que estão inseridas": 48,
-                    "Fortalecimento das parcerias com outros entes federativos (Estado e União)": 47,
-                    "Promoção de ações de melhoria do preenchimento do quesito raça/cor nos dados dos estudantes e profissionais da educação": 44,
-                    "Outras respostas": 4
-                },
-                "showOtherResponsesWarning": false
-            },
             "SME/COCEU": {
                 "totalRespondents": 37,
                 "items": {
@@ -4993,6 +5021,22 @@ const surveyData = {
                     "Aumento do uso de indicadores de desempenho educacional nas políticas de valorização da Rede Municipal de Educação": 236,
                     "Outras respostas": 74
                 }
+            },
+            "SME": {
+                "totalRespondents": 408,
+                "items": {
+                    "Aperfeiçoamento da comunicação entre órgão central, DREs e escolas": 204,
+                    "Fortalecimento da permanência das equipes administrativas no órgão central, DREs e escolas": 165,
+                    "Promoção de ações voltadas à diversificação da jornada de trabalho nas DREs e SME, com a devida adequação da remuneração": 154,
+                    "Ampliação da integração do planejamento entre órgão central, DREs e escolas": 153,
+                    "Fortalecimento de ações voltadas à unificação de ações na RME, como a elaboração do Manual de Normas e Procedimentos": 86,
+                    "Promoção de Conferências Municipais e Regionais de Educação, voltadas à elaboração e monitoramento dos Planos Municipal e Regionais de Educação": 80,
+                    "Incentivo à participação das DREs na construção das políticas pedagógicas centrais": 73,
+                    "Aperfeiçoamento da definição da autonomia das escolas": 69,
+                    "Aumento do uso de indicadores de desempenho educacional nas políticas de valorização da Rede Municipal de Educação": 60,
+                    "Outras respostas": 13
+                },
+                "showOtherResponsesWarning": false
             },
             "DRE-BT": {
                 "totalRespondents": 114,
@@ -5198,22 +5242,6 @@ const surveyData = {
                     "Promoção de Conferências Municipais e Regionais de Educação, voltadas à elaboração e monitoramento dos Planos Municipal e Regionais de Educação": 15,
                     "Aumento do uso de indicadores de desempenho educacional nas políticas de valorização da Rede Municipal de Educação": 12,
                     "Outras respostas": 5
-                },
-                "showOtherResponsesWarning": false
-            },
-            "SME": {
-                "totalRespondents": 408,
-                "items": {
-                    "Aperfeiçoamento da comunicação entre órgão central, DREs e escolas": 204,
-                    "Fortalecimento da permanência das equipes administrativas no órgão central, DREs e escolas": 165,
-                    "Promoção de ações voltadas à diversificação da jornada de trabalho nas DREs e SME, com a devida adequação da remuneração": 154,
-                    "Ampliação da integração do planejamento entre órgão central, DREs e escolas": 153,
-                    "Fortalecimento de ações voltadas à unificação de ações na RME, como a elaboração do Manual de Normas e Procedimentos": 86,
-                    "Promoção de Conferências Municipais e Regionais de Educação, voltadas à elaboração e monitoramento dos Planos Municipal e Regionais de Educação": 80,
-                    "Incentivo à participação das DREs na construção das políticas pedagógicas centrais": 73,
-                    "Aperfeiçoamento da definição da autonomia das escolas": 69,
-                    "Aumento do uso de indicadores de desempenho educacional nas políticas de valorização da Rede Municipal de Educação": 60,
-                    "Outras respostas": 13
                 },
                 "showOtherResponsesWarning": false
             },
@@ -5487,7 +5515,2076 @@ const surveyData = {
         "Respostas": 1568,
         "Total esperado": 3296,
         "Participação": "47.57%"
-    }
+    },
+    "suggestionsData": [
+        {
+            "local": "DRE-BT",
+            "eixo": "Melhorias relacionadas aos profissionais da educação básica",
+            "sugestao": "Ampliar os quadros de assistentes de Diretor, Coordenador pedagógico e ATE."
+        },
+        {
+            "local": "DRE-BT",
+            "eixo": "Melhorias relacionadas à educação especial na perspectiva da educação inclusiva e da educação bilíngue para surdos",
+            "sugestao": "CAPACITAÇÃO PARA GESTORES, EDUCADORES E EQUIPE DE APOIO SOBRE AS ESPECIFICIDADES DO ATENDIMENTO DA CRIANÇA COM TEA."
+        },
+        {
+            "local": "DRE-BT",
+            "eixo": "Melhorias relacionadas à alfabetização",
+            "sugestao": "Alfabetização/letramento de forma lúdica desde a Educação Infantil."
+        },
+        {
+            "local": "DRE-BT",
+            "eixo": "Melhorias relacionadas aos profissionais da educação básica",
+            "sugestao": "Salários mais justos e dignos, diminuição do número de alunos nas salas de aulas, possibilidade de ampliação dos horários de JEIF."
+        },
+        {
+            "local": "DRE-BT",
+            "eixo": "Melhorias relacionadas ao financiamento e à infraestrutura da educação básica",
+            "sugestao": "Investimento em climatização diante de eventos extremos;"
+        },
+        {
+            "local": "DRE-BT",
+            "eixo": "Melhorias relacionadas aos profissionais da educação básica",
+            "sugestao": "ações para saúde do profissional de educação;"
+        },
+        {
+            "local": "DRE-BT",
+            "eixo": "Melhorias relacionadas à avaliação e qualidade da educação infantil",
+            "sugestao": "criação de escola na educação infantil com equipes concursadas."
+        },
+        {
+            "local": "DRE-BT",
+            "eixo": "Melhorias relacionadas aos profissionais da educação básica",
+            "sugestao": "Considerar políticas públicas de valorização profissional."
+        },
+        {
+            "local": "DRE-BT",
+            "eixo": "Melhorias relacionadas à educação integral em tempo integral",
+            "sugestao": "ampliação da educação em tempo integral"
+        },
+        {
+            "local": "DRE-BT",
+            "eixo": "Melhorias relacionadas à gestão do Sistema Municipal de Educação",
+            "sugestao": "ampliação dos órgãos da rede de proteção da criança/adolescente."
+        },
+        {
+            "local": "DRE-BT",
+            "eixo": "Melhorias relacionadas aos profissionais da educação básica",
+            "sugestao": "Número insuficiente de docentes e quadro de apoio, formação continuada e valorização da carreira."
+        },
+        {
+            "local": "DRE-BT",
+            "eixo": "Melhorias relacionadas à gestão do Sistema Municipal de Educação",
+            "sugestao": "Atenção à saúde mental dos estudantes."
+        },
+        {
+            "local": "DRE-BT",
+            "eixo": "Melhorias relacionadas aos profissionais da educação básica",
+            "sugestao": "Atenção à saúde mental dos estudantes e dos profissionais, principalmente professores regentes."
+        },
+        {
+            "local": "DRE-BT",
+            "eixo": "Melhorias relacionadas aos profissionais da educação básica",
+            "sugestao": "Ações e formações ignoram a realidade do chão da escola."
+        },
+        {
+            "local": "DRE-BT",
+            "eixo": "Melhorias relacionadas à participação social e à gestão democrática",
+            "sugestao": "Violência, segurança para todos os que fazem parte da comunidade escolar."
+        },
+        {
+            "local": "DRE-BT",
+            "eixo": "Melhorias relacionadas à participação social e à gestão democrática",
+            "sugestao": "Práticas para mitigar a violência na UE e apoio à mesma. Monitoramento do quadro de funcionários."
+        },
+        {
+            "local": "DRE-BT",
+            "eixo": "Melhorias relacionadas à educação integral em tempo integral",
+            "sugestao": "Ampliação e fortalecimento dos Projetos Mais Educação no contraturno."
+        },
+        {
+            "local": "DRE-BT",
+            "eixo": "Melhorias relacionadas à gestão do Sistema Municipal de Educação",
+            "sugestao": "Reavaliação das provas externas."
+        },
+        {
+            "local": "DRE-BT",
+            "eixo": "Melhorias relacionadas à participação social e à gestão democrática",
+            "sugestao": "Maior segurança nas escolas."
+        },
+        {
+            "local": "DRE-BT",
+            "eixo": "Melhorias relacionadas aos profissionais da educação básica",
+            "sugestao": "Valorização dos profissionais."
+        },
+        {
+            "local": "DRE-BT",
+            "eixo": "Melhorias relacionadas aos profissionais da educação básica",
+            "sugestao": "Trabalhos voltados à saúde mental dos servidores."
+        },
+        {
+            "local": "DRE-BT",
+            "eixo": "Melhorias relacionadas à gestão do Sistema Municipal de Educação",
+            "sugestao": "Políticas públicas para qualidade de vida dos educandos dentro e fora da escola."
+        },
+        {
+            "local": "DRE-BT",
+            "eixo": "Melhorias relacionadas à alfabetização",
+            "sugestao": "Atualização curricular conforme ciência e neurociência, alfabetização."
+        },
+        {
+            "local": "DRE-BT",
+            "eixo": "Melhorias relacionadas ao financiamento e à infraestrutura da educação básica",
+            "sugestao": "Construção de mais escolas para melhor atendimento de bebês, crianças e estudantes."
+        },
+        {
+            "local": "DRE-BT",
+            "eixo": "Melhorias relacionadas à participação social e à gestão democrática",
+            "sugestao": "Fortalecer gestão democrática, laicidade, participação popular, investimento público, reversão de privatizações."
+        },
+        {
+            "local": "DRE-CL",
+            "eixo": "Melhorias relacionadas aos profissionais da educação básica",
+            "sugestao": "Reduzir o tempo gasto com preenchimento de documentação pedagógica."
+        },
+        {
+            "local": "DRE-CL",
+            "eixo": "Melhorias relacionadas à gestão do Sistema Municipal de Educação",
+            "sugestao": "Revogação de legislações conflitantes e de sentido dúbio."
+        },
+        {
+            "local": "DRE-CL",
+            "eixo": "Melhorias relacionadas à gestão do Sistema Municipal de Educação",
+            "sugestao": "Garantir antecipadamente que haja de RH e tecnológicos reais para novas políticas."
+        },
+        {
+            "local": "DRE-CL",
+            "eixo": "Melhorias relacionadas à gestão do Sistema Municipal de Educação",
+            "sugestao": "Simplificação/unificação de legislações afins (portarias de PAP, etc.)."
+        },
+        {
+            "local": "DRE-CL",
+            "eixo": "Melhorias relacionadas à conectividade, à educação para as tecnologias e à cultura digital",
+            "sugestao": "Revisitação do sistema EOL e SGP para possibilitar o registro adequado."
+        },
+        {
+            "local": "DRE-CL",
+            "eixo": "Melhorias relacionadas à gestão do Sistema Municipal de Educação",
+            "sugestao": "Integração efetiva entre os setores."
+        },
+        {
+            "local": "DRE-CL",
+            "eixo": "Melhorias relacionadas aos profissionais da educação básica",
+            "sugestao": "Sugiro capacitação em mediação para lideranças."
+        },
+        {
+            "local": "DRE-CL",
+            "eixo": "Melhorias relacionadas aos profissionais da educação básica",
+            "sugestao": "Lista de melhorias (Plano de carreira, atendimento psicológico, formação de pais, ouvidoria, trabalho remoto)."
+        },
+        {
+            "local": "DRE-CL",
+            "eixo": "Melhorias relacionadas à aprendizagem no ensino fundamental e médio",
+            "sugestao": "Apoiar a melhoria das aulas e sistematização e acompanhamento do planejamento e execução das ações pedagógicas."
+        },
+        {
+            "local": "DRE-CL",
+            "eixo": "Melhorias relacionadas à conectividade, à educação para as tecnologias e à cultura digital",
+            "sugestao": "Sobre a qualidade dos equipamentos de informática para uso pedagógico. É preciso que haja um contrato que cubra..."
+        },
+        {
+            "local": "DRE-CL",
+            "eixo": "Melhorias relacionadas à gestão do Sistema Municipal de Educação",
+            "sugestao": "A presença fixa de psicólogos, neuropsicólogos e psicopedagogos nas escolas beneficiaria alunos, professores e funcionários."
+        },
+        {
+            "local": "DRE-CL",
+            "eixo": "Melhorias relacionadas aos profissionais da educação básica",
+            "sugestao": "Ter um clima, ambiente de trabalho saudável é muito importante para permanência do professor na mesma escola."
+        },
+        {
+            "local": "DRE-CL",
+            "eixo": "Melhorias relacionadas à gestão do Sistema Municipal de Educação",
+            "sugestao": "Parceria ou convênio com Secretaria da Saúde para profissionais da área atuarem nas escolas."
+        },
+        {
+            "local": "DRE-CL",
+            "eixo": "Melhorias relacionadas à conectividade, à educação para as tecnologias e à cultura digital",
+            "sugestao": "Maior uso das tecnologias para aprendizagem, manutenção dos equipamentos."
+        },
+        {
+            "local": "DRE-CL",
+            "eixo": "Melhorias relacionadas aos profissionais da educação básica",
+            "sugestao": "Restituir o módulo de lotação de Auxiliar Técnico de Educação para as escolas."
+        },
+        {
+            "local": "DRE-CL",
+            "eixo": "Melhorias relacionadas aos profissionais da educação básica",
+            "sugestao": "Melhorar o sistema de remuneração dos docentes."
+        },
+        {
+            "local": "DRE-CL",
+            "eixo": "Melhorias relacionadas à conectividade, à educação para as tecnologias e à cultura digital",
+            "sugestao": "Facilitar para os servidores da ponta o reset de senhas de sistemas (SGP, SGA)."
+        },
+        {
+            "local": "DRE-CL",
+            "eixo": "Melhorias relacionadas aos profissionais da educação básica",
+            "sugestao": "Adequação do número de nutricionistas escolares, valorização pela gestão."
+        },
+        {
+            "local": "DRE-CL",
+            "eixo": "Melhorias relacionadas aos profissionais da educação básica",
+            "sugestao": "Melhorar salário do gestor, diminuir alunos por sala, aceitar assistentes terapêuticos."
+        },
+        {
+            "local": "DRE-CL",
+            "eixo": "Melhorias relacionadas aos profissionais da educação básica",
+            "sugestao": "Remuneração docente para evitar múltiplos vínculos, gestor financeiro na escola, JEIF para todos."
+        },
+        {
+            "local": "DRE-CL",
+            "eixo": "Melhorias relacionadas à gestão do Sistema Municipal de Educação",
+            "sugestao": "Reduzir quantidade de demandas às escolas para focar no prioritário."
+        },
+        {
+            "local": "DRE-CL",
+            "eixo": "Melhorias relacionadas à gestão do Sistema Municipal de Educação",
+            "sugestao": "Aumentar número de psicólogos, psicopedagogos e fonoaudiólogos no NAAPA."
+        },
+        {
+            "local": "DRE-CL",
+            "eixo": "Melhorias relacionadas à avaliação e qualidade da educação infantil",
+            "sugestao": "Mais verba para educação infantil (0 a 3 anos), recursos para materiais, brinquedos."
+        },
+        {
+            "local": "DRE-CL",
+            "eixo": "Melhorias relacionadas à gestão do Sistema Municipal de Educação",
+            "sugestao": "Supervisor escolar precisa estar mais próximo da escola, acompanhando pedagogia e administração."
+        },
+        {
+            "local": "DRE-CL",
+            "eixo": "Melhorias relacionadas à avaliação e qualidade da educação infantil",
+            "sugestao": "Extinção do modelo de sala multisseriadas no CEI indireto."
+        },
+        {
+            "local": "DRE-CL",
+            "eixo": "Melhorias relacionadas aos profissionais da educação básica",
+            "sugestao": "Ampliar formação contínua dos componentes, frequência como já ocorre com designados."
+        },
+        {
+            "local": "DRE-CL",
+            "eixo": "Melhorias relacionadas aos profissionais da educação básica",
+            "sugestao": "JEIF para todos os educadores."
+        },
+        {
+            "local": "DRE-CL",
+            "eixo": "Melhorias relacionadas aos profissionais da educação básica",
+            "sugestao": "Instituir tempo de formação para educadores contratados."
+        },
+        {
+            "local": "DRE-CL",
+            "eixo": "Melhorias relacionadas à educação especial na perspectiva da educação inclusiva e da educação bilíngue para surdos",
+            "sugestao": "Capacitação dos profissionais ATEs para lidar com alunos especiais, mais valorização."
+        },
+        {
+            "local": "DRE-CS",
+            "eixo": "Melhorias relacionadas ao financiamento e à infraestrutura da educação básica",
+            "sugestao": "Devido ao aumento da demanda escolar é necessária a ampliação da quantidade de Unidades Escolares."
+        },
+        {
+            "local": "DRE-CS",
+            "eixo": "Melhorias relacionadas aos profissionais da educação básica",
+            "sugestao": "Acredito que tudo poderá ficar bem melhor com a ampliação dos módulos de professores..."
+        },
+        {
+            "local": "DRE-CS",
+            "eixo": "Melhorias relacionadas à gestão do Sistema Municipal de Educação",
+            "sugestao": "Temos muita dificuldade com o conselho tutelar e as UBS. Acredito que isso seja por causa da carência de profissionais."
+        },
+        {
+            "local": "DRE-CS",
+            "eixo": "Melhorias relacionadas aos profissionais da educação básica",
+            "sugestao": "Diminuição do número de estudantes em sala de aula."
+        },
+        {
+            "local": "DRE-CS",
+            "eixo": "Melhorias relacionadas à gestão do Sistema Municipal de Educação",
+            "sugestao": "Acredito que ainda se faz necessário melhorias na comunicação, integração e articulação entre os setores da SME."
+        },
+        {
+            "local": "DRE-CS",
+            "eixo": "Melhorias relacionadas à aprendizagem no ensino fundamental e médio",
+            "sugestao": "Ter por princípio, em todas as ações planejadas e desenvolvidas, as concepções centrais do Currículo da Cidade."
+        },
+        {
+            "local": "DRE-CS",
+            "eixo": "Melhorias relacionadas aos profissionais da educação básica",
+            "sugestao": "Aumento da jornada de trabalho e do salário dos professores para permanecerem nas escolas."
+        },
+        {
+            "local": "DRE-CS",
+            "eixo": "Melhorias relacionadas aos profissionais da educação básica",
+            "sugestao": "Aumentar a quantidade e o salário do quadro de apoio."
+        },
+        {
+            "local": "DRE-CS",
+            "eixo": "Melhorias relacionadas aos profissionais da educação básica",
+            "sugestao": "Fornecer cursos obrigatórios para readaptados para exercerem as funções que forem designados."
+        },
+        {
+            "local": "DRE-CS",
+            "eixo": "Melhorias relacionadas à gestão do Sistema Municipal de Educação",
+            "sugestao": "A ampliação de atendimento intersecretarias, auxiliando famílias em situação de extrema vulnerabilidade...."
+        },
+        {
+            "local": "DRE-CS",
+            "eixo": "Melhorias relacionadas à avaliação e qualidade da educação infantil",
+            "sugestao": "Curso obrigatório de formação para educadores da educação infantil sobre cuidados de higiene e Programa de Alimentação Escolar."
+        },
+        {
+            "local": "DRE-CS",
+            "eixo": "Melhorias relacionadas à participação social e à gestão democrática",
+            "sugestao": "Maior participação de entidades e comunidade no planejamento das diretrizes."
+        },
+        {
+            "local": "DRE-CS",
+            "eixo": "Melhorias relacionadas à gestão do Sistema Municipal de Educação",
+            "sugestao": "Fortalecer articulação entre escolas, saúde, assistência social, órgãos especializados."
+        },
+        {
+            "local": "DRE-CS",
+            "eixo": "Melhorias relacionadas à gestão do Sistema Municipal de Educação",
+            "sugestao": "Atuação dos Conselhos Tutelares deve ser repensada; alinhamento ao ECA."
+        },
+        {
+            "local": "DRE-CS",
+            "eixo": "Melhorias relacionadas aos profissionais da educação básica",
+            "sugestao": "Programa Integrado de Formação Contínua para professores, com metodologias ativas."
+        },
+        {
+            "local": "DRE-CS",
+            "eixo": "Melhorias relacionadas aos profissionais da educação básica",
+            "sugestao": "Concursos para professores e gestores; formações com incentivos."
+        },
+        {
+            "local": "DRE-CS",
+            "eixo": "Outro",
+            "sugestao": "Rever desconto do FUNFIM."
+        },
+        {
+            "local": "DRE-CS",
+            "eixo": "Melhorias relacionadas à aprendizagem no ensino fundamental e médio",
+            "sugestao": "Valorização do currículo; concursos para permanência em territórios vulneráveis."
+        },
+        {
+            "local": "DRE-CS",
+            "eixo": "Melhorias relacionadas aos profissionais da educação básica",
+            "sugestao": "formação para contratados."
+        },
+        {
+            "local": "DRE-CS",
+            "eixo": "Melhorias relacionadas à participação social e à gestão democrática",
+            "sugestao": "SME precisa ouvir as escolas, participação nas decisões, alinhamento de ações."
+        },
+        {
+            "local": "DRE-CS",
+            "eixo": "Melhorias relacionadas à participação social e à gestão democrática",
+            "sugestao": "Respeito e reconhecimento de todos os funcionários da escola, inclusive equipe de apoio e terceirizados."
+        },
+        {
+            "local": "DRE-CS",
+            "eixo": "Melhorias relacionadas aos profissionais da educação básica",
+            "sugestao": "Valorização dos profissionais nas DREs, melhorar condições de trabalho, evitar acúmulo de cargos."
+        },
+        {
+            "local": "DRE-CS",
+            "eixo": "Melhorias relacionadas à alfabetização",
+            "sugestao": "Ampliar formação continuada sobre alfabetização, acompanhar o ciclo pela DRE."
+        },
+        {
+            "local": "DRE-CS",
+            "eixo": "Melhorias relacionadas aos profissionais da educação básica",
+            "sugestao": "Políticas públicas, investimentos, participação, valorização e plano de carreira docente."
+        },
+        {
+            "local": "DRE-CS",
+            "eixo": "Melhorias relacionadas ao financiamento e à infraestrutura da educação básica",
+            "sugestao": "Estrutura, espaços e recursos modelo nos órgãos centrais para inspirar e apoiar as escolas."
+        },
+        {
+            "local": "DRE-CS",
+            "eixo": "Melhorias relacionadas aos profissionais da educação básica",
+            "sugestao": "Finalização valorização dos profissionais das DREs, adicional remuneratório e formações."
+        },
+        {
+            "local": "DRE-CS",
+            "eixo": "Melhorias relacionadas aos profissionais da educação básica",
+            "sugestao": "Incentivo financeiro melhor para permanência nas DREs."
+        },
+        {
+            "local": "DRE-CS",
+            "eixo": "Melhorias relacionadas aos profissionais da educação básica",
+            "sugestao": "Redução do número de estudantes por agrupamento."
+        },
+        {
+            "local": "DRE-CS",
+            "eixo": "Melhorias relacionadas aos profissionais da educação básica",
+            "sugestao": "Professores de Educação Infantil, com nível superior, deveriam poder escolher entre as CEIs e EMEIs."
+        },
+        {
+            "local": "DRE-CS",
+            "eixo": "Melhorias relacionadas aos profissionais da educação básica",
+            "sugestao": "Ampliação de quadros (ATE, professores de módulo, estagiários)."
+        },
+        {
+            "local": "DRE-CS",
+            "eixo": "Melhorias relacionadas à gestão do Sistema Municipal de Educação",
+            "sugestao": "Ampliação do módulo de RH nas DREs."
+        },
+        {
+            "local": "DRE-CS",
+            "eixo": "Melhorias relacionadas à gestão do Sistema Municipal de Educação",
+            "sugestao": "Levar em consideração as especificidades territoriais nas políticas."
+        },
+        {
+            "local": "DRE-CS",
+            "eixo": "Melhorias relacionadas aos profissionais da educação básica",
+            "sugestao": "Valorizar a meritocracia."
+        },
+        {
+            "local": "DRE-CS",
+            "eixo": "Melhorias relacionadas aos profissionais da educação básica",
+            "sugestao": "Acabar com concursados acomodados."
+        },
+        {
+            "local": "DRE-CS",
+            "eixo": "Melhorias relacionadas aos profissionais da educação básica",
+            "sugestao": "Aumento salarial, valorização do profissional da educação."
+        },
+        {
+            "local": "DRE-FB",
+            "eixo": "Outro",
+            "sugestao": "Não tenho como provar mas acredito que existam fabricas de certificados e diplomas."
+        },
+        {
+            "local": "DRE-FB",
+            "eixo": "Melhorias relacionadas aos profissionais da educação básica",
+            "sugestao": "Sugiro um Plano de Carreira para pessoas que queiram seguir carreira nas DREs."
+        },
+        {
+            "local": "DRE-FB",
+            "eixo": "Melhorias relacionadas aos profissionais da educação básica",
+            "sugestao": "Diminuição de servidores que respondem processos ocupando cargos na DRE."
+        },
+        {
+            "local": "DRE-FB",
+            "eixo": "Melhorias relacionadas aos profissionais da educação básica",
+            "sugestao": "Diminuição de servidores que possuem laudo ocupando cargos na DRE."
+        },
+        {
+            "local": "DRE-FB",
+            "eixo": "Melhorias relacionadas à gestão do Sistema Municipal de Educação",
+            "sugestao": "Acho importante conversar com a Supervisão Escolar antes de publicar as IN de atribuição de aula."
+        },
+        {
+            "local": "DRE-FB",
+            "eixo": "Melhorias relacionadas aos profissionais da educação básica",
+            "sugestao": "Aumento de profissionais efetivos na rede, visando a continuidade do trabalho."
+        },
+        {
+            "local": "DRE-FB",
+            "eixo": "Melhorias relacionadas aos profissionais da educação básica",
+            "sugestao": "Considerando as características diversas da educação básica, é preciso levar em conta, nos processos formativos."
+        },
+        {
+            "local": "DRE-FB",
+            "eixo": "Melhorias relacionadas ao financiamento e à infraestrutura da educação básica",
+            "sugestao": "Aumentar o número de veículos disponíveis para as Nutricionistas Supervisoras."
+        },
+        {
+            "local": "DRE-FB",
+            "eixo": "Melhorias relacionadas aos profissionais da educação básica",
+            "sugestao": "Mais tempo e espaço para trabalho colaborativo entre profissionais."
+        },
+        {
+            "local": "DRE-FB",
+            "eixo": "Melhorias relacionadas à aprendizagem no ensino fundamental e médio",
+            "sugestao": "acompanhamento dos estudantes com dificuldades."
+        },
+        {
+            "local": "DRE-FB",
+            "eixo": "Melhorias relacionadas à gestão do Sistema Municipal de Educação",
+            "sugestao": "Melhorias na articulação intersetorial: educação, saúde, assistência social, esporte e cultura."
+        },
+        {
+            "local": "DRE-FB",
+            "eixo": "Melhorias relacionadas à conectividade, à educação para as tecnologias e à cultura digital",
+            "sugestao": "Fomento ao uso de tecnologias educacionais com formação específica para professores, inclusão digital."
+        },
+        {
+            "local": "DRE-FB",
+            "eixo": "Melhorias relacionadas aos profissionais da educação básica",
+            "sugestao": "Valorização geral dos profissionais da educação, modernização dos sistemas, programas e aplicativos."
+        },
+        {
+            "local": "DRE-FB",
+            "eixo": "Melhorias relacionadas aos profissionais da educação básica",
+            "sugestao": "Programas de saúde e bem-estar, fortalecimento da inclusão de surdos."
+        },
+        {
+            "local": "DRE-FB",
+            "eixo": "Melhorias relacionadas aos profissionais da educação básica",
+            "sugestao": "melhor aproveitamento dos readaptados."
+        },
+        {
+            "local": "DRE-FB",
+            "eixo": "Melhorias relacionadas aos profissionais da educação básica",
+            "sugestao": "Aumento do módulo de ATES, remuneração complementar por capita, contratação de estagiários para apoio."
+        },
+        {
+            "local": "DRE-FB",
+            "eixo": "Melhorias relacionadas à gestão do Sistema Municipal de Educação",
+            "sugestao": "Ampliação da equipe NAAPA, mais psicopedagogos por RME."
+        },
+        {
+            "local": "DRE-FB",
+            "eixo": "Melhorias relacionadas à participação social e à gestão democrática",
+            "sugestao": "Ampliar política de comunicação, transparência e participação."
+        },
+        {
+            "local": "DRE-FB",
+            "eixo": "Melhorias relacionadas à gestão do Sistema Municipal de Educação",
+            "sugestao": "Articulação com conselhos tutelares, transporte e cultura para garantir acesso a equipamentos culturais."
+        },
+        {
+            "local": "DRE-FB",
+            "eixo": "Melhorias relacionadas aos profissionais da educação básica",
+            "sugestao": "Ampliar quadro de professores, valorizar formações ministradas por quem tem especialização na rede."
+        },
+        {
+            "local": "DRE-G",
+            "eixo": "Melhorias relacionadas à gestão do Sistema Municipal de Educação",
+            "sugestao": "A rede de apoio com outras Secretarias, pois as escolas necessitam de profissionais especializados."
+        },
+        {
+            "local": "DRE-G",
+            "eixo": "Melhorias relacionadas às agendas transversais",
+            "sugestao": "Investir mais nas periferias que apresentam alto índice de violência e fome."
+        },
+        {
+            "local": "DRE-G",
+            "eixo": "Melhorias relacionadas à gestão do Sistema Municipal de Educação",
+            "sugestao": "Considerando volume de núcleos atrelados à DIAF e a importância do acompanhamento e qualificação."
+        },
+        {
+            "local": "DRE-G",
+            "eixo": "Melhorias relacionadas à gestão do Sistema Municipal de Educação",
+            "sugestao": "Fortalecer as secretarias da assistência social para que a escola consiga se dedicar à sua função primeira."
+        },
+        {
+            "local": "DRE-G",
+            "eixo": "Melhorias relacionadas aos profissionais da educação básica",
+            "sugestao": "Não terceirizar, concursos para todos os segmentos, fortalecer conselhos, GCM nas escolas."
+        },
+        {
+            "local": "DRE-G",
+            "eixo": "Outro",
+            "sugestao": "Valorização socioeconômica (não é possível classificar com base na tabela – não há correspondência direta)."
+        },
+        {
+            "local": "DRE-G",
+            "eixo": "Melhorias relacionadas à conectividade, à educação para as tecnologias e à cultura digital",
+            "sugestao": "Aumento dos equipamentos educacionais."
+        },
+        {
+            "local": "DRE-G",
+            "eixo": "Melhorias relacionadas aos profissionais da educação básica",
+            "sugestao": "Redução da jornada dos profissionais da educação."
+        },
+        {
+            "local": "DRE-IP",
+            "eixo": "Melhorias relacionadas aos profissionais da educação básica",
+            "sugestao": "Fortalecer o programa de estagiários, garantindo que todas as turmas sejam contempladas."
+        },
+        {
+            "local": "DRE-IP",
+            "eixo": "Melhorias relacionadas aos profissionais da educação básica",
+            "sugestao": "Valorização do professor e criação de ambiente de trabalho saudável e estimulante."
+        },
+        {
+            "local": "DRE-IP",
+            "eixo": "Melhorias relacionadas ao financiamento e à infraestrutura da educação básica",
+            "sugestao": "Melhoria na oferta do TEG;"
+        },
+        {
+            "local": "DRE-IP",
+            "eixo": "Melhorias relacionadas aos profissionais da educação básica",
+            "sugestao": "contratações de ATEs e AVEs;"
+        },
+        {
+            "local": "DRE-IP",
+            "eixo": "Melhorias relacionadas aos profissionais da educação básica",
+            "sugestao": "vagas próximas à residência das famílias."
+        },
+        {
+            "local": "DRE-IP",
+            "eixo": "Melhorias relacionadas à educação especial na perspectiva da educação inclusiva e da educação bilíngue para surdos",
+            "sugestao": "Inclusão dos alunos portadores de necessidades especiais sendo feita de forma mais humanizada."
+        },
+        {
+            "local": "DRE-IP",
+            "eixo": "Melhorias relacionadas à gestão do Sistema Municipal de Educação",
+            "sugestao": "Respeito à constituição, gestão democrática, salários dignos, envio de recursos materiais."
+        },
+        {
+            "local": "DRE-IP",
+            "eixo": "Melhorias relacionadas à gestão do Sistema Municipal de Educação",
+            "sugestao": "Gestão central ética e transparente."
+        },
+        {
+            "local": "DRE-IP",
+            "eixo": "Melhorias relacionadas aos profissionais da educação básica",
+            "sugestao": "Lista de melhorias (ampliação do quadro de RH, oferta de formação contínua)."
+        },
+        {
+            "local": "DRE-IP",
+            "eixo": "Melhorias relacionadas aos profissionais da educação básica",
+            "sugestao": "Gestão pública, valorização da carreira, aplicação integral de recursos."
+        },
+        {
+            "local": "DRE-IP",
+            "eixo": "Melhorias relacionadas aos profissionais da educação básica",
+            "sugestao": "Verba de locomoção para formadores acompanharem mais as escolas."
+        },
+        {
+            "local": "DRE-IP",
+            "eixo": "Melhorias relacionadas à gestão do Sistema Municipal de Educação",
+            "sugestao": "Unificação de procedimentos, formulários, requerimentos SME/DRE/escolas."
+        },
+        {
+            "local": "DRE-IP",
+            "eixo": "Melhorias relacionadas à participação social e à gestão democrática",
+            "sugestao": "Projetos envolvendo os pais na frequência e aproveitamento escolar."
+        },
+        {
+            "local": "DRE-IP",
+            "eixo": "Melhorias relacionadas aos profissionais da educação básica",
+            "sugestao": "Permitir JEIF para quem quiser, valorizar profissionais, reconhecer pós-doutorado."
+        },
+        {
+            "local": "DRE-IP",
+            "eixo": "Melhorias relacionadas aos profissionais da educação básica",
+            "sugestao": "Redução do número de alunos por professor(a) em todas etapas."
+        },
+        {
+            "local": "DRE-IQ",
+            "eixo": "Melhorias relacionadas às agendas transversais",
+            "sugestao": "Acredito que todo esforço para garantia das minorias na educação é um fortalecimento."
+        },
+        {
+            "local": "DRE-IQ",
+            "eixo": "Melhorias relacionadas aos profissionais da educação básica",
+            "sugestao": "Aumentar o quadro de nutricionistas supervisores da CODAE."
+        },
+        {
+            "local": "DRE-IQ",
+            "eixo": "Melhorias relacionadas à gestão do Sistema Municipal de Educação",
+            "sugestao": "Remanejamento das equipes das DREs que já estão há muitos anos no mesmo território."
+        },
+        {
+            "local": "DRE-IQ",
+            "eixo": "Melhorias relacionadas aos profissionais da educação básica",
+            "sugestao": "Sim, é urgente melhorar as condições de trabalho em toda a educação. Também Professores..."
+        },
+        {
+            "local": "DRE-IQ",
+            "eixo": "Melhorias relacionadas aos profissionais da educação básica",
+            "sugestao": "Olhar principalmente para o quadro de apoio, promover políticas de valorização de carreira e salarial."
+        },
+        {
+            "local": "DRE-IQ",
+            "eixo": "Melhorias relacionadas aos profissionais da educação básica",
+            "sugestao": "Redução do número de bebês, crianças e educandos em sala, pois a quantidade é muito grande para um professor(a)."
+        },
+        {
+            "local": "DRE-IQ",
+            "eixo": "Melhorias relacionadas aos profissionais da educação básica",
+            "sugestao": "URGENTE MELHORIA SALARIAL, VALORIZAÇÃO DO PESSOAL DA EDUCAÇÃO."
+        },
+        {
+            "local": "DRE-IQ",
+            "eixo": "Melhorias relacionadas aos profissionais da educação básica",
+            "sugestao": "Gostaria de ressaltar a importância da formação continuada e momentos de trocas com os pares."
+        },
+        {
+            "local": "DRE-IQ",
+            "eixo": "Melhorias relacionadas à participação social e à gestão democrática",
+            "sugestao": "Implementação de políticas sistemáticas de escuta e participação estudantil na gestão escolar...."
+        },
+        {
+            "local": "DRE-IQ",
+            "eixo": "Melhorias relacionadas à avaliação e qualidade da educação infantil",
+            "sugestao": "Flexibilização da jornada nas creches... escalas mais equilibradas entre os profissionais."
+        },
+        {
+            "local": "DRE-IQ",
+            "eixo": "Melhorias relacionadas aos profissionais da educação básica",
+            "sugestao": "Diminuição de estudantes por docente em todas as faixas etárias."
+        },
+        {
+            "local": "DRE-IQ",
+            "eixo": "Melhorias relacionadas aos profissionais da educação básica",
+            "sugestao": "Retomar concurso para diretor escolar, avaliar preparo psicológico dos candidatos, motivar ascensão na carreira."
+        },
+        {
+            "local": "DRE-IQ",
+            "eixo": "Melhorias relacionadas às agendas transversais",
+            "sugestao": "Aquisição anual de livros para Minha Biblioteca, formação antirracista para professores de EI."
+        },
+        {
+            "local": "DRE-IQ",
+            "eixo": "Melhorias relacionadas aos profissionais da educação básica",
+            "sugestao": "Investir em saúde física e mental do servidor, incentivo a atividades físicas e prevenção à saúde."
+        },
+        {
+            "local": "DRE-IQ",
+            "eixo": "Melhorias relacionadas aos profissionais da educação básica",
+            "sugestao": "Diminuir carga horária do quadro de apoio para 30 horas semanais."
+        },
+        {
+            "local": "DRE-IQ",
+            "eixo": "Melhorias relacionadas aos profissionais da educação básica",
+            "sugestao": "Considerar o desgaste emocional e físico desses servidores."
+        },
+        {
+            "local": "DRE-IQ",
+            "eixo": "Melhorias relacionadas aos profissionais da educação básica",
+            "sugestao": "Incentivar a valorização e permanência dos servidores nos respectivos locais de trabalho (DREs)."
+        },
+        {
+            "local": "DRE-JT",
+            "eixo": "Melhorias relacionadas à gestão do Sistema Municipal de Educação",
+            "sugestao": "Promoção de diálogos com judiciário.."
+        },
+        {
+            "local": "DRE-JT",
+            "eixo": "Melhorias relacionadas à avaliação e qualidade da educação infantil",
+            "sugestao": "diminuição da proporção de adulto x criança nas turmas dos CEIs."
+        },
+        {
+            "local": "DRE-JT",
+            "eixo": "Melhorias relacionadas aos profissionais da educação básica",
+            "sugestao": "Todas os projetos, práticas, ações e intenções só darão resultado com a redução de estudantes por turma e valorização."
+        },
+        {
+            "local": "DRE-JT",
+            "eixo": "Melhorias relacionadas aos profissionais da educação básica",
+            "sugestao": "Reestruturar e Valorizar a carreira do Quadro de Apoio."
+        },
+        {
+            "local": "DRE-JT",
+            "eixo": "Melhorias relacionadas ao financiamento e à infraestrutura da educação básica",
+            "sugestao": "Construção de novas escolas."
+        },
+        {
+            "local": "DRE-JT",
+            "eixo": "Melhorias relacionadas aos profissionais da educação básica",
+            "sugestao": "Garantir permanência de equipes em todos os setores para desenvolver um trabalho mais sólido..."
+        },
+        {
+            "local": "DRE-JT",
+            "eixo": "Melhorias relacionadas à gestão do Sistema Municipal de Educação",
+            "sugestao": "Crítica ao uso do IDEB como instrumento de pressão e distorção pedagógica."
+        },
+        {
+            "local": "DRE-JT",
+            "eixo": "Melhorias relacionadas à gestão do Sistema Municipal de Educação",
+            "sugestao": "insegurança nas escolas exige resposta urgente intersetorial."
+        },
+        {
+            "local": "DRE-JT",
+            "eixo": "Melhorias relacionadas ao financiamento e à infraestrutura da educação básica",
+            "sugestao": "Ampliação de TEG para adolescentes acima de 12 anos em situação de vulnerabilidade."
+        },
+        {
+            "local": "DRE-JT",
+            "eixo": "Melhorias relacionadas aos profissionais da educação básica",
+            "sugestao": "Programa de prevenção e promoção da saúde mental dos servidores."
+        },
+        {
+            "local": "DRE-JT",
+            "eixo": "Melhorias relacionadas à alfabetização",
+            "sugestao": "Retomar processo de letramento nas EMEIs, prática lúdica e social da escrita desde cedo."
+        },
+        {
+            "local": "DRE-JT",
+            "eixo": "Melhorias relacionadas à avaliação e qualidade da educação infantil",
+            "sugestao": "Olhar específico para acesso de bebês pequenos, condições estruturais e materiais adequados."
+        },
+        {
+            "local": "DRE-JT",
+            "eixo": "Melhorias relacionadas à avaliação e qualidade da educação infantil",
+            "sugestao": "Desenvolver projetos de formação mais modernos e dinâmicos"
+        },
+        {
+            "local": "DRE-JT",
+            "eixo": "Melhorias relacionadas à conectividade, à educação para as tecnologias e à cultura digital",
+            "sugestao": "Formação dos profissionais da educação com o uso da Inteligência Artificial."
+        },
+        {
+            "local": "DRE-JT",
+            "eixo": "Melhorias relacionadas aos profissionais da educação básica",
+            "sugestao": "Desenvolver projetos de formação mais modernos e dinâmicos."
+        },
+        {
+            "local": "DRE-JT",
+            "eixo": "Melhorias relacionadas à avaliação e qualidade da educação infantil",
+            "sugestao": "Redução do número de crianças por educador na educação infantil."
+        },
+        {
+            "local": "DRE-JT",
+            "eixo": "Melhorias relacionadas aos profissionais da educação básica",
+            "sugestao": "Aumento do número de educadores."
+        },
+        {
+            "local": "DRE-PE",
+            "eixo": "Melhorias relacionadas aos profissionais da educação básica",
+            "sugestao": "INCENTIVO A ATIVIDADE FISICA COMO MELHORIA DAS CONDIÇÕES DE SAUDE."
+        },
+        {
+            "local": "DRE-PE",
+            "eixo": "Melhorias relacionadas à educação de jovens e adultos",
+            "sugestao": "Mais atenção as demandas específicas do ensino médio, com prioridade ao aluno trabalhador e da periferia."
+        },
+        {
+            "local": "DRE-PE",
+            "eixo": "Melhorias relacionadas à aprendizagem no ensino fundamental e médio",
+            "sugestao": "Repensar a revisão curricular, pois uma redução do OAD em habilidades da BNCC..."
+        },
+        {
+            "local": "DRE-PE",
+            "eixo": "Melhorias relacionadas à aprendizagem no ensino fundamental e médio",
+            "sugestao": "Garantir o acesso dos estudantes aos materiais curriculares da DRE."
+        },
+        {
+            "local": "DRE-PE",
+            "eixo": "Melhorias relacionadas às agendas transversais",
+            "sugestao": "Repensar a políticas para escolas com alta vulnerabilidade social."
+        },
+        {
+            "local": "DRE-PE",
+            "eixo": "Melhorias relacionadas aos profissionais da educação básica",
+            "sugestao": "A PMSP tem que olhar com mais cuidado para a evolução funcional dos profissionais da educação."
+        },
+        {
+            "local": "DRE-PE",
+            "eixo": "Melhorias relacionadas à gestão do Sistema Municipal de Educação",
+            "sugestao": "Fortalecer a atuação técnica das DREs na análise de prestações de contas das unidades parceiras (OSC)."
+        },
+        {
+            "local": "DRE-PE",
+            "eixo": "Melhorias relacionadas à aprendizagem no ensino fundamental e médio",
+            "sugestao": "Atendimento diferenciado para estudantes com dificuldades de aprendizagem."
+        },
+        {
+            "local": "DRE-PE",
+            "eixo": "Melhorias relacionadas à educação especial na perspectiva da educação inclusiva e da educação bilíngue para surdos",
+            "sugestao": "Atendimento diferenciado para estudantes da educação especial."
+        },
+        {
+            "local": "DRE-PE",
+            "eixo": "Melhorias relacionadas aos profissionais da educação básica",
+            "sugestao": "REDUÇÃO DO QUANTITATIVO DE BEBES, CRIANÇAS, JOVENS E ADULTOS MATRICULADOS NA RME."
+        },
+        {
+            "local": "DRE-PE",
+            "eixo": "Melhorias relacionadas à educação especial na perspectiva da educação inclusiva e da educação bilíngue para surdos",
+            "sugestao": "Aumento do quadro de estagiários para estudantes com deficiência física e TEA."
+        },
+        {
+            "local": "DRE-PE",
+            "eixo": "Melhorias relacionadas aos profissionais da educação básica",
+            "sugestao": "Adequações salariais e formações para o Quadro de Apoio."
+        },
+        {
+            "local": "DRE-PE",
+            "eixo": "Melhorias relacionadas aos profissionais da educação básica",
+            "sugestao": "Valorizar quem educa é condição para transformar a realidade escolar. Salários dignos."
+        },
+        {
+            "local": "DRE-PE",
+            "eixo": "Melhorias relacionadas aos profissionais da educação básica",
+            "sugestao": "Melhoria dos espaços de trabalho dentro das DREs."
+        },
+        {
+            "local": "DRE-PE",
+            "eixo": "Melhorias relacionadas à aprendizagem no ensino fundamental e médio",
+            "sugestao": "Fortalecer o atendimento a crianças com superdotação."
+        },
+        {
+            "local": "DRE-PE",
+            "eixo": "Melhorias relacionadas aos profissionais da educação básica",
+            "sugestao": "Incluir professores contratados na formação da unidade (JEIF)."
+        },
+        {
+            "local": "DRE-PE",
+            "eixo": "Melhorias relacionadas à educação especial na perspectiva da educação inclusiva e da educação bilíngue para surdos",
+            "sugestao": "Aumento de recursos humanos (mais professores) para atendimento de crianças com deficiência."
+        },
+        {
+            "local": "DRE-PE",
+            "eixo": "Melhorias relacionadas à educação especial na perspectiva da educação inclusiva e da educação bilíngue para surdos",
+            "sugestao": "Melhoria das condições de trabalho para atendimento de alunos com deficiência."
+        },
+        {
+            "local": "DRE-PE",
+            "eixo": "Melhorias relacionadas aos profissionais da educação básica",
+            "sugestao": "Aumento da carga horária de planejamento para professores, correção salarial, redução de descontos."
+        },
+        {
+            "local": "DRE-PE",
+            "eixo": "Melhorias relacionadas à aprendizagem no ensino fundamental e médio",
+            "sugestao": "Aumentar planejamento e acompanhamento das aprendizagens."
+        },
+        {
+            "local": "DRE-PE",
+            "eixo": "Melhorias relacionadas à gestão do Sistema Municipal de Educação",
+            "sugestao": "Fortalecer escola pública, fortalecer SMS/SAS, recuperação contínua."
+        },
+        {
+            "local": "DRE-PE",
+            "eixo": "Melhorias relacionadas aos profissionais da educação básica",
+            "sugestao": "Salário digno aos professores, compatível com outras carreiras públicas."
+        },
+        {
+            "local": "DRE-PE",
+            "eixo": "Melhorias relacionadas à participação social e à gestão democrática",
+            "sugestao": "Usar recursos da educação para a população, evitar apropriação por grupos econômicos."
+        },
+        {
+            "local": "DRE-PE",
+            "eixo": "Melhorias relacionadas à educação especial na perspectiva da educação inclusiva e da educação bilíngue para surdos",
+            "sugestao": "Capacitação dos profissionais ATEs para lidar com alunos especiais, mais valorização."
+        },
+        {
+            "local": "DRE-PE",
+            "eixo": "Melhorias relacionadas à aprendizagem no ensino fundamental e médio",
+            "sugestao": "Fortalecer Ed. Gestoras para as EMEFs, ações para Fundamental II, formação em matemática nos anos iniciais."
+        },
+        {
+            "local": "DRE-PE",
+            "eixo": "Melhorias relacionadas à participação social e à gestão democrática",
+            "sugestao": "Propósito de diálogo, ideias e interação para promover mudanças."
+        },
+        {
+            "local": "DRE-PE",
+            "eixo": "Melhorias relacionadas à gestão do Sistema Municipal de Educação",
+            "sugestao": "Fortalecimento da escola pública, rede de proteção, escuta das DREs, valorização com incentivos."
+        },
+        {
+            "local": "DRE-PE",
+            "eixo": "Melhorias relacionadas à participação social e à gestão democrática",
+            "sugestao": "Prática democrática na discussão de propostas SME/DRE/escolas."
+        },
+        {
+            "local": "DRE-PE",
+            "eixo": "Melhorias relacionadas à gestão do Sistema Municipal de Educação",
+            "sugestao": "Troca de experiências entre setores da DRE."
+        },
+        {
+            "local": "DRE-PE",
+            "eixo": "Melhorias relacionadas à avaliação e qualidade da educação infantil",
+            "sugestao": "Melhor acompanhamento da Educação Infantil, indicadores, bonificação por desempenho."
+        },
+        {
+            "local": "DRE-PE",
+            "eixo": "Melhorias relacionadas à alfabetização",
+            "sugestao": "Alfabetização deve começar na creche."
+        },
+        {
+            "local": "DRE-PE",
+            "eixo": "Melhorias relacionadas à participação social e à gestão democrática",
+            "sugestao": "Escola de qualidade com gestão democrática, rede de apoio fortalecida."
+        },
+        {
+            "local": "DRE-PE",
+            "eixo": "Melhorias relacionadas aos profissionais da educação básica",
+            "sugestao": "Valorização do servidor municipal, avaliar e analisar legislações."
+        },
+        {
+            "local": "DRE-PE",
+            "eixo": "Melhorias relacionadas à gestão do Sistema Municipal de Educação",
+            "sugestao": "Fortalecer escola pública de gestão, fortalecimento das secretarias essenciais, formação, concurso, escuta."
+        },
+        {
+            "local": "DRE-PE",
+            "eixo": "Melhorias relacionadas à gestão do Sistema Municipal de Educação",
+            "sugestao": "Fortalecer escola pública, secretarias essenciais, concurso, escuta das DREs, menos parcerias privadas."
+        },
+        {
+            "local": "DRE-PE",
+            "eixo": "Melhorias relacionadas à gestão do Sistema Municipal de Educação",
+            "sugestao": "Lista de melhorias (Manutenção dos bons projetos, mais formações, maior investimento, concurso)."
+        },
+        {
+            "local": "DRE-PE",
+            "eixo": "Melhorias relacionadas aos profissionais da educação básica",
+            "sugestao": "Lista de melhorias (Diminuição de estudantes por sala, aumento de infraestrutura e professores)."
+        },
+        {
+            "local": "DRE-PE",
+            "eixo": "Melhorias relacionadas aos profissionais da educação básica",
+            "sugestao": "Fortalecimento do ATE, diminuição de carga horária para 30h e ampliação de formação."
+        },
+        {
+            "local": "DRE-PE",
+            "eixo": "Melhorias relacionadas às agendas transversais",
+            "sugestao": "Repensar revisão curricular, garantir materiais, criar meios e parcerias para escolas de alta vulnerabilidade."
+        },
+        {
+            "local": "DRE-PJ",
+            "eixo": "Melhorias relacionadas à educação integral em tempo integral",
+            "sugestao": "O Programa de Escolas PEI na rede estadual é uma ótima referência."
+        },
+        {
+            "local": "DRE-PJ",
+            "eixo": "Melhorias relacionadas à participação social e à gestão democrática",
+            "sugestao": "A educação é impactada pela desigualdade social e sabemos o quanto o ambiente gera aprendizado."
+        },
+        {
+            "local": "DRE-PJ",
+            "eixo": "Melhorias relacionadas aos profissionais da educação básica",
+            "sugestao": "Lista de melhorias (AUMENTO DE QUADRO, MELHORES CONDIÇÕES, MAIOR QUANTIDADE DE CARRO)."
+        },
+        {
+            "local": "DRE-PJ",
+            "eixo": "Melhorias relacionadas aos profissionais da educação básica",
+            "sugestao": "Valorização e aprimoramento da remuneração das nutricionistas. Benefícios."
+        },
+        {
+            "local": "DRE-PJ",
+            "eixo": "Melhorias relacionadas aos profissionais da educação básica",
+            "sugestao": "aprimoramento da remuneração das nutricionistas, promoção de benefícios aos trabalhadores."
+        },
+        {
+            "local": "DRE-PJ",
+            "eixo": "Melhorias relacionadas aos profissionais da educação básica",
+            "sugestao": "O que precisa e melhores remunerações e carreira para os ATE 1."
+        },
+        {
+            "local": "DRE-PJ",
+            "eixo": "Melhorias relacionadas aos profissionais da educação básica",
+            "sugestao": "Rever o número de alunos por sala para que o professor tenha condições... contratação de profissionais especialistas."
+        },
+        {
+            "local": "DRE-PJ",
+            "eixo": "Melhorias relacionadas aos profissionais da educação básica",
+            "sugestao": "Sim gostaria de citar a desvalorização dos profissionais da educação..."
+        },
+        {
+            "local": "DRE-PJ",
+            "eixo": "Melhorias relacionadas aos profissionais da educação básica",
+            "sugestao": "redução de alunos por sala."
+        },
+        {
+            "local": "DRE-PJ",
+            "eixo": "Melhorias relacionadas à educação especial na perspectiva da educação inclusiva e da educação bilíngue para surdos",
+            "sugestao": "suporte para atendimento da demanda inclusiva."
+        },
+        {
+            "local": "DRE-PJ",
+            "eixo": "Melhorias relacionadas aos profissionais da educação básica",
+            "sugestao": "Ampliação do número de ATEs, concursados. Ampliação de professores concursados e inclusão."
+        },
+        {
+            "local": "DRE-PJ",
+            "eixo": "Melhorias relacionadas à participação social e à gestão democrática",
+            "sugestao": "Escuta ativa e realmente interessada das comunidades escolares das UEs e das supervisoras."
+        },
+        {
+            "local": "DRE-PJ",
+            "eixo": "Melhorias relacionadas à aprendizagem no ensino fundamental e médio",
+            "sugestao": "Previsão de ampliação da permanência dos alunos na escola para a recuperação das aprendizagens."
+        },
+        {
+            "local": "DRE-PJ",
+            "eixo": "Melhorias relacionadas à alfabetização",
+            "sugestao": "Dupla regência nos 1ºs e 2ºs anos, regência colaborativa com PAEE."
+        },
+        {
+            "local": "DRE-PJ",
+            "eixo": "Melhorias relacionadas aos profissionais da educação básica",
+            "sugestao": "Funcionários mais valorizados, cargos efetivos."
+        },
+        {
+            "local": "DRE-PJ",
+            "eixo": "Melhorias relacionadas aos profissionais da educação básica",
+            "sugestao": "Valorização e respeito das carreiras dos profissionais de educação."
+        },
+        {
+            "local": "DRE-PJ",
+            "eixo": "Melhorias relacionadas ao financiamento e à infraestrutura da educação básica",
+            "sugestao": "Melhorar normas técnicas de obras, mais autonomia técnica para engenheiros das DREs."
+        },
+        {
+            "local": "DRE-PJ",
+            "eixo": "Melhorias relacionadas aos profissionais da educação básica",
+            "sugestao": "Valorização profissional e financeira do educador para garantir aprimoramento contínuo."
+        },
+        {
+            "local": "DRE-PJ",
+            "eixo": "Melhorias relacionadas aos profissionais da educação básica",
+            "sugestao": "Valorização. Formação igualitária e evolução do quadro de apoio."
+        },
+        {
+            "local": "DRE-PJ",
+            "eixo": "Melhorias relacionadas aos profissionais da educação básica",
+            "sugestao": "Lista de melhorias (Menor número de alunos, AVEs para auxílio, redução de jornada, saúde)."
+        },
+        {
+            "local": "DRE-SA",
+            "eixo": "Melhorias relacionadas à educação especial na perspectiva da educação inclusiva e da educação bilíngue para surdos",
+            "sugestao": "Fortalecimento e VALORIZAÇÃO das equipes CEFAI (PAAEs e PAAIs) para diminuir a rotatividade."
+        },
+        {
+            "local": "DRE-SA",
+            "eixo": "Melhorias relacionadas à educação especial na perspectiva da educação inclusiva e da educação bilíngue para surdos",
+            "sugestao": "Aumento do QUADRO de PAAIs."
+        },
+        {
+            "local": "DRE-SA",
+            "eixo": "Melhorias relacionadas aos profissionais da educação básica",
+            "sugestao": "Criação do cargo (acesso e ingresso) de professor de educação especial."
+        },
+        {
+            "local": "DRE-SA",
+            "eixo": "Melhorias relacionadas aos profissionais da educação básica",
+            "sugestao": "Implementar homeoffice de 2x por semana para os coordenadores CEFAI e NAAPA e diretores da DIPED."
+        },
+        {
+            "local": "DRE-SA",
+            "eixo": "Melhorias relacionadas à gestão do Sistema Municipal de Educação",
+            "sugestao": "Fazer com que cada profissional cumpra sua função, as escolas estão querendo que a DRE faça o papel da escola."
+        },
+        {
+            "local": "DRE-SA",
+            "eixo": "Melhorias relacionadas aos profissionais da educação básica",
+            "sugestao": "Valorização do servidor, adicional de insalubridade, aumento de recursos para saídas dos estudantes."
+        },
+        {
+            "local": "DRE-SA",
+            "eixo": "Melhorias relacionadas aos profissionais da educação básica",
+            "sugestao": "A violência nas escolas afeta o aprendizado, expõe educadores a ameaças e causa adoecimento."
+        },
+        {
+            "local": "DRE-SA",
+            "eixo": "Melhorias relacionadas à educação especial na perspectiva da educação inclusiva e da educação bilíngue para surdos",
+            "sugestao": "No tocante à Educação Inclusiva, que os papéis de NAAPA e CEFAI sejam bem explicitados."
+        },
+        {
+            "local": "DRE-SA",
+            "eixo": "Melhorias relacionadas aos profissionais da educação básica",
+            "sugestao": "Reestruturar da carreira do quadro de apoio, Valorização real, ampliação das gratificações."
+        },
+        {
+            "local": "DRE-SA",
+            "eixo": "Melhorias relacionadas aos profissionais da educação básica",
+            "sugestao": "Incorporar a J40 na aposentadoria."
+        },
+        {
+            "local": "DRE-SA",
+            "eixo": "Melhorias relacionadas aos profissionais da educação básica",
+            "sugestao": "Diminuição da carga horária nas Diretorias regionais sem redução salarial."
+        },
+        {
+            "local": "DRE-SA",
+            "eixo": "Melhorias relacionadas aos profissionais da educação básica",
+            "sugestao": "Implementação do home office."
+        },
+        {
+            "local": "DRE-SA",
+            "eixo": "Melhorias relacionadas aos profissionais da educação básica",
+            "sugestao": "Acredito que a implementação do home office e a implementação da HL para as equipes administrativas..."
+        },
+        {
+            "local": "DRE-SA",
+            "eixo": "Melhorias relacionadas aos profissionais da educação básica",
+            "sugestao": "Incorporação da J40 para quem trabalha nas DREs."
+        },
+        {
+            "local": "DRE-SA",
+            "eixo": "Melhorias relacionadas aos profissionais da educação básica",
+            "sugestao": "Lista de melhorias (J40, Home Office, promoções, remuneração, capacitação, internet, etc.)."
+        },
+        {
+            "local": "DRE-SA",
+            "eixo": "Melhorias relacionadas aos profissionais da educação básica",
+            "sugestao": "Descongelam. tempo de sala p/aposentadoria, Jornada DREs muito pesada e TOTALMENTE inflexível."
+        },
+        {
+            "local": "DRE-SA",
+            "eixo": "Melhorias relacionadas aos profissionais da educação básica",
+            "sugestao": "Sou a favor do trabalho HOME OFFICE, pois existem trabalhos em DRE que são 100% digital."
+        },
+        {
+            "local": "DRE-SA",
+            "eixo": "Melhorias relacionadas à educação integral em tempo integral",
+            "sugestao": "Ampliação da qualidade da oferta de Educação Integral o que leva em conta diferentes fatores."
+        },
+        {
+            "local": "DRE-SA",
+            "eixo": "Melhorias relacionadas aos profissionais da educação básica",
+            "sugestao": "Concursos para cargos nas diretorias e SME/equipes, de forma que seja garantido os quadros estáveis."
+        },
+        {
+            "local": "DRE-SA",
+            "eixo": "Melhorias relacionadas à gestão do Sistema Municipal de Educação",
+            "sugestao": "Criar mecanismos de avaliação para rever as questões relacionadas aos itens acima..."
+        },
+        {
+            "local": "DRE-SA",
+            "eixo": "Melhorias relacionadas à participação social e à gestão democrática",
+            "sugestao": "Uma rede direta para reclamações, sugestões, que não seja somente no final do ano."
+        },
+        {
+            "local": "DRE-SA",
+            "eixo": "Melhorias relacionadas aos profissionais da educação básica",
+            "sugestao": "Valorização da carreira dos profissionais de educação; parcerias com as Universidades; escuta dos territórios."
+        },
+        {
+            "local": "DRE-SA",
+            "eixo": "Melhorias relacionadas à avaliação e qualidade da educação infantil",
+            "sugestao": "Ampliação de coordenadores pedagógicos na EI;"
+        },
+        {
+            "local": "DRE-SA",
+            "eixo": "Melhorias relacionadas aos profissionais da educação básica",
+            "sugestao": "direito ao horário de formação;"
+        },
+        {
+            "local": "DRE-SA",
+            "eixo": "Melhorias relacionadas à gestão do Sistema Municipal de Educação",
+            "sugestao": "integração na comunicação e articulação das ações entre órgãos da SME."
+        },
+        {
+            "local": "DRE-SA",
+            "eixo": "Melhorias relacionadas aos profissionais da educação básica",
+            "sugestao": "Unificação de fluxos, gratificações, todos como ATE (não STE)."
+        },
+        {
+            "local": "DRE-SA",
+            "eixo": "Melhorias relacionadas aos profissionais da educação básica",
+            "sugestao": "Incorporação da J40."
+        },
+        {
+            "local": "DRE-SA",
+            "eixo": "Melhorias relacionadas aos profissionais da educação básica",
+            "sugestao": "trabalho híbrido, redução de carga horária."
+        },
+        {
+            "local": "DRE-SA",
+            "eixo": "Melhorias relacionadas aos profissionais da educação básica",
+            "sugestao": "Cargos compatíveis ATEs."
+        },
+        {
+            "local": "DRE-SA",
+            "eixo": "Melhorias relacionadas aos profissionais da educação básica",
+            "sugestao": "Valorização com gratificações, profissionais de apoio à educação."
+        },
+        {
+            "local": "DRE-SA",
+            "eixo": "Melhorias relacionadas à educação especial na perspectiva da educação inclusiva e da educação bilíngue para surdos",
+            "sugestao": "Incentivo à formação de professores na área da inclusão."
+        },
+        {
+            "local": "DRE-SA",
+            "eixo": "Melhorias relacionadas aos profissionais da educação básica",
+            "sugestao": "Formação para professores contratados, participação de JEIF, chamada de aprovados em concurso."
+        },
+        {
+            "local": "DRE-SA",
+            "eixo": "Melhorias relacionadas aos profissionais da educação básica",
+            "sugestao": "Valorização dos profissionais de educação (unidade/UEF)."
+        },
+        {
+            "local": "DRE-SA",
+            "eixo": "Melhorias relacionadas à gestão do Sistema Municipal de Educação",
+            "sugestao": "Transparência no serviço público, integração de sistemas, manual de normas e procedimentos."
+        },
+        {
+            "local": "DRE-SA",
+            "eixo": "Melhorias relacionadas aos profissionais da educação básica",
+            "sugestao": "Valorização salarial aos Auxiliares Técnicos de Educação (especialmente os da DRE/SME)."
+        },
+        {
+            "local": "DRE-SA",
+            "eixo": "Melhorias relacionadas à educação integral em tempo integral",
+            "sugestao": "Fortalecimento do ensino de idiomas, ampliação das ofertas nos CEUs."
+        },
+        {
+            "local": "DRE-SA",
+            "eixo": "Melhorias relacionadas aos profissionais da educação básica",
+            "sugestao": "Formações específicas e mais numerosas para profissionais designados nas DREs."
+        },
+        {
+            "local": "DRE-SA",
+            "eixo": "Melhorias relacionadas aos profissionais da educação básica",
+            "sugestao": "Cumprimento parcial da jornada na modalidade Home Office."
+        },
+        {
+            "local": "DRE-SA",
+            "eixo": "Melhorias relacionadas à gestão do Sistema Municipal de Educação",
+            "sugestao": "Olhar para a competência do profissional acima de questões partidárias."
+        },
+        {
+            "local": "DRE-SA",
+            "eixo": "Melhorias relacionadas aos profissionais da educação básica",
+            "sugestao": "Valorizar carreira do magistério, salários atrativos, plano de carreira."
+        },
+        {
+            "local": "DRE-SA",
+            "eixo": "Melhorias relacionadas ao financiamento e à infraestrutura da educação básica",
+            "sugestao": "Qualificar espaço escolar estruturalmente, menos alunos por sala, apoio para deficiência."
+        },
+        {
+            "local": "DRE-SA",
+            "eixo": "Melhorias relacionadas à aprendizagem no ensino fundamental e médio",
+            "sugestao": "Retomada do programa \"Minha biblioteca\", assinatura de jornais."
+        },
+        {
+            "local": "DRE-SA",
+            "eixo": "Melhorias relacionadas às agendas transversais",
+            "sugestao": "Apoio a escolas em regiões de alta vulnerabilidade, valorização do profissional."
+        },
+        {
+            "local": "DRE-SA",
+            "eixo": "Melhorias relacionadas à gestão do Sistema Municipal de Educação",
+            "sugestao": "Inserção de profissionais de psicologia nas escolas para saúde mental."
+        },
+        {
+            "local": "DRE-SA",
+            "eixo": "Melhorias relacionadas aos profissionais da educação básica",
+            "sugestao": "Valorização dos profissionais da educação, melhoria salarial, ampliação do acesso escolar."
+        },
+        {
+            "local": "DRE-SA",
+            "eixo": "Melhorias relacionadas aos profissionais da educação básica",
+            "sugestao": "Valorização da Supervisão Escolar com GLT."
+        },
+        {
+            "local": "DRE-SA",
+            "eixo": "Melhorias relacionadas à gestão do Sistema Municipal de Educação",
+            "sugestao": "Falta de estrutura na saúde impacta encaminhamentos; desarticulação dos órgãos centrais de compras."
+        },
+        {
+            "local": "DRE-SA",
+            "eixo": "Melhorias relacionadas aos profissionais da educação básica",
+            "sugestao": "Novo concurso para professores efetivos, formação continuada para contratados."
+        },
+        {
+            "local": "DRE-SA",
+            "eixo": "Melhorias relacionadas aos profissionais da educação básica",
+            "sugestao": ", ampliar quadro de apoio."
+        },
+        {
+            "local": "DRE-SA",
+            "eixo": "Melhorias relacionadas à participação social e à gestão democrática",
+            "sugestao": "Respeitar autonomia das unidades educacionais e dos Conselhos de Escola."
+        },
+        {
+            "local": "DRE-SA",
+            "eixo": "Melhorias relacionadas aos profissionais da educação básica",
+            "sugestao": "Concurso público para todos os cargos, cumprimento de contratos."
+        },
+        {
+            "local": "DRE-SA",
+            "eixo": "Melhorias relacionadas aos profissionais da educação básica",
+            "sugestao": "Incorporação da J40 na aposentadoria."
+        },
+        {
+            "local": "DRE-SA",
+            "eixo": "Melhorias relacionadas aos profissionais da educação básica",
+            "sugestao": "Trabalho híbrido nas DREs e SME."
+        },
+        {
+            "local": "DRE-SA",
+            "eixo": "Melhorias relacionadas à educação de jovens e adultos",
+            "sugestao": "Fortalecer permanência e ampliação das EJA(s)."
+        },
+        {
+            "local": "DRE-SM",
+            "eixo": "Melhorias relacionadas à gestão do Sistema Municipal de Educação",
+            "sugestao": "Ampliar a escuta aos supervisores, Diped, Diceu, naapa e diaf."
+        },
+        {
+            "local": "DRE-SM",
+            "eixo": "Melhorias relacionadas ao financiamento e à infraestrutura da educação básica",
+            "sugestao": "Aprimoramento dos setores de prédios e verbas."
+        },
+        {
+            "local": "DRE-SM",
+            "eixo": "Melhorias relacionadas aos profissionais da educação básica",
+            "sugestao": "Maior transparência e critérios profissionais para designações e nomeações."
+        },
+        {
+            "local": "DRE-SM",
+            "eixo": "Melhorias relacionadas à aprendizagem no ensino fundamental e médio",
+            "sugestao": "Ofertas de bolsas de estudos e formações específicas para estudantes que possuem ótimos desempenhos."
+        },
+        {
+            "local": "DRE-SM",
+            "eixo": "Melhorias relacionadas à aprendizagem no ensino fundamental e médio",
+            "sugestao": "Mais acompanhamento com apoio e reforço escolar no contraturno."
+        },
+        {
+            "local": "DRE-SM",
+            "eixo": "Melhorias relacionadas à participação social e à gestão democrática",
+            "sugestao": "Ações relacionadas a ambientes tóxicos nas relações humanas."
+        },
+        {
+            "local": "DRE-SM",
+            "eixo": "Melhorias relacionadas aos profissionais da educação básica",
+            "sugestao": "Cargos de secretário para os ATEs que trabalham em DREs."
+        },
+        {
+            "local": "DRE-SM",
+            "eixo": "Melhorias relacionadas à gestão do Sistema Municipal de Educação",
+            "sugestao": "Os estudantes PCDs enfrentam muitas dificuldades de acesso aos equipamentos de saúde."
+        },
+        {
+            "local": "DRE-SM",
+            "eixo": "Melhorias relacionadas aos profissionais da educação básica",
+            "sugestao": "A avaliação do desempenho dos servidores precisa ser mais efetiva."
+        },
+        {
+            "local": "DRE-SM",
+            "eixo": "Melhorias relacionadas aos profissionais da educação básica",
+            "sugestao": "Incentivo a permanência de professores nas unidades para continuidade do trabalho."
+        },
+        {
+            "local": "DRE-SM",
+            "eixo": "Melhorias relacionadas aos profissionais da educação básica",
+            "sugestao": "Ampliação no número de nutricionistas da CODAE."
+        },
+        {
+            "local": "DRE-SM",
+            "eixo": "Melhorias relacionadas aos profissionais da educação básica",
+            "sugestao": "Ampliação do quadro de Nutricionistas no PNAE por território."
+        },
+        {
+            "local": "DRE-SM",
+            "eixo": "Melhorias relacionadas aos profissionais da educação básica",
+            "sugestao": "Melhoria remuneratória dos profissionais de educação com formações em níveis de mestrado e/ou doutorado."
+        },
+        {
+            "local": "DRE-SM",
+            "eixo": "Melhorias relacionadas aos profissionais da educação básica",
+            "sugestao": "Investir ainda mais em formação continuada de professores (inclusiva, antirracista, gênero, diversidades)."
+        },
+        {
+            "local": "DRE-SM",
+            "eixo": "Melhorias relacionadas à participação social e à gestão democrática",
+            "sugestao": "Fortalecer espaços de escuta ativa dentro das escolas para estudantes."
+        },
+        {
+            "local": "DRE-SM",
+            "eixo": "Melhorias relacionadas à alfabetização",
+            "sugestao": "Diminuir o número de educandos nos anos de alfabetização."
+        },
+        {
+            "local": "DRE-SM",
+            "eixo": "Melhorias relacionadas aos profissionais da educação básica",
+            "sugestao": "Reajuste Salarial."
+        },
+        {
+            "local": "DRE-SM",
+            "eixo": "Melhorias relacionadas aos profissionais da educação básica",
+            "sugestao": "Lista de melhorias (Salário dos docentes; Oferta de diferentes jornadas; Ouvir mais os estudantes)."
+        },
+        {
+            "local": "DRE-SM",
+            "eixo": "Melhorias relacionadas aos profissionais da educação básica",
+            "sugestao": "Redução de alunos por sala, criação de materiais, aumento de estagiários, módulos."
+        },
+        {
+            "local": "DRE-SM",
+            "eixo": "Melhorias relacionadas à alfabetização",
+            "sugestao": "Práticas lúdicas e fonológicas na alfabetização; uso de referências teóricas nacionais."
+        },
+        {
+            "local": "DRE-SM",
+            "eixo": "Melhorias relacionadas aos profissionais da educação básica",
+            "sugestao": "Diminuição de alunos nas salas, grande quantidade de crianças com necessidades especiais."
+        },
+        {
+            "local": "DRE-SM",
+            "eixo": "Melhorias relacionadas à gestão do Sistema Municipal de Educação",
+            "sugestao": "Respeito à autonomia de trabalho de diretores e supervisores."
+        },
+        {
+            "local": "DRE-SM",
+            "eixo": "Melhorias relacionadas à educação especial na perspectiva da educação inclusiva e da educação bilíngue para surdos",
+            "sugestao": "Ampliar equipes CEFAI, criar gatilhos para ampliar módulos conforme demanda, incentivos para permanência."
+        },
+        {
+            "local": "DRE-SM",
+            "eixo": "Melhorias relacionadas à alfabetização",
+            "sugestao": "Fortalecer ações promotoras da alfabetização inicial na EMEI."
+        },
+        {
+            "local": "DRE-SM",
+            "eixo": "Melhorias relacionadas aos profissionais da educação básica",
+            "sugestao": "Qualificação profissional, melhoria salarial."
+        },
+        {
+            "local": "DRE-SM",
+            "eixo": "Melhorias relacionadas aos profissionais da educação básica",
+            "sugestao": "Redução do número de estudantes por sala."
+        },
+        {
+            "local": "DRE-SM",
+            "eixo": "Melhorias relacionadas à conectividade, à educação para as tecnologias e à cultura digital",
+            "sugestao": "Currículo por competências, incentivo à inovação e tecnologias."
+        },
+        {
+            "local": "DRE-SM",
+            "eixo": "Melhorias relacionadas às agendas transversais",
+            "sugestao": "Ensino de Sexual, prevenção, promoção da saúde, ensino laico."
+        },
+        {
+            "local": "DRE-MP",
+            "eixo": "Melhorias relacionadas aos profissionais da educação básica",
+            "sugestao": "Diminuir o número de alunos nas salas de aulas, permanências dos estagiários."
+        },
+        {
+            "local": "DRE-MP",
+            "eixo": "Melhorias relacionadas aos profissionais da educação básica",
+            "sugestao": "Abertura de mais concursos públicos ( falta professores na rede ) e melhoria salarial."
+        },
+        {
+            "local": "DRE-MP",
+            "eixo": "Melhorias relacionadas à gestão do Sistema Municipal de Educação",
+            "sugestao": "Integração do atendimento saúde/educação dentro das unidades escolares para atendimento das crianças."
+        },
+        {
+            "local": "DRE-MP",
+            "eixo": "Melhorias relacionadas à educação especial na perspectiva da educação inclusiva e da educação bilíngue para surdos",
+            "sugestao": "Ampliar o número de estagiários para crianças com TEA a partir da Educação Infantil."
+        },
+        {
+            "local": "DRE-MP",
+            "eixo": "Melhorias relacionadas à conectividade, à educação para as tecnologias e à cultura digital",
+            "sugestao": "A manutenção da rede e dos equipamentos de informática nas salas de aula se impõe como uma urgência."
+        },
+        {
+            "local": "DRE-MP",
+            "eixo": "Melhorias relacionadas à educação especial na perspectiva da educação inclusiva e da educação bilíngue para surdos",
+            "sugestao": "Na minha opinião deveria colocar estagiários para dar um suporte maior para os alunos com TEA."
+        },
+        {
+            "local": "DRE-MP",
+            "eixo": "Melhorias relacionadas aos profissionais da educação básica",
+            "sugestao": "Aumento de salário."
+        },
+        {
+            "local": "DRE-MP",
+            "eixo": "Melhorias relacionadas aos profissionais da educação básica",
+            "sugestao": "Ampliação no número de nutricionistas supervisoras das unidades de educação infantil."
+        },
+        {
+            "local": "DRE-MP",
+            "eixo": "Melhorias relacionadas ao acesso, esgotamento e conclusão no ensino fundamental e médio",
+            "sugestao": "Articulação com a rede estadual para ampliação de escolas para Ensino Médio."
+        },
+        {
+            "local": "DRE-MP",
+            "eixo": "Melhorias relacionadas à avaliação e qualidade da educação infantil",
+            "sugestao": "Redução da proporção bebê/criança e adulto."
+        },
+        {
+            "local": "DRE-MP",
+            "eixo": "Melhorias relacionadas aos profissionais da educação básica",
+            "sugestao": "Formação docente."
+        },
+        {
+            "local": "DRE-MP",
+            "eixo": "Melhorias relacionadas à educação especial na perspectiva da educação inclusiva e da educação bilíngue para surdos",
+            "sugestao": "apoio especializado e redução da proporção criança/adulto às crianças com deficiência."
+        },
+        {
+            "local": "DRE-MP",
+            "eixo": "Melhorias relacionadas aos profissionais da educação básica",
+            "sugestao": "Ampliação do quadro das formadoras de DIPED."
+        },
+        {
+            "local": "DRE-MP",
+            "eixo": "Melhorias relacionadas ao financiamento e à infraestrutura da educação básica",
+            "sugestao": "Garantir escolas bem estruturadas, ambientes acolhedores, integral, com recursos tecnológicos."
+        },
+        {
+            "local": "DRE-MP",
+            "eixo": "Melhorias relacionadas à participação social e à gestão democrática",
+            "sugestao": "Evolução da qualidade passa pelo engajamento da comunidade escolar e local."
+        },
+        {
+            "local": "DRE-MP",
+            "eixo": "Melhorias relacionadas à gestão do Sistema Municipal de Educação",
+            "sugestao": "Programa de garantia de execução das políticas públicas educacionais."
+        },
+        {
+            "local": "DRE-MP",
+            "eixo": "Melhorias relacionadas à gestão do Sistema Municipal de Educação",
+            "sugestao": "Diálogo mais equânime entre diferentes instâncias da Secretaria."
+        },
+        {
+            "local": "DRE-MP",
+            "eixo": "Melhorias relacionadas à educação especial na perspectiva da educação inclusiva e da educação bilíngue para surdos",
+            "sugestao": "Concurso público para Educação Especial, garantir profissionais nas UEs."
+        },
+        {
+            "local": "DRE-MP",
+            "eixo": "Melhorias relacionadas aos profissionais da educação básica",
+            "sugestao": "Redução de alunos por sala e ampliação de profissionais nas unidades."
+        },
+        {
+            "local": "DRE-MP",
+            "eixo": "Melhorias relacionadas aos profissionais da educação básica",
+            "sugestao": "Estratégias para que profissionais possam abrir mão do acúmulo de cargos, salário compatível."
+        },
+        {
+            "local": "DRE-MP",
+            "eixo": "Melhorias relacionadas aos profissionais da educação básica",
+            "sugestao": "Trabalho remoto pelo menos 2 dias, desde que recursos sejam adequados."
+        },
+        {
+            "local": "DRE-MP",
+            "eixo": "Melhorias relacionadas aos profissionais da educação básica",
+            "sugestao": "Redução de alunos por turma, valorização salarial, descongelar tempo da pandemia."
+        },
+        {
+            "local": "DRE-MP",
+            "eixo": "Melhorias relacionadas ao financiamento e à infraestrutura da educação básica",
+            "sugestao": "Investimento em infraestrutura, formação, tecnologia, metodologias inovadoras."
+        },
+        {
+            "local": "DRE-MP",
+            "eixo": "Melhorias relacionadas à alfabetização",
+            "sugestao": "Principalmente formações presenciais como o Aprender e Ensinar descentralizadas."
+        },
+        {
+            "local": "DRE-MP",
+            "eixo": "Melhorias relacionadas à aprendizagem no ensino fundamental e médio",
+            "sugestao": "Mudança efetiva de concepção e efetividade no uso do Currículo da Cidade."
+        },
+        {
+            "local": "SME",
+            "eixo": "Melhorias relacionadas à gestão do Sistema Municipal de Educação",
+            "sugestao": "Elaboração de indicadores sociais que possam mensurar o impacto da escola."
+        },
+        {
+            "local": "SME",
+            "eixo": "Melhorias relacionadas aos profissionais da educação básica",
+            "sugestao": "Redução da quantidade de alunos por turmas."
+        },
+        {
+            "local": "SME",
+            "eixo": "Melhorias relacionadas à educação especial na perspectiva da educação inclusiva e da educação bilíngue para surdos",
+            "sugestao": "Muitos alunos com necessidades especiais por sala, o que ressalta a necessidade de mais profissionais."
+        },
+        {
+            "local": "SME",
+            "eixo": "Melhorias relacionadas aos profissionais da educação básica",
+            "sugestao": "Vemos muitos profissionais adoecendo nas condições de trabalho atual."
+        },
+        {
+            "local": "SME",
+            "eixo": "Melhorias relacionadas aos profissionais da educação básica",
+            "sugestao": "Um incentivo com aumento salarial se faz necessário para que se evite a dupla jornada."
+        },
+        {
+            "local": "SME",
+            "eixo": "Melhorias relacionadas ao financiamento e à infraestrutura da educação básica",
+            "sugestao": "Melhoria na infraestrutura dos prédios administrativos da PMSP."
+        },
+        {
+            "local": "SME",
+            "eixo": "Melhorias relacionadas aos profissionais da educação básica",
+            "sugestao": "Diminuição do número de alunos por professor."
+        },
+        {
+            "local": "SME",
+            "eixo": "Melhorias relacionadas aos profissionais da educação básica",
+            "sugestao": "Aumento do numero de ATES capacitados para a inclusão."
+        },
+        {
+            "local": "SME",
+            "eixo": "Melhorias relacionadas ao financiamento e à infraestrutura da educação básica",
+            "sugestao": "Infraestrutura dos prédios administrativos. Estamos sempre em reforma, sempre tentando \"maquiar\"."
+        },
+        {
+            "local": "SME",
+            "eixo": "Melhorias relacionadas à participação social e à gestão democrática",
+            "sugestao": "Tornar obrigatório, como Instrução Normativa ou similar, conselhos e participações sociais da comunidade."
+        },
+        {
+            "local": "SME",
+            "eixo": "Melhorias relacionadas aos profissionais da educação básica",
+            "sugestao": "Temos cargos essenciais vagos em nossas unidades educacionais e é urgente preenche-los."
+        },
+        {
+            "local": "SME",
+            "eixo": "Melhorias relacionadas aos profissionais da educação básica",
+            "sugestao": "Valorização das formações dos profissionais e valorização através da remuneração."
+        },
+        {
+            "local": "SME",
+            "eixo": "Melhorias relacionadas aos profissionais da educação básica",
+            "sugestao": "Acolher profissionais adoecidos, garantindo acesso a tratamento médico e psicológico."
+        },
+        {
+            "local": "SME",
+            "eixo": "Melhorias relacionadas à aprendizagem no ensino fundamental e médio",
+            "sugestao": "Um acervo diversificado e atualizado oferece diferentes possibilidades de aprendizado."
+        },
+        {
+            "local": "SME",
+            "eixo": "Melhorias relacionadas aos profissionais da educação básica",
+            "sugestao": "Valorização profissional e salarial dos professores e auxiliares técnicos de educação."
+        },
+        {
+            "local": "SME",
+            "eixo": "Melhorias relacionadas aos profissionais da educação básica",
+            "sugestao": "Diminuição de número de alunos por turma em todas as etapas do ensino básico."
+        },
+        {
+            "local": "SME",
+            "eixo": "Melhorias relacionadas ao financiamento e à infraestrutura da educação básica",
+            "sugestao": "Mais unidades escolares para suprir a demanda de estudantes com qualidade."
+        },
+        {
+            "local": "SME",
+            "eixo": "Melhorias relacionadas aos profissionais da educação básica",
+            "sugestao": "Basicamente, melhorias nos rendimentos e plano de carreira."
+        },
+        {
+            "local": "SME",
+            "eixo": "Melhorias relacionadas aos profissionais da educação básica",
+            "sugestao": "Melhorando qualidade de vida dos funcionários DRE e melhorando também a mobilidade urbana."
+        },
+        {
+            "local": "SME",
+            "eixo": "Melhorias relacionadas à gestão do Sistema Municipal de Educação",
+            "sugestao": "Acredito que boa parte das questões suscitadas possuem aderência ao contexto de fomento à melhoria da qualidade da educação."
+        },
+        {
+            "local": "SME",
+            "eixo": "Melhorias relacionadas à gestão do Sistema Municipal de Educação",
+            "sugestao": "Sobre o formulário, alguns itens estão um pouco desconexos ou não explicitam de fato uma relação com a temática."
+        },
+        {
+            "local": "SME",
+            "eixo": "Melhorias relacionadas ao financiamento e à infraestrutura da educação básica",
+            "sugestao": "A qualidade da educação depende de boas condições em sala de aula: espaço adequado, limpeza, conforto."
+        },
+        {
+            "local": "SME",
+            "eixo": "Melhorias relacionadas à educação especial na perspectiva da educação inclusiva e da educação bilíngue para surdos",
+            "sugestao": "acessibilidade, apoio a estudante com deficiência - com salário digno, tempo para avaliar, planejar."
+        },
+        {
+            "local": "SME",
+            "eixo": "Melhorias relacionadas à educação integral em tempo integral",
+            "sugestao": "Incentivo à prática esportiva e cultural; levar os alunos para assistir a espetáculos e eventos."
+        },
+        {
+            "local": "SME",
+            "eixo": "Melhorias relacionadas aos profissionais da educação básica",
+            "sugestao": "A criação de alguns cargos, para serem mais atrativos nos órgãos das DREs e SMEs."
+        },
+        {
+            "local": "SME",
+            "eixo": "Melhorias relacionadas à gestão do Sistema Municipal de Educação",
+            "sugestao": "Sugestão de melhoria na comunicação entre e dentro dos Órgãos Centrais de SME e DREs."
+        },
+        {
+            "local": "SME",
+            "eixo": "Melhorias relacionadas aos profissionais da educação básica",
+            "sugestao": "Melhorar a qualidade das formações ministradas aos profissionais da educação."
+        },
+        {
+            "local": "SME",
+            "eixo": "Melhorias relacionadas ao financiamento e à infraestrutura da educação básica",
+            "sugestao": "Melhorias na estrutura das unidades escolares com modernização dos espaços e equipamentos."
+        },
+        {
+            "local": "SME",
+            "eixo": "Melhorias relacionadas aos profissionais da educação básica",
+            "sugestao": "Auxílio alimentação pra profissionais que trabalham em órgãos administrativos."
+        },
+        {
+            "local": "SME",
+            "eixo": "Melhorias relacionadas à gestão do Sistema Municipal de Educação",
+            "sugestao": "Colocar equipes de saúde dentro das unidades escolares."
+        },
+        {
+            "local": "SME",
+            "eixo": "Outro",
+            "sugestao": "(q.15) Coloquei em outros o aproveitamento dos servidores, no sentido de quando tiver Congressos/Eventos da SME..."
+        },
+        {
+            "local": "SME",
+            "eixo": "Melhorias relacionadas aos profissionais da educação básica",
+            "sugestao": "Valorização salarial dos profissionais da educação, bolsas de estudo em grandes universidades."
+        },
+        {
+            "local": "SME",
+            "eixo": "Melhorias relacionadas às agendas transversais",
+            "sugestao": "Sugiro mais e melhores informações sobre alimentação adequada e saudável... melhorar o padrão alimentar."
+        },
+        {
+            "local": "SME",
+            "eixo": "Melhorias relacionadas à participação social e à gestão democrática",
+            "sugestao": "Melhora na comunicação entre DRE e escola. Principalmente no que diz respeito a obras nas escolas."
+        },
+        {
+            "local": "SME",
+            "eixo": "Melhorias relacionadas às agendas transversais",
+            "sugestao": "Agenda para implementação do Currículo - Orientações Pedagógicas para Educação Alimentar e Nutricional."
+        },
+        {
+            "local": "SME",
+            "eixo": "Melhorias relacionadas aos profissionais da educação básica",
+            "sugestao": "O principal foco deveria ser na diminuição de alunos por sala, aumento do número de professora efetivos."
+        },
+        {
+            "local": "SME",
+            "eixo": "Melhorias relacionadas ao financiamento e à infraestrutura da educação básica",
+            "sugestao": "escolas bem equipadas e infraestrutura adequada."
+        },
+        {
+            "local": "SME",
+            "eixo": "Melhorias relacionadas à participação social e à gestão democrática",
+            "sugestao": "A proposta de fortalecer a comunicação entre escolas e famílias por meio de práticas educomunicativas."
+        },
+        {
+            "local": "SME",
+            "eixo": "Melhorias relacionadas ao financiamento e à infraestrutura da educação básica",
+            "sugestao": "Os Programas deveriam ter um Planejamento Orçamentário Plurianual..."
+        },
+        {
+            "local": "SME",
+            "eixo": "Melhorias relacionadas às agendas transversais",
+            "sugestao": "Planejar estratégias de ação para aumento de investimentos... nas unidades que possuem maiores casos de vulnerabilidade social."
+        },
+        {
+            "local": "SME",
+            "eixo": "Melhorias relacionadas aos profissionais da educação básica",
+            "sugestao": "Remoção de cargos para Assistente Administrativo de Gestão (AAGs)... trabalha melhor quando trabalha onde deseja."
+        },
+        {
+            "local": "SME",
+            "eixo": "Melhorias relacionadas à gestão do Sistema Municipal de Educação",
+            "sugestao": "Aprimorar a comunicação entre órgão central e coordenadorias. Materiais unificados de alimentação."
+        },
+        {
+            "local": "SME",
+            "eixo": "Melhorias relacionadas à gestão do Sistema Municipal de Educação",
+            "sugestao": "Elaboração de material unificado para ser utilizado por SME, Codae, Naapa, Cefai."
+        },
+        {
+            "local": "SME",
+            "eixo": "Melhorias relacionadas à gestão do Sistema Municipal de Educação",
+            "sugestao": "Aprimorar comunicação entre órgãos centrais e DREs; necessidade de espaço físico adequado."
+        },
+        {
+            "local": "SME",
+            "eixo": "Melhorias relacionadas ao financiamento e à infraestrutura da educação básica",
+            "sugestao": "infraestrutura: ouvir profissionais técnicos para obras/manutenção/construção das cozinhas."
+        },
+        {
+            "local": "SME",
+            "eixo": "Melhorias relacionadas à gestão do Sistema Municipal de Educação",
+            "sugestao": "Melhorar comunicação entre setores da educação. Alinhar orientações."
+        },
+        {
+            "local": "SME",
+            "eixo": "Melhorias relacionadas ao financiamento e à infraestrutura da educação básica",
+            "sugestao": "Infraestrutura: ouvir profissionais técnicos para obras/manutenção/construção das cozinhas."
+        },
+        {
+            "local": "SME",
+            "eixo": "Melhorias relacionadas aos profissionais da educação básica",
+            "sugestao": "Saúde do profissional;"
+        },
+        {
+            "local": "SME",
+            "eixo": "Melhorias relacionadas aos profissionais da educação básica",
+            "sugestao": "reescrita das atribuições do ATE;"
+        },
+        {
+            "local": "SME",
+            "eixo": "Melhorias relacionadas aos profissionais da educação básica",
+            "sugestao": "plano de carreira;"
+        },
+        {
+            "local": "SME",
+            "eixo": "Outro",
+            "sugestao": "adicional noturno/reuniões fora do expediente."
+        },
+        {
+            "local": "SME",
+            "eixo": "Melhorias relacionadas aos profissionais da educação básica",
+            "sugestao": "Valorização dos profissionais eficientes, não considerando apenas a assiduidade como critério para pagamento do PDE."
+        },
+        {
+            "local": "SME",
+            "eixo": "Melhorias relacionadas à educação integral em tempo integral",
+            "sugestao": "Rediscutir a questão dos espaços, ampliação da educação integral."
+        },
+        {
+            "local": "SME",
+            "eixo": "Melhorias relacionadas ao financiamento e à infraestrutura da educação básica",
+            "sugestao": "Melhoria da infraestrutura das escolas."
+        },
+        {
+            "local": "SME",
+            "eixo": "Outro",
+            "sugestao": "Autonomia das unidades escolares."
+        },
+        {
+            "local": "SME",
+            "eixo": "Melhorias relacionadas aos profissionais da educação básica",
+            "sugestao": "Redução no número de alunos nas salas de aula."
+        },
+        {
+            "local": "SME",
+            "eixo": "Melhorias relacionadas à avaliação e qualidade da educação infantil",
+            "sugestao": "Olhar com critério a quantidade de criança por adulto."
+        },
+        {
+            "local": "SME",
+            "eixo": "Melhorias relacionadas à gestão do Sistema Municipal de Educação",
+            "sugestao": "Melhoria na comunicação entre áreas da SME."
+        },
+        {
+            "local": "SME",
+            "eixo": "Melhorias relacionadas aos profissionais da educação básica",
+            "sugestao": "Rever docentes de módulos em escolas pequenas, valorizar permanência, reduzir nº médio de estudantes."
+        },
+        {
+            "local": "SME",
+            "eixo": "Melhorias relacionadas aos profissionais da educação básica",
+            "sugestao": "Centros Educacionais Unificados apresentam fragilidades nos atendimentos, valorizar profissionais adoecidos."
+        },
+        {
+            "local": "SME",
+            "eixo": "Melhorias relacionadas aos profissionais da educação básica",
+            "sugestao": "Ampliação do quadro de apoio nas UEs, incentivo/remuneração adequados."
+        },
+        {
+            "local": "SME",
+            "eixo": "Melhorias relacionadas aos profissionais da educação básica",
+            "sugestao": "Lista de melhorias (plano de carreira, participação, tecnologias, formação para diversidade)."
+        },
+        {
+            "local": "SME",
+            "eixo": "Melhorias relacionadas aos profissionais da educação básica",
+            "sugestao": "Premiação aos profissionais da SME além do financeiro."
+        },
+        {
+            "local": "SME",
+            "eixo": "Melhorias relacionadas à educação integral em tempo integral",
+            "sugestao": "Padronizar lançamento de projetos contraturno no EOL para monitoramento."
+        },
+        {
+            "local": "SME",
+            "eixo": "Melhorias relacionadas à aprendizagem no ensino fundamental e médio",
+            "sugestao": "Programa de avaliação permanente e recuperação das aprendizagens do estudante."
+        },
+        {
+            "local": "SME",
+            "eixo": "Melhorias relacionadas aos profissionais da educação básica",
+            "sugestao": "Formação e qualificação dos gestores escolares."
+        },
+        {
+            "local": "SME",
+            "eixo": "Melhorias relacionadas aos profissionais da educação básica",
+            "sugestao": "Aumentar e aperfeiçoar quadros dos órgãos central e DREs."
+        },
+        {
+            "local": "SME",
+            "eixo": "Melhorias relacionadas à gestão do Sistema Municipal de Educação",
+            "sugestao": "Ações para fortalecer a RME."
+        },
+        {
+            "local": "SME",
+            "eixo": "Melhorias relacionadas à educação integral em tempo integral",
+            "sugestao": "Incentivo aos projetos Mais Educação, educação integral, incluso e equidade, esporte educacional."
+        },
+        {
+            "local": "SME",
+            "eixo": "Melhorias relacionadas à aprendizagem no ensino fundamental e médio",
+            "sugestao": "A sala de leitura, importante espaço educativo da escola não foi citado na pesquisa."
+        },
+        {
+            "local": "SME",
+            "eixo": "Melhorias relacionadas ao financiamento e à infraestrutura da educação básica",
+            "sugestao": "Escolas recentemente municipalizadas ainda não têm esse espaço dentro de suas unidades."
+        },
+        {
+            "local": "SME",
+            "eixo": "Melhorias relacionadas à gestão do Sistema Municipal de Educação",
+            "sugestao": "Ações intersecretariais do cuidado e autocuidado na saúde do estudante."
+        },
+        {
+            "local": "SME",
+            "eixo": "Melhorias relacionadas aos profissionais da educação básica",
+            "sugestao": "Valorização salarial dos profissionais da educação."
+        },
+        {
+            "local": "SME",
+            "eixo": "Melhorias relacionadas aos profissionais da educação básica",
+            "sugestao": "Que não precisem acumular cargos e trabalhar 12 horas por dia para ter salário digno."
+        },
+        {
+            "local": "SME",
+            "eixo": "Melhorias relacionadas à avaliação e qualidade da educação infantil",
+            "sugestao": "Inclusão do profissional de Educação Física no quadro de CEIs e EMEIs."
+        }
+    ],
+    "suggestionLocations": [
+        "DRE-BT",
+        "DRE-CL",
+        "DRE-CS",
+        "DRE-FB",
+        "DRE-G",
+        "DRE-IP",
+        "DRE-IQ",
+        "DRE-JT",
+        "DRE-MP",
+        "DRE-PE",
+        "DRE-PJ",
+        "DRE-SA",
+        "DRE-SM",
+        "SME"
+    ],
+    "suggestionAxes": [
+        "Melhorias relacionadas ao acesso, esgotamento e conclusão no ensino fundamental e médio",
+        "Melhorias relacionadas ao financiamento e à infraestrutura da educação básica",
+        "Melhorias relacionadas aos profissionais da educação básica",
+        "Melhorias relacionadas à alfabetização",
+        "Melhorias relacionadas à aprendizagem no ensino fundamental e médio",
+        "Melhorias relacionadas à avaliação e qualidade da educação infantil",
+        "Melhorias relacionadas à conectividade, à educação para as tecnologias e à cultura digital",
+        "Melhorias relacionadas à educação de jovens e adultos",
+        "Melhorias relacionadas à educação especial na perspectiva da educação inclusiva e da educação bilíngue para surdos",
+        "Melhorias relacionadas à educação integral em tempo integral",
+        "Melhorias relacionadas à gestão do Sistema Municipal de Educação",
+        "Melhorias relacionadas à participação social e à gestão democrática",
+        "Melhorias relacionadas às agendas transversais",
+        "Outro"
+    ]
 };
 
 Chart.register(ChartDataLabels);
@@ -5513,10 +7610,18 @@ function wrapText(text, maxWidth) {
 
 document.addEventListener('DOMContentLoaded', () => {
     let locationChart, localChart;
+
     const questionSelect = document.getElementById('question-select');
     const locationSelect = document.getElementById('location-select');
     const participationTable = document.getElementById('participationTable');
-    let currentSort = { column: 3, order: 'desc' };
+    const suggestionsSection = document.getElementById('suggestions-section');
+    const suggestionLocationSelect = document.getElementById('suggestion-location-select');
+    const suggestionEixoSelect = document.getElementById('suggestion-eixo-select');
+    const suggestionsTable = document.getElementById('suggestionsTable');
+    const suggestionsTableBody = document.getElementById('suggestions-table-body');
+    
+    let participationSort = { column: 3, order: 'desc' };
+    let suggestionSort = { key: 'local', order: 'asc' };
 
     function renderParticipationTable() {
         const tableBody = participationTable.querySelector('tbody');
@@ -5531,10 +7636,10 @@ document.addEventListener('DOMContentLoaded', () => {
         
         const dataToSort = [...surveyData.participationData];
         dataToSort.sort((a, b) => {
-            const key = Object.keys(a)[currentSort.column];
+            const key = Object.keys(a)[participationSort.column];
             const valA = a[key];
             const valB = b[key];
-            const columnType = participationTable.querySelector(`th[data-column-index='${currentSort.column}']`).dataset.columnType;
+            const columnType = participationTable.querySelector(`th[data-column-index='${participationSort.column}']`).dataset.columnType;
             let compareA, compareB;
 
             if (columnType === 'percentage') {
@@ -5548,15 +7653,15 @@ document.addEventListener('DOMContentLoaded', () => {
                 compareB = String(valB).toLowerCase();
             }
 
-            if (compareA < compareB) return currentSort.order === 'asc' ? -1 : 1;
-            if (compareA > compareB) return currentSort.order === 'asc' ? 1 : -1;
+            if (compareA < compareB) return participationSort.order === 'asc' ? -1 : 1;
+            if (compareA > compareB) return participationSort.order === 'asc' ? 1 : -1;
             return 0;
         });
 
         dataToSort.forEach(row => {
             const tr = `
                 <tr class="bg-white border-b hover:bg-gray-50">
-                    <td class="py-4 px-6 font-medium text-gray-900 whitespace-nowrap">${row['Unidade']}</td>
+                    <td class="py-4 px-6 font-medium text-gray-900">${row['Unidade']}</td>
                     <td class="py-4 px-6 text-right">${Number(row['Respostas']).toLocaleString('pt-BR')}</td>
                     <td class="py-4 px-6 text-right">${Number(row['Total esperado']).toLocaleString('pt-BR')}</td>
                     <td class="py-4 px-6 text-right">${row['Participação']}</td>
@@ -5577,29 +7682,66 @@ document.addEventListener('DOMContentLoaded', () => {
             `;
             tableFoot.innerHTML = totalRow;
         }
-
-        participationTable.querySelectorAll('th').forEach(th => {
-            th.classList.remove('sort-asc', 'sort-desc');
-            const colIndex = parseInt(th.dataset.columnIndex, 10);
-            if (colIndex === currentSort.column) {
-                th.classList.add(currentSort.order === 'asc' ? 'sort-asc' : 'sort-desc');
-            }
+        updateSortIcons(participationTable, participationSort.column, participationSort.order, 'data-column-index');
+    }
+    
+    function populateSuggestionFilters() {
+        suggestionLocationSelect.innerHTML = '<option value="Todos">Todos</option>';
+        surveyData.suggestionLocations.forEach(location => {
+            const option = document.createElement('option');
+            option.value = location;
+            option.textContent = location;
+            suggestionLocationSelect.appendChild(option);
+        });
+        
+        suggestionEixoSelect.innerHTML = '<option value="Todos">Todos</option>';
+        surveyData.suggestionAxes.forEach(eixo => {
+            const option = document.createElement('option');
+            option.value = eixo;
+            option.textContent = eixo;
+            suggestionEixoSelect.appendChild(option);
         });
     }
     
-    participationTable.querySelectorAll('th').forEach(th => {
-        th.addEventListener('click', () => {
-            const columnIndex = parseInt(th.dataset.columnIndex, 10);
-            if (currentSort.column === columnIndex) {
-                currentSort.order = currentSort.order === 'asc' ? 'desc' : 'asc';
-            } else {
-                currentSort.column = columnIndex;
-                currentSort.order = 'desc';
-            }
-            renderParticipationTable();
+    function renderSuggestionsTable() {
+        const selectedLocation = suggestionLocationSelect.value;
+        const selectedEixo = suggestionEixoSelect.value;
+        
+        const filteredData = surveyData.suggestionsData.filter(item => {
+            const locationMatch = (selectedLocation === 'Todos' || item.local === selectedLocation);
+            const eixoMatch = (selectedEixo === 'Todos' || item.eixo === selectedEixo);
+            return locationMatch && eixoMatch;
         });
-    });
-    
+        
+        filteredData.sort((a, b) => {
+            const key = suggestionSort.key;
+            const valA = String(a[key] || '').toLowerCase();
+            const valB = String(b[key] || '').toLowerCase();
+            
+            if (valA < valB) return suggestionSort.order === 'asc' ? -1 : 1;
+            if (valA > valB) return suggestionSort.order === 'asc' ? 1 : -1;
+            return 0;
+        });
+        
+        suggestionsTableBody.innerHTML = ''; 
+        
+        if (filteredData.length === 0) {
+            suggestionsTableBody.innerHTML = `<tr><td colspan="3" class="text-center py-4 px-6 text-gray-500">Nenhuma sugestão encontrada para os filtros selecionados.</td></tr>`;
+        } else {
+            filteredData.forEach(item => {
+                const row = document.createElement('tr');
+                row.className = 'bg-white border-b hover:bg-gray-50';
+                row.innerHTML = `
+                    <td class="py-4 px-6 align-top">${item.local}</td>
+                    <td class="py-4 px-6 align-top">${item.eixo}</td>
+                    <td class="py-4 px-6 align-top">${item.sugestao}</td>
+                `;
+                suggestionsTableBody.appendChild(row);
+            });
+        }
+        updateSortIcons(suggestionsTable, suggestionSort.key, suggestionSort.order, 'data-column-key');
+    }
+
     function renderLocationResponsesChart() {
         const ctx = document.getElementById('locationResponsesChart').getContext('2d');
         const data = surveyData.responsesByLocation;
@@ -5610,199 +7752,223 @@ document.addEventListener('DOMContentLoaded', () => {
         if (locationChart) locationChart.destroy();
         locationChart = new Chart(ctx, {
             type: 'bar',
-            data: {
-                labels: labels,
-                datasets: [{ label: 'Respostas', data: values, backgroundColor: backgroundColors }]
-            },
+            data: { labels, datasets: [{ label: 'Respostas', data: values, backgroundColor: backgroundColors }] },
             options: {
-                indexAxis: 'y',
-                responsive: true,
-                maintainAspectRatio: false,
+                indexAxis: 'y', responsive: true, maintainAspectRatio: false,
                 plugins: {
                     legend: { display: false },
-                    datalabels: {
-                        display: true,
-                        anchor: 'end',
-                        align: 'end',
-                        color: '#333',
-                        font: { weight: 'bold', size: 12 },
-                        formatter: (value) => value.toLocaleString('pt-BR')
-                    }
+                    datalabels: { display: true, anchor: 'end', align: 'end', color: '#333', font: { weight: 'bold', size: 12 }, formatter: (v) => v.toLocaleString('pt-BR') }
                 },
                 scales: {
-                    x: {
-                        type: 'logarithmic',
-                        title: { display: true, text: 'Quantidade de Respostas (Escala Log)' },
-                    },
+                    x: { type: 'logarithmic', title: { display: true, text: 'Quantidade de Respostas (Escala Log)' } },
                     y: { ticks: { autoSkip: false } }
                 }
             }
         });
     }
-
+    
+    // *** INÍCIO DA MODIFICAÇÃO DO GRÁFICO PRINCIPAL ***
     function renderComparisonChart(questionId, locationId) {
         const localCtx = document.getElementById('localComparisonChart').getContext('2d');
-        const localQuestionData = surveyData.answers[questionId]?.[locationId];
         const globalQuestionData = surveyData.answers[questionId]?.['Global'];
-        
-        // *** INÍCIO DA ALTERAÇÃO JS ***
         const subtitleElement = document.getElementById('local-chart-subtitle');
-        subtitleElement.textContent = ''; // Limpa a mensagem por padrão
-        // *** FIM DA ALTERAÇÃO JS ***
+        const titleElement = document.getElementById('local-chart-title');
+        const comparisonLegend = document.getElementById('comparison-legend');
+        subtitleElement.textContent = '';
 
         if (localChart) localChart.destroy();
 
-        if (localQuestionData && globalQuestionData) {
-            // *** INÍCIO DA ALTERAÇÃO JS ***
-            // Pega a nova flag 'showOtherResponsesWarning' dos dados
-            const { totalRespondents: totalLocal, items: localItems, showOtherResponsesWarning } = localQuestionData;
-            // *** FIM DA ALTERAÇÃO JS ***
-            
-            const { totalRespondents: totalGlobal, items: globalItems } = globalQuestionData;
+        // CASO 1: Usuário selecionou "Rede" para ver apenas os dados gerais
+        if (locationId === 'Rede') {
+            comparisonLegend.style.display = 'none'; // Esconde a legenda de comparação
+            if (globalQuestionData) {
+                const { totalRespondents: totalGlobal, items: globalItems } = globalQuestionData;
+                titleElement.textContent = `Resultados Gerais da Rede (${totalGlobal.toLocaleString('pt-BR')} resp.)`;
 
-            document.getElementById('local-chart-title').textContent =
-                `Comparativo: ${locationId} (${totalLocal.toLocaleString('pt-BR')} resp.) vs. Rede (${totalGlobal.toLocaleString('pt-BR')} resp.)`;
+                const sortedGlobalItems = Object.entries(globalItems).sort(([, a], [, b]) => b - a);
+                const labels = sortedGlobalItems.map(([label]) => label);
+                const globalAbsoluteCounts = sortedGlobalItems.map(([, value]) => value);
+                const globalPercentages = globalAbsoluteCounts.map(count => totalGlobal > 0 ? (count / totalGlobal) * 100 : 0);
 
-            // *** INÍCIO DA ALTERAÇÃO JS ***
-            // Mostra a mensagem se a flag for verdadeira
-            if (showOtherResponsesWarning) {
-                subtitleElement.textContent = `Como cada respondente podia selecionar até 3 itens por eixo e escrever sua própria sugestão, a porcentagem de "Outras respostas" pode ultrapassar 100%`;
-            }
-            // *** FIM DA ALTERAÇÃO JS ***
+                const maxPercentage = Math.max(0, ...globalPercentages);
+                const suggestedMax = Math.ceil(maxPercentage / 10) * 10 + 5;
 
-            const sortedLocalItems = Object.entries(localItems).sort(([, a], [, b]) => b - a);
-            const labels = sortedLocalItems.map(([label]) => label);
-            const localAbsoluteCounts = sortedLocalItems.map(([, value]) => value);
-            const tickColors = [], localPercentages = [], globalPercentagesForCompare = [];
-
-            labels.forEach((label, i) => {
-                const local_perc = totalLocal > 0 ? (localAbsoluteCounts[i] / totalLocal) * 100 : 0;
-                const global_perc = totalGlobal > 0 ? ((globalItems[label] || 0) / totalGlobal) * 100 : 0;
-                localPercentages.push(local_perc);
-                globalPercentagesForCompare.push(global_perc);
-
-                if (global_perc > 0) {
-                    const diff = (local_perc - global_perc) / global_perc;
-                    if (diff >= 0.20) tickColors.push('#d32f2f');
-                    else if (diff <= -0.20) tickColors.push('#388e3c');
-                    else tickColors.push('#666');
-                } else {
-                    tickColors.push('#666');
-                }
-            });
-            
-            const maxPercentage = Math.max(0, ...localPercentages, ...globalPercentagesForCompare);
-            const suggestedMax = Math.ceil(maxPercentage / 10) * 10 + 5;
-
-            localChart = new Chart(localCtx, {
-                type: 'bar',
-                data: {
-                    labels: labels,
-                    datasets: [
-                        {
-                            label: locationId,
-                            data: localPercentages,
-                            backgroundColor: surveyData.locationColors[locationId] || '#333',
-                            absoluteCounts: localAbsoluteCounts
-                        },
-                        {
+                localChart = new Chart(localCtx, {
+                    type: 'bar',
+                    data: {
+                        labels,
+                        datasets: [{
                             label: 'Rede',
-                            data: globalPercentagesForCompare,
-                            backgroundColor: '#a0aec0',
-                        }
-                    ]
-                },
-                options: getChartOptions('y',`% de Respostas (${locationId} vs. Rede)`,
-                    (ctx) => `${ctx.dataset.label}: ${ctx.raw.toFixed(1)}%`,
-                    {
+                            data: globalPercentages,
+                            backgroundColor: '#a0aec0', // Cor neutra para a rede
+                            absoluteCounts: globalAbsoluteCounts
+                        }]
+                    },
+                    options: getChartOptions('y', '% de Respostas', (ctx) => `${ctx.raw.toFixed(1)}%`, {
                         formatter: (value, context) => {
-                            const dataset = context.chart.data.datasets[context.datasetIndex];
-                            if(dataset.label !== 'Rede') {
-                                const count = dataset.absoluteCounts[context.dataIndex];
-                                return `${count} (${value.toFixed(1)}%)`;
-                            }
-                            return `${value.toFixed(1)}%`;
-                        },
-                    }, tickColors, suggestedMax
-                )
-            });
+                            const count = context.chart.data.datasets[0].absoluteCounts[context.dataIndex];
+                            return `${count} (${value.toFixed(1)}%)`;
+                        }
+                    }, '#666', suggestedMax) // Cor padrão para os ticks do eixo Y
+                });
+            } else {
+                titleElement.textContent = 'Resultados Gerais da Rede';
+                localCtx.clearRect(0, 0, localCtx.canvas.width, localCtx.canvas.height);
+                localCtx.font = "16px Inter";
+                localCtx.fillStyle = "#888";
+                localCtx.textAlign = "center";
+                localCtx.fillText(`Sem dados para este eixo.`, localCtx.canvas.width / 2, localCtx.canvas.height / 2);
+            }
+        // CASO 2: Usuário selecionou um local específico para comparar com a rede (lógica original)
         } else {
-            document.getElementById('local-chart-title').textContent = `Comparativo Local vs. Rede`;
-            localCtx.clearRect(0, 0, localCtx.canvas.width, localCtx.canvas.height);
-            localCtx.font = "16px Inter";
-            localCtx.fillStyle = "#888";
-            localCtx.textAlign = "center";
-            localCtx.fillText(`Sem dados para '${locationId}' neste eixo.`, localCtx.canvas.width / 2, localCtx.canvas.height / 2);
+            comparisonLegend.style.display = 'flex'; // Mostra a legenda de comparação
+            const localQuestionData = surveyData.answers[questionId]?.[locationId];
+
+            if (localQuestionData && globalQuestionData) {
+                const { totalRespondents: totalLocal, items: localItems, showOtherResponsesWarning } = localQuestionData;
+                const { totalRespondents: totalGlobal, items: globalItems } = globalQuestionData;
+
+                titleElement.textContent = `Comparativo: ${locationId} (${totalLocal.toLocaleString('pt-BR')} resp.) vs. Rede (${totalGlobal.toLocaleString('pt-BR')} resp.)`;
+                if (showOtherResponsesWarning) {
+                    subtitleElement.textContent = `Como cada respondente podia selecionar até 3 itens por eixo e escrever sua própria sugestão, a porcentagem de "Outras respostas" pode ultrapassar 100%`;
+                }
+
+                const sortedLocalItems = Object.entries(localItems).sort(([, a], [, b]) => b - a);
+                const labels = sortedLocalItems.map(([label]) => label);
+                const localAbsoluteCounts = sortedLocalItems.map(([, value]) => value);
+                const tickColors = [], localPercentages = [], globalPercentagesForCompare = [];
+
+                labels.forEach((label, i) => {
+                    const local_perc = totalLocal > 0 ? (localAbsoluteCounts[i] / totalLocal) * 100 : 0;
+                    const global_perc = totalGlobal > 0 ? ((globalItems[label] || 0) / totalGlobal) * 100 : 0;
+                    localPercentages.push(local_perc);
+                    globalPercentagesForCompare.push(global_perc);
+
+                    if (global_perc > 0) {
+                        const diff = (local_perc - global_perc) / global_perc;
+                        if (diff >= 0.20) tickColors.push('#d32f2f');
+                        else if (diff <= -0.20) tickColors.push('#388e3c');
+                        else tickColors.push('#666');
+                    } else {
+                        tickColors.push('#666');
+                    }
+                });
+                
+                const maxPercentage = Math.max(0, ...localPercentages, ...globalPercentagesForCompare);
+                const suggestedMax = Math.ceil(maxPercentage / 10) * 10 + 5;
+
+                localChart = new Chart(localCtx, {
+                    type: 'bar',
+                    data: { labels, datasets: [
+                        { label: locationId, data: localPercentages, backgroundColor: surveyData.locationColors[locationId] || '#333', absoluteCounts: localAbsoluteCounts },
+                        { label: 'Rede', data: globalPercentagesForCompare, backgroundColor: '#a0aec0' }
+                    ]},
+                    options: getChartOptions('y',`% de Respostas (${locationId} vs. Rede)`,
+                        (ctx) => `${ctx.dataset.label}: ${ctx.raw.toFixed(1)}%`,
+                        { formatter: (value, context) => {
+                            const dataset = context.chart.data.datasets[context.datasetIndex];
+                            if(dataset.label !== 'Rede') { const count = dataset.absoluteCounts[context.dataIndex]; return `${count} (${value.toFixed(1)}%)`; }
+                            return `${value.toFixed(1)}%`;
+                        }}, tickColors, suggestedMax)
+                });
+            } else {
+                titleElement.textContent = `Comparativo Local vs. Rede`;
+                localCtx.clearRect(0, 0, localCtx.canvas.width, localCtx.canvas.height);
+                localCtx.font = "16px Inter";
+                localCtx.fillStyle = "#888";
+                localCtx.textAlign = "center";
+                localCtx.fillText(`Sem dados para '${locationId}' neste eixo.`, localCtx.canvas.width / 2, localCtx.canvas.height / 2);
+            }
         }
     }
+    // *** FIM DA MODIFICAÇÃO ***
     
     function getChartOptions(axis, xAxisTitle, tooltipLabelCallback, datalabelsConfig, yAxisTickColors = '#666', suggestedMax = 100) {
         return {
-            indexAxis: axis,
-            responsive: true,
-            maintainAspectRatio: false,
-            layout: { padding: { left: 0 } },
+            indexAxis: axis, responsive: true, maintainAspectRatio: false, layout: { padding: { left: 0 } },
             plugins: {
                 legend: { position: 'top' },
                 tooltip: { callbacks: { label: tooltipLabelCallback } },
                 datalabels: { display: true, anchor: 'end', align: 'end', color: '#333', font: { weight: 'bold', size: 12 }, ...datalabelsConfig }
             },
             scales: {
-                x: {
-                    suggestedMax: suggestedMax,
-                    title: { display: true, text: xAxisTitle },
-                    ticks: { callback: value => value.toFixed(0) + "%" }
-                },
-                y: {
-                    ticks: {
-                        color: yAxisTickColors,
-                        callback: function(value) { return wrapText(this.getLabelForValue(value), 70); }
-                    }
-                }
+                x: { suggestedMax, title: { display: true, text: xAxisTitle }, ticks: { callback: value => value.toFixed(0) + "%" } },
+                y: { ticks: { color: yAxisTickColors, callback: function(value) { return wrapText(this.getLabelForValue(value), 70); } } }
             }
         };
     }
 
-    function populateSelects() {
+    // *** INÍCIO DA MODIFICAÇÃO DOS FILTROS ***
+    function populateComparisonSelects() {
         Object.entries(surveyData.questions).forEach(([id, title]) => {
             const option = document.createElement('option');
-            option.value = id;
-            option.textContent = title;
+            option.value = id; option.textContent = title;
             questionSelect.appendChild(option);
         });
-
+        // A lista de locais agora vem pré-ordenada do Python
         const locations = surveyData.allComparableLocations;
-        const smeDefault = 'SME';
-        let finalLocations;
-
-        if (locations.includes(smeDefault)) {
-            const otherLocations = locations.filter(loc => loc !== smeDefault).sort((a, b) => a.localeCompare(b));
-            finalLocations = [smeDefault, ...otherLocations];
-        } else {
-            finalLocations = locations.sort((a, b) => a.localeCompare(b));
-        }
-        
-        finalLocations.forEach(location => {
+        locations.forEach(location => {
             const option = document.createElement('option');
-            option.value = location;
-            option.textContent = location;
+            option.value = location; option.textContent = location;
             locationSelect.appendChild(option);
         });
     }
-
-    function updateCharts() {
-        const selectedQuestion = questionSelect.value;
-        const selectedLocation = locationSelect.value;
-        renderComparisonChart(selectedQuestion, selectedLocation);
-    }
+    // *** FIM DA MODIFICAÇÃO ***
     
+    function updateSortIcons(table, activeColumn, order, keyAttribute) {
+        table.querySelectorAll('th .sort-icon').forEach(icon => icon.textContent = '');
+        const activeTh = table.querySelector(`th[${keyAttribute}='${activeColumn}'] .sort-icon`);
+        if (activeTh) activeTh.textContent = order === 'asc' ? ' ▲' : ' ▼';
+    }
+
     function init() {
-        populateSelects();
-        questionSelect.addEventListener('change', updateCharts);
-        locationSelect.addEventListener('change', updateCharts);
+        populateComparisonSelects();
+        questionSelect.addEventListener('change', () => renderComparisonChart(questionSelect.value, locationSelect.value));
+        locationSelect.addEventListener('change', () => renderComparisonChart(questionSelect.value, locationSelect.value));
+        
         renderLocationResponsesChart();
-        renderParticipationTable();
-        updateCharts();
+        // A chamada inicial agora renderizará o gráfico da "Rede" por padrão
+        renderComparisonChart(questionSelect.value, locationSelect.value);
+
+        if (surveyData.participationData && surveyData.participationData.length > 0) {
+            renderParticipationTable();
+            participationTable.querySelectorAll('th.sortable-th').forEach(th => {
+                th.addEventListener('click', () => {
+                    const columnIndex = parseInt(th.dataset.columnIndex, 10);
+                    if (participationSort.column === columnIndex) {
+                        participationSort.order = participationSort.order === 'asc' ? 'desc' : 'asc';
+                    } else {
+                        participationSort.column = columnIndex;
+                        participationSort.order = 'desc';
+                    }
+                    renderParticipationTable();
+                });
+            });
+        } else {
+             document.getElementById('participation-section').style.display = 'none';
+        }
+        
+        if (surveyData.suggestionsData && surveyData.suggestionsData.length > 0) {
+            populateSuggestionFilters();
+            renderSuggestionsTable();
+            suggestionLocationSelect.addEventListener('change', renderSuggestionsTable);
+            suggestionEixoSelect.addEventListener('change', renderSuggestionsTable);
+            
+            suggestionsTable.querySelectorAll('th.sortable-th').forEach(th => {
+                th.addEventListener('click', () => {
+                    const key = th.dataset.columnKey;
+                    if (suggestionSort.key === key) {
+                        suggestionSort.order = suggestionSort.order === 'asc' ? 'desc' : 'asc';
+                    } else {
+                        suggestionSort.key = key;
+                        suggestionSort.order = 'asc';
+                    }
+                    renderSuggestionsTable();
+                });
+            });
+        } else {
+            suggestionsSection.style.display = 'none';
+        }
     }
 
     init();
