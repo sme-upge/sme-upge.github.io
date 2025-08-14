@@ -45,17 +45,23 @@
         .hidden-by-logic {
             display: none !important;
         }
-        
-        /* Estilos para a barra de resultados recolhível */
-        #results-bar.collapsed #results-grid-container {
-            display: flex;
-            justify-content: center;
+        /* --- NOVOS ESTILOS PARA BARRA RECOLHÍVEL --- */
+        #results-details {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.4s ease-out;
         }
-        #results-bar.collapsed .collapsible-content {
-            display: none;
+        #results-bar.is-expanded #results-details {
+            max-height: 300px; /* Um valor seguro para o conteúdo caber */
         }
-        #results-bar.collapsed #toggle-icon {
-            transform: rotate(180deg);
+        #toggle-icon {
+            transition: transform 0.3s;
+        }
+        #results-bar.is-expanded #toggle-icon {
+            transform: rotate(180deg); /* Gira o ícone para baixo quando expandido */
+        }
+        #results-header {
+            cursor: pointer;
         }
     </style>
 </head>
@@ -242,44 +248,53 @@
     </main>
 
     <!-- Barra de Resultados Flutuante -->
-    <footer id="results-bar" class="relative fixed bottom-0 left-0 right-0 bg-gray-800 text-white shadow-2xl transform translate-y-full transition-all duration-500 pt-8 pb-4 px-4">
-        <!-- Botão de expandir/recolher -->
-        <div class="absolute -top-4 left-1/2 -translate-x-1/2">
-            <button id="toggle-results-btn" class="bg-gray-700 hover:bg-gray-600 text-white rounded-full w-8 h-8 flex items-center justify-center focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-800 focus:ring-white" aria-label="Expandir ou recolher resultados">
-                <svg id="toggle-icon" class="w-5 h-5 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
-            </button>
-        </div>
-        
-        <div id="results-grid-container" class="max-w-6xl mx-auto grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-4 text-center">
-            <div class="collapsible-content">
-                <span class="block text-xs text-gray-400">1ª Etapa (Valor)</span>
-                <span id="res-etapa1-valor" class="block text-lg font-bold">R$ 0,00</span>
+    <footer id="results-bar" class="fixed bottom-0 left-0 right-0 bg-gray-800 text-white shadow-2xl transform translate-y-full transition-transform duration-500">
+        <!-- Cabeçalho Clicável para Expandir/Recolher -->
+        <div id="results-header" class="max-w-6xl mx-auto flex items-center justify-between p-2 sm:p-4">
+            <div class="flex-grow grid grid-cols-2 gap-2 sm:gap-4">
+                <div class="bg-blue-600 p-2 rounded-lg text-center">
+                    <span class="block text-xs text-blue-200">TOTAL ESTIMADO</span>
+                    <span id="res-total-estimado" class="block text-xl sm:text-2xl font-extrabold">Até R$ 0,00</span>
+                </div>
+                <div class="bg-green-600 p-2 rounded-lg text-center">
+                    <span class="block text-xs text-green-200">TETO DO PRÊMIO</span>
+                    <span id="res-total-maximo" class="block text-xl sm:text-2xl font-extrabold">R$ 0,00</span>
+                </div>
             </div>
-            <div class="collapsible-content">
-                <span class="block text-xs text-gray-400">1ª Etapa (Bônus)</span>
-                <span id="res-etapa1-bonus" class="block text-lg font-bold">R$ 0,00</span>
-            </div>
-            <div class="collapsible-content">
-                <span class="block text-xs text-gray-400">2ª Etapa (Valor)</span>
-                <span id="res-etapa2-valor" class="block text-lg font-bold">R$ 0,00</span>
-            </div>
-            <div class="collapsible-content">
-                <span class="block text-xs text-gray-400">2ª Etapa (Bônus)</span>
-                <span id="res-etapa2-bonus" class="block text-lg font-bold">R$ 0,00</span>
-            </div>
-            <div class="col-span-2 sm:col-span-1 md:col-span-1 bg-blue-600 p-2 rounded-lg">
-                <span class="block text-xs text-blue-200">TOTAL ESTIMADO</span>
-                <span id="res-total-estimado" class="block text-2xl font-extrabold">Até R$ 0,00</span>
-            </div>
-             <div class="collapsible-content col-span-2 sm:col-span-1 md:col-span-1 bg-green-600 p-2 rounded-lg">
-                <span class="block text-xs text-green-200">TETO DO PRÊMIO</span>
-                <span id="res-total-maximo" class="block text-2xl font-extrabold">R$ 0,00</span>
+            <div id="toggle-container" class="pl-4 text-center">
+                 <span class="text-xs hidden sm:block">Detalhes</span>
+                <svg id="toggle-icon" xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mx-auto text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M5 15l7-7 7 7" />
+                </svg>
             </div>
         </div>
-        <p class="text-xs text-center text-gray-400 mt-4 px-4">
-            <strong>Aviso:</strong> Os valores são exibidos apenas para fins de simulação. Os valores efetivamente pagos considerarão o texto do decreto publicado no Diário Oficial da Cidade e os dados processados pela SME com base nas informações disponíveis nos sistemas da PMSP.
-        </p>
+
+        <!-- Conteúdo Detalhado (Recolhível) -->
+        <div id="results-details">
+            <div class="max-w-6xl mx-auto grid grid-cols-2 sm:grid-cols-4 gap-4 text-center px-4 pb-4">
+                <div>
+                    <span class="block text-xs text-gray-400">1ª Etapa (Valor)</span>
+                    <span id="res-etapa1-valor" class="block text-lg font-bold">R$ 0,00</span>
+                </div>
+                <div>
+                    <span class="block text-xs text-gray-400">1ª Etapa (Bônus)</span>
+                    <span id="res-etapa1-bonus" class="block text-lg font-bold">R$ 0,00</span>
+                </div>
+                <div>
+                    <span class="block text-xs text-gray-400">2ª Etapa (Valor)</span>
+                    <span id="res-etapa2-valor" class="block text-lg font-bold">R$ 0,00</span>
+                </div>
+                <div>
+                    <span class="block text-xs text-gray-400">2ª Etapa (Bônus)</span>
+                    <span id="res-etapa2-bonus" class="block text-lg font-bold">R$ 0,00</span>
+                </div>
+            </div>
+            <p class="text-xs text-center text-gray-400 mt-2 px-4 pb-4">
+                <strong>Aviso:</strong> Os valores são exibidos apenas para fins de simulação. Os valores efetivamente pagos considerarão o texto do decreto publicado no Diário Oficial da Cidade e os dados processados pela SME com base nas informações disponíveis nos sistemas da PMSP.
+            </p>
+        </div>
     </footer>
+
 
     <!-- Modal -->
     <div id="modal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 items-center justify-center p-4">
@@ -464,6 +479,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
         results: {
             bar: document.getElementById('results-bar'),
+            header: document.getElementById('results-header'), // NOVO
             etapa1_valor: document.getElementById('res-etapa1-valor'),
             etapa1_bonus: document.getElementById('res-etapa1-bonus'),
             etapa2_valor: document.getElementById('res-etapa2-valor'),
@@ -674,6 +690,24 @@ document.addEventListener('DOMContentLoaded', function () {
     });
     // #endregion
 
+    // #region LÓGICA DE EXPANDIR/RECOLHER RESULTADOS
+    function setupResultsToggle() {
+        const resultsBar = elements.results.bar;
+        const resultsHeader = elements.results.header;
+
+        resultsHeader.addEventListener('click', () => {
+            resultsBar.classList.toggle('is-expanded');
+        });
+
+        // Definir estado inicial com base na largura da tela
+        if (window.innerWidth < 768) { // md breakpoint in tailwind
+            resultsBar.classList.remove('is-expanded');
+        } else {
+            resultsBar.classList.add('is-expanded');
+        }
+    }
+    // #endregion
+
     // #region EVENT LISTENERS
     const allInputs = [
         elements.cargo, elements.localTrabalho, elements.jornada, 
@@ -682,21 +716,15 @@ document.addEventListener('DOMContentLoaded', function () {
     ];
 
     allInputs.forEach(input => {
-        if(input) {
+        if(input) { // Checagem para garantir que o elemento existe
             input.addEventListener('input', updateUI);
         }
-    });
-
-    // Listener para o botão de recolher/expandir
-    const toggleBtn = document.getElementById('toggle-results-btn');
-    const resultsBar = document.getElementById('results-bar');
-    toggleBtn.addEventListener('click', () => {
-        resultsBar.classList.toggle('collapsed');
     });
     // #endregion
 
     // Inicialização
     updateUI();
+    setupResultsToggle(); // Adiciona a nova funcionalidade
 });
 </script>
 
