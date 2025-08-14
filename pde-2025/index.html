@@ -45,6 +45,18 @@
         .hidden-by-logic {
             display: none !important;
         }
+        
+        /* Estilos para a barra de resultados recolhível */
+        #results-bar.collapsed #results-grid-container {
+            display: flex;
+            justify-content: center;
+        }
+        #results-bar.collapsed .collapsible-content {
+            display: none;
+        }
+        #results-bar.collapsed #toggle-icon {
+            transform: rotate(180deg);
+        }
     </style>
 </head>
 <body class="bg-[#f0f4f8]">
@@ -56,7 +68,7 @@
     </header>
 
     <!-- Corpo Principal -->
-    <main class="p-4 md:p-8 mb-48"> <!-- CORREÇÃO: trocado pb-60 por mb-48 -->
+    <main class="p-4 md:p-8 mb-48">
         <div class="max-w-4xl mx-auto bg-blue-100 p-6 rounded-lg shadow-lg">
 
             <!-- Seção de Seleção Inicial -->
@@ -230,21 +242,28 @@
     </main>
 
     <!-- Barra de Resultados Flutuante -->
-    <footer id="results-bar" class="fixed bottom-0 left-0 right-0 bg-gray-800 text-white p-4 shadow-2xl transform translate-y-full transition-transform duration-500">
-        <div class="max-w-6xl mx-auto grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-4 text-center">
-            <div>
+    <footer id="results-bar" class="relative fixed bottom-0 left-0 right-0 bg-gray-800 text-white shadow-2xl transform translate-y-full transition-all duration-500 pt-8 pb-4 px-4">
+        <!-- Botão de expandir/recolher -->
+        <div class="absolute -top-4 left-1/2 -translate-x-1/2">
+            <button id="toggle-results-btn" class="bg-gray-700 hover:bg-gray-600 text-white rounded-full w-8 h-8 flex items-center justify-center focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-800 focus:ring-white" aria-label="Expandir ou recolher resultados">
+                <svg id="toggle-icon" class="w-5 h-5 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+            </button>
+        </div>
+        
+        <div id="results-grid-container" class="max-w-6xl mx-auto grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-4 text-center">
+            <div class="collapsible-content">
                 <span class="block text-xs text-gray-400">1ª Etapa (Valor)</span>
                 <span id="res-etapa1-valor" class="block text-lg font-bold">R$ 0,00</span>
             </div>
-            <div>
+            <div class="collapsible-content">
                 <span class="block text-xs text-gray-400">1ª Etapa (Bônus)</span>
                 <span id="res-etapa1-bonus" class="block text-lg font-bold">R$ 0,00</span>
             </div>
-            <div>
+            <div class="collapsible-content">
                 <span class="block text-xs text-gray-400">2ª Etapa (Valor)</span>
                 <span id="res-etapa2-valor" class="block text-lg font-bold">R$ 0,00</span>
             </div>
-            <div>
+            <div class="collapsible-content">
                 <span class="block text-xs text-gray-400">2ª Etapa (Bônus)</span>
                 <span id="res-etapa2-bonus" class="block text-lg font-bold">R$ 0,00</span>
             </div>
@@ -252,7 +271,7 @@
                 <span class="block text-xs text-blue-200">TOTAL ESTIMADO</span>
                 <span id="res-total-estimado" class="block text-2xl font-extrabold">Até R$ 0,00</span>
             </div>
-             <div class="col-span-2 sm:col-span-1 md:col-span-1 bg-green-600 p-2 rounded-lg">
+             <div class="collapsible-content col-span-2 sm:col-span-1 md:col-span-1 bg-green-600 p-2 rounded-lg">
                 <span class="block text-xs text-green-200">TETO DO PRÊMIO</span>
                 <span id="res-total-maximo" class="block text-2xl font-extrabold">R$ 0,00</span>
             </div>
@@ -504,9 +523,6 @@ document.addEventListener('DOMContentLoaded', function () {
             case 'emef_emefm':
                 const percFreq = parseFloat(elements.inputsColetivos.freqEstudantesEmef.value);
                 const percEvol = parseFloat(elements.inputsColetivos.evolucaoProvaSPEmef.value);
-                // Frequencia vale 10% do total da etapa (300 de 3000), e evolucao 50% (1500 de 3000).
-                // O peso coletivo é 60%, então o valor base é 1800.
-                // A proporção dentro do coletivo é 300/1800 para freq e 1500/1800 para evol.
                 const valorFreq = (300 / 1800) * valorBaseColetivo1 * percFreq;
                 const valorEvol = (1500 / 1800) * valorBaseColetivo1 * percEvol;
                 valorColetivo1 = valorFreq + valorEvol;
@@ -535,7 +551,6 @@ document.addEventListener('DOMContentLoaded', function () {
         } else if (['cei', 'emei_cemei', 'cieja'].includes(state.local)) {
             bonusColetivo2 = CONFIG.bonusColetivoMax.outros;
         }
-        // Para DRE/SME/etc, o bônus segue regras específicas, aqui simulamos o máximo possível para um "outro"
         else {
              bonusColetivo2 = CONFIG.bonusColetivoMax.outros;
         }
@@ -667,9 +682,16 @@ document.addEventListener('DOMContentLoaded', function () {
     ];
 
     allInputs.forEach(input => {
-        if(input) { // Checagem para garantir que o elemento existe
+        if(input) {
             input.addEventListener('input', updateUI);
         }
+    });
+
+    // Listener para o botão de recolher/expandir
+    const toggleBtn = document.getElementById('toggle-results-btn');
+    const resultsBar = document.getElementById('results-bar');
+    toggleBtn.addEventListener('click', () => {
+        resultsBar.classList.toggle('collapsed');
     });
     // #endregion
 
