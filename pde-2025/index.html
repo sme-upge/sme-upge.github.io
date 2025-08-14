@@ -699,12 +699,8 @@ document.addEventListener('DOMContentLoaded', function () {
             resultsBar.classList.toggle('is-expanded');
         });
 
-        // Definir estado inicial com base na largura da tela
-        if (window.innerWidth < 768) { // md breakpoint in tailwind
-            resultsBar.classList.remove('is-expanded');
-        } else {
-            resultsBar.classList.add('is-expanded');
-        }
+        // Definir estado inicial como expandido por padrão
+        resultsBar.classList.add('is-expanded');
     }
     // #endregion
 
