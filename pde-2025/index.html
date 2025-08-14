@@ -11,612 +11,672 @@
     <style>
         body {
             font-family: 'Inter', sans-serif;
-            background-color: #003562;
+            background-color: #f0f4f8;
         }
-        .tooltip {
-            position: relative;
-            display: inline-block;
+        /* Estilo para o ícone de interrogação */
+        .help-icon {
             cursor: pointer;
-        }
-        .tooltip .tooltiptext {
-            visibility: hidden;
-            width: 320px;
-            background-color: #555;
-            color: #fff;
-            text-align: left;
-            border-radius: 6px;
-            padding: 10px;
-            position: absolute;
-            z-index: 1;
-            bottom: 125%;
-            left: 50%;
-            margin-left: -160px;
-            opacity: 0;
-            transition: opacity 0.3s;
-            font-size: 0.8rem;
-            line-height: 1.4;
-        }
-        .tooltip:hover .tooltiptext {
-            visibility: visible;
-            opacity: 1;
-        }
-        .tooltip .tooltiptext table {
-            width: 100%;
-        }
-        .tooltip .tooltiptext th, .tooltip .tooltiptext td {
-            border: 1px solid #ddd;
-            padding: 4px;
-        }
-        .tooltip .tooltiptext th {
-            background-color: #666;
-        }
-        /* Custom radio button styles */
-        .custom-radio-container {
-            display: flex;
-            gap: 1rem;
-        }
-        .custom-radio-label {
-            display: flex;
+            color: #0056b3;
+            font-weight: bold;
+            border: 1px solid #0056b3;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            display: inline-flex;
             align-items: center;
-            cursor: pointer;
-            padding: 0.5rem 1rem;
-            border: 1px solid #ccc;
-            border-radius: 0.375rem;
-            transition: background-color 0.2s, border-color 0.2s;
+            justify-content: center;
+            margin-left: 8px;
+            transition: all 0.2s ease-in-out;
         }
-        .custom-radio-label input {
-            display: none;
-        }
-        .custom-radio-label:has(input:checked) {
-            background-color: #3b82f6;
+        .help-icon:hover {
+            background-color: #0056b3;
             color: white;
-            border-color: #3b82f6;
+        }
+        /* Esconder os spinners de inputs do tipo number */
+        input[type=number]::-webkit-inner-spin-button,
+        input[type=number]::-webkit-outer-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+        input[type=number] {
+            -moz-appearance: textfield;
+        }
+        /* Classes para controlar visibilidade */
+        .hidden-by-logic {
+            display: none !important;
         }
     </style>
 </head>
-<body class="text-gray-800">
+<body class="bg-[#f0f4f8]">
 
-    <header class="bg-[#003562] text-white p-4 shadow-md">
-        <div class="container mx-auto flex justify-between items-center">
-            <h1 class="text-2xl md:text-3xl font-bold">Simulação do PDE 2025</h1>
-            <img src="https://sme-upge.github.io/pde-2025/logo-sme.png" alt="Logo da Secretaria Municipal de Educação" class="w-40 md:w-52" onerror="this.onerror=null; this.src='https://placehold.co/200x50/003562/FFFFFF?text=Logo+SME';">
-        </div>
+    <!-- Cabeçalho -->
+    <header class="bg-[#003562] text-white p-4 shadow-md flex justify-between items-center">
+        <h1 class="text-xl md:text-2xl font-bold">Simulação do PDE 2025</h1>
+        <img src="https://sme-upge.github.io/pde-2025/logo-sme.png" alt="Logo da Secretaria Municipal de Educação" style="width: 200px; height: auto;">
     </header>
 
-    <main class="container mx-auto p-4">
-        <div class="bg-blue-100 p-6 rounded-lg shadow-lg">
+    <!-- Corpo Principal -->
+    <main class="p-4 md:p-8 mb-48"> <!-- CORREÇÃO: trocado pb-60 por mb-48 -->
+        <div class="max-w-4xl mx-auto bg-blue-100 p-6 rounded-lg shadow-lg">
 
-            <!-- Seções de Seleção Inicial -->
+            <!-- Seção de Seleção Inicial -->
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
                 <div>
-                    <label for="cargo" class="block text-lg font-semibold mb-2">Qual o seu cargo?</label>
-                    <select id="cargo" class="w-full p-3 rounded-md border border-gray-300 focus:ring-2 focus:ring-blue-500">
-                        <option value="1">Professor(a)</option>
-                        <option value="2">Diretor(a) de Escola</option>
-                        <option value="3">Assistente de Diretor(a) de Escola</option>
-                        <option value="4">Coordenador(a) Pedagógico(a)</option>
-                        <option value="5">Supervisor(a) Escolar</option>
-                        <option value="6">Outros</option>
+                    <label for="cargo" class="block text-sm font-medium text-gray-700 mb-1">Qual o seu cargo?</label>
+                    <select id="cargo" class="w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
+                        <option value="professor">Professor(a)</option>
+                        <option value="diretor">Diretor(a) de Escola</option>
+                        <option value="assistente_diretor">Assistente de Diretor(a) de Escola</option>
+                        <option value="coordenador">Coordenador(a) Pedagógico(a)</option>
+                        <option value="supervisor">Supervisor(a) Escolar</option>
+                        <option value="outros_cargos">Outros</option>
                     </select>
                 </div>
                 <div>
-                    <label for="localTrabalho" class="block text-lg font-semibold mb-2">Onde você trabalha?</label>
-                    <select id="localTrabalho" class="w-full p-3 rounded-md border border-gray-300 focus:ring-2 focus:ring-blue-500">
-                        <option value="1">EMEF/EMEFM</option>
-                        <option value="2">EMEI/CEMEI</option>
-                        <option value="3">CEI</option>
-                        <option value="4">CIEJA</option>
-                        <option value="5">EMEBS/CMCT/Gestão do CEU</option>
-                        <option value="6">Diretoria Regional de Educação</option>
-                        <option value="7">Secretaria Municipal de Educação</option>
+                    <label for="localTrabalho" class="block text-sm font-medium text-gray-700 mb-1">Onde você trabalha?</label>
+                    <select id="localTrabalho" class="w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
+                        <option value="emef_emefm">EMEF/EMEFM</option>
+                        <option value="emei_cemei">EMEI/CEMEI</option>
+                        <option value="cei">CEI</option>
+                        <option value="cieja">CIEJA</option>
+                        <option value="eme_etc">EMEBS/CMCT/Gestão do CEU</option>
+                        <option value="dre">Diretoria Regional de Educação</option>
+                        <option value="sme">Secretaria Municipal de Educação</option>
                     </select>
                 </div>
                 <div>
-                    <label for="jornada" class="block text-lg font-semibold mb-2">Qual é a sua jornada de trabalho?</label>
-                    <select id="jornada" class="w-full p-3 rounded-md border border-gray-300 focus:ring-2 focus:ring-blue-500">
-                        <option value="3">JEIF/JB 30/JB 40/JE 40</option>
-                        <option value="2">JBD</option>
-                        <option value="1">JB</option>
+                    <label for="jornada" class="block text-sm font-medium text-gray-700 mb-1">Qual é a sua jornada?</label>
+                    <select id="jornada" class="w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
+                        <option value="jeif">JEIF/JB 30/JB 40/JE 40</option>
+                        <option value="jbd">JBD</option>
+                        <option value="jb">JB</option>
                     </select>
                 </div>
             </div>
 
-            <!-- Critérios de Desempenho -->
-            <div id="criterios-container" class="space-y-8">
-                <!-- Desempenho Individual -->
-                <div class="bg-white p-6 rounded-lg shadow">
-                     <h3 class="text-xl font-semibold mb-4 tooltip">
-                        Desempenho Individual (1ª e 2ª Etapa)
-                        <span class="tooltiptext">
-                            <table>
-                                <thead><tr><th>Faltas</th><th>%</th><th>Valor (Demais)</th><th>Valor (CEI)</th></tr></thead>
-                                <tbody>
-                                    <tr><td>0</td><td>100% + Bônus</td><td>R$ 1.200 + R$ 900</td><td>R$ 2.400 + R$ 900</td></tr>
-                                    <tr><td>1</td><td>100%</td><td>R$ 1.200</td><td>R$ 2.400</td></tr>
-                                    <tr><td>2</td><td>95%</td><td>R$ 1.140</td><td>R$ 2.280</td></tr>
-                                    <tr><td>3</td><td>90%</td><td>R$ 1.080</td><td>R$ 2.160</td></tr>
-                                    <tr><td>4</td><td>85%</td><td>R$ 1.020</td><td>R$ 2.040</td></tr>
-                                    <tr><td>5</td><td>80%</td><td>R$ 960</td><td>R$ 1.920</td></tr>
-                                    <tr><td>6</td><td>75%</td><td>R$ 900</td><td>R$ 1.800</td></tr>
-                                    <tr><td>7</td><td>70%</td><td>R$ 840</td><td>R$ 1.680</td></tr>
-                                    <tr><td>8</td><td>65%</td><td>R$ 780</td><td>R$ 1.560</td></tr>
-                                    <tr><td>9</td><td>60%</td><td>R$ 720</td><td>R$ 1.440</td></tr>
-                                    <tr><td>10</td><td>55%</td><td>R$ 660</td><td>R$ 1.320</td></tr>
-                                    <tr><td>>10</td><td>0%</td><td>R$ 0</td><td>R$ 0</td></tr>
-                                </tbody>
-                            </table>
-                            *Valores por semestre.
-                        </span>
-                    </h3>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <!-- Critérios -->
+            <div class="space-y-6">
+                <!-- ETAPA 1 -->
+                <div class="bg-white p-4 rounded-lg shadow">
+                    <h2 class="text-lg font-bold text-gray-800 mb-4">1ª Etapa</h2>
+                    
+                    <!-- Desempenho Individual -->
+                    <h3 class="font-semibold text-gray-700 mb-2">Desempenho Individual</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                         <div>
-                            <label for="faltas1" class="block font-medium mb-1">Número de faltas no 1º semestre</label>
-                            <input type="number" id="faltas1" class="w-full p-2 rounded-md border border-gray-300" value="0" min="0">
+                            <label for="faltas1" class="flex items-center text-sm font-medium text-gray-700">
+                                Número de faltas no 1º semestre
+                                <span class="help-icon" data-modal-id="assiduidade">?</span>
+                            </label>
+                            <input type="number" id="faltas1" value="0" min="0" class="mt-1 w-full p-2 border border-gray-300 rounded-md">
+                        </div>
+                        <div class="flex items-end">
+                            <label class="flex items-center">
+                                <input type="checkbox" id="bonusFaltas1" class="h-4 w-4 text-blue-600 border-gray-300 rounded" disabled checked>
+                                <span class="ml-2 text-sm text-gray-600">Bônus: Zero faltas no 1º semestre</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Desempenho Coletivo -->
+                    <h3 class="font-semibold text-gray-700 mb-2">Desempenho Coletivo</h3>
+                    
+                    <!-- EMEF/EMEFM -->
+                    <div id="coletivo-emef_emefm" class="space-y-4">
+                        <div>
+                            <label for="freqEstudantesEmef" class="flex items-center text-sm font-medium text-gray-700">
+                                Frequência dos estudantes
+                                <span class="help-icon" data-modal-id="freqEstudantesEmef">?</span>
+                            </label>
+                            <select id="freqEstudantesEmef" class="mt-1 w-full p-2 border border-gray-300 rounded-md">
+                                <option value="1.0">90% ou maior</option>
+                                <option value="0.75">85% a 89,99%</option>
+                                <option value="0.5">80% a 84,99%</option>
+                                <option value="0.25">75% a 79,99%</option>
+                                <option value="0.0">Abaixo de 75%</option>
+                            </select>
                         </div>
                         <div>
-                            <label for="faltas2" class="block font-medium mb-1">Número de faltas no 2º semestre</label>
-                            <input type="number" id="faltas2" class="w-full p-2 rounded-md border border-gray-300" value="0" min="0">
+                            <label for="evolucaoProvaSPEmef" class="flex items-center text-sm font-medium text-gray-700">
+                                Evolução da nota na Prova São Paulo (2023 para 2024)
+                                <span class="help-icon" data-modal-id="evolucaoProvaSPEmef">?</span>
+                            </label>
+                            <select id="evolucaoProvaSPEmef" class="mt-1 w-full p-2 border border-gray-300 rounded-md">
+                                <option value="1.0">Sim (houve aumento da média ponderada)</option>
+                                <option value="0.0">Não (não houve aumento da média ponderada)</option>
+                            </select>
                         </div>
+                    </div>
+                    
+                    <!-- EMEI/CEMEI -->
+                    <div id="coletivo-emei_cemei" class="hidden-by-logic">
+                         <label for="freqEstudantesEmei" class="flex items-center text-sm font-medium text-gray-700">
+                            Frequência dos estudantes
+                            <span class="help-icon" data-modal-id="freqEstudantesEmei">?</span>
+                        </label>
+                        <select id="freqEstudantesEmei" class="mt-1 w-full p-2 border border-gray-300 rounded-md">
+                            <option value="1.0">90% ou maior</option>
+                            <option value="0.8">80% a 89,99%</option>
+                            <option value="0.65">70% a 79,99%</option>
+                            <option value="0.5">60% a 69,99%</option>
+                            <option value="0.0">Abaixo de 60%</option>
+                        </select>
+                    </div>
+
+                    <!-- CEI -->
+                    <div id="coletivo-cei" class="hidden-by-logic">
+                        <label for="taxaOcupacaoCei" class="flex items-center text-sm font-medium text-gray-700">
+                            Taxa de ocupação
+                            <span class="help-icon" data-modal-id="taxaOcupacaoCei">?</span>
+                        </label>
+                        <select id="taxaOcupacaoCei" class="mt-1 w-full p-2 border border-gray-300 rounded-md">
+                            <option value="1.0">90% ou maior</option>
+                            <option value="0.5">80% a 89,99%</option>
+                            <option value="0.3">70% a 79,99%</option>
+                            <option value="0.0">Abaixo de 70%</option>
+                        </select>
+                    </div>
+
+                    <!-- CIEJA -->
+                    <div id="coletivo-cieja" class="hidden-by-logic">
+                         <label for="taxaOcupacaoCieja" class="flex items-center text-sm font-medium text-gray-700">
+                            Taxa de ocupação
+                            <span class="help-icon" data-modal-id="taxaOcupacaoCieja">?</span>
+                        </label>
+                        <select id="taxaOcupacaoCieja" class="mt-1 w-full p-2 border border-gray-300 rounded-md">
+                            <option value="1.0">80% ou maior</option>
+                            <option value="0.5">70% a 79,99%</option>
+                            <option value="0.3">60% a 69,99%</option>
+                            <option value="0.0">Abaixo de 60%</option>
+                        </select>
+                    </div>
+
+                    <!-- DRE/SME/ETC -->
+                    <div id="coletivo-media" class="hidden-by-logic bg-blue-50 p-3 rounded-md border border-blue-200">
+                        <p class="text-sm text-blue-800"></p>
                     </div>
                 </div>
 
-                <!-- Desempenho Coletivo -->
-                <div id="desempenho-coletivo" class="bg-white p-6 rounded-lg shadow">
-                    <!-- Conteúdo dinâmico aqui -->
-                </div>
-
-                <!-- Bônus -->
-                <div id="bonus-container" class="bg-white p-6 rounded-lg shadow">
-                     <!-- Conteúdo dinâmico aqui -->
-                </div>
-
-            </div>
-
-            <!-- Resultados -->
-            <div id="resultados" class="mt-10 bg-white p-8 rounded-lg shadow-inner">
-                <h2 class="text-2xl font-bold text-center mb-6 text-gray-700">Resultado da Simulação</h2>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-4 text-lg">
-                    <p>Valor estimado da 1ª etapa:</p><p class="font-semibold text-right" id="resultadoEtapa1">R$ 0,00</p>
-                    <p>Bônus estimado da 1ª etapa:</p><p class="font-semibold text-right" id="resultadoBonus1">R$ 0,00</p>
-                    <p>Valor estimado da 2ª etapa:</p><p class="font-semibold text-right" id="resultadoEtapa2">R$ 0,00</p>
-                    <p>Bônus estimado da 2ª etapa:</p><p class="font-semibold text-right" id="resultadoBonus2">R$ 0,00</p>
-                </div>
-                <hr class="my-6">
-                <div class="text-center">
-                    <p class="text-xl font-medium">Soma dos valores estimados do PDE 2025:</p>
-                    <p class="text-4xl font-extrabold text-blue-600 my-2" id="resultadoTotal">R$ 0,00</p>
-                    <p class="text-md text-gray-600" id="resultadoMaximo">Valor máximo possível: R$ 0,00</p>
-                </div>
-                <div class="mt-8 bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-4 rounded-md">
-                    <p class="font-bold">Aviso Importante</p>
-                    <p class="text-sm">Os valores exibidos são apenas para fins de simulação. Os valores efetivamente pagos considerarão o texto do decreto publicado no Diário Oficial da Cidade e os dados processados pela Secretaria Municipal de Educação (SME) com base nas informações disponíveis nos sistemas da Prefeitura Municipal de São Paulo.</p>
+                <!-- ETAPA 2 -->
+                <div class="bg-white p-4 rounded-lg shadow">
+                    <h2 class="text-lg font-bold text-gray-800 mb-4">2ª Etapa (Estimativa com valores máximos)</h2>
+                    
+                    <!-- Desempenho Individual -->
+                    <h3 class="font-semibold text-gray-700 mb-2">Desempenho Individual</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                        <div>
+                            <label for="faltas2" class="flex items-center text-sm font-medium text-gray-700">
+                                Número de faltas no 2º semestre
+                                <span class="help-icon" data-modal-id="assiduidade">?</span>
+                            </label>
+                            <input type="number" id="faltas2" value="0" min="0" class="mt-1 w-full p-2 border border-gray-300 rounded-md">
+                        </div>
+                        <div class="flex items-end">
+                            <label class="flex items-center">
+                                <input type="checkbox" id="bonusFaltas2" class="h-4 w-4 text-blue-600 border-gray-300 rounded" disabled checked>
+                                <span class="ml-2 text-sm text-gray-600">Bônus: Zero faltas no 2º semestre</span>
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <!-- Desempenho e Bônus Coletivo (Visualização) -->
+                    <h3 class="font-semibold text-gray-700 mb-2">Desempenho e Bônus Coletivo (Critérios para valor máximo)</h3>
+                    <div id="coletivo-etapa2-view" class="bg-gray-100 p-3 rounded-md border border-gray-200 text-sm text-gray-600 space-y-2">
+                        <!-- Conteúdo dinâmico aqui -->
+                    </div>
                 </div>
             </div>
         </div>
     </main>
 
-    <script>
-        // Elementos do DOM
-        const cargoEl = document.getElementById('cargo');
-        const localTrabalhoEl = document.getElementById('localTrabalho');
-        const jornadaEl = document.getElementById('jornada');
-        const faltas1El = document.getElementById('faltas1');
-        const faltas2El = document.getElementById('faltas2');
-        const desempenhoColetivoContainer = document.getElementById('desempenho-coletivo');
-        const bonusContainer = document.getElementById('bonus-container');
+    <!-- Barra de Resultados Flutuante -->
+    <footer id="results-bar" class="fixed bottom-0 left-0 right-0 bg-gray-800 text-white p-4 shadow-2xl transform translate-y-full transition-transform duration-500">
+        <div class="max-w-6xl mx-auto grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-4 text-center">
+            <div>
+                <span class="block text-xs text-gray-400">1ª Etapa (Valor)</span>
+                <span id="res-etapa1-valor" class="block text-lg font-bold">R$ 0,00</span>
+            </div>
+            <div>
+                <span class="block text-xs text-gray-400">1ª Etapa (Bônus)</span>
+                <span id="res-etapa1-bonus" class="block text-lg font-bold">R$ 0,00</span>
+            </div>
+            <div>
+                <span class="block text-xs text-gray-400">2ª Etapa (Valor)</span>
+                <span id="res-etapa2-valor" class="block text-lg font-bold">R$ 0,00</span>
+            </div>
+            <div>
+                <span class="block text-xs text-gray-400">2ª Etapa (Bônus)</span>
+                <span id="res-etapa2-bonus" class="block text-lg font-bold">R$ 0,00</span>
+            </div>
+            <div class="col-span-2 sm:col-span-1 md:col-span-1 bg-blue-600 p-2 rounded-lg">
+                <span class="block text-xs text-blue-200">TOTAL ESTIMADO</span>
+                <span id="res-total-estimado" class="block text-2xl font-extrabold">Até R$ 0,00</span>
+            </div>
+             <div class="col-span-2 sm:col-span-1 md:col-span-1 bg-green-600 p-2 rounded-lg">
+                <span class="block text-xs text-green-200">TETO DO PRÊMIO</span>
+                <span id="res-total-maximo" class="block text-2xl font-extrabold">R$ 0,00</span>
+            </div>
+        </div>
+        <p class="text-xs text-center text-gray-400 mt-4 px-4">
+            <strong>Aviso:</strong> Os valores são exibidos apenas para fins de simulação. Os valores efetivamente pagos considerarão o texto do decreto publicado no Diário Oficial da Cidade e os dados processados pela SME com base nas informações disponíveis nos sistemas da PMSP.
+        </p>
+    </footer>
 
-        // Elementos de resultado
-        const resultadoEtapa1El = document.getElementById('resultadoEtapa1');
-        const resultadoBonus1El = document.getElementById('resultadoBonus1');
-        const resultadoEtapa2El = document.getElementById('resultadoEtapa2');
-        const resultadoBonus2El = document.getElementById('resultadoBonus2');
-        const resultadoTotalEl = document.getElementById('resultadoTotal');
-        const resultadoMaximoEl = document.getElementById('resultadoMaximo');
-
-        // Constantes de valores máximos
-        const VALOR_MAX_ETAPA = 3000;
-        const VALOR_MAX_BONUS1 = 900;
-        const VALOR_MAX_BONUS2_GERAL = 1800;
-        const VALOR_MAX_BONUS2_DIRETORIA = 5800;
-
-        // Adiciona listeners
-        [cargoEl, localTrabalhoEl, jornadaEl, faltas1El, faltas2El].forEach(el => {
-            el.addEventListener('change', () => {
-                updateUI();
-                calculate();
-            });
-        });
-
-        function updateUI() {
-            const local = localTrabalhoEl.value;
-            const cargo = cargoEl.value;
-
-            // --- Atualiza Desempenho Coletivo ---
-            let htmlColetivo = `<h3 class="text-xl font-semibold mb-4">Desempenho Coletivo</h3>`;
-            switch (local) {
-                case '1': // EMEF/EMEFM
-                    htmlColetivo += `
-                        <div class="space-y-4">
-                            <div>
-                                <h4 class="font-semibold tooltip">
-                                    1ª Etapa
-                                    <span class="tooltiptext">
-                                        <strong>Frequência:</strong><br>
-                                        >= 90%: 100% (R$ 300)<br>
-                                        85-89.99%: 75% (R$ 225)<br>
-                                        80-84.99%: 50% (R$ 150)<br>
-                                        75-79.99%: 25% (R$ 75)<br>
-                                        < 75%: 0% (R$ 0)<br>
-                                        <strong>Evolução Prova SP:</strong><br>
-                                        Aumento: 100% (R$ 1.500)<br>
-                                        Igual/Menor: 0% (R$ 0)
-                                    </span>
-                                </h4>
-                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-2">
-                                    <div>
-                                        <label for="coletivo_freq_1" class="block font-medium mb-1">Frequência dos estudantes (%)</label>
-                                        <input type="number" id="coletivo_freq_1" class="w-full p-2 rounded-md border" value="100" min="0" max="100">
-                                    </div>
-                                    <div>
-                                        <label class="block font-medium mb-1">Evolução na Prova São Paulo (2024 para 2025)</label>
-                                        <select id="coletivo_evolucao_1" class="w-full p-2 rounded-md border"><option value="1">Sim</option><option value="0">Não</option></select>
-                                    </div>
-                                </div>
-                            </div>
-                             <div>
-                                <h4 class="font-semibold tooltip">
-                                    2ª Etapa
-                                     <span class="tooltiptext">
-                                        <strong>Frequência:</strong><br>
-                                        (Mesmas faixas da 1ª etapa)<br>
-                                        <strong>Participação Prova SP/SARESP:</strong><br>
-                                        >= 80% em ambas: 100% (R$ 1.500)<br>
-                                        < 80% em uma delas: 0% (R$ 0)
-                                    </span>
-                                </h4>
-                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-2">
-                                    <div>
-                                        <label for="coletivo_freq_2" class="block font-medium mb-1">Frequência dos estudantes (%)</label>
-                                        <input type="number" id="coletivo_freq_2" class="w-full p-2 rounded-md border" value="100" min="0" max="100">
-                                    </div>
-                                    <div>
-                                        <label class="block font-medium mb-1">Participação >= 80% na Prova SP e SARESP 2025</label>
-                                        <select id="coletivo_participacao_2" class="w-full p-2 rounded-md border"><option value="1">Sim</option><option value="0">Não</option></select>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>`;
-                    break;
-                case '2': // EMEI/CEMEI
-                     htmlColetivo += `
-                        <div class="space-y-4">
-                            <div class="tooltip">
-                                <label for="coletivo_freq_1" class="block font-medium mb-1">Frequência dos estudantes (%) - 1º Semestre</label>
-                                <span class="tooltiptext">
-                                    >= 90%: 100% (R$ 1.800)<br>
-                                    80-89.99%: 80% (R$ 1.440)<br>
-                                    70-79.99%: 65% (R$ 1.170)<br>
-                                    60-69.99%: 50% (R$ 900)<br>
-                                    < 60%: 0% (R$ 0)
-                                </span>
-                            </div>
-                            <input type="number" id="coletivo_freq_1" class="w-full p-2 rounded-md border" value="100" min="0" max="100">
-                             <div class="tooltip">
-                                <label for="coletivo_freq_2" class="block font-medium mb-1">Frequência dos estudantes (%) - 2º Semestre</label>
-                                 <span class="tooltiptext">
-                                    (Mesmas faixas do 1º Semestre)
-                                </span>
-                            </div>
-                            <input type="number" id="coletivo_freq_2" class="w-full p-2 rounded-md border" value="100" min="0" max="100">
-                        </div>`;
-                    break;
-                case '3': // CEI
-                    htmlColetivo += `
-                        <div class="space-y-4">
-                            <div class="tooltip">
-                                <label for="coletivo_ocupacao_1" class="block font-medium mb-1">Taxa de ocupação (%) - 1ª Etapa</label>
-                                <span class="tooltiptext">
-                                    >= 90%: 100% (R$ 600)<br>
-                                    80-89.99%: 50% (R$ 300)<br>
-                                    70-79.99%: 30% (R$ 180)<br>
-                                    < 70%: 0% (R$ 0)
-                                </span>
-                            </div>
-                            <input type="number" id="coletivo_ocupacao_1" class="w-full p-2 rounded-md border" value="100" min="0" max="100">
-                             <div class="tooltip">
-                                <label for="coletivo_ocupacao_2" class="block font-medium mb-1">Taxa de ocupação (%) - 2ª Etapa</label>
-                                <span class="tooltiptext">(Mesmas faixas da 1ª Etapa)</span>
-                            </div>
-                            <input type="number" id="coletivo_ocupacao_2" class="w-full p-2 rounded-md border" value="100" min="0" max="100">
-                        </div>`;
-                    break;
-                case '4': // CIEJA
-                     htmlColetivo += `
-                        <div class="space-y-4">
-                            <div class="tooltip">
-                                <label for="coletivo_ocupacao_1" class="block font-medium mb-1">Taxa de ocupação (%) - 1ª Etapa</label>
-                                <span class="tooltiptext">
-                                    >= 80%: 100% (R$ 1.800)<br>
-                                    70-79.99%: 50% (R$ 900)<br>
-                                    60-69.99%: 30% (R$ 540)<br>
-                                    < 60%: 0% (R$ 0)
-                                </span>
-                            </div>
-                            <input type="number" id="coletivo_ocupacao_1" class="w-full p-2 rounded-md border" value="100" min="0" max="100">
-                             <div class="tooltip">
-                                <label for="coletivo_ocupacao_2" class="block font-medium mb-1">Taxa de ocupação (%) - 2ª Etapa</label>
-                                 <span class="tooltiptext">(Mesmas faixas da 1ª Etapa)</span>
-                            </div>
-                            <input type="number" id="coletivo_ocupacao_2" class="w-full p-2 rounded-md border" value="100" min="0" max="100">
-                        </div>`;
-                    break;
-                case '7': // SME
-                     htmlColetivo += `<p class="text-gray-600">O valor do desempenho coletivo será a média do desempenho coletivo de todas as DREs. Para a simulação, consideramos o valor máximo.</p>`;
-                    break;
-                default: // DRE, EMEBS, etc.
-                    htmlColetivo += `<p class="text-gray-600">O valor do desempenho coletivo será a média do desempenho coletivo das unidades da respectiva DRE (ou todas as DREs para SME). Para a simulação, consideramos o valor máximo.</p>`;
-                    break;
-            }
-            desempenhoColetivoContainer.innerHTML = htmlColetivo;
-
-            // --- Atualiza Bônus ---
-            let htmlBonus = `<h3 class="text-xl font-semibold mb-4">Bônus de Desempenho</h3>`;
-            const isDiretoria = ['2', '3', '4'].includes(cargo); // Diretor, Assistente, Coordenador
-            
-            // Bônus Individual (Faltas)
-            htmlBonus += `
-                <div class="mb-6">
-                    <h4 class="font-semibold">Bônus Individual (Assiduidade)</h4>
-                    <div class="flex items-center mt-2">
-                        <input type="checkbox" id="bonus_falta_zero_1" disabled class="h-5 w-5 text-blue-600 border-gray-300 rounded focus:ring-blue-500">
-                        <label for="bonus_falta_zero_1" class="ml-2 text-gray-700">Zero falta no 1º semestre (Bônus de R$ 900,00)</label>
-                    </div>
-                     <div class="flex items-center mt-2">
-                        <input type="checkbox" id="bonus_falta_zero_2" disabled class="h-5 w-5 text-blue-600 border-gray-300 rounded focus:ring-blue-500">
-                        <label for="bonus_falta_zero_2" class="ml-2 text-gray-700">Zero falta no 2º semestre (Bônus de R$ 900,00)</label>
-                    </div>
+    <!-- Modal -->
+    <div id="modal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 items-center justify-center p-4">
+        <div class="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-full overflow-y-auto">
+            <div class="p-6">
+                <div class="flex justify-between items-start">
+                    <h3 id="modal-title" class="text-xl font-bold text-gray-900"></h3>
+                    <button id="modal-close-btn" class="text-gray-400 hover:text-gray-600 text-3xl leading-none">&times;</button>
                 </div>
-            `;
+                <div id="modal-body" class="mt-4 text-gray-600"></div>
+            </div>
+        </div>
+    </div>
 
-            // Bônus Coletivo
-            htmlBonus += `<h4 class="font-semibold mb-2">Bônus Coletivo (2ª Etapa)</h4>`;
-            if (local === '1') { // EMEF/EMEFM
-                htmlBonus += `
-                    <div class="space-y-3">
-                        <p class="text-sm text-gray-600">Regras de aumento do IDEP. Regra 1A e 1B não são cumulativas.</p>
-                        <div class="custom-radio-container">
-                             <label class="custom-radio-label">
-                                <input type="radio" name="bonus_idep_regra1" value="1A" checked> Regra 1A: Aumento do IDEP acima da média
-                            </label>
-                            <label class="custom-radio-label">
-                                <input type="radio" name="bonus_idep_regra1" value="1B"> Regra 1B: Aumento do IDEP e entre os 10% maiores
-                            </label>
-                             <label class="custom-radio-label">
-                                <input type="radio" name="bonus_idep_regra1" value="none"> Nenhuma
-                            </label>
-                        </div>
-                        <div class="flex items-center">
-                            <input type="checkbox" id="bonus_idep_regra2" checked class="h-5 w-5 text-blue-600 border-gray-300 rounded">
-                            <label for="bonus_idep_regra2" class="ml-2 text-gray-700">Regra 2: Aumento do IDEP com diminuição de estudantes abaixo do básico</label>
-                        </div>
-                `;
-                if (isDiretoria) {
-                    htmlBonus += `
-                        <div class="flex items-center pt-2">
-                            <input type="checkbox" id="bonus_alfabetizacao" checked class="h-5 w-5 text-blue-600 border-gray-300 rounded">
-                            <label for="bonus_alfabetizacao" class="ml-2 text-gray-700">Aumento da % de estudantes alfabetizados no 2º ano (mín. 51%)</label>
-                        </div>
-                    `;
-                }
-                htmlBonus += `</div>`;
-            } else if (['2', '3', '4'].includes(local)) { // EMEI/CEMEI, CEI, CIEJA
-                htmlBonus += `
-                    <div class="flex items-center">
-                        <input type="checkbox" id="bonus_acima_media" checked class="h-5 w-5 text-blue-600 border-gray-300 rounded">
-                        <label for="bonus_acima_media" class="ml-2 text-gray-700">Desempenho da unidade acima da média das unidades de seu tipo</label>
-                    </div>
-                `;
-            } else { // DRE/SME/ETC
-                htmlBonus += `<p class="text-gray-600">O bônus de desempenho da 2ª etapa seguirá as regras do decreto. Na estimativa, consideramos o valor máximo possível.</p>`;
-            }
-            bonusContainer.innerHTML = htmlBonus;
-            
-            // Adiciona listeners aos novos elementos
-            document.querySelectorAll('#desempenho-coletivo input, #desempenho-coletivo select, #bonus-container input, #bonus-container select').forEach(el => {
-                el.addEventListener('change', calculate);
-            });
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    // #region CONFIGURAÇÃO E CONSTANTES
+    const CONFIG = {
+        valoresBase: {
+            etapa: 3000,
+            bonusAssiduidade: 900,
+        },
+        pesos: {
+            geral: { individual: 0.40, coletivo: 0.60 },
+            cei: { individual: 0.80, coletivo: 0.20 }
+        },
+        jornadaMultiplicador: {
+            jeif: 1.0,
+            jbd: 0.75,
+            jb: 0.5
+        },
+        assiduidade: [
+            { faltas: 0, perc: 1.0, bonus: true },
+            { faltas: 1, perc: 1.0 },
+            { faltas: 2, perc: 0.95 },
+            { faltas: 3, perc: 0.90 },
+            { faltas: 4, perc: 0.85 },
+            { faltas: 5, perc: 0.80 },
+            { faltas: 6, perc: 0.75 },
+            { faltas: 7, perc: 0.70 },
+            { faltas: 8, perc: 0.65 },
+            { faltas: 9, perc: 0.60 },
+            { faltas: 10, perc: 0.55 },
+            { faltas: Infinity, perc: 0.0 }
+        ],
+        bonusColetivoMax: {
+            diretor_emef: 1450 + 1450 + 2000, // Regra 1 + Regra 2 + Alfabetizacao
+            demais_emef: 450 + 450, // Regra 1 + Regra 2
+            outros: 900
+        },
+        coletivoMax: {
+            emef_emefm: { etapa1: 300 + 1500, etapa2: 300 + 1500 },
+            emei_cemei: { etapa1: 1800, etapa2: 1800 },
+            cei: { etapa1: 600, etapa2: 600 },
+            cieja: { etapa1: 1800, etapa2: 1800 },
+        }
+    };
 
-            // Lógica para desmarcar radios de bônus IDEP
-            const radiosRegra1 = document.querySelectorAll('input[name="bonus_idep_regra1"]');
-            radiosRegra1.forEach(radio => {
-                radio.addEventListener('click', function(e) {
-                    if (this.wasChecked) {
-                        this.checked = false;
-                        document.querySelector('input[name="bonus_idep_regra1"][value="none"]').checked = true;
-                    }
-                    this.wasChecked = this.checked;
-                     calculate();
-                });
-            });
+    const MODAL_DATA = {
+        assiduidade: {
+            title: 'Critério de Assiduidade',
+            body: `
+                <p class="mb-4">Garante o maior percentual de assiduidade dos servidores. O valor base é de 40% (R$ 1.200) para a maioria das unidades ou 80% (R$ 2.400) para CEIs, por semestre. Há um bônus de R$ 900 para quem não tiver faltas no semestre.</p>
+                <table class="w-full text-sm text-left text-gray-500">
+                    <thead class="text-xs text-gray-700 uppercase bg-gray-50"><tr><th class="px-6 py-3">Faltas no Semestre</th><th class="px-6 py-3">Percentual Obtido</th></tr></thead>
+                    <tbody>
+                        <tr class="bg-white border-b"><td class="px-6 py-4">0</td><td class="px-6 py-4">100% + Bônus de R$ 900</td></tr>
+                        <tr class="bg-gray-50 border-b"><td class="px-6 py-4">1</td><td class="px-6 py-4">100%</td></tr>
+                        <tr class="bg-white border-b"><td class="px-6 py-4">2</td><td class="px-6 py-4">95%</td></tr>
+                        <tr class="bg-gray-50 border-b"><td class="px-6 py-4">3</td><td class="px-6 py-4">90%</td></tr>
+                        <tr class="bg-white border-b"><td class="px-6 py-4">4</td><td class="px-6 py-4">85%</td></tr>
+                        <tr class="bg-gray-50 border-b"><td class="px-6 py-4">5</td><td class="px-6 py-4">80%</td></tr>
+                        <tr class="bg-white border-b"><td class="px-6 py-4">6</td><td class="px-6 py-4">75%</td></tr>
+                        <tr class="bg-gray-50 border-b"><td class="px-6 py-4">7</td><td class="px-6 py-4">70%</td></tr>
+                        <tr class="bg-white border-b"><td class="px-6 py-4">8</td><td class="px-6 py-4">65%</td></tr>
+                        <tr class="bg-gray-50 border-b"><td class="px-6 py-4">9</td><td class="px-6 py-4">60%</td></tr>
+                        <tr class="bg-white border-b"><td class="px-6 py-4">10</td><td class="px-6 py-4">55%</td></tr>
+                        <tr class="bg-gray-50"><td class="px-6 py-4">Mais de 10</td><td class="px-6 py-4">0%</td></tr>
+                    </tbody>
+                </table>`
+        },
+        freqEstudantesEmef: {
+            title: 'Frequência dos Estudantes (EMEF/EMEFM)',
+            body: `
+                <p class="mb-4">Corresponde a 10% da base de cálculo da etapa (até R$ 300,00).</p>
+                <table class="w-full text-sm text-left text-gray-500">
+                    <thead class="text-xs text-gray-700 uppercase bg-gray-50"><tr><th class="px-6 py-3">Média de Frequência</th><th class="px-6 py-3">Resultado</th><th class="px-6 py-3">Valor</th></tr></thead>
+                    <tbody>
+                        <tr class="bg-white border-b"><td class="px-6 py-4">90% ou maior</td><td class="px-6 py-4">100%</td><td class="px-6 py-4">R$ 300,00</td></tr>
+                        <tr class="bg-gray-50 border-b"><td class="px-6 py-4">85% a 89,99%</td><td class="px-6 py-4">75%</td><td class="px-6 py-4">R$ 225,00</td></tr>
+                        <tr class="bg-white border-b"><td class="px-6 py-4">80% a 84,99%</td><td class="px-6 py-4">50%</td><td class="px-6 py-4">R$ 150,00</td></tr>
+                        <tr class="bg-gray-50 border-b"><td class="px-6 py-4">75% a 79,99%</td><td class="px-6 py-4">25%</td><td class="px-6 py-4">R$ 75,00</td></tr>
+                        <tr class="bg-white"><td class="px-6 py-4">Abaixo de 75%</td><td class="px-6 py-4">0%</td><td class="px-6 py-4">R$ 0,00</td></tr>
+                    </tbody>
+                </table>`
+        },
+        evolucaoProvaSPEmef: {
+            title: 'Evolução na Prova São Paulo (EMEF/EMEFM)',
+            body: `
+                <p class="mb-4">Compara a nota geral ponderada de 2024 com a de 2023. Corresponde a 50% da base de cálculo da etapa (até R$ 1.500,00).</p>
+                <table class="w-full text-sm text-left text-gray-500">
+                    <thead class="text-xs text-gray-700 uppercase bg-gray-50"><tr><th class="px-6 py-3">Apuração</th><th class="px-6 py-3">Resultado</th><th class="px-6 py-3">Valor</th></tr></thead>
+                    <tbody>
+                        <tr class="bg-white border-b"><td class="px-6 py-4">Houve aumento da média ponderada</td><td class="px-6 py-4">100%</td><td class="px-6 py-4">R$ 1.500,00</td></tr>
+                        <tr class="bg-gray-50"><td class="px-6 py-4">Não houve aumento da média ponderada</td><td class="px-6 py-4">0%</td><td class="px-6 py-4">R$ 0,00</td></tr>
+                    </tbody>
+                </table>`
+        },
+        freqEstudantesEmei: {
+            title: 'Frequência dos Estudantes (EMEI/CEMEI)',
+            body: `
+                <p class="mb-4">Corresponde a 60% da base de cálculo da etapa (até R$ 1.800,00).</p>
+                <table class="w-full text-sm text-left text-gray-500">
+                    <thead class="text-xs text-gray-700 uppercase bg-gray-50"><tr><th class="px-6 py-3">Média de Frequência</th><th class="px-6 py-3">Resultado</th><th class="px-6 py-3">Valor</th></tr></thead>
+                    <tbody>
+                        <tr class="bg-white border-b"><td class="px-6 py-4">90% ou maior</td><td class="px-6 py-4">100%</td><td class="px-6 py-4">R$ 1.800,00</td></tr>
+                        <tr class="bg-gray-50 border-b"><td class="px-6 py-4">80% a 89,99%</td><td class="px-6 py-4">80%</td><td class="px-6 py-4">R$ 1.440,00</td></tr>
+                        <tr class="bg-white border-b"><td class="px-6 py-4">70% a 79,99%</td><td class="px-6 py-4">65%</td><td class="px-6 py-4">R$ 1.170,00</td></tr>
+                        <tr class="bg-gray-50 border-b"><td class="px-6 py-4">60% a 69,99%</td><td class="px-6 py-4">50%</td><td class="px-6 py-4">R$ 900,00</td></tr>
+                        <tr class="bg-white"><td class="px-6 py-4">Abaixo de 60%</td><td class="px-6 py-4">0%</td><td class="px-6 py-4">R$ 0,00</td></tr>
+                    </tbody>
+                </table>`
+        },
+        taxaOcupacaoCei: {
+            title: 'Taxa de Ocupação (CEI)',
+            body: `
+                <p class="mb-4">Corresponde a 20% da base de cálculo da etapa (até R$ 600,00).</p>
+                <table class="w-full text-sm text-left text-gray-500">
+                    <thead class="text-xs text-gray-700 uppercase bg-gray-50"><tr><th class="px-6 py-3">Ocupação</th><th class="px-6 py-3">Resultado</th><th class="px-6 py-3">Valor</th></tr></thead>
+                    <tbody>
+                        <tr class="bg-white border-b"><td class="px-6 py-4">90% ou maior</td><td class="px-6 py-4">100%</td><td class="px-6 py-4">R$ 600,00</td></tr>
+                        <tr class="bg-gray-50 border-b"><td class="px-6 py-4">80% a 89,99%</td><td class="px-6 py-4">50%</td><td class="px-6 py-4">R$ 300,00</td></tr>
+                        <tr class="bg-white border-b"><td class="px-6 py-4">70% a 79,99%</td><td class="px-6 py-4">30%</td><td class="px-6 py-4">R$ 180,00</td></tr>
+                        <tr class="bg-white"><td class="px-6 py-4">Abaixo de 70%</td><td class="px-6 py-4">0%</td><td class="px-6 py-4">R$ 0,00</td></tr>
+                    </tbody>
+                </table>`
+        },
+        taxaOcupacaoCieja: {
+            title: 'Taxa de Ocupação (CIEJA)',
+            body: `
+                <p class="mb-4">Corresponde a 60% da base de cálculo da etapa (até R$ 1.800,00).</p>
+                <table class="w-full text-sm text-left text-gray-500">
+                    <thead class="text-xs text-gray-700 uppercase bg-gray-50"><tr><th class="px-6 py-3">Ocupação</th><th class="px-6 py-3">Resultado</th><th class="px-6 py-3">Valor</th></tr></thead>
+                    <tbody>
+                        <tr class="bg-white border-b"><td class="px-6 py-4">80% ou maior</td><td class="px-6 py-4">100%</td><td class="px-6 py-4">R$ 1.800,00</td></tr>
+                        <tr class="bg-gray-50 border-b"><td class="px-6 py-4">70% a 79,99%</td><td class="px-6 py-4">50%</td><td class="px-6 py-4">R$ 900,00</td></tr>
+                        <tr class="bg-white border-b"><td class="px-6 py-4">60% a 69,99%</td><td class="px-6 py-4">30%</td><td class="px-6 py-4">R$ 540,00</td></tr>
+                        <tr class="bg-white"><td class="px-6 py-4">Abaixo de 60%</td><td class="px-6 py-4">0%</td><td class="px-6 py-4">R$ 0,00</td></tr>
+                    </tbody>
+                </table>`
+        }
+    };
+    // #endregion
 
+    // #region ELEMENTOS DO DOM
+    const elements = {
+        cargo: document.getElementById('cargo'),
+        localTrabalho: document.getElementById('localTrabalho'),
+        jornada: document.getElementById('jornada'),
+        faltas1: document.getElementById('faltas1'),
+        faltas2: document.getElementById('faltas2'),
+        bonusFaltas1: document.getElementById('bonusFaltas1'),
+        bonusFaltas2: document.getElementById('bonusFaltas2'),
+        
+        coletivo: {
+            emef_emefm: document.getElementById('coletivo-emef_emefm'),
+            emei_cemei: document.getElementById('coletivo-emei_cemei'),
+            cei: document.getElementById('coletivo-cei'),
+            cieja: document.getElementById('coletivo-cieja'),
+            media: document.getElementById('coletivo-media'),
+        },
 
+        inputsColetivos: {
+            freqEstudantesEmef: document.getElementById('freqEstudantesEmef'),
+            evolucaoProvaSPEmef: document.getElementById('evolucaoProvaSPEmef'),
+            freqEstudantesEmei: document.getElementById('freqEstudantesEmei'),
+            taxaOcupacaoCei: document.getElementById('taxaOcupacaoCei'),
+            taxaOcupacaoCieja: document.getElementById('taxaOcupacaoCieja'),
+        },
+
+        coletivoEtapa2View: document.getElementById('coletivo-etapa2-view'),
+
+        results: {
+            bar: document.getElementById('results-bar'),
+            etapa1_valor: document.getElementById('res-etapa1-valor'),
+            etapa1_bonus: document.getElementById('res-etapa1-bonus'),
+            etapa2_valor: document.getElementById('res-etapa2-valor'),
+            etapa2_bonus: document.getElementById('res-etapa2-bonus'),
+            total_estimado: document.getElementById('res-total-estimado'),
+            total_maximo: document.getElementById('res-total-maximo'),
+        },
+        
+        modal: {
+            container: document.getElementById('modal'),
+            title: document.getElementById('modal-title'),
+            body: document.getElementById('modal-body'),
+            closeBtn: document.getElementById('modal-close-btn')
+        }
+    };
+    // #endregion
+
+    // #region FUNÇÕES DE CÁLCULO
+    function formatCurrency(value) {
+        return value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+    }
+
+    function getAssiduidade(faltas) {
+        const faixa = CONFIG.assiduidade.find(f => faltas <= f.faltas);
+        return faixa || { perc: 0, bonus: false };
+    }
+
+    function calculate() {
+        // 1. Obter estado atual dos inputs
+        const state = {
+            cargo: elements.cargo.value,
+            local: elements.localTrabalho.value,
+            jornada: elements.jornada.value,
+            faltas1: parseInt(elements.faltas1.value) || 0,
+            faltas2: parseInt(elements.faltas2.value) || 0,
+        };
+
+        const isGestorEmef = ['diretor', 'assistente_diretor', 'coordenador'].includes(state.cargo) && state.local === 'emef_emefm';
+        const pesos = (state.local === 'cei') ? CONFIG.pesos.cei : CONFIG.pesos.geral;
+        const multJornada = CONFIG.jornadaMultiplicador[state.jornada];
+
+        // 2. Calcular Desempenho Individual (por etapa)
+        const assiduidade1 = getAssiduidade(state.faltas1);
+        const assiduidade2 = getAssiduidade(state.faltas2);
+
+        const valorIndividual1 = CONFIG.valoresBase.etapa * pesos.individual * assiduidade1.perc;
+        const bonusIndividual1 = assiduidade1.bonus ? CONFIG.valoresBase.bonusAssiduidade : 0;
+        
+        const valorIndividual2 = CONFIG.valoresBase.etapa * pesos.individual * assiduidade2.perc;
+        const bonusIndividual2 = assiduidade2.bonus ? CONFIG.valoresBase.bonusAssiduidade : 0;
+
+        // 3. Calcular Desempenho Coletivo (Etapa 1 - editável)
+        let valorColetivo1 = 0;
+        const valorBaseColetivo1 = CONFIG.valoresBase.etapa * pesos.coletivo;
+        
+        switch (state.local) {
+            case 'emef_emefm':
+                const percFreq = parseFloat(elements.inputsColetivos.freqEstudantesEmef.value);
+                const percEvol = parseFloat(elements.inputsColetivos.evolucaoProvaSPEmef.value);
+                // Frequencia vale 10% do total da etapa (300 de 3000), e evolucao 50% (1500 de 3000).
+                // O peso coletivo é 60%, então o valor base é 1800.
+                // A proporção dentro do coletivo é 300/1800 para freq e 1500/1800 para evol.
+                const valorFreq = (300 / 1800) * valorBaseColetivo1 * percFreq;
+                const valorEvol = (1500 / 1800) * valorBaseColetivo1 * percEvol;
+                valorColetivo1 = valorFreq + valorEvol;
+                break;
+            case 'emei_cemei':
+                valorColetivo1 = valorBaseColetivo1 * parseFloat(elements.inputsColetivos.freqEstudantesEmei.value);
+                break;
+            case 'cei':
+                valorColetivo1 = valorBaseColetivo1 * parseFloat(elements.inputsColetivos.taxaOcupacaoCei.value);
+                break;
+            case 'cieja':
+                valorColetivo1 = valorBaseColetivo1 * parseFloat(elements.inputsColetivos.taxaOcupacaoCieja.value);
+                break;
+            default: // DRE, SME, EMEBS etc. usam a média, aqui simulamos o máximo.
+                valorColetivo1 = valorBaseColetivo1;
+                break;
         }
 
-        function calculate() {
-            // --- Parâmetros Iniciais ---
-            const cargo = cargoEl.value;
-            const local = localTrabalhoEl.value;
-            const jornada = parseFloat(jornadaEl.value);
-            const isCEI = local === '3';
-            const isDiretoria = ['2', '3', '4'].includes(cargo);
+        // 4. Desempenho Coletivo (Etapa 2 - valor máximo)
+        const valorColetivo2 = CONFIG.valoresBase.etapa * pesos.coletivo;
 
-            let jornadaMultiplier = 1.0;
-            if (jornada === 1) jornadaMultiplier = 0.5;
-            if (jornada === 2) jornadaMultiplier = 0.75;
-
-            // --- Desempenho Individual (Assiduidade) ---
-            const faltas1 = parseInt(faltas1El.value) || 0;
-            const faltas2 = parseInt(faltas2El.value) || 0;
-            
-            document.getElementById('bonus_falta_zero_1').checked = faltas1 === 0;
-            document.getElementById('bonus_falta_zero_2').checked = faltas2 === 0;
-
-            const baseIndividual = isCEI ? VALOR_MAX_ETAPA * 0.8 : VALOR_MAX_ETAPA * 0.4;
-            
-            const getIndividualValue = (faltas) => {
-                if (faltas === 1) return baseIndividual;
-                if (faltas === 2) return baseIndividual * 0.95;
-                if (faltas === 3) return baseIndividual * 0.90;
-                if (faltas === 4) return baseIndividual * 0.85;
-                if (faltas === 5) return baseIndividual * 0.80;
-                if (faltas === 6) return baseIndividual * 0.75;
-                if (faltas === 7) return baseIndividual * 0.70;
-                if (faltas === 8) return baseIndividual * 0.65;
-                if (faltas === 9) return baseIndividual * 0.60;
-                if (faltas === 10) return baseIndividual * 0.55;
-                if (faltas > 10) return 0;
-                return baseIndividual; // para 0 faltas (sem bônus)
-            };
-
-            let valorIndividual1 = getIndividualValue(faltas1);
-            let valorIndividual2 = getIndividualValue(faltas2);
-            let bonus1 = (faltas1 === 0) ? VALOR_MAX_BONUS1 : 0;
-            let bonus2Assiduidade = (faltas2 === 0) ? VALOR_MAX_BONUS1 : 0;
-
-            // --- Desempenho Coletivo ---
-            const baseColetivo = isCEI ? VALOR_MAX_ETAPA * 0.2 : VALOR_MAX_ETAPA * 0.6;
-            let valorColetivo1 = baseColetivo;
-            let valorColetivo2 = baseColetivo;
-
-            switch (local) {
-                case '1': // EMEF/EMEFM
-                    const freq1 = parseFloat(document.getElementById('coletivo_freq_1')?.value || 100);
-                    const evolucao1 = document.getElementById('coletivo_evolucao_1')?.value === '1';
-                    const freq2 = parseFloat(document.getElementById('coletivo_freq_2')?.value || 100);
-                    const participacao2 = document.getElementById('coletivo_participacao_2')?.value === '1';
-
-                    let freq1Val = 0;
-                    if (freq1 >= 90) freq1Val = 300;
-                    else if (freq1 >= 85) freq1Val = 225;
-                    else if (freq1 >= 80) freq1Val = 150;
-                    else if (freq1 >= 75) freq1Val = 75;
-                    
-                    let freq2Val = 0;
-                    if (freq2 >= 90) freq2Val = 300;
-                    else if (freq2 >= 85) freq2Val = 225;
-                    else if (freq2 >= 80) freq2Val = 150;
-                    else if (freq2 >= 75) freq2Val = 75;
-
-                    valorColetivo1 = freq1Val + (evolucao1 ? 1500 : 0);
-                    valorColetivo2 = freq2Val + (participacao2 ? 1500 : 0);
-                    break;
-                case '2': // EMEI/CEMEI
-                    const freqEmei1 = parseFloat(document.getElementById('coletivo_freq_1')?.value || 100);
-                    const freqEmei2 = parseFloat(document.getElementById('coletivo_freq_2')?.value || 100);
-                    
-                    const getEmeiValue = (freq) => {
-                        if (freq >= 90) return 1800;
-                        if (freq >= 80) return 1440;
-                        if (freq >= 70) return 1170;
-                        if (freq >= 60) return 900;
-                        return 0;
-                    };
-                    valorColetivo1 = getEmeiValue(freqEmei1);
-                    valorColetivo2 = getEmeiValue(freqEmei2);
-                    break;
-                case '3': // CEI
-                    const ocupacaoCei1 = parseFloat(document.getElementById('coletivo_ocupacao_1')?.value || 100);
-                    const ocupacaoCei2 = parseFloat(document.getElementById('coletivo_ocupacao_2')?.value || 100);
-
-                    const getCeiValue = (ocupacao) => {
-                        if (ocupacao >= 90) return 600;
-                        if (ocupacao >= 80) return 300;
-                        if (ocupacao >= 70) return 180;
-                        return 0;
-                    };
-                    valorColetivo1 = getCeiValue(ocupacaoCei1);
-                    valorColetivo2 = getCeiValue(ocupacaoCei2);
-                    break;
-                case '4': // CIEJA
-                    const ocupacaoCieja1 = parseFloat(document.getElementById('coletivo_ocupacao_1')?.value || 100);
-                    const ocupacaoCieja2 = parseFloat(document.getElementById('coletivo_ocupacao_2')?.value || 100);
-                    
-                     const getCiejaValue = (ocupacao) => {
-                        if (ocupacao >= 80) return 1800;
-                        if (ocupacao >= 70) return 900;
-                        if (ocupacao >= 60) return 540;
-                        return 0;
-                    };
-                    valorColetivo1 = getCiejaValue(ocupacaoCieja1);
-                    valorColetivo2 = getCiejaValue(ocupacaoCieja2);
-                    break;
-                // Casos 5, 6, 7 usam o valor máximo por padrão na simulação
-            }
-
-            // --- Bônus Coletivo (Etapa 2) ---
-            let bonus2Coletivo = 0;
-            if (local === '1') { // EMEF/EMEFM
-                const regra1A = document.querySelector('input[name="bonus_idep_regra1"][value="1A"]')?.checked;
-                const regra1B = document.querySelector('input[name="bonus_idep_regra1"][value="1B"]')?.checked;
-                const regra2 = document.getElementById('bonus_idep_regra2')?.checked;
-                const bonusAlfabetizacao = document.getElementById('bonus_alfabetizacao')?.checked;
-
-                const baseBonusColetivo = isDiretoria ? 1450 : 450;
-                
-                if (regra1A || regra1B) {
-                    bonus2Coletivo += baseBonusColetivo;
-                }
-                if (regra2) {
-                    bonus2Coletivo += baseBonusColetivo;
-                }
-                if (isDiretoria && bonusAlfabetizacao) {
-                    bonus2Coletivo += 2000;
-                }
-            } else if (['2', '3', '4'].includes(local)) { // EMEI/CEMEI, CEI, CIEJA
-                const acimaMedia = document.getElementById('bonus_acima_media')?.checked;
-                if (acimaMedia) {
-                    bonus2Coletivo = 900;
-                }
-            } else { // DRE/SME/ETC
-                 // Para simulação, consideramos o bônus máximo para esses locais
-                 bonus2Coletivo = isDiretoria ? VALOR_MAX_BONUS2_DIRETORIA - VALOR_MAX_BONUS1 : VALOR_MAX_BONUS2_GERAL - VALOR_MAX_BONUS1;
-            }
-
-            // --- Consolidação e Aplicação da Jornada ---
-            const etapa1 = (valorIndividual1 + valorColetivo1);
-            const etapa2 = (valorIndividual2 + valorColetivo2);
-            const bonus2 = bonus2Assiduidade + bonus2Coletivo;
-
-            const etapa1Final = etapa1 * jornadaMultiplier;
-            const bonus1Final = bonus1 * jornadaMultiplier;
-            const etapa2Final = etapa2 * jornadaMultiplier;
-            const bonus2Final = bonus2 * jornadaMultiplier;
-            const totalFinal = etapa1Final + bonus1Final + etapa2Final + bonus2Final;
-
-            // --- Cálculo do Valor Máximo Possível ---
-            let maxBonus2 = isDiretoria && local === '1' ? VALOR_MAX_BONUS2_DIRETORIA : VALOR_MAX_BONUS2_GERAL;
-            if (['5','6','7'].includes(local)) { // DRE, SME, etc.
-                 maxBonus2 = VALOR_MAX_BONUS2_GERAL;
-            }
-
-            const maxTotal = (VALOR_MAX_ETAPA + VALOR_MAX_BONUS1 + VALOR_MAX_ETAPA + maxBonus2) * jornadaMultiplier;
-
-
-            // --- Atualiza a Tela ---
-            resultadoEtapa1El.textContent = etapa1Final.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
-            resultadoBonus1El.textContent = bonus1Final.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
-            resultadoEtapa2El.textContent = etapa2Final.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
-            resultadoBonus2El.textContent = bonus2Final.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
-            resultadoTotalEl.textContent = totalFinal.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
-            resultadoMaximoEl.textContent = `Valor máximo possível: ${maxTotal.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}`;
+        // 5. Bônus Coletivo (Etapa 2 - valor máximo)
+        let bonusColetivo2 = 0;
+        if (state.local === 'emef_emefm') {
+            bonusColetivo2 = isGestorEmef ? CONFIG.bonusColetivoMax.diretor_emef : CONFIG.bonusColetivoMax.demais_emef;
+        } else if (['cei', 'emei_cemei', 'cieja'].includes(state.local)) {
+            bonusColetivo2 = CONFIG.bonusColetivoMax.outros;
+        }
+        // Para DRE/SME/etc, o bônus segue regras específicas, aqui simulamos o máximo possível para um "outro"
+        else {
+             bonusColetivo2 = CONFIG.bonusColetivoMax.outros;
         }
 
-        // Inicialização
-        document.addEventListener('DOMContentLoaded', () => {
-            updateUI();
-            calculate();
+        // 6. Calcular totais por etapa
+        const totalEtapa1 = valorIndividual1 + valorColetivo1;
+        const totalEtapa2 = valorIndividual2 + valorColetivo2;
+        const totalBonus1 = bonusIndividual1;
+        const totalBonus2 = bonusIndividual2 + bonusColetivo2;
+        
+        // 7. Aplicar jornada e exibir
+        const totalEstimado = (totalEtapa1 + totalEtapa2 + totalBonus1 + totalBonus2) * multJornada;
+
+        elements.results.etapa1_valor.textContent = formatCurrency(totalEtapa1 * multJornada);
+        elements.results.etapa1_bonus.textContent = formatCurrency(totalBonus1 * multJornada);
+        elements.results.etapa2_valor.textContent = formatCurrency(totalEtapa2 * multJornada);
+        elements.results.etapa2_bonus.textContent = formatCurrency(totalBonus2 * multJornada);
+        elements.results.total_estimado.textContent = `Até ${formatCurrency(totalEstimado)}`;
+
+        // 8. Calcular Teto Máximo
+        const maxBonusColetivo = isGestorEmef ? CONFIG.bonusColetivoMax.diretor_emef : (state.local === 'emef_emefm' ? CONFIG.bonusColetivoMax.demais_emef : CONFIG.bonusColetivoMax.outros);
+        const valorMaximoBase = CONFIG.valoresBase.etapa * 2;
+        const valorMaximoBonus = (CONFIG.valoresBase.bonusAssiduidade * 2) + maxBonusColetivo;
+        const valorMaximoTotal = (valorMaximoBase + valorMaximoBonus) * multJornada;
+        elements.results.total_maximo.textContent = formatCurrency(valorMaximoTotal);
+
+        // Animação da barra de resultados
+        setTimeout(() => {
+            elements.results.bar.style.transform = 'translateY(0)';
+        }, 100);
+    }
+    // #endregion
+
+    // #region ATUALIZAÇÃO DA UI (VISIBILIDADE)
+    function updateUI() {
+        const local = elements.localTrabalho.value;
+        const cargo = elements.cargo.value;
+        const isGestorEmef = ['diretor', 'assistente_diretor', 'coordenador'].includes(cargo) && local === 'emef_emefm';
+
+        // Visibilidade dos blocos de critério coletivo
+        Object.values(elements.coletivo).forEach(el => el.classList.add('hidden-by-logic'));
+        
+        if (elements.coletivo[local]) {
+            elements.coletivo[local].classList.remove('hidden-by-logic');
+        } else {
+            // Casos como DRE, SME, EMEBS
+            elements.coletivo.media.classList.remove('hidden-by-logic');
+            let explanationText = '';
+            if (local === 'sme') {
+                explanationText = 'O valor do desempenho coletivo será a média do desempenho coletivo de todas as DREs. Para a simulação, consideramos o valor máximo.';
+            } else {
+                explanationText = 'O valor do desempenho coletivo será a média do desempenho das unidades da respectiva DRE. Para a simulação, consideramos o valor máximo.';
+            }
+            elements.coletivo.media.querySelector('p').textContent = explanationText;
+        }
+
+        // Atualizar checkboxes de bônus por falta
+        elements.bonusFaltas1.checked = (parseInt(elements.faltas1.value) || 0) === 0;
+        elements.bonusFaltas2.checked = (parseInt(elements.faltas2.value) || 0) === 0;
+
+        // Atualizar visualização da Etapa 2
+        let etapa2Html = '';
+        switch (local) {
+            case 'emef_emefm':
+                etapa2Html = `
+                    <p><strong>Frequência dos estudantes:</strong> Atingir 90% ou mais.</p>
+                    <p><strong>Participação em Avaliações:</strong> Atingir ao menos 80% na Prova São Paulo 2025 e no SARESP 2025.</p>
+                    <p class="mt-2 font-semibold">Critérios de Bônus:</p>
+                    <ul class="list-disc list-inside ml-2">
+                        <li><strong>Regra 1:</strong> Aumento do IDEP acima da média ou entre os 10% maiores.</li>
+                        <li><strong>Regra 2:</strong> Aumento do IDEP com diminuição de estudantes abaixo do básico.</li>
+                        ${isGestorEmef ? '<li><strong>Alfabetização:</strong> Aumento da % de estudantes alfabetizados no 2º ano (mín. 51%).</li>' : ''}
+                    </ul>`;
+                break;
+            case 'emei_cemei':
+                etapa2Html = `<p><strong>Frequência dos estudantes:</strong> Atingir 90% ou mais.</p>
+                <p class="mt-2 font-semibold">Critério de Bônus:</p>
+                <p>Desempenho da unidade acima da média das unidades do mesmo tipo.</p>`;
+                break;
+            case 'cei':
+            case 'cieja':
+                etapa2Html = `<p><strong>Taxa de ocupação:</strong> Atingir a faixa máxima da tabela.</p>
+                <p class="mt-2 font-semibold">Critério de Bônus:</p>
+                <p>Desempenho da unidade acima da média das unidades do mesmo tipo.</p>`;
+                break;
+            default:
+                etapa2Html = `<p>O desempenho coletivo e o bônus seguirão as regras do decreto, baseados em médias de outras unidades. Na estimativa, consideramos o valor máximo possível.</p>`;
+        }
+        elements.coletivoEtapa2View.innerHTML = etapa2Html;
+
+        calculate();
+    }
+    // #endregion
+
+    // #region LÓGICA DO MODAL
+    function openModal(modalId) {
+        const data = MODAL_DATA[modalId];
+        if (!data) return;
+        
+        elements.modal.title.textContent = data.title;
+        elements.modal.body.innerHTML = data.body;
+        elements.modal.container.style.display = 'flex';
+    }
+
+    function closeModal() {
+        elements.modal.container.style.display = 'none';
+    }
+
+    document.querySelectorAll('.help-icon').forEach(icon => {
+        icon.addEventListener('click', (e) => {
+            const modalId = e.target.dataset.modalId;
+            openModal(modalId);
         });
-    </script>
+    });
+
+    elements.modal.closeBtn.addEventListener('click', closeModal);
+    elements.modal.container.addEventListener('click', (e) => {
+        if (e.target === elements.modal.container) {
+            closeModal();
+        }
+    });
+    // #endregion
+
+    // #region EVENT LISTENERS
+    const allInputs = [
+        elements.cargo, elements.localTrabalho, elements.jornada, 
+        elements.faltas1, elements.faltas2,
+        ...Object.values(elements.inputsColetivos)
+    ];
+
+    allInputs.forEach(input => {
+        if(input) { // Checagem para garantir que o elemento existe
+            input.addEventListener('input', updateUI);
+        }
+    });
+    // #endregion
+
+    // Inicialização
+    updateUI();
+});
+</script>
 
 </body>
 </html>
