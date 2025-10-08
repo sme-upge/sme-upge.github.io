@@ -27,6 +27,13 @@
             max-height: 70vh;
             overflow-y: auto;
         }
+        
+        /* Hide legend and filters on mobile */
+        @media (max-width: 768px) {
+            #legend-container, #filter-container {
+                display: none;
+            }
+        }
     </style>
      <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -73,7 +80,7 @@
     </div>
     
     <!-- Legend -->
-    <div class="absolute bottom-4 left-4 bg-white/80 backdrop-blur-sm p-4 rounded-lg shadow-lg border border-gray-200 z-10">
+    <div id="legend-container" class="absolute bottom-4 left-4 bg-white/80 backdrop-blur-sm p-4 rounded-lg shadow-lg border border-gray-200 z-10">
         <h4 class="font-bold text-lg mb-2 text-gray-800">Legenda</h4>
         <ul class="space-y-2">
             <li class="flex items-center"><span class="w-4 h-4 rounded-full mr-3 border-2 border-white shadow" style="background-color: #f43f5e;"></span>Problema macro</li>
