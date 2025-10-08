@@ -78,7 +78,7 @@
         <div class="absolute top-0 left-0 p-4 z-10 w-full bg-gradient-to-b from-white to-transparent text-center">
             <img src="https://sme-upge.github.io/diagnostico/logo-pe.png" alt="Logo Planejamento Estratégico 2025-2028" style="max-height: 120px;" class="mx-auto">
             <h1 class="text-2xl font-bold text-gray-800 mt-2">Árvore de problemas do Planejamento Estratégico 2025-2028</h1>
-            <p class="text-gray-600">Clique em uma causa final (nós nas bordas) para ver as evidências.</p>
+            <p class="text-gray-600">Clique em qualquer causa para ver as evidências associadas.</p>
         </div>
         <div id="mynetwork"></div>
     </div>
@@ -179,7 +179,7 @@
             const nodes = new Map();
             const edges = [];
             const evidenceMap = new Map();
-            const childrenCount = new Map();
+            const connectionCount = new Map();
 
             const addNode = (id, label, group, level) => {
                 if (!id) return null;
@@ -191,9 +191,9 @@
                         label: label.trim(), 
                         group: group, 
                         level: level, 
-                        title: id.trim() // Full text for tooltip
+                        title: id.trim()
                     });
-                    childrenCount.set(cleanId, 0);
+                    connectionCount.set(cleanId, 0);
                 }
                 return nodes.get(cleanId);
             };
@@ -224,14 +224,13 @@
                         const edgeExists = edges.some(e => e.from === parentId && e.to === current.id);
                         if (!edgeExists) {
                            edges.push({ from: parentId, to: current.id, arrows: { to: { enabled: false } } });
-                           if (childrenCount.has(parentId)) {
-                               childrenCount.set(parentId, childrenCount.get(parentId) + 1);
-                           }
+                           connectionCount.set(parentId, (connectionCount.get(parentId) || 0) + 1);
+                           connectionCount.set(current.id, (connectionCount.get(current.id) || 0) + 1);
                         }
                         parentId = current.id;
                         leafNodeId = current.id;
                     } else {
-                        break; // Stop processing path if a segment is empty
+                        break;
                     }
                 }
                 
@@ -253,16 +252,22 @@
 
             const finalNodes = Array.from(nodes.values());
             
+            // Ajusta o tamanho dos nós com base no número de conexões,
+            // com um tratamento especial para os nós de nível superior e um limite de tamanho.
+            const baseSize = 10;
+            const minSize = baseSize; // O menor nó terá o tamanho base.
+            const maxSize = minSize * 6; // Limita o maior nó a ser 500% maior que o menor (100% + 500% = 600%).
+
             finalNodes.forEach(node => {
-                const count = childrenCount.get(node.id) || 0;
-                node.value = 15 + count * 4;
-            });
-            
-            const allFrom = new Set(edges.map(e => e.from));
-            finalNodes.forEach(node => {
-                if (!allFrom.has(node.id) && node.id !== problemMacro) {
-                    node.isLeaf = true;
+                const count = connectionCount.get(node.id) || 0;
+                let size;
+                if (node.level < 3) { // Problema Macro, Eixo, Problema Central
+                    // Aumenta o impacto das conexões para nós de nível superior
+                    size = baseSize + count * 3.5;
+                } else { // Causas
+                    size = baseSize + count * 2.5;
                 }
+                node.value = Math.min(size, maxSize); // Aplica o teto de tamanho
             });
 
             return { nodes: finalNodes, edges, evidenceMap };
@@ -291,7 +296,7 @@
                         nodes: {
                             shape: 'dot',
                             font: {
-                                size: 14,
+                                size: 18,
                                 color: '#333',
                                 strokeWidth: 0,
                             },
@@ -317,12 +322,12 @@
                             }
                         },
                         groups: {
-                            macro:    { color: { background: '#f43f5e', border: '#be123c' }, size: 40 },
-                            eixo:     { color: { background: '#f97316', border: '#c2410c' }, size: 30 },
-                            problema: { color: { background: '#eab308', border: '#a16207' }, size: 25 },
-                            causa1:   { color: { background: '#22c55e', border: '#15803d' }, size: 20 },
-                            causa2:   { color: { background: '#3b82f6', border: '#1d4ed8' }, size: 16 },
-                            causa3:   { color: { background: '#8b5cf6', border: '#6d28d9' }, size: 12 },
+                            macro:    { color: { background: '#f43f5e', border: '#be123c' } },
+                            eixo:     { color: { background: '#f97316', border: '#c2410c' } },
+                            problema: { color: { background: '#eab308', border: '#a16207' } },
+                            causa1:   { color: { background: '#22c55e', border: '#15803d' } },
+                            causa2:   { color: { background: '#3b82f6', border: '#1d4ed8' } },
+                            causa3:   { color: { background: '#8b5cf6', border: '#6d28d9' } },
                         },
                         interaction: {
                             hover: true,
@@ -352,13 +357,11 @@
                     const network = new vis.Network(container, data, options);
                     const loadingOverlay = document.getElementById('loading-overlay');
 
-                    network.on("stabilizationProgress", function(params) {
-                        // You can add progress bar logic here if needed
-                    });
+                    network.on("stabilizationProgress", function(params) {});
 
                     network.once("stabilizationIterationsDone", function() {
                         loadingOverlay.style.display = 'none';
-                        network.setOptions({ physics: false }); // Turn off physics after stabilization
+                        network.setOptions({ physics: true });
                     });
                     
                      network.on("showPopup", function (params) {
@@ -372,34 +375,73 @@
                         }
                     });
 
-
                     // --- Modal Logic ---
                     const modal = document.getElementById('evidenceModal');
                     const modalTitle = document.getElementById('modalTitle');
                     const modalContent = document.getElementById('modalContent');
 
+                    function getSubtree(nodeId) {
+                        const subtreeNodes = new Set([nodeId]);
+                        const toVisit = [nodeId];
+                        while (toVisit.length > 0) {
+                            const currentId = toVisit.pop();
+                            const childEdges = data.edges.get({ filter: edge => edge.from === currentId });
+                            childEdges.forEach(edge => {
+                                if (!subtreeNodes.has(edge.to)) {
+                                    subtreeNodes.add(edge.to);
+                                    toVisit.push(edge.to);
+                                }
+                            });
+                        }
+                        return Array.from(subtreeNodes);
+                    }
+
+                    function getNodePath(nodeId) {
+                        const path = [];
+                        let currentId = nodeId;
+                        while (currentId) {
+                            const node = data.nodes.get(currentId);
+                            if (node) {
+                                path.unshift(node.title);
+                                const parentEdge = data.edges.get({ filter: edge => edge.to === currentId });
+                                currentId = parentEdge.length > 0 ? parentEdge[0].from : null;
+                            } else {
+                                currentId = null;
+                            }
+                        }
+                        return path;
+                    }
+
                     network.on("click", function (params) {
                         if (params.nodes.length > 0) {
                             const nodeId = params.nodes[0];
-                            const node = data.nodes.get(nodeId);
-                            
-                            if (node.isLeaf && evidenceMap.has(nodeId)) {
-                                openModal(nodeId);
-                            }
+                            openModal(nodeId);
                         }
                     });
 
                     window.openModal = function(nodeId) {
-                        const evidence = evidenceMap.get(nodeId);
+                        const subtreeNodeIds = getSubtree(nodeId);
+                        let aggregatedEvidence = [];
+                        subtreeNodeIds.forEach(id => {
+                            if (evidenceMap.has(id)) {
+                                aggregatedEvidence.push(...evidenceMap.get(id));
+                            }
+                        });
+                        
                         const node = data.nodes.get(nodeId);
+                        const path = getNodePath(nodeId);
+
                         modalTitle.innerText = `Evidências para: ${node.title}`;
                         
-                        modalContent.innerHTML = evidence.length > 0 ? evidence.map(ev => `
+                        const pathHtml = `<div class="mb-4 text-sm text-gray-500 font-mono break-words">${path.join(' > ')}</div>`;
+                        const evidenceHtml = aggregatedEvidence.length > 0 ? aggregatedEvidence.map(ev => `
                             <div class="mb-4 p-4 bg-gray-50 rounded-lg border border-gray-200">
                                 <h4 class="font-bold text-lg text-indigo-700">${ev.title}</h4>
                                 <p class="text-gray-700 mt-1 whitespace-pre-wrap">${ev.content}</p>
                             </div>
-                        `).join('') : '<p class="text-gray-600">Nenhuma evidência foi registrada para esta causa.</p>';
+                        `).join('') : '<p class="text-gray-600">Nenhuma evidência foi registrada para esta causa ou suas sub-causas.</p>';
+
+                        modalContent.innerHTML = pathHtml + evidenceHtml;
 
                         modal.classList.remove('hidden');
                         modal.classList.add('flex');
