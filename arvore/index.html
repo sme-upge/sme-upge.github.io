@@ -352,7 +352,7 @@
                             solver: 'barnesHut',
                             stabilization: {
                                 iterations: 1000,
-                                fit: true
+                                fit: false // We will manually fit after the initial animation setup
                             }
                         }
                     };
@@ -360,11 +360,24 @@
                     const network = new vis.Network(container, data, options);
                     const loadingOverlay = document.getElementById('loading-overlay');
 
-                    network.on("stabilizationProgress", function(params) {});
-
-                    network.once("stabilizationIterationsDone", function() {
+                    network.once("stabilizationIterationsDone", function () {
                         loadingOverlay.style.display = 'none';
-                        network.setOptions({ physics: true });
+                        
+                        // 1. Start zoomed in on the macro problem without animation
+                        network.focus(problemMacro, {
+                            scale: 2.5, // Start zoomed in
+                            animation: false
+                        });
+
+                        // 2. After a very short delay, start the zoom-out animation
+                        setTimeout(() => {
+                            network.fit({
+                                animation: {
+                                    duration: 4000,
+                                    easingFunction: 'easeInOutQuad'
+                                }
+                            });
+                        }, 50); // A tiny delay to ensure the initial focus is rendered
                     });
                     
                      network.on("showPopup", function (params) {
