@@ -306,9 +306,9 @@
                                 max: 150
                             },
                             font: {
-                                size: 18,
+                                size: 16,
                                 color: '#333',
-                                strokeWidth: 0,
+                                strokeWidth: 1,
                             },
                             borderWidth: 2,
                             shadow: {
@@ -349,12 +349,12 @@
                         physics: {
                             enabled: true,
                             barnesHut: {
-                                gravitationalConstant: -40000,
+                                gravitationalConstant: -50000,
                                 centralGravity: 0.4,
-                                springLength: 100, // Diminui a distância padrão das molas
+                                springLength: 250, // Diminui a distância padrão das molas
                                 springConstant: 0.05,
                                 damping: 0.1,
-                                avoidOverlap: 0.9
+                                avoidOverlap: 1
                             },
                             solver: 'barnesHut',
                             stabilization: {
