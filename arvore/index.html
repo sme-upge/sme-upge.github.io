@@ -263,10 +263,10 @@
                 if (node.level === 0) { // Problema Macro
                     node.value = 3000; // Maior de todos
                 } else if (node.level < 3) { // Eixo, Problema Central
-                    node.value = 1000; // Tamanho intermediário
+                    node.value = 500; // Tamanho intermediário
                 } else { // Causas
                     // Tamanho menor, com leve variação baseada nas conexões
-                    const baseSize = 10;
+                    const baseSize = 1;
                     node.value = baseSize + count * 40;
                 }
             });
@@ -301,12 +301,16 @@
                         },
                         nodes: {
                             shape: 'dot',
+                            scaling: {
+                                min: 10,
+                                max: 150
+                            },
                             font: {
                                 size: 18,
                                 color: '#333',
                                 strokeWidth: 0,
                             },
-                            borderWidth: 4,
+                            borderWidth: 2,
                             shadow: {
                                 enabled: true,
                                 color: 'rgba(0,0,0,0.2)',
@@ -337,7 +341,7 @@
                         },
                         interaction: {
                             hover: true,
-                            tooltipDelay: 100,
+                            tooltipDelay: 50,
                             navigationButtons: false,
                             keyboard: true,
                             dragNodes: true,
@@ -345,12 +349,12 @@
                         physics: {
                             enabled: true,
                             barnesHut: {
-                                gravitationalConstant: -30000,
-                                centralGravity: 0.3,
-                                springLength: 150, // Diminui a distância padrão das molas
+                                gravitationalConstant: -40000,
+                                centralGravity: 0.4,
+                                springLength: 100, // Diminui a distância padrão das molas
                                 springConstant: 0.05,
                                 damping: 0.1,
-                                avoidOverlap: 0.1
+                                avoidOverlap: 0.9
                             },
                             solver: 'barnesHut',
                             stabilization: {
