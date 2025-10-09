@@ -222,7 +222,7 @@
                 for (let i = 1; i < path.length; i++) {
                     const current = path[i];
                     if (current.id && current.id.trim() !== "") {
-                        const nodeLabel = `${current.id.substring(0, 40)}${current.id.length > 40 ? '...' : ''}`;
+                        const nodeLabel = `${current.id.substring(0, 60)}${current.id.length > 60 ? '...' : ''}`;
                         addNode(current.id, nodeLabel, current.group, i);
                         
                         const edgeExists = edges.some(e => e.from === lastValidParentId && e.to === current.id);
@@ -238,10 +238,13 @@
                 
                 if (leafNodeId) {
                     const evidence = [];
-                    if(indicadores) evidence.push({ title: 'Indicadores', content: indicadores });
-                    if(evFocais) evidence.push({ title: 'Evidências nos Grupos Focais', content: evFocais });
-                    if(evOficinas) evidence.push({ title: 'Evidências nas Oficinas', content: evOficinas });
-                    if(outrasEv) evidence.push({ title: 'Outras Evidências', content: outrasEv });
+                    const leafIndex = path.findIndex(p => p.id === leafNodeId);
+                    const nodePath = leafIndex !== -1 ? path.slice(0, leafIndex + 1).map(p => p.id).filter(id => id && id.trim() !== "") : [];
+
+                    if(indicadores) evidence.push({ title: 'Indicadores e dados quantitativos', content: indicadores, path: nodePath });
+                    if(evFocais) evidence.push({ title: 'Evidências nas escutas dos grupos focais', content: evFocais, path: nodePath });
+                    if(evOficinas) evidence.push({ title: 'Evidências nas escutas das oficinas', content: evOficinas, path: nodePath });
+                    if(outrasEv) evidence.push({ title: 'Outras evidências', content: outrasEv, path: nodePath });
 
                     if (evidence.length > 0) {
                         if (!evidenceMap.has(leafNodeId)) {
@@ -445,19 +448,23 @@
                         });
                         
                         const node = data.nodes.get(nodeId);
-                        const path = getNodePath(nodeId);
 
-                        modalTitle.innerText = `Evidências para: ${node.label}`;
+                        // Use node.title for the full, non-truncated text
+                        modalTitle.innerText = `Evidências para: ${node.title}`;
                         
-                        const pathHtml = `<div class="mb-6 p-3 bg-indigo-50 border border-indigo-200 rounded-lg text-sm text-indigo-800 break-words">${path.join(' <span class="font-bold text-indigo-400 mx-1">&gt;</span> ')}</div>`;
-                        const evidenceHtml = aggregatedEvidence.length > 0 ? aggregatedEvidence.map(ev => `
+                        const evidenceHtml = aggregatedEvidence.length > 0 ? aggregatedEvidence.map(ev => {
+                            const pathString = ev.path ? ev.path.join(' > ') : '';
+                            const pathHtml = ev.path && ev.path.length > 0 ? `<p class="text-xs text-gray-500 mt-1 mb-2">${pathString}</p>` : '';
+                            
+                            return `
                             <div class="mb-4 p-4 bg-gray-50 rounded-lg border border-gray-200">
                                 <h4 class="font-bold text-lg text-indigo-700">${ev.title}</h4>
+                                ${pathHtml}
                                 <p class="text-gray-700 mt-1 whitespace-pre-wrap">${ev.content}</p>
                             </div>
-                        `).join('') : '<p class="text-gray-600">Nenhuma evidência foi registrada para esta causa ou suas sub-causas.</p>';
+                        `}).join('') : '<p class="text-gray-600">Nenhuma evidência foi registrada para esta causa ou suas sub-causas.</p>';
 
-                        modalContent.innerHTML = pathHtml + evidenceHtml;
+                        modalContent.innerHTML = evidenceHtml;
 
                         modal.classList.remove('hidden');
                         modal.classList.add('flex');
