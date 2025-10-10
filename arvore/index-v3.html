@@ -471,14 +471,9 @@
                             const pathString = ev.path ? ev.path.join(' > ') : '';
                             const pathHtml = ev.path && ev.path.length > 0 ? `<p class="text-xs text-gray-500 mt-1 mb-2">${pathString}</p>` : '';
                             
-                            const isIndicator = ev.title === 'Indicadores e dados quantitativos';
-                            const bgColorClass = isIndicator ? 'bg-indigo-50' : 'bg-gray-50';
-                            const borderColorClass = isIndicator ? 'border-indigo-200' : 'border-gray-200';
-                            const titleColorClass = isIndicator ? 'text-indigo-800' : 'text-indigo-700';
-
                             return `
-                            <div class="mb-4 p-4 ${bgColorClass} rounded-lg border ${borderColorClass}">
-                                <h4 class="font-bold text-lg ${titleColorClass}">${ev.title}</h4>
+                            <div class="mb-4 p-4 bg-gray-50 rounded-lg border border-gray-200">
+                                <h4 class="font-bold text-lg text-indigo-700">${ev.title}</h4>
                                 ${pathHtml}
                                 <p class="text-gray-700 mt-1 whitespace-pre-wrap">${ev.content}</p>
                             </div>

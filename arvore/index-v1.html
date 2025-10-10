@@ -94,11 +94,7 @@
 
     <!-- Filter Controls -->
     <div id="filter-container" class="absolute bottom-4 right-4 bg-white/80 backdrop-blur-sm p-4 rounded-lg shadow-lg border border-gray-200 z-10 max-w-xs">
-        <h4 class="font-bold text-lg mb-2 text-gray-800">Busca</h4>
-        <div class="mb-3">
-            <input type="text" id="search-input" placeholder="Pesquisar na árvore..." class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm">
-        </div>
-        <h4 class="font-bold text-lg mb-2 text-gray-800">Eixos</h4>
+        <h4 class="font-bold text-lg mb-2 text-gray-800">Filtrar por Eixo</h4>
         <ul id="eixo-filter-list" class="space-y-1 max-h-48 overflow-y-auto">
             <!-- Eixos serão populados aqui via JS -->
         </ul>
@@ -189,8 +185,7 @@
                         label: label.trim(), 
                         group: group, 
                         level: level, 
-                        title: id.trim(),
-                        eixos: new Set() // Each node will store its associated eixos
+                        title: id.trim()
                     };
                     // Fixa o nó macro no centro
                     if (level === 0) {
@@ -207,10 +202,9 @@
 
             csvRows.forEach(columns => {
                 const [eixo, problema, causa1, causa2, causa3, evFocais, evOficinas, indicadores, outrasEv] = columns;
-                const currentEixo = eixo.trim();
 
-                if (currentEixo !== "") {
-                    eixos.add(currentEixo);
+                if (eixo && eixo.trim() !== "") {
+                    eixos.add(eixo.trim());
                 }
                 
                 const path = [
@@ -229,12 +223,7 @@
                     const current = path[i];
                     if (current.id && current.id.trim() !== "") {
                         const nodeLabel = `${current.id.substring(0, 60)}${current.id.length > 60 ? '...' : ''}`;
-                        const node = addNode(current.id, nodeLabel, current.group, i);
-                        
-                        // Associate the current row's eixo with every node in its path, except for the macro problem and the eixos themselves.
-                        if (node && currentEixo !== "" && current.group !== 'macro' && current.group !== 'eixo') {
-                            node.eixos.add(currentEixo);
-                        }
+                        addNode(current.id, nodeLabel, current.group, i);
                         
                         const edgeExists = edges.some(e => e.from === lastValidParentId && e.to === current.id);
                         if (!edgeExists) {
@@ -471,14 +460,9 @@
                             const pathString = ev.path ? ev.path.join(' > ') : '';
                             const pathHtml = ev.path && ev.path.length > 0 ? `<p class="text-xs text-gray-500 mt-1 mb-2">${pathString}</p>` : '';
                             
-                            const isIndicator = ev.title === 'Indicadores e dados quantitativos';
-                            const bgColorClass = isIndicator ? 'bg-indigo-50' : 'bg-gray-50';
-                            const borderColorClass = isIndicator ? 'border-indigo-200' : 'border-gray-200';
-                            const titleColorClass = isIndicator ? 'text-indigo-800' : 'text-indigo-700';
-
                             return `
-                            <div class="mb-4 p-4 ${bgColorClass} rounded-lg border ${borderColorClass}">
-                                <h4 class="font-bold text-lg ${titleColorClass}">${ev.title}</h4>
+                            <div class="mb-4 p-4 bg-gray-50 rounded-lg border border-gray-200">
+                                <h4 class="font-bold text-lg text-indigo-700">${ev.title}</h4>
                                 ${pathHtml}
                                 <p class="text-gray-700 mt-1 whitespace-pre-wrap">${ev.content}</p>
                             </div>
@@ -507,23 +491,10 @@
 
                     // --- Filter Logic ---
                     const filterList = document.getElementById('eixo-filter-list');
-                    const searchInput = document.getElementById('search-input');
                     const selectAllBtn = document.getElementById('select-all-btn');
                     const deselectAllBtn = document.getElementById('deselect-all-btn');
-                    let selectedEixos = new Set(eixos); // Start with all selected
+                    let selectedEixos = new Set(eixos); // Começa com todos selecionados
 
-                    // Event Listeners
-                    searchInput.addEventListener('input', () => applyFilter());
-                    selectAllBtn.addEventListener('click', () => {
-                        selectedEixos = new Set(eixos);
-                        applyFilter();
-                    });
-                    deselectAllBtn.addEventListener('click', () => {
-                        selectedEixos.clear();
-                        applyFilter();
-                    });
-
-                    // Populate Eixo Filter List
                     eixos.forEach(eixo => {
                         const li = document.createElement('li');
                         li.className = 'p-2 rounded-md hover:bg-indigo-100 cursor-pointer text-gray-700 text-sm';
@@ -543,77 +514,35 @@
                     }
 
                     function applyFilter() {
-                        const allNodes = data.nodes.get();
-                        const allEdges = data.edges.get();
-                        const searchTerm = searchInput.value.toLowerCase().trim();
+                        const allNodes = data.nodes.get({ returnType: "Object" });
+                        const allEdges = data.edges.get({ returnType: "Object" });
 
-                        // 1. Determine nodes matching the EIXO filter
-                        const eixoHighlightSet = new Set([problemMacro]);
-                        if (selectedEixos.size === eixos.length) {
-                            allNodes.forEach(node => eixoHighlightSet.add(node.id));
-                        } else if (selectedEixos.size > 0) {
-                            const directlyMatchedNodes = new Set();
-                            allNodes.forEach(node => {
-                                if (node.group === 'eixo' && selectedEixos.has(node.id)) {
-                                    directlyMatchedNodes.add(node.id);
-                                } else if (node.eixos && node.eixos.size > 0) {
-                                    if ([...node.eixos].some(eixo => selectedEixos.has(eixo))) {
-                                        directlyMatchedNodes.add(node.id);
-                                    }
-                                }
-                            });
-                            directlyMatchedNodes.forEach(nodeId => {
-                                let currentId = nodeId;
-                                while (currentId) {
-                                    if (eixoHighlightSet.has(currentId)) break;
-                                    eixoHighlightSet.add(currentId);
-                                    const parentEdge = data.edges.get({ filter: edge => edge.to === currentId });
-                                    currentId = parentEdge.length > 0 ? parentEdge[0].from : null;
-                                }
-                            });
-                        }
-
-                        // 2. Determine nodes matching the SEARCH filter
-                        const searchHighlightSet = new Set([problemMacro]);
-                        if (searchTerm === '') {
-                            allNodes.forEach(node => searchHighlightSet.add(node.id));
-                        } else {
-                            const directlyMatchedNodes = new Set();
-                            allNodes.forEach(node => {
-                                if (node.title.toLowerCase().includes(searchTerm)) {
-                                    directlyMatchedNodes.add(node.id);
-                                }
-                            });
-                            directlyMatchedNodes.forEach(nodeId => {
-                                let currentId = nodeId;
-                                while (currentId) {
-                                    if (searchHighlightSet.has(currentId)) break;
-                                    searchHighlightSet.add(currentId);
-                                    const parentEdge = data.edges.get({ filter: edge => edge.to === currentId });
-                                    currentId = parentEdge.length > 0 ? parentEdge[0].from : null;
-                                }
-                            });
-                        }
-
-                        // 3. Combine filters (AND logic): intersection of both sets
-                        const nodesToHighlight = new Set([...eixoHighlightSet].filter(id => searchHighlightSet.has(id)));
-                        nodesToHighlight.add(problemMacro); // Ensure macro is always visible
-
-                        // 4. Apply visual updates
-                        const nodeUpdates = [];
-                        allNodes.forEach(node => {
-                            const isHighlighted = nodesToHighlight.has(node.id);
-                            const originalColor = options.groups[node.group] ? options.groups[node.group].color : options.fadedColor.node;
-                            const targetColor = isHighlighted ? originalColor : options.fadedColor.node;
-                            nodeUpdates.push({ id: node.id, color: targetColor });
+                        let nodesToHighlight = new Set([problemMacro]);
+                        
+                        // Adiciona o próprio eixo e todos os seus descendentes para cada eixo selecionado
+                        selectedEixos.forEach(eixoId => {
+                            const subtree = getSubtree(eixoId);
+                            subtree.forEach(nodeId => nodesToHighlight.add(nodeId));
                         });
 
+                        const nodeUpdates = [];
                         const edgeUpdates = [];
-                        allEdges.forEach(edge => {
+
+                        // Atualiza nós
+                        for (const nodeId in allNodes) {
+                            const node = allNodes[nodeId];
+                            const isHighlighted = nodesToHighlight.has(nodeId);
+                            const targetColor = isHighlighted ? options.groups[node.group].color : options.fadedColor.node;
+                            nodeUpdates.push({ id: nodeId, color: targetColor });
+                        }
+
+                        // Atualiza arestas
+                        for (const edgeId in allEdges) {
+                            const edge = allEdges[edgeId];
                             const isHighlighted = nodesToHighlight.has(edge.from) && nodesToHighlight.has(edge.to);
                             const targetColor = isHighlighted ? options.edges.color : options.fadedColor.edge;
-                            edgeUpdates.push({ id: edge.id, color: targetColor });
-                        });
+                            edgeUpdates.push({ id: edgeId, color: targetColor });
+                        }
 
                         data.nodes.update(nodeUpdates);
                         data.edges.update(edgeUpdates);
@@ -631,7 +560,17 @@
                         });
                     }
 
-                    // Initial filter application
+                    selectAllBtn.addEventListener('click', () => {
+                        selectedEixos = new Set(eixos);
+                        applyFilter();
+                    });
+
+                    deselectAllBtn.addEventListener('click', () => {
+                        selectedEixos.clear();
+                        applyFilter();
+                    });
+
+                    // Aplica o filtro inicial com todos os eixos selecionados
                     applyFilter();
                 })
                 .catch(error => {
