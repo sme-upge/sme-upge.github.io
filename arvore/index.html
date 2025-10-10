@@ -94,6 +94,27 @@
 
     <!-- Filter Controls -->
     <div id="filter-container" class="absolute bottom-4 right-4 bg-white/80 backdrop-blur-sm p-4 rounded-lg shadow-lg border border-gray-200 z-10 max-w-xs">
+        <div class="flex items-center justify-between mb-3">
+            <h4 class="font-bold text-lg text-gray-800">Visualização</h4>
+            <label for="simplified-view-toggle" class="flex items-center cursor-pointer">
+                <span class="mr-2 text-sm text-gray-600">Simplificada</span>
+                <div class="relative">
+                    <input type="checkbox" id="simplified-view-toggle" class="sr-only">
+                    <div class="block bg-gray-300 w-10 h-6 rounded-full"></div>
+                    <div class="dot absolute left-1 top-1 bg-white w-4 h-4 rounded-full transition"></div>
+                </div>
+            </label>
+        </div>
+        <style>
+            #simplified-view-toggle:checked ~ .dot {
+                transform: translateX(100%);
+                background-color: #4f46e5; 
+            }
+            #simplified-view-toggle:checked ~ .block {
+                background-color: #c7d2fe;
+            }
+        </style>
+
         <h4 class="font-bold text-lg mb-2 text-gray-800">Busca</h4>
         <div class="mb-3">
             <input type="text" id="search-input" placeholder="Pesquisar na árvore..." class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm">
@@ -504,6 +525,56 @@
                             closeModal();
                         }
                     });
+
+                    const simplifiedViewToggle = document.getElementById('simplified-view-toggle');
+
+                    simplifiedViewToggle.addEventListener('change', () => {
+                        toggleSimplifiedView(simplifiedViewToggle.checked);
+                    });
+
+                    function toggleSimplifiedView(isSimplified) {
+                        const allNodes = data.nodes.get({ returnType: 'Array' });
+                        const updates = [];
+
+                        // Update physics based on view
+                        const springLength = isSimplified ? 50 : 250;
+                        network.setOptions({
+                            physics: {
+                                barnesHut: { springLength: springLength }
+                            }
+                        });
+
+                        allNodes.forEach(node => {
+                            let isHidden = false;
+                            let fontSize = 16; // Default font size
+
+                            if (isSimplified) {
+                                if (node.level === 1 || node.level > 3) { // Hide eixos and secondary/tertiary causes
+                                    isHidden = true;
+                                } else if (node.level > 0) { // For other visible nodes (problemas, causa1)
+                                    fontSize = 28; // Increase font size
+                                }
+                            }
+
+                            updates.push({
+                                id: node.id,
+                                hidden: isHidden,
+                                font: { size: fontSize }
+                            });
+                        });
+
+                        data.nodes.update(updates);
+
+                        // Adjust the view after updating nodes
+                        setTimeout(() => {
+                            network.fit({
+                                animation: {
+                                    duration: 1000,
+                                    easingFunction: 'easeInOutQuad'
+                                }
+                            });
+                        }, 200); // Delay to allow nodes to be hidden/shown before fitting
+                    }
 
                     // --- Filter Logic ---
                     const filterList = document.getElementById('eixo-filter-list');
