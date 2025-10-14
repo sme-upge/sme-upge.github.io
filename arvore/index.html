@@ -69,7 +69,27 @@
                 <button onclick="closeModal()" class="text-gray-400 hover:text-gray-600">&times;</button>
             </div>
             <div class="p-6 modal-content-area">
-                <div id="modalContent"></div>
+                <!-- Tab buttons -->
+                <div class="border-b border-gray-200">
+                    <nav class="-mb-px flex space-x-8" aria-label="Tabs">
+                        <button id="tab-quant" onclick="switchTab('quant')" class="whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm">
+                            Dados quantitativos
+                        </button>
+                        <button id="tab-qual" onclick="switchTab('qual')" class="whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm">
+                            Evidências de escutas
+                        </button>
+                    </nav>
+                </div>
+
+                <!-- Tab content -->
+                <div class="pt-6">
+                    <div id="quantitative-content">
+                        <!-- Quantitative evidence here -->
+                    </div>
+                    <div id="qualitative-content" class="hidden">
+                        <!-- Qualitative evidence here -->
+                    </div>
+                </div>
             </div>
             <div class="p-4 bg-gray-50 border-t border-gray-200 rounded-b-2xl text-right">
                 <button onclick="closeModal()" class="px-6 py-2 bg-indigo-600 text-white font-semibold rounded-lg shadow-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-opacity-75 transition-colors">
@@ -410,7 +430,7 @@
                         setTimeout(() => {
                             network.fit({
                                 animation: {
-                                    duration: 4000,
+                                    duration: 2000,
                                     easingFunction: 'easeInOutQuad'
                                 }
                             });
@@ -431,7 +451,28 @@
                     // --- Modal Logic ---
                     const modal = document.getElementById('evidenceModal');
                     const modalTitle = document.getElementById('modalTitle');
-                    const modalContent = document.getElementById('modalContent');
+                    const quantitativeContent = document.getElementById('quantitative-content');
+                    const qualitativeContent = document.getElementById('qualitative-content');
+                    const quantTab = document.getElementById('tab-quant');
+                    const qualTab = document.getElementById('tab-qual');
+
+                    window.switchTab = function(tab) {
+                        if (tab === 'quant') {
+                            quantitativeContent.classList.remove('hidden');
+                            qualitativeContent.classList.add('hidden');
+                            quantTab.classList.add('text-indigo-600', 'border-indigo-500');
+                            quantTab.classList.remove('text-gray-500', 'hover:text-gray-700', 'hover:border-gray-300', 'border-transparent');
+                            qualTab.classList.add('text-gray-500', 'hover:text-gray-700', 'hover:border-gray-300', 'border-transparent');
+                            qualTab.classList.remove('text-indigo-600', 'border-indigo-500');
+                        } else {
+                            qualitativeContent.classList.remove('hidden');
+                            quantitativeContent.classList.add('hidden');
+                            qualTab.classList.add('text-indigo-600', 'border-indigo-500');
+                            qualTab.classList.remove('text-gray-500', 'hover:text-gray-700', 'hover:border-gray-300', 'border-transparent');
+                            quantTab.classList.add('text-gray-500', 'hover:text-gray-700', 'hover:border-gray-300', 'border-transparent');
+                            quantTab.classList.remove('text-indigo-600', 'border-indigo-500');
+                        }
+                    }
 
                     function getSubtree(nodeId) {
                         const subtreeNodes = new Set([nodeId]);
@@ -486,24 +527,57 @@
                         // Use node.title for the full, non-truncated text
                         modalTitle.innerText = `Evidências para: ${node.title}`;
                         
-                        const evidenceHtml = aggregatedEvidence.length > 0 ? aggregatedEvidence.map(ev => {
-                            const pathString = ev.path ? ev.path.join(' > ') : '';
-                            const pathHtml = ev.path && ev.path.length > 0 ? `<p class="text-xs text-gray-500 mt-1 mb-2">${pathString}</p>` : '';
-                            
-                            const isIndicator = ev.title === 'Indicadores e dados quantitativos';
-                            const bgColorClass = isIndicator ? 'bg-indigo-50' : 'bg-gray-50';
-                            const borderColorClass = isIndicator ? 'border-indigo-200' : 'border-gray-200';
-                            const titleColorClass = isIndicator ? 'text-indigo-800' : 'text-indigo-700';
+                        const quantitativeEvidence = aggregatedEvidence.filter(ev => ev.title === 'Indicadores e dados quantitativos');
+                        const qualitativeEvidence = aggregatedEvidence.filter(ev => ev.title !== 'Indicadores e dados quantitativos');
 
-                            return `
-                            <div class="mb-4 p-4 ${bgColorClass} rounded-lg border ${borderColorClass}">
-                                <h4 class="font-bold text-lg ${titleColorClass}">${ev.title}</h4>
-                                ${pathHtml}
-                                <p class="text-gray-700 mt-1 whitespace-pre-wrap">${ev.content}</p>
-                            </div>
-                        `}).join('') : '<p class="text-gray-600">Nenhuma evidência foi registrada para esta causa ou suas sub-causas.</p>';
+                        const createEvidenceHtml = (evidenceList) => {
+                            if (evidenceList.length === 0) {
+                                return '<p class="text-gray-600">Nenhuma evidência registrada nesta categoria.</p>';
+                            }
+                            return evidenceList.map(ev => {
+                                const pathString = ev.path ? ev.path.join(' > ') : '';
+                                const pathHtml = ev.path && ev.path.length > 0 ? `<p class="text-xs text-gray-500 mt-1 mb-2">${pathString}</p>` : '';
+                                
+                                const bgColorClass = 'bg-gray-50';
+                                const borderColorClass = 'border-gray-200';
+                                const titleColorClass = 'text-indigo-700';
 
-                        modalContent.innerHTML = evidenceHtml;
+                                return `
+                                <div class="mb-4 p-4 ${bgColorClass} rounded-lg border ${borderColorClass}">
+                                    <h4 class="font-bold text-lg ${titleColorClass}">${ev.title}</h4>
+                                    ${pathHtml}
+                                    <p class="text-gray-700 mt-1 whitespace-pre-wrap">${ev.content}</p>
+                                </div>
+                            `}).join('');
+                        };
+
+                        quantitativeContent.innerHTML = createEvidenceHtml(quantitativeEvidence);
+                        qualitativeContent.innerHTML = createEvidenceHtml(qualitativeEvidence);
+
+                        const quantEvidenceCount = quantitativeEvidence.length;
+                        const qualEvidenceCount = qualitativeEvidence.length;
+
+                        if (quantEvidenceCount > 0) {
+                            quantTab.classList.remove('hidden');
+                        } else {
+                            quantTab.classList.add('hidden');
+                        }
+
+                        if (qualEvidenceCount > 0) {
+                            qualTab.classList.remove('hidden');
+                        } else {
+                            qualTab.classList.add('hidden');
+                        }
+
+                        // Set default tab
+                        if (quantEvidenceCount > 0) {
+                            switchTab('quant');
+                        } else if (qualEvidenceCount > 0) {
+                            switchTab('qual');
+                        } else {
+                            // If no evidence, default to quant tab and show message.
+                            switchTab('quant');
+                        }
 
                         modal.classList.remove('hidden');
                         modal.classList.add('flex');
