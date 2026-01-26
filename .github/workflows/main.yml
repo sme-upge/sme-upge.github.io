@@ -21,10 +21,10 @@ jobs:
       - name: Executar Script R
         run: Rscript orcamento/atualiza_base.R
       
-      - name: Salvar Arquivo Gerado
+- name: Salvar Arquivo Gerado
         run: |
           git config --global user.name "Robo-BI"
           git config --global user.email "actions@github.com"
-          git add orcamento/Execucao_Orcamentaria_Atualizada.csv
-          git commit -m "Dados atualizados automaticamente" || echo "Sem alterações para salvar"
+          git add orcamento/Execucao_Orcamentaria_Atualizada.xlsx
+          git commit -m "Dados atualizados em Excel" || echo "Sem alterações"
           git push
