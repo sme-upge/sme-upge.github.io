@@ -76,4 +76,4 @@ base_filtrada$Ds_Unidade <- recode(base_filtrada$Ds_Unidade, !!!mapa_unidade)
 
 # 3. SALVAR O RESULTADO
 # No GitHub, salvamos no diretório atual
-write.csv(base_filtrada, "orcamento/Execucao_Orcamentaria_Atualizada.csv", row.names = FALSE)
+write.xlsx(base_filtrada, "orcamento/Execucao_Orcamentaria_Atualizada.xlsx", overwrite = TRUE)
