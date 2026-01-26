@@ -44,7 +44,7 @@ mapa_unidade <- c(
   "Diretoria Regional de Educação Campo Limpo" = "Campo Limpo",
   "Diretoria Regional de Educação - Campo Limpo" = "Campo Limpo",
   "Diretoria Regional de Educação Capela do Socorro" = "Capela do Socorro",
-  "Diretoria Regional de Educação  Capela do Socorro" = "Capela do Socorro"
+  "Diretoria Regional de Educação  Capela do Socorro" = "Capela do Socorro",
   "Diretoria Regional de Educação - Capela do Socorro" = "Capela do Socorro",
   "Diretoria Regional de Educação Penha" = "Penha",
   "Diretoria Regional de Educação - Penha" = "Penha",
