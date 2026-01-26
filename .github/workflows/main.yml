@@ -2,7 +2,7 @@ name: Atualizar Dados BI Orçamento
 
 on:
   schedule:
-    - cron: '0 5 * * *' # Roda todo dia às 5 da manhã (horário UTC)
+    - cron: '0 8 * * *' # Roda todo dia às 5 da manhã (horário UTC)
   workflow_dispatch: # Permite que você rode manualmente para testar
 
 jobs:
