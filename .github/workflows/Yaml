@@ -2,8 +2,8 @@ name: Atualizar Dados BI Orçamento
 
 on:
   schedule:
-    - cron: '0 8 * * *' # Roda todo dia às 5 da manhã (horário UTC)
-  workflow_dispatch: # Permite que você rode manualmente para testar
+    - cron: '0 8 * * *' # Roda às 08:00 UTC (05:00 AM Brasília)
+  workflow_dispatch: # Permite rodar manualmente para testar
 
 jobs:
   build:
@@ -21,7 +21,7 @@ jobs:
       - name: Executar Script R
         run: Rscript orcamento/atualiza_base.R
       
-- name: Salvar Arquivo Gerado
+      - name: Salvar Arquivo Excel no Repositório
         run: |
           git config --global user.name "Robo-BI"
           git config --global user.email "actions@github.com"
