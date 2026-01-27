@@ -1,15 +1,10 @@
-# Instalar pacotes se não houver (o GitHub fará isso)
-if(!require(readxl)) install.packages("readxl")
-if(!require(dplyr)) install.packages("dplyr")
-if(!require(openxlsx)) install.packages("openxlsx")
-if(!require(lubridate)) install.packages("lubridate")
-
+# --- Script de Atualização de Orçamento SME ---
 library(readxl)
 library(dplyr)
-library(openxlsx)
+library(readr)
 library(lubridate)
 
-# 1. GERAR LINK DINÂMICO (Resolve o problema de mudar todo mês)
+# 1. GERAR LINK DINÂMICO
 get_url <- function(data) {
   ano <- format(data, "%Y")
   mes_ano <- format(data, "%m%y")
@@ -24,11 +19,12 @@ arquivo_temp <- tempfile(fileext = ".xlsx")
 try_download <- try(download.file(url_base, destfile = arquivo_temp, mode = "wb"), silent = TRUE)
 
 if(inherits(try_download, "try-error")) {
+  message("Mês atual não disponível, tentando mês anterior...")
   url_base <- get_url(Sys.Date() %m-% months(1))
   download.file(url_base, destfile = arquivo_temp, mode = "wb")
 }
 
-# 2. PROCESSAMENTO (Seu código original com ajustes)
+# 2. PROCESSAMENTO
 base_completa <- read_excel(arquivo_temp)
 
 mapa_unidade <- c(
@@ -68,12 +64,19 @@ mapa_unidade <- c(
 base_filtrada <- base_completa %>%
   mutate(
     Cd_AnoExecucao = as.numeric(Cd_AnoExecucao),
-    Ds_Orgao = trimws(Ds_Orgao)
+    Ds_Orgao = trimws(Ds_Orgao),
+    # Correção crucial: transformar em Date para remover as horas que quebram o Power BI
+    DataInicial = as.Date(DataInicial),
+    DataFinal = as.Date(DataFinal),
+    DataExtracao = Sys.time()
   ) %>%
   filter(Cd_AnoExecucao >= 2010, Sigla_Orgao == "SME")
 
 base_filtrada$Ds_Unidade <- recode(base_filtrada$Ds_Unidade, !!!mapa_unidade)
 
-# 3. SALVAR O RESULTADO
-# No GitHub, salvamos no diretório atual
-write.xlsx(base_filtrada, "orcamento/Execucao_Orcamentaria_Atualizada.xlsx", overwrite = TRUE)
+# 3. SALVAR RESULTADO
+if(!dir.exists("orcamento")) dir.create("orcamento")
+# write_csv garante UTF-8 e compatibilidade total
+write_csv(base_filtrada, "orcamento/Execucao_Orcamentaria_Atualizada.csv")
+
+message("Arquivo CSV gerado com sucesso!")
