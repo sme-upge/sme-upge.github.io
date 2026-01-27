@@ -30,6 +30,7 @@ jobs:
 
       - name: Rodar script de atualizacao
         run: Rscript orcamento/atualiza_base.R
+
       - name: Commit e Push dos resultados
         run: |
           git config --local user.email "actions@github.com"
