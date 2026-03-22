@@ -80,6 +80,6 @@ base_filtrada$Ds_Unidade <- recode(base_filtrada$Ds_Unidade, !!!mapa_unidade)
 if(!dir.exists("orcamento")) { dir.create("orcamento") }
 
 # Gravar o CSV
-write_csv(base_filtrada, "orcamento/Execucao_Orcamentaria_Atualizada.csv")
+write_excel_csv2(base_filtrada, "orcamento/Execucao_Orcamentaria_Atualizada.csv")
 
 message("Arquivo CSV gerado com sucesso!")
