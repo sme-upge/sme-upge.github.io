@@ -3,6 +3,7 @@ library(readxl)
 library(dplyr)
 library(readr)
 library(lubridate)
+options(scipen = 999) # Garante que números grandes não virem '1e+10'
 
 # 1. GERAR LINK DINÂMICO
 get_url <- function(data) {
