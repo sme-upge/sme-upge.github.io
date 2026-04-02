@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simulação do PDE 2025</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #f0f4f8; }
+        .help-icon { cursor: pointer; color: #0056b3; font-weight: bold; border: 1px solid #0056b3; border-radius: 50%; width: 24px; height: 24px; display: inline-flex; align-items: center; justify-content: center; margin-left: 8px; transition: all 0.2s ease-in-out; }
+        .help-icon:hover { background-color: #0056b3; color: white; }
+        input[type=number]::-webkit-inner-spin-button, input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+        input[type=number] { -moz-appearance: textfield; }
+        .hidden-by-logic { display: none !important; }
+        #results-details { max-height: 0; overflow: hidden; transition: max-height 0.4s ease-out; }
+        #results-bar.is-expanded #results-details { max-height: 400px; }
+        #toggle-icon { transition: transform 0.3s; }
+        #results-bar.is-expanded #toggle-icon { transform: rotate(180deg); }
+    </style>
+</head>
+<body class="bg-[#f0f4f8]">
+
+    <!-- Cabeçalho -->
+    <header class="bg-[#003562] text-white p-4 shadow-md flex justify-between items-center">
+        <div>
+            <h1 class="text-xl md:text-2xl font-bold">Simulação do PDE 2025</h1>
+            <p class="text-xs text-gray-300 mt-1">Desenvolvido pela SME</p>
+        </div>
+        <!-- Logo (Coloque o link correto da imagem da SME se precisar) -->
+        <div class="hidden md:block font-bold text-sm text-right">PREFEITURA DE<br>SÃO PAULO<br><span class="font-normal text-xs">EDUCAÇÃO</span></div>
+    </header>
+
+    <!-- Corpo Principal -->
+    <main class="p-4 md:p-8 mb-48">
+        <div class="max-w-4xl mx-auto bg-blue-100 p-6 rounded-lg shadow-lg">
+
+            <!-- Seção de Seleção Inicial -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8 bg-white p-4 rounded-lg shadow-sm border border-blue-200">
+                <div>
+                    <label class="block text-sm font-bold text-gray-700 mb-1">Qual o seu cargo?</label>
+                    <select id="cargo" class="w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
+                        <option value="professor">Professor(a) / Demais Cargos</option>
+                        <option value="diretor">Diretor(a) de Escola</option>
+                        <option value="assistente_diretor">Assistente de Diretor(a)</option>
+                        <option value="coordenador">Coordenador(a) Pedagógico(a)</option>
+                        <option value="supervisor">Supervisor(a) Escolar / DRE / SME</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-bold text-gray-700 mb-1">Onde você trabalha?</label>
+                    <select id="localTrabalho" class="w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
+                        <option value="emef_emefm">EMEF / EMEFM</option>
+                        <option value="emei_cemei">EMEI / CEMEI</option>
+                        <option value="cei">CEI</option>
+                        <option value="cieja">CIEJA / CCI / CIPS</option>
+                        <option value="dre">DRE / SME / CEU Gestão / EMEBS</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-bold text-gray-700 mb-1">Qual é a sua jornada?</label>
+                    <select id="jornada" class="w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
+                        <option value="jeif">JEIF / JB 30 / JB 40 / JE 40 / 40H</option>
+                        <option value="jbd">JBD / JBE / 33H</option>
+                        <option value="jb">JB / 20H</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="space-y-6">
+                <!-- ETAPA 1 -->
+                <div class="bg-white p-5 rounded-lg shadow border-l-4 border-blue-600">
+                    <h2 class="text-lg font-bold text-gray-800 mb-4">1ª Etapa (Semestre 1)</h2>
+                    
+                    <h3 class="font-semibold text-gray-700 mb-2">Desempenho Individual</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4 bg-gray-50 p-3 rounded border">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">Número de faltas no 1º semestre:</label>
+                            <input type="number" id="faltas1" value="0" min="0" class="mt-1 w-full p-2 border border-gray-300 rounded-md text-center">
+                        </div>
+                    </div>
+
+                    <h3 class="font-semibold text-gray-700 mb-2 mt-6">Desempenho Coletivo (1ª Etapa)</h3>
+                    <!-- Dynamic EMEF 1 -->
+                    <div id="col_e1_emef" class="space-y-4 bg-gray-50 p-3 rounded border">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">Frequência dos estudantes:</label>
+                            <select id="freq1_emef" class="mt-1 w-full p-2 border rounded-md text-sm">
+                                <option value="1.0">90% ou maior (100%)</option>
+                                <option value="0.75">85% a 89,99% (75%)</option>
+                                <option value="0.5">80% a 84,99% (50%)</option>
+                                <option value="0.25">75% a 79,99% (25%)</option>
+                                <option value="0.0">Abaixo de 75% (0%)</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">Evolução na Prova São Paulo (2023 para 2024):</label>
+                            <select id="evol1_emef" class="mt-1 w-full p-2 border rounded-md text-sm">
+                                <option value="1.0">Sim (houve aumento da média ponderada)</option>
+                                <option value="0.0">Não (não houve aumento da média ponderada)</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Dynamic Outros 1 -->
+                    <div id="col_e1_outros" class="space-y-4 bg-gray-50 p-3 rounded border hidden-by-logic">
+                        <label class="block text-sm font-medium text-gray-700">Atingimento da Meta (Freq. ou Ocupação):</label>
+                        <select id="meta1_outros" class="mt-1 w-full p-2 border rounded-md text-sm">
+                            <option value="1.0">Atingiu a meta máxima (100%)</option>
+                            <option value="0.8">Atingiu 80%</option>
+                            <option value="0.65">Atingiu 65%</option>
+                            <option value="0.5">Atingiu 50%</option>
+                            <option value="0.0">Não atingiu (0%)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- ETAPA 2 (O QUE MUDOU DE VERDADE) -->
+                <div class="bg-white p-5 rounded-lg shadow border-l-4 border-green-600">
+                    <h2 class="text-lg font-bold text-gray-800 mb-4">2ª Etapa (Semestre 2)</h2>
+                    
+                    <h3 class="font-semibold text-gray-700 mb-2">Desempenho Individual</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4 bg-gray-50 p-3 rounded border">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">Número de faltas no 2º semestre:</label>
+                            <input type="number" id="faltas2" value="0" min="0" class="mt-1 w-full p-2 border border-gray-300 rounded-md text-center">
+                        </div>
+                    </div>
+                    
+                    <h3 class="font-semibold text-gray-700 mb-2 mt-6">Desempenho Coletivo (2ª Etapa)</h3>
+                    
+                    <!-- EMEF Etapa 2 -->
+                    <div id="col_e2_emef" class="space-y-4 bg-gray-50 p-3 rounded border">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">Frequência dos estudantes:</label>
+                            <select id="freq2_emef" class="mt-1 w-full p-2 border rounded-md text-sm">
+                                <option value="1.0">90% ou maior (100%)</option>
+                                <option value="0.75">85% a 89,99% (75%)</option>
+                                <option value="0.5">80% a 84,99% (50%)</option>
+                                <option value="0.25">75% a 79,99% (25%)</option>
+                                <option value="0.0">Abaixo de 75% (0%)</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">Participação (SARESP e Prova SP 2025):</label>
+                            <select id="part2_emef" class="mt-1 w-full p-2 border rounded-md text-sm">
+                                <option value="1.0">Pelo menos 80% nas DUAS provas (100%)</option>
+                                <option value="0.0">Menos de 80% em alguma (0%)</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Outros Etapa 2 -->
+                    <div id="col_e2_outros" class="space-y-4 bg-gray-50 p-3 rounded border hidden-by-logic">
+                        <label class="block text-sm font-medium text-gray-700">Atingimento da Meta (Freq. ou Ocupação):</label>
+                        <select id="meta2_outros" class="mt-1 w-full p-2 border rounded-md text-sm">
+                            <option value="1.0">Atingiu a meta máxima (100%)</option>
+                            <option value="0.8">Atingiu 80%</option>
+                            <option value="0.65">Atingiu 65%</option>
+                            <option value="0.5">Atingiu 50%</option>
+                            <option value="0.0">Não atingiu (0%)</option>
+                        </select>
+                    </div>
+
+                    <!-- BÔNUS VALOR ADICIONAL -->
+                    <h3 class="font-semibold text-gray-700 mb-2 mt-6">Valor Adicional (Bônus)</h3>
+                    
+                    <!-- Bônus EMEF -->
+                    <div id="bonus_emef" class="space-y-2 bg-yellow-50 p-4 rounded border border-yellow-300">
+                        <label class="flex items-center text-sm font-medium text-gray-800">
+                            <input type="checkbox" id="b_emef_r1" class="mr-2 h-4 w-4 text-blue-600">
+                            Regra 1: Aumento do IDEP acima da média da rede (ou top 10%).
+                        </label>
+                        <label class="flex items-center text-sm font-medium text-gray-800">
+                            <input type="checkbox" id="b_emef_r2" class="mr-2 h-4 w-4 text-blue-600">
+                            Regra 2: Aumento do IDEP com diminuição do "Abaixo do Básico".
+                        </label>
+                        <label id="div_b_emef_alfa" class="flex items-center text-sm font-medium text-gray-800 hidden-by-logic">
+                            <input type="checkbox" id="b_emef_alfa" class="mr-2 h-4 w-4 text-blue-600">
+                            Alfabetização: Atingiu meta no 2º Ano. (Exclusivo Gestão)
+                        </label>
+                    </div>
+
+                    <!-- Bônus Demais (Média) -->
+                    <div id="bonus_outros" class="bg-yellow-50 p-4 rounded border border-yellow-300 hidden-by-logic">
+                        <label class="flex items-center text-sm font-medium text-gray-800">
+                            <input type="checkbox" id="b_outros_media" class="mr-2 h-5 w-5 text-blue-600">
+                            A unidade atingiu Desempenho ACIMA da média do seu tipo (DRE).
+                        </label>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- BARRA DE RESULTADOS FLUTUANTE (Idêntica à original) -->
+    <footer id="results-bar" class="fixed bottom-0 left-0 right-0 bg-[#1f2937] text-white shadow-2xl transform translate-y-full transition-transform duration-500">
+        <div id="results-header" class="max-w-6xl mx-auto flex items-center justify-between p-2 sm:p-4 cursor-pointer">
+            <div class="flex-grow grid grid-cols-2 gap-2 sm:gap-4">
+                <div class="bg-blue-600 p-2 rounded-lg text-center shadow-inner">
+                    <span class="block text-xs text-blue-200">TOTAL ESTIMADO NO ANO</span>
+                    <span id="res-total-estimado" class="block text-xl sm:text-2xl font-extrabold text-white">R$ 0,00</span>
+                </div>
+                <div class="bg-green-600 p-2 rounded-lg text-center shadow-inner">
+                    <span class="block text-xs text-green-200">TETO MÁXIMO POSSÍVEL</span>
+                    <span id="res-total-maximo" class="block text-xl sm:text-2xl font-extrabold text-white">R$ 0,00</span>
+                </div>
+            </div>
+            <div id="toggle-container" class="pl-4 text-center">
+                 <span class="text-xs hidden sm:block text-gray-400">Detalhes</span>
+                <svg id="toggle-icon" xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mx-auto text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M5 15l7-7 7 7" />
+                </svg>
+            </div>
+        </div>
+
+        <!-- Conteúdo Detalhado -->
+        <div id="results-details" class="bg-gray-800 border-t border-gray-700">
+            <div class="max-w-6xl mx-auto grid grid-cols-2 sm:grid-cols-4 gap-4 text-center p-4">
+                <div class="bg-gray-700 p-2 rounded">
+                    <span class="block text-xs text-gray-400">1ª Etapa (Valor Base)</span>
+                    <span id="res-etapa1-valor" class="block text-lg font-bold text-gray-200">R$ 0,00</span>
+                </div>
+                <div class="bg-gray-700 p-2 rounded">
+                    <span class="block text-xs text-gray-400">1ª Etapa (Bônus 0 Faltas)</span>
+                    <span id="res-etapa1-bonus" class="block text-lg font-bold text-yellow-400">R$ 0,00</span>
+                </div>
+                <div class="bg-gray-700 p-2 rounded">
+                    <span class="block text-xs text-gray-400">2ª Etapa (Valor Base)</span>
+                    <span id="res-etapa2-valor" class="block text-lg font-bold text-gray-200">R$ 0,00</span>
+                </div>
+                <div class="bg-gray-700 p-2 rounded border border-yellow-600">
+                    <span class="block text-xs text-gray-400">2ª Etapa (Valores Adicionais)</span>
+                    <span id="res-etapa2-bonus" class="block text-lg font-bold text-yellow-400">R$ 0,00</span>
+                </div>
+            </div>
+            <p class="text-xs text-center text-gray-400 px-4 pb-4">
+                <strong>Aviso:</strong> O valor líquido a receber na sua conta no final do ano será este "TOTAL ESTIMADO" <b>descontando</b> o valor que você já recebeu de adiantamento em agosto.
+            </p>
+        </div>
+    </footer>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    
+    // Calcula % de desconto por faltas
+    function getAssiduidade(faltas) {
+        if(faltas > 10) return 0;
+        if(faltas <= 1) return 1;
+        return 1 - ((faltas - 1) * 0.05);
+    }
+
+    function calculate() {
+        const cargo = document.getElementById('cargo').value;
+        const local = document.getElementById('localTrabalho').value;
+        const jor = document.getElementById('jornada').value;
+        const f1 = parseInt(document.getElementById('faltas1').value) || 0;
+        const f2 = parseInt(document.getElementById('faltas2').value) || 0;
+
+        let multJornada = (jor === 'jeif') ? 1.0 : (jor === 'jbd') ? 0.75 : 0.5;
+        let isGestor = ['diretor', 'assistente_diretor', 'coordenador'].includes(cargo);
+
+        // 1. BASES LEGAIS
+        let teto_assid_etapa = (local === 'cei') ? 2400 : 1200;
+        let teto_coletivo_etapa = (local === 'cei') ? 600 : (local === 'emef_emefm' ? 1500 : 1800);
+        let freq_base_emef = 300; 
+
+        // 2. ASSIDUIDADE (INDIVIDUAL)
+        let assid_perc1 = getAssiduidade(f1);
+        let valInd1 = teto_assid_etapa * assid_perc1;
+        let bonusInd1 = (f1 === 0) ? 900 : 0;
+
+        let assid_perc2 = getAssiduidade(f2);
+        let valInd2 = teto_assid_etapa * assid_perc2;
+        let bonusInd2 = (f2 === 0) ? 900 : 0;
+
+        // 3. DESEMPENHO COLETIVO
+        let valCol1 = 0, valCol2 = 0, bonusCol2 = 0;
+        let maxBonusCol2 = 0;
+
+        if (local === 'emef_emefm') {
+            // EMEF
+            valCol1 = (freq_base_emef * parseFloat(document.getElementById('freq1_emef').value)) + 
+                      (1500 * parseFloat(document.getElementById('evol1_emef').value));
+            
+            valCol2 = (freq_base_emef * parseFloat(document.getElementById('freq2_emef').value)) + 
+                      (1500 * parseFloat(document.getElementById('part2_emef').value));
+
+            if(document.getElementById('b_emef_r1').checked) bonusCol2 += (isGestor ? 1450 : 450);
+            if(document.getElementById('b_emef_r2').checked) bonusCol2 += (isGestor ? 1450 : 450);
+            if(isGestor && document.getElementById('b_emef_alfa').checked) bonusCol2 += 2000;
+
+            maxBonusCol2 = isGestor ? 4900 : 900;
+        } 
+        else {
+            // CEI, EMEI, DRE
+            valCol1 = teto_coletivo_etapa * parseFloat(document.getElementById('meta1_outros').value);
+            valCol2 = teto_coletivo_etapa * parseFloat(document.getElementById('meta2_outros').value);
+            
+            if(document.getElementById('b_outros_media').checked) bonusCol2 += 900;
+            maxBonusCol2 = 900;
+        }
+
+        // 4. APLICAR JORNADA E SOMAR TUDO
+        let e1_valor = (valInd1 + valCol1) * multJornada;
+        let e1_bonus = bonusInd1 * multJornada;
+        
+        let e2_valor = (valInd2 + valCol2) * multJornada;
+        let e2_bonus = (bonusInd2 + bonusCol2) * multJornada;
+
+        let totalEstimado = e1_valor + e1_bonus + e2_valor + e2_bonus;
+
+        // 5. CALCULAR O TETO MÁXIMO POSSÍVEL DAQUELE CARGO
+        let teto_ano_base = (teto_assid_etapa * 2) + (teto_coletivo_etapa * 2) + (local === 'emef_emefm' ? 600 : 0); // EMEF tem +300x2 de Freq
+        let teto_ano_bonus = 1800 + maxBonusCol2; // 900+900 de faltas + bonus coletivo
+        let tetoMaximo = (teto_ano_base + teto_ano_bonus) * multJornada;
+
+        // 6. ATUALIZAR A TELA
+        const formatBRL = (val) => val.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+
+        document.getElementById('res-etapa1-valor').textContent = formatBRL(e1_valor);
+        document.getElementById('res-etapa1-bonus').textContent = formatBRL(e1_bonus);
+        document.getElementById('res-etapa2-valor').textContent = formatBRL(e2_valor);
+        document.getElementById('res-etapa2-bonus').textContent = formatBRL(e2_bonus);
+        
+        document.getElementById('res-total-estimado').textContent = formatBRL(totalEstimado);
+        document.getElementById('res-total-maximo').textContent = formatBRL(tetoMaximo);
+
+        // Animação da barra ao iniciar
+        setTimeout(() => { document.getElementById('results-bar').style.transform = 'translateY(0)'; }, 100);
+    }
+
+    // Controle de visibilidade dos inputs dependendo do local
+    function updateUI() {
+        const local = document.getElementById('localTrabalho').value;
+        const cargo = document.getElementById('cargo').value;
+        const isGestor = ['diretor', 'assistente_diretor', 'coordenador'].includes(cargo);
+
+        // Reseta todos os painéis
+        document.getElementById('col_e1_emef').classList.add('hidden-by-logic');
+        document.getElementById('col_e2_emef').classList.add('hidden-by-logic');
+        document.getElementById('bonus_emef').classList.add('hidden-by-logic');
+        document.getElementById('col_e1_outros').classList.add('hidden-by-logic');
+        document.getElementById('col_e2_outros').classList.add('hidden-by-logic');
+        document.getElementById('bonus_outros').classList.add('hidden-by-logic');
+
+        if(local === 'emef_emefm') {
+            document.getElementById('col_e1_emef').classList.remove('hidden-by-logic');
+            document.getElementById('col_e2_emef').classList.remove('hidden-by-logic');
+            document.getElementById('bonus_emef').classList.remove('hidden-by-logic');
+            
+            if(isGestor) {
+                document.getElementById('div_b_emef_alfa').classList.remove('hidden-by-logic');
+            } else {
+                document.getElementById('div_b_emef_alfa').classList.add('hidden-by-logic');
+                document.getElementById('b_emef_alfa').checked = false;
+            }
+        } else {
+            document.getElementById('col_e1_outros').classList.remove('hidden-by-logic');
+            document.getElementById('col_e2_outros').classList.remove('hidden-by-logic');
+            document.getElementById('bonus_outros').classList.remove('hidden-by-logic');
+        }
+
+        calculate();
+    }
+
+    // Toggle da barra inferior
+    document.getElementById('results-header').addEventListener('click', () => {
+        document.getElementById('results-bar').classList.toggle('is-expanded');
+    });
+
+    // Listeners
+    document.querySelectorAll('select, input').forEach(el => {
+        el.addEventListener('change', updateUI);
+        el.addEventListener('keyup', updateUI);
+    });
+
+    updateUI();
+    document.getElementById('results-bar').classList.add('is-expanded');
+});
+</script>
+</body>
+</html>
