@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Simulação da segunda parcela do PDE 2025</title>
+    <title>Simulação da 2ª Parcela do PDE 2025</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
@@ -14,30 +14,31 @@
         input[type=number] { -moz-appearance: textfield; }
         .hidden-by-logic { display: none !important; }
         #results-details { max-height: 0; overflow: hidden; transition: max-height 0.4s ease-out; }
-        #results-bar.is-expanded #results-details { max-height: 400px; }
+        #results-bar.is-expanded #results-details { max-height: 300px; }
         #toggle-icon { transition: transform 0.3s; }
         #results-bar.is-expanded #toggle-icon { transform: rotate(180deg); }
         #results-header { cursor: pointer; }
     </style>
 </head>
-<body class="bg-[#f0f4f8] pb-56">
+<body class="bg-[#f0f4f8] pb-48">
 
     <!-- Cabeçalho -->
     <header class="bg-[#003562] text-white p-4 shadow-md flex justify-between items-center sticky top-0 z-40">
         <div>
-            <h1 class="text-xl md:text-2xl font-bold">Simulação da segunda parcela do PDE 2025</h1>
-            <p class="text-xs text-gray-300 mt-1">Cálculo do Ano Completo (1ª + 2ª Etapa)</p>
+            <h1 class="text-xl md:text-2xl font-bold">Simulação da 2ª Parcela do PDE 2025</h1>
+            <p class="text-xs text-blue-200 mt-1">Cálculo do Ano Completo (1ª + 2ª Etapa)</p>
         </div>
         <div class="hidden md:block font-bold text-sm text-right leading-tight">
             PREFEITURA DE<br>SÃO PAULO<br><span class="font-normal text-xs">EDUCAÇÃO</span>
         </div>
     </header>
 
+    <!-- Corpo Principal -->
     <main class="p-4 md:p-8 max-w-4xl mx-auto">
-        <div class="bg-blue-100 p-6 rounded-lg shadow-lg border border-blue-200">
+        <div class="bg-blue-100 p-6 rounded-lg shadow-lg">
 
-            <!-- Seleção Inicial -->
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8 bg-white p-4 rounded-lg shadow-sm">
+            <!-- Seção de Seleção Inicial -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8 bg-white p-4 rounded-lg shadow-sm border border-blue-200">
                 <div>
                     <label class="block text-sm font-bold text-gray-700 mb-1">Qual o seu cargo?</label>
                     <select id="cargo" class="w-full p-2 border border-gray-300 rounded-md bg-gray-50 focus:ring-2 focus:ring-blue-500 outline-none">
@@ -56,9 +57,9 @@
                         <option value="emei">EMEI / CEMEI</option>
                         <option value="cei">CEI</option>
                         <option value="cieja">CIEJA / CCI / CIPS</option>
-                        <option value="emebs">EMEBS / CMCT / Gestão do CEU</option>
                         <option value="dre">Diretoria Regional de Educação</option>
                         <option value="sme">Secretaria Municipal de Educação</option>
+                        <option value="ceugestao">EMEBS / CMCT / Gestão do CEU</option>
                     </select>
                 </div>
                 <div>
@@ -71,11 +72,13 @@
                 </div>
             </div>
 
+            <!-- Critérios -->
             <div class="space-y-6">
                 <!-- ETAPA 1 -->
-                <div class="bg-white p-4 rounded-lg shadow border-l-4 border-blue-500">
+                <div class="bg-white p-5 rounded-lg shadow border-l-4 border-blue-500">
                     <h2 class="text-lg font-bold text-gray-800 mb-4">1ª Etapa</h2>
                     
+                    <!-- Desempenho Individual -->
                     <h3 class="font-semibold text-gray-700 mb-2">Desempenho Individual</h3>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4 bg-gray-50 p-3 rounded">
                         <div>
@@ -93,12 +96,16 @@
                         </div>
                     </div>
 
+                    <!-- Desempenho Coletivo -->
                     <h3 class="font-semibold text-gray-700 mb-2">Desempenho Coletivo</h3>
                     
-                    <!-- EMEF/EMEFM E1 -->
+                    <!-- EMEF/EMEFM -->
                     <div id="col1-emef" class="space-y-4">
                         <div>
-                            <label class="flex items-center text-sm font-medium text-gray-700">Frequência dos estudantes <span class="help-icon" onclick="openModal('freqEstudantesEmef')">?</span></label>
+                            <label class="flex items-center text-sm font-medium text-gray-700">
+                                Frequência dos estudantes
+                                <span class="help-icon" onclick="openModal('freqEstudantesEmef')">?</span>
+                            </label>
                             <select id="e1_freq_emef" class="mt-1 w-full p-2 border border-gray-300 rounded-md bg-gray-50">
                                 <option value="1.0">90% ou maior</option>
                                 <option value="0.75">85% a 89,99%</option>
@@ -108,7 +115,10 @@
                             </select>
                         </div>
                         <div>
-                            <label class="flex items-center text-sm font-medium text-gray-700">Evolução da nota na Prova São Paulo (2023 para 2024) <span class="help-icon" onclick="openModal('evolucaoProvaSPEmef')">?</span></label>
+                            <label class="flex items-center text-sm font-medium text-gray-700">
+                                Evolução da nota na Prova São Paulo (2023 para 2024)
+                                <span class="help-icon" onclick="openModal('evolucaoProvaSPEmef')">?</span>
+                            </label>
                             <select id="e1_evol_emef" class="mt-1 w-full p-2 border border-gray-300 rounded-md bg-gray-50">
                                 <option value="1.0">Sim (houve aumento da média ponderada)</option>
                                 <option value="0.0">Não (não houve aumento da média ponderada)</option>
@@ -116,40 +126,60 @@
                         </div>
                     </div>
                     
-                    <!-- EMEI E1 -->
+                    <!-- EMEI/CEMEI -->
                     <div id="col1-emei" class="hidden-by-logic">
-                         <label class="flex items-center text-sm font-medium text-gray-700">Frequência dos estudantes <span class="help-icon" onclick="openModal('freqEstudantesEmei')">?</span></label>
+                         <label class="flex items-center text-sm font-medium text-gray-700">
+                            Frequência dos estudantes
+                            <span class="help-icon" onclick="openModal('freqEstudantesEmei')">?</span>
+                        </label>
                         <select id="e1_freq_emei" class="mt-1 w-full p-2 border border-gray-300 rounded-md bg-gray-50">
-                            <option value="1.0">90% ou maior</option><option value="0.8">80% a 89,99%</option><option value="0.65">70% a 79,99%</option><option value="0.5">60% a 69,99%</option><option value="0.0">Abaixo de 60%</option>
+                            <option value="1.0">90% ou maior</option>
+                            <option value="0.8">80% a 89,99%</option>
+                            <option value="0.65">70% a 79,99%</option>
+                            <option value="0.5">60% a 69,99%</option>
+                            <option value="0.0">Abaixo de 60%</option>
                         </select>
                     </div>
 
-                    <!-- CEI E1 -->
+                    <!-- CEI -->
                     <div id="col1-cei" class="hidden-by-logic">
-                        <label class="flex items-center text-sm font-medium text-gray-700">Taxa de ocupação <span class="help-icon" onclick="openModal('taxaOcupacaoCei')">?</span></label>
+                        <label class="flex items-center text-sm font-medium text-gray-700">
+                            Taxa de ocupação
+                            <span class="help-icon" onclick="openModal('taxaOcupacaoCei')">?</span>
+                        </label>
                         <select id="e1_ocup_cei" class="mt-1 w-full p-2 border border-gray-300 rounded-md bg-gray-50">
-                            <option value="1.0">90% ou maior</option><option value="0.5">80% a 89,99%</option><option value="0.3">70% a 79,99%</option><option value="0.0">Abaixo de 70%</option>
+                            <option value="1.0">90% ou maior</option>
+                            <option value="0.5">80% a 89,99%</option>
+                            <option value="0.3">70% a 79,99%</option>
+                            <option value="0.0">Abaixo de 70%</option>
                         </select>
                     </div>
 
-                    <!-- CIEJA E1 -->
+                    <!-- CIEJA -->
                     <div id="col1-cieja" class="hidden-by-logic">
-                         <label class="flex items-center text-sm font-medium text-gray-700">Taxa de ocupação <span class="help-icon" onclick="openModal('taxaOcupacaoCieja')">?</span></label>
+                         <label class="flex items-center text-sm font-medium text-gray-700">
+                            Taxa de ocupação
+                            <span class="help-icon" onclick="openModal('taxaOcupacaoCieja')">?</span>
+                        </label>
                         <select id="e1_ocup_cieja" class="mt-1 w-full p-2 border border-gray-300 rounded-md bg-gray-50">
-                            <option value="1.0">80% ou maior</option><option value="0.5">70% a 79,99%</option><option value="0.3">60% a 69,99%</option><option value="0.0">Abaixo de 60%</option>
+                            <option value="1.0">80% ou maior</option>
+                            <option value="0.5">70% a 79,99%</option>
+                            <option value="0.3">60% a 69,99%</option>
+                            <option value="0.0">Abaixo de 60%</option>
                         </select>
                     </div>
 
-                    <!-- ORGAOS E1 -->
+                    <!-- DRE/SME/ETC -->
                     <div id="col1-media" class="hidden-by-logic bg-blue-50 p-3 rounded-md border border-blue-200">
                         <p id="txt-media-e1" class="text-sm text-blue-800"></p>
                     </div>
                 </div>
 
                 <!-- ETAPA 2 -->
-                <div class="bg-white p-4 rounded-lg shadow border-l-4 border-green-500">
+                <div class="bg-white p-5 rounded-lg shadow border-l-4 border-green-500">
                     <h2 class="text-lg font-bold text-gray-800 mb-4">2ª Etapa (Estimativa com valores máximos)</h2>
                     
+                    <!-- Desempenho Individual -->
                     <h3 class="font-semibold text-gray-700 mb-2">Desempenho Individual</h3>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4 bg-gray-50 p-3 rounded">
                         <div>
@@ -167,26 +197,28 @@
                         </div>
                     </div>
                     
-                    <h3 class="font-semibold text-gray-700 mb-2">Desempenho Coletivo e Bônus Adicional</h3>
-                    <div id="coletivo-etapa2-view" class="bg-gray-100 p-4 rounded-md border border-gray-200 text-sm text-gray-700 space-y-2">
-                        <!-- Conteúdo gerado via JS baseado no local -->
+                    <!-- Desempenho e Bônus Coletivo (Visualização) -->
+                    <h3 class="font-semibold text-gray-700 mb-2 mt-6">Desempenho Coletivo e Bônus Adicional</h3>
+                    <div id="coletivo-etapa2-view" class="bg-gray-100 p-4 rounded-md border border-gray-200 text-sm text-gray-700 space-y-2 leading-relaxed">
+                        <!-- Conteúdo dinâmico aqui (Injetado via JS) -->
                     </div>
                 </div>
             </div>
         </div>
     </main>
 
-    <!-- Barra de Resultados Flutuante -->
-    <footer id="results-bar" class="fixed bottom-0 left-0 right-0 bg-[#1f2937] text-white shadow-2xl transform translate-y-full transition-transform duration-500 is-expanded z-50">
+    <!-- BARRA DE RESULTADOS FLUTUANTE (O RODAPÉ AZUL E VERDE) -->
+    <footer id="results-bar" class="fixed bottom-0 left-0 right-0 bg-[#1f2937] text-white shadow-2xl transform translate-y-full transition-transform duration-500">
+        <!-- Cabeçalho Clicável para Expandir/Recolher -->
         <div id="results-header" class="max-w-6xl mx-auto flex items-center justify-between p-2 sm:p-4">
             <div class="flex-grow grid grid-cols-2 gap-2 sm:gap-4">
-                <div class="bg-blue-600 p-2 rounded-lg text-center shadow-inner">
-                    <span class="block text-[10px] sm:text-xs text-blue-200 uppercase tracking-widest">Total Estimado no Ano</span>
-                    <span id="res-total-estimado" class="block text-xl sm:text-2xl font-black text-white">Até R$ 0,00</span>
+                <div class="bg-blue-600 p-2 rounded-lg text-center shadow-inner border border-blue-500">
+                    <span class="block text-[10px] sm:text-xs text-blue-200 uppercase tracking-widest font-bold">TOTAL ESTIMADO</span>
+                    <span id="res-total-estimado" class="block text-xl sm:text-3xl font-extrabold text-white">Até R$ 0,00</span>
                 </div>
-                <div class="bg-green-600 p-2 rounded-lg text-center shadow-inner">
-                    <span class="block text-[10px] sm:text-xs text-green-200 uppercase tracking-widest">Teto Máximo Possível</span>
-                    <span id="res-total-maximo" class="block text-xl sm:text-2xl font-black text-white">R$ 0,00</span>
+                <div class="bg-green-600 p-2 rounded-lg text-center shadow-inner border border-green-500">
+                    <span class="block text-[10px] sm:text-xs text-green-200 uppercase tracking-widest font-bold">TETO DO PRÊMIO</span>
+                    <span id="res-total-maximo" class="block text-xl sm:text-3xl font-extrabold text-white">R$ 0,00</span>
                 </div>
             </div>
             <div id="toggle-container" class="pl-4 text-center">
@@ -197,39 +229,53 @@
             </div>
         </div>
 
-        <div id="results-details" class="bg-gray-800 border-t border-gray-700">
-            <div class="max-w-6xl mx-auto grid grid-cols-2 sm:grid-cols-4 gap-4 text-center p-4">
-                <div class="bg-gray-700 p-2 rounded"><span class="block text-xs text-gray-400">1ª Etapa (Valor Base)</span><span id="res-etapa1-valor" class="block text-lg font-bold text-gray-200">R$ 0,00</span></div>
-                <div class="bg-gray-700 p-2 rounded"><span class="block text-xs text-gray-400">1ª Etapa (Bônus Faltas)</span><span id="res-etapa1-bonus" class="block text-lg font-bold text-yellow-400">R$ 0,00</span></div>
-                <div class="bg-gray-700 p-2 rounded"><span class="block text-xs text-gray-400">2ª Etapa (Valor Base)</span><span id="res-etapa2-valor" class="block text-lg font-bold text-gray-200">R$ 0,00</span></div>
-                <div class="bg-gray-700 p-2 rounded border border-yellow-600"><span class="block text-xs text-gray-400">2ª Etapa (Bônus Adicionais)</span><span id="res-etapa2-bonus" class="block text-lg font-bold text-yellow-400">R$ 0,00</span></div>
+        <!-- Conteúdo Detalhado (Recolhível) -->
+        <div id="results-details">
+            <div class="max-w-6xl mx-auto grid grid-cols-2 sm:grid-cols-4 gap-4 text-center px-4 pb-4">
+                <div class="bg-gray-700 p-2 rounded">
+                    <span class="block text-xs text-gray-400 uppercase tracking-wider mb-1">1ª Etapa (Valor Base)</span>
+                    <span id="res-etapa1-valor" class="block text-lg font-bold text-gray-200">R$ 0,00</span>
+                </div>
+                <div class="bg-gray-700 p-2 rounded border border-gray-600">
+                    <span class="block text-xs text-gray-400 uppercase tracking-wider mb-1">1ª Etapa (Bônus Faltas)</span>
+                    <span id="res-etapa1-bonus" class="block text-lg font-bold text-yellow-400">R$ 0,00</span>
+                </div>
+                <div class="bg-gray-700 p-2 rounded">
+                    <span class="block text-xs text-gray-400 uppercase tracking-wider mb-1">2ª Etapa (Valor Base)</span>
+                    <span id="res-etapa2-valor" class="block text-lg font-bold text-gray-200">R$ 0,00</span>
+                </div>
+                <div class="bg-gray-700 p-2 rounded border border-yellow-600">
+                    <span class="block text-xs text-yellow-500 uppercase tracking-wider mb-1">2ª Etapa (Adicional/Bônus)</span>
+                    <span id="res-etapa2-bonus" class="block text-lg font-bold text-yellow-400">R$ 0,00</span>
+                </div>
             </div>
-            <p class="text-xs text-center text-gray-400 px-4 pb-4">
-                <strong>Aviso:</strong> O valor líquido da sua 2ª Parcela será este "TOTAL ESTIMADO" descontando o valor que você já recebeu de adiantamento na 1ª Parcela.
+            <p class="text-xs text-center text-gray-400 mt-2 px-4 pb-4 max-w-4xl mx-auto">
+                <strong>Aviso:</strong> Os valores são exibidos apenas para fins de simulação. O valor líquido a receber na 2ª Etapa será o "TOTAL ESTIMADO" <b>descontando</b> o valor que você já recebeu de adiantamento em agosto.
             </p>
         </div>
     </footer>
 
-    <!-- MODAL -->
-    <div id="modal" class="hidden fixed inset-0 bg-black bg-opacity-60 z-[60] flex items-center justify-center p-4 backdrop-blur-sm" onclick="closeModal()">
+    <!-- MODAL (Janela flutuante das Tabelas do Decreto) -->
+    <div id="modal" class="hidden fixed inset-0 bg-black bg-opacity-60 z-50 flex items-center justify-center p-4 backdrop-blur-sm" onclick="closeModal()">
         <div class="bg-white rounded-xl shadow-2xl max-w-2xl w-full max-h-[90vh] flex flex-col" onclick="event.stopPropagation()">
-            <div class="flex justify-between items-center p-4 border-b">
-                <h3 id="modal-title" class="text-lg font-bold text-gray-900"></h3>
+            <div class="p-6 border-b flex justify-between items-start">
+                <h3 id="modal-title" class="text-xl font-bold text-gray-900"></h3>
                 <button onclick="closeModal()" class="text-gray-400 hover:text-red-500 text-3xl font-bold leading-none">&times;</button>
             </div>
-            <div id="modal-body" class="p-6 text-gray-600 overflow-y-auto"></div>
+            <div id="modal-body" class="p-6 text-gray-600 overflow-y-auto flex-grow text-sm leading-relaxed"></div>
         </div>
     </div>
 
 <script>
 document.addEventListener('DOMContentLoaded', function () {
     
+    // TABELAS DO DECRETO (PARA OS MODAIS)
     const MODAL_DATA = {
         assiduidade: {
             title: 'Critério de Assiduidade (Anexo III)',
             body: `<p class="mb-4">O valor base é de 40% (R$ 1.200) para a maioria das unidades ou 80% (R$ 2.400) para CEIs, por semestre. Há um bônus de R$ 900 para quem não tiver faltas no semestre.</p>
-                <table class="w-full text-sm text-left">
-                    <thead class="bg-gray-100"><tr><th>Faltas</th><th>Percentual Atingido</th></tr></thead>
+                <table class="w-full text-left">
+                    <thead><tr><th>Faltas no Semestre</th><th>Percentual Obtido</th></tr></thead>
                     <tbody>
                         <tr><td>0</td><td>100% + Bônus de R$ 900</td></tr>
                         <tr><td>1</td><td>100%</td></tr><tr><td>2</td><td>95%</td></tr><tr><td>3</td><td>90%</td></tr>
@@ -241,26 +287,72 @@ document.addEventListener('DOMContentLoaded', function () {
         },
         freqEstudantesEmef: {
             title: 'Frequência dos Estudantes (EMEF/EMEFM)',
-            body: `Corresponde a 10% da etapa (R$ 300).<br><table><tr><th>Média</th><th>% do Prêmio</th></tr><tr><td>90% ou maior</td><td>100%</td></tr><tr><td>85% a 89,99%</td><td>75%</td></tr><tr><td>80% a 84,99%</td><td>50%</td></tr><tr><td>75% a 79,99%</td><td>25%</td></tr><tr><td>Abaixo de 75%</td><td>0%</td></tr></table>`
+            body: `<p class="mb-4">Corresponde a 10% da base de cálculo da etapa (R$ 300,00).</p>
+                <table class="w-full text-left">
+                    <thead><tr><th>Média de Frequência</th><th>Resultado</th><th>Valor</th></tr></thead>
+                    <tbody>
+                        <tr><td>90% ou maior</td><td>100%</td><td>R$ 300,00</td></tr>
+                        <tr><td>85% a 89,99%</td><td>75%</td><td>R$ 225,00</td></tr>
+                        <tr><td>80% a 84,99%</td><td>50%</td><td>R$ 150,00</td></tr>
+                        <tr><td>75% a 79,99%</td><td>25%</td><td>R$ 75,00</td></tr>
+                        <tr><td>Abaixo de 75%</td><td>0%</td><td>R$ 0,00</td></tr>
+                    </tbody>
+                </table>`
         },
         evolucaoProvaSPEmef: {
             title: 'Evolução na Prova São Paulo (1ª Etapa)',
-            body: `Compara a nota de 2024 com 2023. Corresponde a 50% da etapa (R$ 1.500).<br><table><tr><th>Apuração</th><th>% do Prêmio</th></tr><tr><td>Houve aumento</td><td>100%</td></tr><tr><td>Não houve aumento</td><td>0%</td></tr></table>`
+            body: `<p class="mb-4">Compara a nota geral ponderada de 2024 com a de 2023. Corresponde a 50% da base de cálculo da etapa (R$ 1.500,00).</p>
+                <table class="w-full text-left">
+                    <thead><tr><th>Apuração</th><th>Resultado</th><th>Valor</th></tr></thead>
+                    <tbody>
+                        <tr><td>Houve aumento da média ponderada</td><td>100%</td><td>R$ 1.500,00</td></tr>
+                        <tr><td>Não houve aumento da média ponderada</td><td>0%</td><td>R$ 0,00</td></tr>
+                    </tbody>
+                </table>`
         },
         freqEstudantesEmei: {
             title: 'Frequência dos Estudantes (EMEI/CEMEI)',
-            body: `Corresponde a 60% da etapa (R$ 1.800).<br><table><tr><th>Frequência</th><th>% do Prêmio</th></tr><tr><td>90% ou maior</td><td>100%</td></tr><tr><td>80% a 89,99%</td><td>80%</td></tr><tr><td>70% a 79,99%</td><td>65%</td></tr><tr><td>60% a 69,99%</td><td>50%</td></tr><tr><td>Abaixo de 60%</td><td>0%</td></tr></table>`
+            body: `<p class="mb-4">Corresponde a 60% da base de cálculo da etapa (R$ 1.800,00).</p>
+                <table class="w-full text-left">
+                    <thead><tr><th>Média de Frequência</th><th>Resultado</th><th>Valor</th></tr></thead>
+                    <tbody>
+                        <tr><td>90% ou maior</td><td>100%</td><td>R$ 1.800,00</td></tr>
+                        <tr><td>80% a 89,99%</td><td>80%</td><td>R$ 1.440,00</td></tr>
+                        <tr><td>70% a 79,99%</td><td>65%</td><td>R$ 1.170,00</td></tr>
+                        <tr><td>60% a 69,99%</td><td>50%</td><td>R$ 900,00</td></tr>
+                        <tr><td>Abaixo de 60%</td><td>0%</td><td>R$ 0,00</td></tr>
+                    </tbody>
+                </table>`
         },
         taxaOcupacaoCei: {
             title: 'Taxa de Ocupação (CEI)',
-            body: `Corresponde a 20% da etapa (R$ 600).<br><table><tr><th>Ocupação</th><th>% do Prêmio</th></tr><tr><td>90% ou maior</td><td>100%</td></tr><tr><td>80% a 89,99%</td><td>50%</td></tr><tr><td>70% a 79,99%</td><td>30%</td></tr><tr><td>Abaixo de 70%</td><td>0%</td></tr></table>`
+            body: `<p class="mb-4">Corresponde a 20% da base de cálculo da etapa (R$ 600,00).</p>
+                <table class="w-full text-left">
+                    <thead><tr><th>Ocupação</th><th>Resultado</th><th>Valor</th></tr></thead>
+                    <tbody>
+                        <tr><td>90% ou maior</td><td>100%</td><td>R$ 600,00</td></tr>
+                        <tr><td>80% a 89,99%</td><td>50%</td><td>R$ 300,00</td></tr>
+                        <tr><td>70% a 79,99%</td><td>30%</td><td>R$ 180,00</td></tr>
+                        <tr><td>Abaixo de 70%</td><td>0%</td><td>R$ 0,00</td></tr>
+                    </tbody>
+                </table>`
         },
         taxaOcupacaoCieja: {
-            title: 'Taxa de Ocupação (CIEJA/CCI)',
-            body: `Corresponde a 60% da etapa (R$ 1.800).<br><table><tr><th>Ocupação</th><th>% do Prêmio</th></tr><tr><td>80% ou maior</td><td>100%</td></tr><tr><td>70% a 79,99%</td><td>50%</td></tr><tr><td>60% a 69,99%</td><td>30%</td></tr><tr><td>Abaixo de 60%</td><td>0%</td></tr></table>`
+            title: 'Taxa de Ocupação (CIEJA / CCI / CIPS)',
+            body: `<p class="mb-4">Corresponde a 60% da base de cálculo da etapa (R$ 1.800,00).</p>
+                <table class="w-full text-left">
+                    <thead><tr><th>Ocupação</th><th>Resultado</th><th>Valor</th></tr></thead>
+                    <tbody>
+                        <tr><td>80% ou maior</td><td>100%</td><td>R$ 1.800,00</td></tr>
+                        <tr><td>70% a 79,99%</td><td>50%</td><td>R$ 900,00</td></tr>
+                        <tr><td>60% a 69,99%</td><td>30%</td><td>R$ 540,00</td></tr>
+                        <tr><td>Abaixo de 60%</td><td>0%</td><td>R$ 0,00</td></tr>
+                    </tbody>
+                </table>`
         }
     };
 
+    // ABRIR/FECHAR MODAL
     window.openModal = function(id) {
         document.getElementById('modal-title').innerHTML = MODAL_DATA[id].title;
         document.getElementById('modal-body').innerHTML = MODAL_DATA[id].body;
@@ -268,6 +360,7 @@ document.addEventListener('DOMContentLoaded', function () {
     }
     window.closeModal = function() { document.getElementById('modal').classList.add('hidden'); }
 
+    // FUNÇÕES MATEMÁTICAS
     function calcAssiduidade(faltas) {
         if(faltas > 10) return 0;
         if(faltas <= 1) return 1;
@@ -282,125 +375,131 @@ document.addEventListener('DOMContentLoaded', function () {
         const f1 = parseInt(document.getElementById('faltas1').value) || 0;
         const f2 = parseInt(document.getElementById('faltas2').value) || 0;
 
+        // Atualiza checkmarks visuais de bônus falta
         document.getElementById('bonusFaltas1').checked = (f1 === 0);
         document.getElementById('bonusFaltas2').checked = (f2 === 0);
 
-        let teto_assid = (local === 'cei') ? 2400 : 1200;
-        let teto_col = (local === 'cei') ? 600 : (local === 'emef' ? 1500 : 1800);
+        // VARIÁVEIS DO DECRETO
+        let teto_assid_etapa = (local === 'cei') ? 2400 : 1200;
+        let teto_col_etapa = (local === 'cei') ? 600 : (local === 'emef' ? 1500 : 1800); // EMEF é 1500+300
         let isGestor = ['diretor', 'assistente_diretor', 'coordenador'].includes(cargo);
 
-        // INDIVIDUAL
-        let v_ind1 = teto_assid * calcAssiduidade(f1);
-        let b_ind1 = (f1 === 0) ? 900 : 0;
-        let v_ind2 = teto_assid * calcAssiduidade(f2);
-        let b_ind2 = (f2 === 0) ? 900 : 0;
+        // 1. CÁLCULO INDIVIDUAL (ASSIDUIDADE)
+        let ind1_valor = teto_assid_etapa * calcAssiduidade(f1);
+        let ind1_bonus = (f1 === 0) ? 900 : 0;
+        let ind2_valor = teto_assid_etapa * calcAssiduidade(f2);
+        let ind2_bonus = (f2 === 0) ? 900 : 0;
 
-        // COLETIVO E1
-        let v_col1 = 0;
+        // 2. CÁLCULO COLETIVO ETAPA 1
+        let col1_valor = 0;
         if (local === 'emef') {
-            v_col1 = (300 * parseFloat(document.getElementById('e1_freq_emef').value)) + (1500 * parseFloat(document.getElementById('e1_evol_emef').value));
-        } else if (local === 'emei') { v_col1 = 1800 * parseFloat(document.getElementById('e1_freq_emei').value); }
-        else if (local === 'cei') { v_col1 = 600 * parseFloat(document.getElementById('e1_ocup_cei').value); }
-        else if (local === 'cieja') { v_col1 = 1800 * parseFloat(document.getElementById('e1_ocup_cieja').value); }
-        else { v_col1 = 1800; } // DRE/SME Simula o teto na tela
+            col1_valor = (300 * parseFloat(document.getElementById('e1_freq_emef').value)) + (1500 * parseFloat(document.getElementById('e1_evol_emef').value));
+        } else if (local === 'emei') { col1_valor = 1800 * parseFloat(document.getElementById('e1_freq_emei').value); }
+        else if (local === 'cei') { col1_valor = 600 * parseFloat(document.getElementById('e1_ocup_cei').value); }
+        else if (local === 'cieja') { col1_valor = 1800 * parseFloat(document.getElementById('e1_ocup_cieja').value); }
+        else { col1_valor = 1800; } // DRE/SME Simula maximo na Etapa 1
 
-        // COLETIVO E2 (Simulado como Teto nas opções de estimativa)
-        let v_col2 = 0;
-        let max_bonus_col2 = 0;
+        // 3. CÁLCULO COLETIVO ETAPA 2 (ESTIMATIVA MÁXIMA) E BÔNUS ANEXO IV
+        let col2_valor = 0;
+        let max_bonus_anexoIV = 0;
 
         if (local === 'emef') {
-            v_col2 = 1800; // Simula atingir SARESP e Freq
-            max_bonus_col2 = isGestor ? 4900 : 900;
+            col2_valor = 1800; // Simula que atingiu SARESP e Frequência na E2
+            max_bonus_anexoIV = isGestor ? 4900 : 900; // Regras 1 + 2 + Alfa
         } else if (['emei', 'cei', 'cieja'].includes(local)) {
-            v_col2 = teto_col; 
-            max_bonus_col2 = 900;
+            col2_valor = teto_col_etapa; // CEI 600, Outros 1800
+            max_bonus_anexoIV = 900; // Acima da média
         } else {
-            v_col2 = 1800;
-            max_bonus_col2 = 900;
+            col2_valor = 1800; // DRE, EMEBS, etc.
+            max_bonus_anexoIV = 900;
         }
 
-        // TOTAIS LÍQUIDOS (X JORNADA)
-        let t_e1_val = (v_ind1 + v_col1) * jor;
-        let t_e1_bon = b_ind1 * jor;
-        let t_e2_val = (v_ind2 + v_col2) * jor;
-        let t_e2_bon = (b_ind2 + max_bonus_col2) * jor; // Na E2, soma o bonus individual com o teto do bonus coletivo
+        // TOTAIS FINAIS (MULTIPLICADOS PELA JORNADA)
+        let total_e1_valor = (ind1_valor + col1_valor) * jor;
+        let total_e1_bonus = ind1_bonus * jor;
+        let total_e2_valor = (ind2_valor + col2_valor) * jor;
+        let total_e2_bonus = (ind2_bonus + max_bonus_anexoIV) * jor; // Junta bônus falta + bônus anexo IV
 
-        let super_total = t_e1_val + t_e1_bon + t_e2_val + t_e2_bon;
+        let total_estimado = total_e1_valor + total_e1_bonus + total_e2_valor + total_e2_bonus;
 
-        // TETO MAXIMO
-        let teto_ano = ((teto_assid * 2) + (teto_col * 2) + (local === 'emef' ? 600 : 0) + max_bonus_col2 + 1800) * jor;
+        // TETO MÁXIMO POSSÍVEL (Para a barra verde)
+        let teto_maximo = ((teto_assid_etapa * 2) + (teto_col_etapa * 2) + (local === 'emef' ? 600 : 0) + max_bonus_anexoIV + 1800) * jor;
 
-        // RENDERIZAR
-        const fmt = (v) => v.toLocaleString('pt-BR', {style: 'currency', currency: 'BRL'});
-        document.getElementById('res-etapa1-valor').textContent = fmt(t_e1_val);
-        document.getElementById('res-etapa1-bonus').textContent = fmt(t_e1_bon);
-        document.getElementById('res-etapa2-valor').textContent = fmt(t_e2_val);
-        document.getElementById('res-etapa2-bonus').textContent = fmt(t_e2_bon);
+        // FORMATAÇÃO E EXIBIÇÃO
+        const formatBRL = (val) => val.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+
+        document.getElementById('res-etapa1-valor').textContent = formatBRL(total_e1_valor);
+        document.getElementById('res-etapa1-bonus').textContent = formatBRL(total_e1_bonus);
+        document.getElementById('res-etapa2-valor').textContent = formatBRL(total_e2_valor);
+        document.getElementById('res-etapa2-bonus').textContent = formatBRL(total_e2_bonus);
         
-        document.getElementById('res-total-estimado').textContent = `Até ${fmt(super_total)}`;
-        document.getElementById('res-total-maximo').textContent = fmt(teto_ano);
+        document.getElementById('res-total-estimado').textContent = `Até ${formatBRL(total_estimado)}`;
+        document.getElementById('res-total-maximo').textContent = formatBRL(teto_maximo);
+
+        // Animação inicial
+        setTimeout(() => { document.getElementById('results-bar').style.transform = 'translateY(0)'; }, 100);
     }
 
+    // ALTERNAR VISIBILIDADE DAS CAIXAS DE ACORDO COM LOCAL/CARGO
     function updateUI() {
         const local = document.getElementById('localTrabalho').value;
         const cargo = document.getElementById('cargo').value;
         const isGestor = ['diretor', 'assistente_diretor', 'coordenador'].includes(cargo);
 
-        // Ocultar E1
-        ['col1-emef','col1-emei','col1-cei','col1-cieja','col1-media'].forEach(id => {
-            document.getElementById(id).classList.add('hidden-by-logic');
-        });
+        // Reseta tudo (oculta)
+        ['col1-emef','col1-emei','col1-cei','col1-cieja','col1-media'].forEach(id => document.getElementById(id).classList.add('hidden-by-logic'));
 
-        // Mostrar E1
+        // ETAPA 1 - Mostrar campos corretos
         if(local === 'emef') { document.getElementById('col1-emef').classList.remove('hidden-by-logic'); }
         else if(local === 'emei') { document.getElementById('col1-emei').classList.remove('hidden-by-logic'); }
         else if(local === 'cei') { document.getElementById('col1-cei').classList.remove('hidden-by-logic'); }
         else if(local === 'cieja') { document.getElementById('col1-cieja').classList.remove('hidden-by-logic'); }
         else {
             document.getElementById('col1-media').classList.remove('hidden-by-logic');
-            if (local === 'sme') document.getElementById('txt-media-e1').textContent = "Como Órgão Central, o valor do desempenho coletivo será a média de TODAS as DREs. Na simulação, consideramos o valor máximo.";
-            else if (local === 'dre') document.getElementById('txt-media-e1').textContent = "O valor do desempenho coletivo será a média do desempenho das unidades da respectiva DRE. Na simulação, consideramos o valor máximo.";
-            else if (cargo === 'supervisor') document.getElementById('txt-media-e1').textContent = "O valor do desempenho coletivo do Supervisor será a média das unidades que supervisiona (50%) + a média da sua DRE (50%). Na simulação, consideramos o valor máximo.";
-            else document.getElementById('txt-media-e1').textContent = "Para as unidades EMEBS/CMCT/CEU, o valor será a média da respectiva DRE. Na simulação, consideramos o valor máximo.";
+            if (local === 'sme') document.getElementById('txt-media-e1').textContent = "O valor coletivo será a média de TODAS as DREs (Órgão Central). Para simulação, consideramos o valor máximo.";
+            else if (local === 'dre') document.getElementById('txt-media-e1').textContent = "O valor coletivo será a média das unidades da respectiva DRE. Para simulação, consideramos o valor máximo.";
+            else if (local === 'ceugestao') document.getElementById('txt-media-e1').textContent = "O valor coletivo será a média da respectiva DRE (Art 2º, Inciso IV). Para simulação, consideramos o valor máximo.";
+            else if (cargo === 'supervisor') document.getElementById('txt-media-e1').textContent = "O valor coletivo é 50% Média das DREs + 50% Média das Escolas que supervisiona. Na simulação, consideramos o valor máximo.";
         }
 
-        // TEXTOS DA ETAPA 2 (ESTIMATIVA MÁXIMA)
+        // ETAPA 2 - Montar o texto estático do Anexo IV dependendo do Cargo/Local
         let e2Html = '';
         if (local === 'emef') {
-            e2Html = `<p><strong>Frequência:</strong> Atingir 90% ou mais.</p>
-                      <p><strong>Participação:</strong> Atingir ao menos 80% na Prova São Paulo 2025 e no SARESP 2025.</p>
-                      <p class="mt-3 font-bold text-yellow-700 bg-yellow-100 p-1 rounded inline-block">Critérios do Bônus Adicional (Anexo IV):</p>
-                      <ul class="list-disc ml-5 mt-1">
-                        <li><b>Regra 1:</b> Aumento do IDEP acima da média da DRE ou Top 10% (Até R$ ${isGestor?'1.450':'450'}).</li>
-                        <li><b>Regra 2:</b> Aumento do IDEP c/ redução de "Abaixo do Básico" (Até R$ ${isGestor?'1.450':'450'}).</li>
-                        ${isGestor ? '<li><b>Alfabetização:</b> Aumento no 2º Ano (Mín 51%) - Exclusivo Gestão (R$ 2.000).</li>' : ''}
+            e2Html = `<p><strong>Frequência dos estudantes:</strong> Atingir 90% ou mais.</p>
+                      <p><strong>Participação em Avaliações:</strong> Atingir ao menos 80% na Prova SP e no SARESP 2025.</p>
+                      <p class="mt-3 p-1 bg-yellow-100 font-bold text-yellow-800 rounded inline-block">Critérios de Bônus Adicional (Anexo IV):</p>
+                      <ul class="list-disc ml-5 mt-1 text-xs md:text-sm">
+                        <li><b>Regra 1:</b> Aumento do IDEP acima da média ou Top 10% (R$ ${isGestor?'1.450':'450'}).</li>
+                        <li><b>Regra 2:</b> Aumento do IDEP c/ redução de "Abaixo do Básico" (R$ ${isGestor?'1.450':'450'}).</li>
+                        ${isGestor ? '<li><b>Alfabetização:</b> Aumento no 2º Ano. Min 51% - Exclusivo Gestão (R$ 2.000).</li>' : ''}
                       </ul>`;
         } else if (['emei', 'cei', 'cieja'].includes(local)) {
             let criterio = local === 'emei' ? 'Frequência dos estudantes' : 'Taxa de Ocupação';
             e2Html = `<p><strong>${criterio}:</strong> Atingir a faixa máxima da tabela.</p>
-                      <p class="mt-3 font-bold text-yellow-700 bg-yellow-100 p-1 rounded inline-block">Critérios do Bônus Adicional (Anexo IV):</p>
-                      <ul class="list-disc ml-5 mt-1"><li>O desempenho médio anual da unidade deve ser ACIMA da média da DRE (R$ 900).</li></ul>`;
+                      <p class="mt-3 p-1 bg-yellow-100 font-bold text-yellow-800 rounded inline-block">Critério de Bônus Adicional (Anexo IV):</p>
+                      <ul class="list-disc ml-5 mt-1 text-xs md:text-sm"><li>Desempenho da unidade ACIMA da média das unidades do seu tipo na DRE (R$ 900).</li></ul>`;
         } else {
-            let add_txt = (cargo === 'supervisor' || local === 'dre') ? "Média do Valor Adicional conquistado pelas escolas da sua DRE." : "Média do Valor Adicional conquistado por todas as DREs.";
-            e2Html = `<p>O desempenho seguirá a média da DRE/SME. Na simulação, consideramos o teto de 100%.</p>
-                      <p class="mt-3 font-bold text-yellow-700 bg-yellow-100 p-1 rounded inline-block">Critérios do Bônus Adicional (Anexo IV):</p>
-                      <ul class="list-disc ml-5 mt-1"><li>${add_txt} (Máx R$ 900).</li></ul>`;
+            e2Html = `<p>O desempenho coletivo e o bônus seguirão as regras do decreto, baseados em médias de outras unidades. Na estimativa, consideramos o teto de 100%.</p>`;
         }
         document.getElementById('coletivo-etapa2-view').innerHTML = e2Html;
 
         calculate();
     }
 
+    // Toggle Barra Inferior
     document.getElementById('results-header').addEventListener('click', () => {
         document.getElementById('results-bar').classList.toggle('is-expanded');
     });
 
+    // Gatilhos de recalculo
     document.querySelectorAll('select, input').forEach(el => {
         el.addEventListener('change', updateUI);
         el.addEventListener('keyup', updateUI);
     });
 
+    // Inicia a interface e já deixa a barra expandida
     updateUI();
+    document.getElementById('results-bar').classList.add('is-expanded');
 });
 </script>
 </body>
