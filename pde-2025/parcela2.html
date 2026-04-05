@@ -3,75 +3,126 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Simulação do PDE 2025</title>
+    <title>Simulador do Prêmio de Desempenho Educacional (PDE) </title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        body { font-family: 'Inter', sans-serif; background-color: #f0f4f8; }
-        .help-icon { cursor: pointer; color: #0056b3; font-size: 0.75rem; font-weight: bold; border: 1px solid #0056b3; border-radius: 50%; width: 18px; height: 18px; display: inline-flex; align-items: center; justify-content: center; margin-left: 6px; transition: all 0.2s; }
-        .help-icon:hover { background-color: #0056b3; color: white; }
-        input[type=number]::-webkit-inner-spin-button, input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
-        input[type=number] { -moz-appearance: textfield; }
-        .hidden { display: none !important; }
-        
-        /* Barra de resultados expansível */
-        #results-details { max-height: 0; overflow: hidden; transition: max-height 0.4s ease-out; }
-        #results-bar.is-expanded #results-details { max-height: 400px; }
-        #toggle-icon { transition: transform 0.3s; }
-        #results-bar.is-expanded #toggle-icon { transform: rotate(180deg); }
-
-        /* Tabelas dos modais */
-        table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 0.85rem; }
-        th { background-color: #f3f4f6; padding: 8px; text-align: left; border: 1px solid #e5e7eb; font-weight: 600;}
-        td { padding: 8px; border: 1px solid #e5e7eb; }
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f0f4f8;
+        }
+        /* Estilo para o ícone de interrogação */
+        .help-icon {
+            cursor: pointer;
+            color: #0056b3;
+            font-weight: bold;
+            border: 1px solid #0056b3;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            margin-left: 8px;
+            transition: all 0.2s ease-in-out;
+        }
+        .help-icon:hover {
+            background-color: #0056b3;
+            color: white;
+        }
+        /* Esconder os spinners de inputs do tipo number */
+        input[type=number]::-webkit-inner-spin-button,
+        input[type=number]::-webkit-outer-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+        input[type=number] {
+            -moz-appearance: textfield;
+        }
+        /* Classes para controlar visibilidade */
+        .hidden-by-logic {
+            display: none !important;
+        }
+        /* --- NOVOS ESTILOS PARA BARRA RECOLHÍVEL --- */
+        #results-details {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.4s ease-out;
+        }
+        #results-bar.is-expanded #results-details {
+            max-height: 300px; /* Um valor seguro para o conteúdo caber */
+        }
+        #toggle-icon {
+            transition: transform 0.3s;
+        }
+        #results-bar.is-expanded #toggle-icon {
+            transform: rotate(180deg); /* Gira o ícone para baixo quando expandido */
+        }
+        #results-header {
+            cursor: pointer;
+        }
     </style>
-</head>
-<body class="pb-56">
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-PYJXTETC9M"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
 
-    <!-- CABEÇALHO -->
-    <header class="bg-[#003562] text-white p-4 shadow-md flex justify-between items-center sticky top-0 z-40">
+  gtag('config', 'G-PYJXTETC9M');
+</script>
+</head>
+<body class="bg-[#f0f4f8]">
+
+   <!-- Cabeçalho -->
+    <header class="bg-[#003562] text-white p-4 shadow-md flex justify-between items-center">
         <div>
-            <h1 class="text-xl md:text-2xl font-bold">Simulação do PDE 2025</h1>
-            <p class="text-sm text-blue-200 mt-1">Desenvolvido pela SME</p>
+            <h1 class="text-xl md:text-2xl font-bold">Simulador - Prêmio de Desempenho Educacional (PDE) </h1>
+            <p class="text-xs text-gray-300 mt-1">Desenvolvido pela SME</p>
         </div>
-        <div class="hidden md:block font-bold text-sm text-right leading-tight">
-            PREFEITURA DE<br>SÃO PAULO<br><span class="font-normal text-xs">EDUCAÇÃO</span>
-        </div>
+        <img src="https://sme-upge.github.io/pde-2025/logo-sme.png" alt="Logo da Secretaria Municipal de Educação" style="width: 200px; height: auto;">
     </header>
 
-    <main class="p-4 md:p-6 max-w-4xl mx-auto">
+    <!-- Corpo Principal -->
+    <main class="p-4 md:p-8 mb-48">
+        <div class="max-w-4xl mx-auto bg-blue-100 p-6 rounded-lg shadow-lg">
         
-        <!-- SELEÇÃO DE CARGO/LOCAL/JORNADA -->
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6 bg-blue-50 p-5 rounded-xl border border-blue-100">
-            <div>
-                <label class="block text-sm font-bold text-gray-700 mb-1">Qual o seu cargo?</label>
-                <select id="cargo" class="w-full p-2 border border-gray-300 rounded bg-white">
-                    <option value="prof">Professor(a) / Demais Cargos</option>
-                    <option value="dir">Diretor(a) de Escola</option>
-                    <option value="ad">Assistente de Diretor(a) de Escola</option>
-                    <option value="cp">Coordenador(a) Pedagógico(a)</option>
-                    <option value="sup">Supervisor Escolar / DRE / SME</option>
-                </select>
+    <!-- Seção de Seleção Inicial -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                <div>
+                    <label for="cargo" class="block text-sm font-medium text-gray-700 mb-1">Qual o seu cargo?</label>
+                    <select id="cargo" class="w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
+                        <option value="professor">Professor(a)</option>
+                        <option value="diretor">Diretor(a) de Escola</option>
+                        <option value="assistente_diretor">Assistente de Diretor(a) de Escola</option>
+                        <option value="coordenador">Coordenador(a) Pedagógico(a)</option>
+                        <option value="supervisor">Supervisor(a) Escolar</option>
+                        <option value="outros_cargos">Auxiliar Técnico de Educação, Agente Escolar, Inspetor(a) e demais cargos</option>
+                    </select>
+                </div>
+                <div>
+                    <label for="localTrabalho" class="block text-sm font-medium text-gray-700 mb-1">Onde você trabalha?</label>
+                    <select id="localTrabalho" class="w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
+                        <option value="emef_emefm">EMEF/EMEFM</option>
+                        <option value="emei_cemei">EMEI/CEMEI</option>
+                        <option value="cei">CEI</option>
+                        <option value="cieja">CIEJA</option>
+                        <option value="eme_etc">EMEBS/CMCT/Gestão do CEU</option>
+                        <option value="dre">Diretoria Regional de Educação</option>
+                        <option value="sme">Secretaria Municipal de Educação</option>
+                    </select>
+                </div>
+                <div>
+                    <label for="jornada" class="block text-sm font-medium text-gray-700 mb-1">Qual é a sua jornada?</label>
+                    <select id="jornada" class="w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
+                        <option value="jeif">JEIF/JB 30/JB 40/JE 40</option>
+                        <option value="jbd">JBD</option>
+                        <option value="jb">JB</option>
+                    </select>
+                </div>
             </div>
-            <div>
-                <label class="block text-sm font-bold text-gray-700 mb-1">Onde você trabalha?</label>
-                <select id="local" class="w-full p-2 border border-gray-300 rounded bg-white">
-                    <option value="emef">EMEF/EMEFM</option>
-                    <option value="emei">EMEI/CEMEI</option>
-                    <option value="cei">CEI</option>
-                    <option value="cieja">CIEJA / CCI / CIPS</option>
-                    <option value="dre">DRE / SME / EMEBS / CEU Gestão</option>
-                </select>
-            </div>
-            <div>
-                <label class="block text-sm font-bold text-gray-700 mb-1">Qual é a sua jornada?</label>
-                <select id="jornada" class="w-full p-2 border border-gray-300 rounded bg-white">
-                    <option value="1">JEIF/JB 30/JB 40/JE 40/40 H</option>
-                    <option value="0.75">JBD / JBE / 33 H</option>
-                    <option value="0.5">JB / 20 H</option>
-                </select>
-            </div>
-        </div>
 
         <!-- 1ª ETAPA -->
         <div class="bg-white rounded-xl shadow-sm border border-gray-200 mb-6 p-5">
