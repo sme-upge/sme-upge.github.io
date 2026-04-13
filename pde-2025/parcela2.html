@@ -18,7 +18,7 @@
         .help-icon:hover { background-color: #0056b3; color: white; }
         input[type=number]::-webkit-inner-spin-button, input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
         #results-details { max-height: 0; overflow: hidden; transition: max-height 0.4s ease-out; }
-        #results-bar.is-expanded #results-details { max-height: 500px; }
+        #results-bar.is-expanded #results-details { max-height: 600px; }
         #toggle-icon { transition: transform 0.3s; }
         #results-bar.is-expanded #toggle-icon { transform: rotate(180deg); }
         table { width: 100%; border-collapse: collapse; margin-top: 10px; }
@@ -26,17 +26,14 @@
         th { background-color: #f2f2f2; }
     </style>
 </head>
-<body class="bg-[#f0f4f8] pb-48">
+<body class="bg-[#f0f4f8] pb-64">
 
     <header class="bg-[#003562] text-white p-4 shadow-md flex justify-between items-center">
         <div>
             <h1 class="text-xl md:text-2xl font-bold">Simulador - Prêmio de Desempenho Educacional (PDE)</h1>
             <p class="text-xs text-gray-300 mt-1">Desenvolvido pela SME</p>
         </div>
-        <div class="hidden md:block text-right">
-            <span class="text-sm font-semibold block">PREFEITURA DE SÃO PAULO</span>
-            <span class="text-xs">SECRETARIA DE EDUCAÇÃO</span>
-        </div>
+        <img src="https://sme-upge.github.io/pde-2025/logo-sme.png" alt="Logo da Secretaria Municipal de Educação" style="width: 200px; height: auto;">
     </header>
 
     <main class="p-4 md:p-8 max-w-4xl mx-auto">
@@ -178,17 +175,19 @@
         </div>
     </main>
 
-    <!-- BARRA FIXA INFERIOR -->
+    <!-- BARRA FIXA INFERIOR ATUALIZADA -->
     <footer id="results-bar" class="fixed bottom-0 left-0 right-0 bg-[#111827] text-white shadow-2xl transition-all duration-300 is-expanded z-50 border-t-4 border-[#003562]">
         <div id="results-header" class="max-w-4xl mx-auto flex items-center justify-between p-3 cursor-pointer hover:bg-gray-800">
             <div class="flex-grow grid grid-cols-2 gap-4">
-                <div class="bg-blue-700 p-2 rounded text-center shadow-inner">
-                    <span class="block text-[10px] sm:text-xs text-blue-200 uppercase tracking-widest">Total Estimado no Ano</span>
-                    <span id="res_total" class="block text-xl sm:text-3xl font-black text-white">R$ 0,00</span>
-                </div>
+                <!-- TETO MÁXIMO NA ESQUERDA -->
                 <div class="bg-green-700 p-2 rounded text-center shadow-inner">
                     <span class="block text-[10px] sm:text-xs text-green-200 uppercase tracking-widest">Teto Máximo Possível</span>
                     <span id="res_teto" class="block text-xl sm:text-3xl font-black text-white">R$ 0,00</span>
+                </div>
+                <!-- TOTAL ESTIMADO NA DIREITA -->
+                <div class="bg-blue-700 p-2 rounded text-center shadow-inner">
+                    <span class="block text-[10px] sm:text-xs text-blue-200 uppercase tracking-widest">Total Estimado no Ano</span>
+                    <span id="res_total" class="block text-xl sm:text-3xl font-black text-white">R$ 0,00</span>
                 </div>
             </div>
             <div class="pl-4 text-center">
@@ -197,11 +196,16 @@
             </div>
         </div>
         <div id="results-details" class="bg-gray-800 border-t border-gray-700">
-            <div class="max-w-4xl mx-auto p-4 grid grid-cols-2 md:grid-cols-4 gap-3 text-center">
+            <div class="max-w-4xl mx-auto p-4 grid grid-cols-2 md:grid-cols-3 gap-3 text-center">
                 <div class="bg-gray-700 p-2 rounded"><p class="text-[10px] text-gray-400 uppercase">1ª Etapa (Valor)</p><p id="res_e1_val" class="font-bold">R$ 0,00</p></div>
                 <div class="bg-gray-700 p-2 rounded"><p class="text-[10px] text-gray-400 uppercase">1ª Etapa (Bônus 0 Faltas)</p><p id="res_e1_bon" class="font-bold text-yellow-400">R$ 0,00</p></div>
+                <!-- TOTAL 1ª ETAPA -->
+                <div class="bg-gray-600 p-2 rounded border border-blue-400"><p class="text-[10px] text-blue-300 uppercase">1ª Etapa Valor Final</p><p id="res_e1_total_f" class="font-black text-white text-lg">R$ 0,00</p></div>
+
                 <div class="bg-gray-700 p-2 rounded"><p class="text-[10px] text-gray-400 uppercase">2ª Etapa (Valor)</p><p id="res_e2_val" class="font-bold">R$ 0,00</p></div>
-                <div class="bg-gray-700 p-2 rounded border border-yellow-600"><p class="text-[10px] text-yellow-500 uppercase">2ª Etapa (Adicional/Bônus)</p><p id="res_e2_bon" class="font-bold text-yellow-400">R$ 0,00</p></div>
+                <div class="bg-gray-700 p-2 rounded"><p class="text-[10px] text-gray-400 uppercase">2ª Etapa (Bônus/Adic.)</p><p id="res_e2_bon" class="font-bold text-yellow-400">R$ 0,00</p></div>
+                <!-- TOTAL 2ª ETAPA -->
+                <div class="bg-gray-600 p-2 rounded border border-blue-400"><p class="text-[10px] text-blue-300 uppercase">2ª Etapa Valor Final</p><p id="res_e2_total_f" class="font-black text-white text-lg">R$ 0,00</p></div>
             </div>
             <p class="text-xs text-center text-gray-400 px-4 pb-4">
                 <strong>Aviso:</strong> Este simulador é uma estimativa. O valor real depende de publicação oficial.
@@ -223,13 +227,10 @@
 <script>
 document.addEventListener('DOMContentLoaded', function () {
     const modais = {
-        assiduidade: { t: "Tabela de Assiduidade", b: "O Valor Base é R$ 1.200 (CEIs R$ 2.400) por semestre. <table><tr><th>Faltas</th><th>%</th></tr><tr><td>0</td><td>100% + Bônus R$ 900</td></tr><tr><td>1</td><td>100%</td></tr><tr><td>2</td><td>95%</td></tr><tr><td>3</td><td>90%</td></tr><tr><td>4</td><td>85%</td></tr><tr><td>5</td><td>80%</td></tr><tr><td>11+</td><td>0%</td></tr></table>" },
+        assiduidade: { t: "Tabela de Assiduidade", b: "O Valor Base é R$ 1.200 (CEIs R$ 2.400) por semestre. <table><tr><th>Faltas</th><th>%</th></tr><tr><td>0</td><td>100% + Bônus R$ 900</td></tr><tr><td>1</td><td>100%</td></tr><tr><td>11+</td><td>0%</td></tr></table>" },
         freq_emef: { t: "Frequência (EMEF)", b: "Corresponde a R$ 300 da etapa." },
         evol_emef: { t: "Evolução (1ª Etapa)", b: "Houve aumento da nota? Corresponde a R$ 1.500." },
         part_emef: { t: "Participação (2ª Etapa)", b: "Mínimo 80% de participação. Vale R$ 1.500." },
-        freq_emei: { t: "Frequência (EMEI)", b: "Vale R$ 1.800 da etapa." },
-        ocup_cei: { t: "Ocupação (CEI)", b: "Vale R$ 600 da etapa." },
-        ocup_cieja: { t: "Ocupação (CIEJA)", b: "Vale R$ 1.800 da etapa." },
         adicional: { t: "Bônus Anexo IV", b: "Valores extras por resultados da unidade ou DRE." }
     };
 
@@ -289,8 +290,12 @@ document.addEventListener('DOMContentLoaded', function () {
         const fmt = v => v.toLocaleString('pt-BR', {style: 'currency', currency: 'BRL'});
         document.getElementById('res_e1_val').textContent = fmt(t_e1_val);
         document.getElementById('res_e1_bon').textContent = fmt(t_e1_bon);
+        document.getElementById('res_e1_total_f').textContent = fmt(t_e1_val + t_e1_bon); // SOMA FINAL 1
+        
         document.getElementById('res_e2_val').textContent = fmt(t_e2_val);
         document.getElementById('res_e2_bon').textContent = fmt(t_e2_bon);
+        document.getElementById('res_e2_total_f').textContent = fmt(t_e2_val + t_e2_bon); // SOMA FINAL 2
+
         document.getElementById('res_total').textContent = fmt(total);
         document.getElementById('res_teto').textContent = fmt(teto);
     }
@@ -309,17 +314,9 @@ document.addEventListener('DOMContentLoaded', function () {
             document.getElementById('e2_emef').classList.remove('hidden');
             document.getElementById('bonus_emef').classList.remove('hidden');
             if(isGestor) document.getElementById('bonus_alfa').classList.remove('hidden');
-        } else if (local === 'emei') {
-            document.getElementById('e1_emei').classList.remove('hidden');
-            document.getElementById('e2_emei').classList.remove('hidden');
-            document.getElementById('bonus_outros').classList.remove('hidden');
-        } else if (local === 'cei') {
-            document.getElementById('e1_cei').classList.remove('hidden');
-            document.getElementById('e2_cei').classList.remove('hidden');
-            document.getElementById('bonus_outros').classList.remove('hidden');
-        } else if (local === 'cieja') {
-            document.getElementById('e1_cieja').classList.remove('hidden');
-            document.getElementById('e2_cieja').classList.remove('hidden');
+        } else if (local === 'emei' || local === 'cei' || local === 'cieja') {
+            document.getElementById('e1_' + local).classList.remove('hidden');
+            document.getElementById('e2_' + local).classList.remove('hidden');
             document.getElementById('bonus_outros').classList.remove('hidden');
         } else {
             document.getElementById('e1_dre').classList.remove('hidden');
