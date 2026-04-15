@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simulador PDE 2025 | Secretaria Municipal de Educação</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #f8fafc; color: #1e293b; }
+        .help-icon {
+            cursor: pointer; color: #0369a1; font-weight: bold; border: 1.5px solid #0369a1;
+            border-radius: 50%; width: 22px; height: 22px; display: inline-flex;
+            align-items: center; justify-content: center; margin-left: 8px; transition: all 0.2s;
+            font-size: 12px; background: white;
+        }
+        .help-icon:hover { background-color: #0369a1; color: white; transform: scale(1.1); }
+        select, input { transition: border-color 0.2s, box-shadow 0.2s; }
+        select:focus, input:focus { outline: none; border-color: #2563eb; box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1); }
+        #results-details { max-height: 0; overflow: hidden; transition: max-height 0.5s ease-in-out; }
+        #results-bar.is-expanded #results-details { max-height: 1000px; }
+        #toggle-icon { transition: transform 0.3s; }
+        #results-bar.is-expanded #toggle-icon { transform: rotate(180deg); }
+        .card-shadow { box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1); }
+        table { width: 100%; border-collapse: collapse; margin-top: 12px; border-radius: 8px; overflow: hidden; }
+        th, td { border: 1px solid #e2e8f0; padding: 10px; text-align: center; }
+        th { background-color: #f1f5f9; font-weight: 700; color: #475569; font-size: 11px; text-transform: uppercase; }
+        td { font-size: 13px; }
+    </style>
+</head>
+<body class="pb-72">
+
+    <!-- HEADER OFICIAL -->
+    <header class="bg-[#003562] text-white p-5 shadow-lg border-b-4 border-[#fbbf24]">
+        <div class="max-w-6xl mx-auto flex flex-col md:flex-row justify-between items-center gap-4">
+            <div class="text-center md:text-left">
+                <h1 class="text-xl md:text-2xl font-extrabold tracking-tight">Simulador PDE 2025</h1>
+                <p class="text-[10px] md:text-xs text-blue-200 uppercase tracking-widest font-medium mt-1">Prêmio de Desempenho Educacional • SME - São Paulo</p>
+            </div>
+            <img src="https://sme-upge.github.io/pde-2025/logo-sme.png" alt="SME" class="h-12 md:h-16 w-auto brightness-110">
+        </div>
+    </header>
+
+    <main class="p-4 md:p-8 max-w-5xl mx-auto">
+        
+        <!-- SEÇÃO: PERFIL -->
+        <div class="bg-white p-6 rounded-2xl card-shadow mb-8 border border-slate-200">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div>
+                    <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Seu Cargo</label>
+                    <select id="cargo" class="w-full p-3 bg-slate-50 border border-slate-300 rounded-xl font-semibold text-slate-700">
+                        <option value="professor">Professor(a)</option>
+                        <option value="diretor">Diretor(a) de Escola</option>
+                        <option value="assistente_diretor">Assistente de Diretor(a)</option>
+                        <option value="coordenador">Coordenador(a) Pedagógico(a)</option>
+                        <option value="supervisor">Supervisor(a) Escolar</option>
+                        <option value="outros_cargos">Auxiliar Técnico / Agente Escolar / Outros</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Local de Trabalho</label>
+                    <select id="localTrabalho" class="w-full p-3 bg-slate-50 border border-slate-300 rounded-xl font-semibold text-slate-700">
+                        <option value="emef">EMEF / EMEFM</option>
+                        <option value="emei">EMEI / CEMEI</option>
+                        <option value="cei">CEI DIRETO</option>
+                        <option value="cieja">CIEJA</option>
+                        <option value="dre">DRE / SME / GESTÃO CEU</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Jornada</label>
+                    <select id="jornada" class="w-full p-3 bg-slate-50 border border-slate-300 rounded-xl font-semibold text-slate-700">
+                        <option value="1.0">JEIF / JB 30 / JB 40 / JE 40</option>
+                        <option value="0.75">JBD (Docente)</option>
+                        <option value="0.5">JB (Básica)</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <!-- SEÇÃO: 1ª ETAPA -->
+        <div class="bg-white rounded-2xl card-shadow border border-slate-200 mb-6 overflow-hidden">
+            <div class="bg-slate-50 px-6 py-3 border-b border-slate-200 flex justify-between items-center">
+                <h2 class="font-extrabold text-slate-800 uppercase tracking-widest text-sm">1ª Etapa (Primeiro Semestre)</h2>
+                <span class="bg-blue-100 text-blue-700 text-[10px] px-2 py-1 rounded-full font-bold">MARÇO/2025</span>
+            </div>
+            <div class="p-6">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <div>
+                        <h3 class="text-xs font-black text-slate-400 uppercase mb-4 tracking-tighter">Desempenho Individual</h3>
+                        <label class="block text-sm text-slate-600 mb-2 flex items-center">Faltas no 1º semestre <span class="help-icon" data-modal="assiduidade">?</span></label>
+                        <div class="flex items-center gap-4">
+                            <input type="number" id="f1" value="0" min="0" class="w-24 p-3 border border-slate-300 rounded-xl bg-slate-50 font-bold text-xl text-center">
+                            <label class="flex items-center text-xs text-slate-400"><input type="checkbox" id="b1" disabled checked class="mr-2"> Bônus Zero Faltas</label>
+                        </div>
+                    </div>
+                    <div>
+                        <h3 class="text-xs font-black text-slate-400 uppercase mb-4 tracking-tighter">Desempenho Coletivo</h3>
+                        <div id="e1_metrics" class="space-y-4 font-semibold text-slate-700"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SEÇÃO: 2ª ETAPA -->
+        <div class="bg-white rounded-2xl card-shadow border border-slate-200 mb-6 overflow-hidden">
+            <div class="bg-slate-50 px-6 py-3 border-b border-slate-200 flex justify-between items-center">
+                <h2 class="font-extrabold text-slate-800 uppercase tracking-widest text-sm">2ª Etapa (Segundo Semestre)</h2>
+                <span class="bg-blue-100 text-blue-700 text-[10px] px-2 py-1 rounded-full font-bold">DEZEMBRO/2025</span>
+            </div>
+            <div class="p-6">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <div>
+                        <h3 class="text-xs font-black text-slate-400 uppercase mb-4 tracking-tighter">Desempenho Individual</h3>
+                        <label class="block text-sm text-slate-600 mb-2 flex items-center">Faltas no 2º semestre <span class="help-icon" data-modal="assiduidade">?</span></label>
+                        <div class="flex items-center gap-4">
+                            <input type="number" id="f2" value="0" min="0" class="w-24 p-3 border border-slate-300 rounded-xl bg-slate-50 font-bold text-xl text-center">
+                            <label class="flex items-center text-xs text-slate-400"><input type="checkbox" id="b2" disabled checked class="mr-2"> Bônus Zero Faltas</label>
+                        </div>
+                    </div>
+                    <div>
+                        <h3 class="text-xs font-black text-slate-400 uppercase mb-4 tracking-tighter">Desempenho Coletivo</h3>
+                        <div id="e2_metrics" class="space-y-4 font-semibold text-slate-700"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- BÔNUS ADICIONAIS -->
+        <div class="bg-amber-50 rounded-2xl border-2 border-amber-200 p-6 mb-8">
+            <h2 class="text-sm font-black text-amber-800 uppercase tracking-widest mb-4 flex items-center">
+                Valores Adicionais (Bônus Anexo IV)
+                <span class="help-icon border-amber-800 text-amber-800" data-modal="adicional">?</span>
+            </h2>
+            <div id="bonus_emef" class="space-y-3">
+                <label class="flex p-4 bg-white border border-amber-100 rounded-xl cursor-pointer hover:bg-amber-100/50 transition-colors shadow-sm">
+                    <input type="checkbox" id="b_emef_1" class="mt-1 mr-4 h-5 w-5 rounded border-amber-300 text-amber-600"> 
+                    <span class="text-sm text-slate-700 leading-tight"><b>Regra 1:</b> IDEP acima da média da DRE ou Top 10%.</span>
+                </label>
+                <label class="flex p-4 bg-white border border-amber-100 rounded-xl cursor-pointer hover:bg-amber-100/50 transition-colors shadow-sm">
+                    <input type="checkbox" id="b_emef_2" class="mt-1 mr-4 h-5 w-5 rounded border-amber-300 text-amber-600"> 
+                    <span class="text-sm text-slate-700 leading-tight"><b>Regra 2:</b> Aumento IDEP e redução de alunos Abaixo do Básico.</span>
+                </label>
+                <label id="bonus_alfa_box" class="hidden flex p-4 bg-blue-50 border border-blue-200 rounded-xl cursor-pointer shadow-sm">
+                    <input type="checkbox" id="b_emef_alfa" class="mt-1 mr-4 h-5 w-5 text-blue-600"> 
+                    <span class="text-sm text-blue-800 leading-tight font-bold">Alfabetização: <span class="font-normal">Atingiu meta no 2º Ano (Min 51%).</span></span>
+                </label>
+            </div>
+            <div id="bonus_outros" class="hidden">
+                <label class="flex p-4 bg-white border border-green-200 rounded-xl cursor-pointer hover:bg-green-50 transition-colors shadow-sm text-green-800 font-bold">
+                    <input type="checkbox" id="b_outros_ok" class="mt-1 mr-4 h-6 w-6 text-green-600"> Bônus Unidade: Desempenho acima da média da DRE.
+                </label>
+            </div>
+            <div id="bonus_dre" class="hidden">
+                <label class="block text-sm text-slate-700 font-bold mb-2">Média adicional da Jurisdição (Máx R$ 900):</label>
+                <input type="number" id="b_dre_val" value="900" class="w-32 p-3 border border-slate-300 rounded-xl bg-white font-black text-center text-blue-600">
+            </div>
+        </div>
+    </main>
+
+    <!-- RODAPÉ DE RESULTADOS -->
+    <footer id="results-bar" class="fixed bottom-0 left-0 right-0 bg-[#0f172a] text-white shadow-[0_-10px_25px_-5px_rgba(0,0,0,0.3)] transition-all duration-300 is-expanded z-50 border-t-4 border-blue-600">
+        <div id="results-header" class="max-w-6xl mx-auto flex items-center justify-between p-4 cursor-pointer hover:bg-slate-800/50">
+            <div class="fl
