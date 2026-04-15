@@ -253,4 +253,35 @@ document.addEventListener('DOMContentLoaded', function () {
             let opt = local === 'cei' ? '<option value="1">90% ou maior</option><option value="0.5">80% a 89%</option><option value="0">Menor</option>' : (local === 'emei' ? '<option value="1">90% ou maior</option><option value="0.8">80% a 89%</option><option value="0">Menor</option>' : (local === 'dre' ? '' : '<option value="1">80% ou maior</option><option value="0">Menor</option>'));
             let f1 = local === 'dre' ? `<input type="number" id="e1_val" value="100" class="w-full p-2 border rounded bg-gray-50">` : `<select id="e1_val" class="w-full p-2 border rounded bg-gray-50">${opt}</select>`;
             let f2 = local === 'dre' ? `<input type="number" id="e2_val" value="100" class="w-full p-2 border rounded bg-gray-50">` : `<select id="e2_val" class="w-full p-2 border rounded bg-gray-50">${opt}</select>`;
-            h1 = `<div><label class="block text-sm text-gray-600 mb-1">${label} ${modId?`<span class="help-icon" data-modal="${modId}">?</span>
+            h1 = `<div><label class="block text-sm text-gray-600 mb-1">${label} ${modId?`<span class="help-icon" data-modal="${modId}">?</span>`:''}</label>${f1}</div>`;
+            h2 = `<div><label class="block text-sm text-gray-600 mb-1">${label}</label>${f2}</div>`;
+        }
+
+        document.getElementById('e1_metrics').innerHTML = h1;
+        document.getElementById('e2_metrics').innerHTML = h2;
+        document.getElementById('bonus_emef').classList.toggle('hidden', local !== 'emef');
+        document.getElementById('bonus_outros').classList.toggle('hidden', local === 'emef' || local === 'dre');
+        document.getElementById('bonus_dre').classList.toggle('hidden', local !== 'dre');
+
+        document.querySelectorAll('input, select').forEach(el => el.addEventListener('input', calculate));
+        document.querySelectorAll('.help-icon').forEach(btn => {
+            btn.onclick = (e) => {
+                const id = e.target.getAttribute('data-modal');
+                document.getElementById('m_title').innerText = modais[id].t;
+                document.getElementById('m_body').innerHTML = modais[id].b;
+                document.getElementById('modal').classList.remove('hidden');
+            };
+        });
+        calculate();
+    }
+
+    document.getElementById('localTrabalho').addEventListener('change', changeUI);
+    document.getElementById('cargo').addEventListener('change', calculate);
+    document.getElementById('results-header').onclick = () => document.getElementById('results-bar').classList.toggle('is-expanded');
+    document.getElementById('close_modal').onclick = () => document.getElementById('modal').classList.add('hidden');
+
+    changeUI();
+});
+</script>
+</body>
+</html>
