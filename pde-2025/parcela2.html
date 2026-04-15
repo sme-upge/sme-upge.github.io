@@ -122,7 +122,7 @@
                 <label class="flex p-3 bg-green-50 border border-green-200 rounded cursor-pointer"><input type="checkbox" id="b_outros_ok" class="mt-1 mr-3 h-5 w-5"> <span class="text-sm text-green-800 font-bold">Bônus Unidade: <span class="font-normal">Desempenho acima da média da DRE.</span></span></label>
             </div>
             <div id="bonus_dre" class="hidden">
-                <label class="block text-sm text-gray-700 mb-1">Média adicional Jurisdição (Máx R$ 900):</label>
+                <label class="block text-sm text-gray-700 mb-1">Média adicional (Máx R$ 900):</label>
                 <input type="number" id="b_dre_val" value="900" class="w-32 p-2 border rounded bg-gray-50 font-bold">
             </div>
         </div>
@@ -177,7 +177,7 @@ document.addEventListener('DOMContentLoaded', function () {
         assiduidade: { t: "Tabela de Assiduidade", b: "O Valor Base é R$ 1.200 (CEIs R$ 2.400) por semestre. <br><b>Escala de frequência individual:</b> <table><tr><th>Faltas</th><th>% do Valor</th></tr><tr><td>0 ou 1</td><td>100% (+ Bônus R$ 900 se for zero)</td></tr><tr><td>2</td><td>95%</td></tr><tr><td>3</td><td>90%</td></tr><tr><td>4</td><td>85%</td></tr><tr><td>5</td><td>80%</td></tr><tr><td>6</td><td>75%</td></tr><tr><td>7</td><td>70%</td></tr><tr><td>8</td><td>65%</td></tr><tr><td>9</td><td>60%</td></tr><tr><td>10</td><td>55%</td></tr><tr><td>11 ou mais</td><td>0%</td></tr></table>" },
         freq_emef: { t: "Frequência Estudantes (EMEF)", b: "Até R$ 300 da parcela coletiva. <br>90% ou + (100%), 85% a 89,99% (75%), 80% a 84,99% (50%), 75% a 79,99% (25%)." },
         evol_emef: { t: "Evolução Prova SP", b: "R$ 1.500 na 1ª etapa se houver aumento na nota média da unidade escolar." },
-        part_emef: { t: "Participação em Provas", b: "R$ 1.500 na 2ª etapa se atingir pelo menos 80% de participação." },
+        part_emef: { t: "Participação em Provas", b: "R$ 1.500 na 2ª etapa se atingir pelo menos 80% de participação na  São Paulo e SARESP." },
         freq_emei: { t: "Frequência Estudantes (EMEI)", b: "Vale R$ 1.800 da parcela coletiva. <br>90% ou + (100%), 80% a 89,99% (80%), 70% a 79,99% (65%), 60% a 69,99% (50%)." },
         ocup_cei: { t: "Taxa de Ocupação (CEI)", b: "Vale R$ 600 da parcela coletiva. <br>90% ou + (100%), 80% a 89,99% (50%), 70% a 79,99% (30%)." },
         ocup_cieja: { t: "Taxa de Ocupação (CIEJA)", b: "Vale R$ 1.800 da parcela coletiva. <br>80% ou + (100%), 70% a 79,9% (50%), 60% a 69,9% (30%)." },
