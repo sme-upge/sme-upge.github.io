@@ -18,7 +18,7 @@
         .help-icon:hover { background-color: #0056b3; color: white; }
         input[type=number]::-webkit-inner-spin-button, input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
         #results-details { max-height: 0; overflow: hidden; transition: max-height 0.4s ease-out; }
-        #results-bar.is-expanded #results-details { max-height: 500px; }
+        #results-bar.is-expanded #results-details { max-height: 800px; }
         #toggle-icon { transition: transform 0.3s; }
         #results-bar.is-expanded #toggle-icon { transform: rotate(180deg); }
         table { width: 100%; border-collapse: collapse; margin-top: 10px; }
@@ -26,7 +26,7 @@
         th { background-color: #f2f2f2; }
     </style>
 </head>
-<body class="bg-[#f0f4f8] pb-48">
+<body class="bg-[#f0f4f8] pb-64">
 
     <header class="bg-[#003562] text-white p-4 shadow-md flex justify-between items-center">
         <div>
@@ -157,7 +157,7 @@
             </div>
         </div>
 
-        <!-- BÔNUS (ADICIONAL ANEXO IV) -->
+        <!-- VALORES ADICIONAIS -->
         <div class="bg-white rounded-xl shadow-sm border border-yellow-400 p-5 mb-8">
             <h2 class="text-lg font-bold text-yellow-800 mb-4 flex items-center">Valores Adicionais (Bônus) <span class="help-icon border-yellow-800 text-yellow-800" data-modal="adicional">?</span></h2>
             <div id="bonus_emef" class="space-y-2">
@@ -177,7 +177,7 @@
 
     <!-- BARRA FIXA INFERIOR -->
     <footer id="results-bar" class="fixed bottom-0 left-0 right-0 bg-[#111827] text-white shadow-2xl transition-all duration-300 is-expanded z-50 border-t-4 border-[#003562]">
-        <div id="results-header" class="max-w-4xl mx-auto flex items-center justify-between p-3 cursor-pointer hover:bg-gray-800">
+        <div id="results-header" class="max-w-5xl mx-auto flex items-center justify-between p-3 cursor-pointer hover:bg-gray-800">
             <div class="flex-grow grid grid-cols-2 gap-4">
                 <div class="bg-blue-700 p-2 rounded text-center shadow-inner">
                     <span class="block text-[10px] sm:text-xs text-blue-200 uppercase tracking-widest">Total Estimado no Ano</span>
@@ -194,11 +194,16 @@
             </div>
         </div>
         <div id="results-details" class="bg-gray-800 border-t border-gray-700">
-            <div class="max-w-4xl mx-auto p-4 grid grid-cols-2 md:grid-cols-4 gap-3 text-center">
-                <div class="bg-gray-700 p-2 rounded"><p class="text-[10px] text-gray-400 uppercase">1ª Etapa (Valor)</p><p id="res_e1_val" class="font-bold">R$ 0,00</p></div>
-                <div class="bg-gray-700 p-2 rounded"><p class="text-[10px] text-gray-400 uppercase">1ª Etapa (Bônus 0 Faltas)</p><p id="res_e1_bon" class="font-bold text-yellow-400">R$ 0,00</p></div>
-                <div class="bg-gray-700 p-2 rounded"><p class="text-[10px] text-gray-400 uppercase">2ª Etapa (Valor)</p><p id="res_e2_val" class="font-bold">R$ 0,00</p></div>
-                <div class="bg-gray-700 p-2 rounded border border-yellow-600"><p class="text-[10px] text-yellow-500 uppercase">2ª Etapa (Adicional/Bônus)</p><p id="res_e2_bon" class="font-bold text-yellow-400">R$ 0,00</p></div>
+            <div class="max-w-5xl mx-auto p-4 grid grid-cols-2 md:grid-cols-3 gap-3 text-center">
+                <!-- 1ª ETAPA -->
+                <div class="bg-gray-700 p-2 rounded"><p class="text-[10px] text-gray-400 uppercase">1ª Etapa (Valor)</p><p id="res_e1_val" class="font-bold text-sm">R$ 0,00</p></div>
+                <div class="bg-gray-700 p-2 rounded"><p class="text-[10px] text-gray-400 uppercase">1ª Etapa (Bônus 0 Faltas)</p><p id="res_e1_bon" class="font-bold text-yellow-400 text-sm">R$ 0,00</p></div>
+                <div class="bg-gray-900 border border-blue-500 p-2 rounded"><p class="text-[10px] text-blue-400 uppercase font-bold">1ª Etapa Valor Final</p><p id="res_e1_total_f" class="font-black text-white text-lg">R$ 0,00</p></div>
+
+                <!-- 2ª ETAPA -->
+                <div class="bg-gray-700 p-2 rounded"><p class="text-[10px] text-gray-400 uppercase">2ª Etapa (Valor)</p><p id="res_e2_val" class="font-bold text-sm">R$ 0,00</p></div>
+                <div class="bg-gray-700 p-2 rounded"><p class="text-[10px] text-gray-400 uppercase">2ª Etapa (Bônus/Adic.)</p><p id="res_e2_bon" class="font-bold text-yellow-400 text-sm">R$ 0,00</p></div>
+                <div class="bg-gray-900 border border-blue-500 p-2 rounded"><p class="text-[10px] text-blue-400 uppercase font-bold">2ª Etapa Valor Final</p><p id="res_e2_total_f" class="font-black text-white text-lg">R$ 0,00</p></div>
             </div>
             <p class="text-xs text-center text-gray-400 px-4 pb-4">
                 <strong>Aviso:</strong> Este simulador é uma estimativa. O valor real depende de publicação oficial.
@@ -220,130 +225,4 @@
 <script>
 document.addEventListener('DOMContentLoaded', function () {
     const modais = {
-        assiduidade: { t: "Tabela de Assiduidade", b: "O Valor Base é R$ 1.200 (CEIs R$ 2.400) por semestre. <table><tr><th>Faltas</th><th>%</th></tr><tr><td>0</td><td>100% + Bônus R$ 900</td></tr><tr><td>1</td><td>100%</td></tr><tr><td>2</td><td>95%</td></tr><tr><td>3</td><td>90%</td></tr><tr><td>4</td><td>85%</td></tr><tr><td>5</td><td>80%</td></tr><tr><td>11+</td><td>0%</td></tr></table>" },
-        freq_emef: { t: "Frequência (EMEF)", b: "Corresponde a R$ 300 da etapa." },
-        evol_emef: { t: "Evolução (1ª Etapa)", b: "Houve aumento da nota? Corresponde a R$ 1.500." },
-        part_emef: { t: "Participação (2ª Etapa)", b: "Mínimo 80% de participação. Vale R$ 1.500." },
-        freq_emei: { t: "Frequência (EMEI)", b: "Vale R$ 1.800 da etapa." },
-        ocup_cei: { t: "Ocupação (CEI)", b: "Vale R$ 600 da etapa." },
-        ocup_cieja: { t: "Ocupação (CIEJA)", b: "Vale R$ 1.800 da etapa." },
-        adicional: { t: "Bônus Anexo IV", b: "Valores extras por resultados da unidade ou DRE." }
-    };
-
-    function getAssid(faltas) {
-        if(faltas >= 11) return 0;
-        if(faltas <= 1) return 1;
-        return Math.max(0, 1 - ((faltas - 1) * 0.05));
-    }
-
-    function calculate() {
-        const cargo = document.getElementById('cargo').value;
-        const local = document.getElementById('localTrabalho').value;
-        const jor = parseFloat(document.getElementById('jornada').value);
-        const isGestor = ['diretor', 'assistente_diretor', 'coordenador'].includes(cargo);
-
-        const f1 = parseInt(document.getElementById('f1').value) || 0;
-        const f2 = parseInt(document.getElementById('f2').value) || 0;
-        document.getElementById('b1').checked = (f1 === 0);
-        document.getElementById('b2').checked = (f2 === 0);
-
-        let teto_assid = (local === 'cei') ? 2400 : 1200;
-        let teto_col = (local === 'cei') ? 600 : (local === 'emef' ? 1500 : 1800);
-        
-        let e1_col = 0;
-        if(local === 'emef') e1_col = (300 * parseFloat(document.getElementById('e1_freq_emef').value)) + (1500 * parseFloat(document.getElementById('e1_evol_emef').value));
-        else if(local === 'emei') e1_col = 1800 * parseFloat(document.getElementById('e1_freq_emei').value);
-        else if(local === 'cei') e1_col = 600 * parseFloat(document.getElementById('e1_ocup_cei').value);
-        else if(local === 'cieja') e1_col = 1800 * parseFloat(document.getElementById('e1_ocup_cieja').value);
-        else e1_col = 1800 * (parseFloat(document.getElementById('e1_media_dre').value)/100);
-
-        let e2_col = 0;
-        if(local === 'emef') e2_col = (300 * parseFloat(document.getElementById('e2_freq_emef').value)) + (1500 * parseFloat(document.getElementById('e2_part_emef').value));
-        else if(local === 'emei') e2_col = 1800 * parseFloat(document.getElementById('e2_freq_emei').value);
-        else if(local === 'cei') e2_col = 600 * parseFloat(document.getElementById('e2_ocup_cei').value);
-        else if(local === 'cieja') e2_col = 1800 * parseFloat(document.getElementById('e2_ocup_cieja').value);
-        else e2_col = 1800 * (parseFloat(document.getElementById('e2_media_dre').value)/100);
-
-        let bonus_add = 0;
-        if (local === 'emef') {
-            if(document.getElementById('b_emef_1').checked) bonus_add += (isGestor ? 1450 : 450);
-            if(document.getElementById('b_emef_2').checked) bonus_add += (isGestor ? 1450 : 450);
-            if(isGestor && document.getElementById('b_emef_alfa').checked) bonus_add += 2000;
-        } else if (['emei', 'cei', 'cieja'].includes(local)) {
-            if(document.getElementById('b_outros_ok').checked) bonus_add = 900;
-        } else {
-            bonus_add = parseFloat(document.getElementById('b_dre_val').value) || 0;
-        }
-
-        const t_e1_val = (teto_assid * getAssid(f1) + e1_col) * jor;
-        const t_e1_bon = (f1 === 0 ? 900 : 0) * jor;
-        const t_e2_val = (teto_assid * getAssid(f2) + e2_col) * jor;
-        const t_e2_bon = ((f2 === 0 ? 900 : 0) + bonus_add) * jor;
-
-        const total = t_e1_val + t_e1_bon + t_e2_val + t_e2_bon;
-        const teto = ((teto_assid * 2) + (teto_col * 2) + 1800 + (local === 'emef' ? (isGestor ? 4900 : 900) : 900)) * jor;
-
-        const fmt = v => v.toLocaleString('pt-BR', {style: 'currency', currency: 'BRL'});
-        document.getElementById('res_e1_val').textContent = fmt(t_e1_val);
-        document.getElementById('res_e1_bon').textContent = fmt(t_e1_bon);
-        document.getElementById('res_e2_val').textContent = fmt(t_e2_val);
-        document.getElementById('res_e2_bon').textContent = fmt(t_e2_bon);
-        document.getElementById('res_total').textContent = fmt(total);
-        document.getElementById('res_teto').textContent = fmt(teto);
-    }
-
-    function changeUI() {
-        const local = document.getElementById('localTrabalho').value;
-        const isGestor = ['diretor', 'assistente_diretor', 'coordenador'].includes(document.getElementById('cargo').value);
-
-        ['e1_emef','e1_emei','e1_cei','e1_cieja','e1_dre','e2_emef','e2_emei','e2_cei','e2_cieja','e2_dre','bonus_emef','bonus_alfa','bonus_outros','bonus_dre'].forEach(id => {
-            const el = document.getElementById(id);
-            if(el) el.classList.add('hidden');
-        });
-
-        if(local === 'emef') {
-            document.getElementById('e1_emef').classList.remove('hidden');
-            document.getElementById('e2_emef').classList.remove('hidden');
-            document.getElementById('bonus_emef').classList.remove('hidden');
-            if(isGestor) document.getElementById('bonus_alfa').classList.remove('hidden');
-        } else if (local === 'emei') {
-            document.getElementById('e1_emei').classList.remove('hidden');
-            document.getElementById('e2_emei').classList.remove('hidden');
-            document.getElementById('bonus_outros').classList.remove('hidden');
-        } else if (local === 'cei') {
-            document.getElementById('e1_cei').classList.remove('hidden');
-            document.getElementById('e2_cei').classList.remove('hidden');
-            document.getElementById('bonus_outros').classList.remove('hidden');
-        } else if (local === 'cieja') {
-            document.getElementById('e1_cieja').classList.remove('hidden');
-            document.getElementById('e2_cieja').classList.remove('hidden');
-            document.getElementById('bonus_outros').classList.remove('hidden');
-        } else {
-            document.getElementById('e1_dre').classList.remove('hidden');
-            document.getElementById('e2_dre').classList.remove('hidden');
-            document.getElementById('bonus_dre').classList.remove('hidden');
-        }
-        calculate();
-    }
-
-    document.querySelectorAll('select, input').forEach(el => {
-        el.addEventListener('change', changeUI);
-        el.addEventListener('input', calculate);
-    });
-
-    document.querySelectorAll('.help-icon').forEach(btn => {
-        btn.addEventListener('click', (e) => {
-            const id = e.target.getAttribute('data-modal');
-            document.getElementById('m_title').innerText = modais[id].t;
-            document.getElementById('m_body').innerHTML = modais[id].b;
-            document.getElementById('modal').classList.remove('hidden');
-        });
-    });
-    document.getElementById('close_modal').onclick = () => document.getElementById('modal').classList.add('hidden');
-    document.getElementById('results-header').onclick = () => document.getElementById('results-bar').classList.toggle('is-expanded');
-
-    changeUI();
-});
-</script>
-</body>
-</html>
+        assiduidade: { t: "Tabela de Assiduidade", b: "O Valor Base é R$ 1.
