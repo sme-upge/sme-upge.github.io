@@ -184,7 +184,7 @@ document.addEventListener('DOMContentLoaded', function () {
         freq_emei: { t: "Frequência Estudantes (EMEI)", b: "Vale R$ 1.800 da parcela coletiva. <br><br><b>90% ou mais:</b> 100% (R$ 1.800)<br><b>80% a 89,99%:</b> 80% (R$ 1.440)<br><b>70% a 79,99%:</b> 65% (R$ 1.170)<br><b>60% a 69,99%:</b> 50% (R$ 900)<br><b>Abaixo de 60%:</b> 0%" },
         ocup_cei: { t: "Taxa de Ocupação (CEI)", b: "Vale R$ 600 da parcela coletiva. <br><br><b>90% ou mais:</b> 100% (R$ 600)<br><b>80% a 89,99%:</b> 50% (R$ 300)<br><b>70% a 79,99%:</b> 30% (R$ 180)<br><b>Abaixo de 70%:</b> 0%" },
         superv_help: { t: "Desempenho Coletivo - Supervisores", b: "Para supervisores (as) escolares, a segunda parcela do prêmio corresponde a média de desempenho das unidades supervisionadas." },
-        adicional: { t: "Adicionais Anexo IV", b: "Prêmios extras. Para o Trio Gestor de EMEF, somam até R$ 4.900,00. Para Supervisores e DRE, bônus máximo de R$ 900,00 calculado sobre os pontos atingidos." }
+        adicional: { t: "Adicionais Anexo IV", b: "Prêmios extras. Para o Trio Gestor de EMEF ou EMEFM, poderão somar até R$ 4.900,00. Para Supervisores, DREs, EMEBS, CEU Gestão e unidades municipalizadas ou recém-inauguradas, o valor máximo do valor adicional é de R$ 900,00, calculado com base no desempenho adicional da respectiva DRE." }
     };
 
     function calculate() {
@@ -262,7 +262,7 @@ document.addEventListener('DOMContentLoaded', function () {
             h1 = `<div><label class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Frequência <span class="help-icon" data-modal="freq_emef">?</span></label><select id="e1_m_val" class="w-full p-2 border rounded-lg bg-slate-50 font-bold">${opt}</select></div><div><label class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Evolução <span class="help-icon" data-modal="evol_emef">?</span></label><select id="e1_ex_val" class="w-full p-2 border rounded-lg bg-slate-50 font-bold"><option value="1">Sim</option><option value="0">Não</option></select></div>`;
             h2 = `<div><label class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Frequência</label><select id="e2_m_val" class="w-full p-2 border rounded-lg bg-slate-50 font-bold">${opt}</select></div><div><label class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Participação <span class="help-icon" data-modal="part_emef">?</span></label><select id="e2_ex_val" class="w-full p-2 border rounded-lg bg-slate-50 font-bold"><option value="1">Sim (80%+)</option><option value="0">Não</option></select></div>`;
         } else {
-            let label = (local === 'cei' || local === 'cieja') ? 'Taxa Ocupação' : (local === 'dre' || isSupervisor ? 'Média de desempenho das unidades das unidades supervisionadas (0-100)' : 'Frequência');
+            let label = (local === 'cei' || local === 'cieja') ? 'Taxa Ocupação' : (local === 'dre' || isSupervisor ? 'Média de desempenho das unidades supervisionadas (%)' : 'Frequência');
             let mId = local === 'cei' ? 'ocup_cei' : (local === 'emei' ? 'freq_emei' : '');
             let opt = '';
             if(local === 'cei') opt = '<option value="1">90% ou maior</option><option value="0.5">80% a 89%</option><option value="0.3">70% a 79%</option><option value="0">Menor</option>';
@@ -279,7 +279,7 @@ document.addEventListener('DOMContentLoaded', function () {
         document.getElementById('bonus_emef').classList.toggle('hidden', local !== 'emef' || isSupervisor);
         document.getElementById('bonus_outros').classList.toggle('hidden', local === 'emef' || local === 'dre' || isSupervisor);
         document.getElementById('bonus_dre').classList.toggle('hidden', (local !== 'dre' && !isSupervisor));
-        document.getElementById('dre_label').innerText = isSupervisor ? "Média Adicional da DRE (Pontos 0 a 100):" : "Média Adicional Jurisdição (Pontos 0 a 100):";
+        document.getElementById('dre_label').innerText = isSupervisor ? "Média Adicional da DRE (Pontos 0 a 100):" : "Média Adicional Jurisdição (0 a 100):";
         
         document.querySelectorAll('input, select').forEach(el => el.addEventListener('input', calculate));
         document.querySelectorAll('.help-icon').forEach(btn => btn.onclick = (e) => {
