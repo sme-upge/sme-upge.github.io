@@ -3,285 +3,675 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Árvore de Problemas — GT de Alfabetização · SME-SP</title>
+<title>Ãrvore de Problemas â€” GT de AlfabetizaÃ§Ã£o Â· SME-SP</title>
 <script src="https://cdn.tailwindcss.com"></script>
 <script src="https://unpkg.com/vis-network/standalone/umd/vis-network.min.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
-  *{box-sizing:border-box;}
-  html,body{height:100%;margin:0;padding:0;overflow:hidden;font-family:"Inter",sans-serif;background:#F7F8FA;}
-  #mynetwork{width:100%;height:100vh;background:#F7F8FA;}
-  
-  /* Legenda Fixa à Esquerda */
-  #legend-box { position: absolute; bottom: 30px; left: 30px; z-index: 10; }
-  
-  /* Painel de Filtros à Direita */
-  #panel { position: absolute; top: 30px; right: 30px; bottom: 30px; width: 320px; z-index: 20; display: flex; flex-direction: column; }
-  
-  .filter-section { max-height: 40vh; overflow-y: auto; scrollbar-width: thin; }
-  .filter-section::-webkit-scrollbar { width: 4px; }
-  .filter-section::-webkit-scrollbar-thumb { background: #CBD5E1; border-radius: 4px; }
-
-  /* Ajustes de Clique e Modal */
-  #modal { background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(4px); }
-  
-  /* Estilo das conexões vis.js */
-  .vis-tooltip { background: #1e293b !important; color: #fff !important; border-radius: 8px !important; padding: 10px !important; font-size: 12px !important; border: none !important; }
+  *{box-sizing:border-box}
+  html,body{height:100%;margin:0;padding:0;overflow:hidden;font-family:"Inter",sans-serif;background:#F7F8FA}
+  #net{width:100%;height:100vh;background:#F7F8FA}
+  .vis-tooltip{background:rgba(17,24,39,.92)!important;color:#F9FAFB!important;border:none!important;border-radius:8px!important;font-size:11px!important;padding:7px 11px!important;max-width:260px!important;line-height:1.5!important;box-shadow:0 4px 16px rgba(0,0,0,.2)!important}
+  #panel{transition:width .2s,height .2s}
+  #panel.min{width:44px!important;height:44px!important;overflow:hidden;border-radius:12px}
+  #panel.min #pb{display:none}
+  ::-webkit-scrollbar{width:4px}
+  ::-webkit-scrollbar-thumb{background:#D1D5DB;border-radius:4px}
+  @media(max-width:640px){#legend,#panel{display:none!important}}
 </style>
 </head>
 <body>
 
-<div id="loading" class="absolute inset-0 z-[100] flex flex-col items-center justify-center bg-white">
-  <div class="w-10 h-10 border-4 border-indigo-500 border-t-transparent rounded-full animate-spin"></div>
-  <p class="mt-4 font-bold text-gray-600">Restaurando Árvore...</p>
+<div id="loading" class="absolute inset-0 z-50 flex flex-col items-center justify-center" style="background:rgba(247,248,250,.96)">
+  <div class="relative w-14 h-14 mb-5">
+    <div class="absolute inset-0 rounded-full border-4 border-indigo-100"></div>
+    <div class="absolute inset-0 rounded-full border-4 border-indigo-500 border-t-transparent animate-spin"></div>
+  </div>
+  <p class="text-base font-semibold text-gray-700">Montando a Ã¡rvore de problemas</p>
+  <p class="text-xs text-gray-400 mt-1">GT de AlfabetizaÃ§Ã£o Â· SME-SP Â· 2026</p>
 </div>
 
-<div id="mynetwork"></div>
-
-<div id="legend-box" class="bg-white/90 p-5 rounded-2xl shadow-lg border border-gray-100 hidden sm:block">
-  <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-3">Hierarquia</p>
-  <div class="space-y-2">
-    <div class="flex items-center gap-2 text-[11px] font-medium text-gray-600"><span class="w-3 h-3 rounded-full bg-[#EF4444]"></span> Problema Macro</div>
-    <div class="flex items-center gap-2 text-[11px] font-medium text-gray-600"><span class="w-3 h-3 rounded-full bg-[#F97316]"></span> Eixo</div>
-    <div class="flex items-center gap-2 text-[11px] font-medium text-gray-600"><span class="w-3 h-3 rounded-full bg-[#EAB308]"></span> Problema Central</div>
-    <div class="flex items-center gap-2 text-[11px] font-medium text-gray-600"><span class="w-3 h-3 rounded-full bg-[#22C55E]"></span> Causa Primária</div>
-    <div class="flex items-center gap-2 text-[11px] font-medium text-gray-600"><span class="w-3 h-3 rounded-full bg-[#3B82F6]"></span> Causa Secundária</div>
-    <div class="flex items-center gap-2 text-[11px] font-medium text-gray-600"><span class="w-3 h-3 rounded-full bg-[#A855F7]"></span> Causa Terciária</div>
+<div class="absolute top-0 left-0 right-0 z-10 pointer-events-none" style="background:linear-gradient(rgba(247,248,250,1),rgba(247,248,250,0))">
+  <div class="flex justify-center pt-5 pb-10">
+    <div class="text-center">
+      <h1 class="text-lg font-bold text-gray-800 tracking-tight">Ãrvore de Problemas</h1>
+      <p class="text-xs text-gray-400 mt-0.5">GT de AlfabetizaÃ§Ã£o Â· SME-SP Â· 2026</p>
+    </div>
   </div>
 </div>
 
-<div id="panel" class="bg-white shadow-2xl rounded-3xl border border-gray-100 overflow-hidden">
-  <div class="p-6 border-b border-gray-50">
-    <h1 class="text-lg font-bold text-gray-800">Filtros</h1>
-    <input id="search" type="text" placeholder="Pesquisar na árvore..." class="w-full mt-4 px-4 py-2 bg-gray-50 border border-gray-100 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 outline-none">
-  </div>
+<div id="net"></div>
 
-  <div class="p-6 flex-1 overflow-y-auto space-y-8">
+<!-- Modal -->
+<div id="modal" class="fixed inset-0 z-[100] hidden items-center justify-center p-4" style="background:rgba(17,24,39,.5)">
+  <div id="mbox" class="bg-white rounded-2xl shadow-2xl w-full max-w-lg transform transition-all duration-200 scale-95 opacity-0 overflow-hidden">
+    <div class="px-6 pt-6 pb-4 border-b border-gray-100">
+      <div class="flex items-start justify-between gap-4">
+        <div class="flex-1">
+          <div class="flex items-center gap-2 mb-3 flex-wrap">
+            <span id="m-nivel" class="text-[10px] font-semibold uppercase tracking-widest text-gray-400 bg-gray-100 px-2 py-0.5 rounded-md"></span>
+            <span id="m-eixo" class="text-[10px] font-semibold text-white px-2.5 py-0.5 rounded-full" style="background:#1E3A5F"></span>
+          </div>
+          <p class="text-[10px] font-semibold uppercase tracking-wider text-gray-400 mb-1.5">O que o grupo disse</p>
+          <h3 id="m-causa" class="text-sm font-semibold text-gray-800 leading-relaxed"></h3>
+        </div>
+        <button onclick="closeModal()" class="w-8 h-8 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center text-gray-500 text-lg flex-shrink-0">Ã—</button>
+      </div>
+    </div>
+    <div id="m-cat-wrap" class="px-6 py-4 border-b border-gray-100">
+      <p class="text-[10px] font-semibold uppercase tracking-wider text-gray-400 mb-2">ConexÃ£o temÃ¡tica</p>
+      <div id="m-cat" class="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs font-medium"></div>
+      <p class="text-[10px] text-gray-400 mt-2 italic">Instrumento analÃ­tico â€” nÃ£o Ã© uma fala do grupo.</p>
+    </div>
+    <div id="m-votos-wrap" class="px-6 py-4 hidden">
+      <span id="m-votos" class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-amber-50 text-amber-700 rounded-xl text-xs font-semibold"></span>
+    </div>
+    <div class="px-6 py-4 bg-gray-50 flex justify-end">
+      <button onclick="closeModal()" class="px-5 py-2 bg-gray-900 hover:bg-gray-700 text-white text-xs font-semibold rounded-xl">Fechar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Legenda -->
+<div id="legend" class="absolute bottom-5 left-5 bg-white/95 rounded-2xl shadow-lg border border-gray-100 p-4 z-10" style="min-width:170px">
+  <p class="text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-3">Hierarquia</p>
+  <div class="space-y-2 text-xs text-gray-600">
+    <div class="flex items-center gap-2"><span class="w-4 h-4 rounded-full flex-shrink-0" style="background:#E53E3E"></span>Problema macro</div>
+    <div class="flex items-center gap-2"><span class="w-3.5 h-3.5 rounded-full flex-shrink-0" style="background:#DD6B20"></span>Eixo</div>
+    <div class="flex items-center gap-2"><span class="w-3 h-3 rounded-full flex-shrink-0" style="background:#D69E2E"></span>Problema central</div>
+    <div class="flex items-center gap-2"><span class="w-2.5 h-2.5 rounded-full flex-shrink-0" style="background:#38A169"></span>Causa primÃ¡ria</div>
+    <div class="flex items-center gap-2"><span class="w-2 h-2 rounded-full flex-shrink-0" style="background:#3182CE"></span>Causa secundÃ¡ria</div>
+    <div class="flex items-center gap-2"><span class="w-1.5 h-1.5 rounded-full flex-shrink-0" style="background:#805AD5"></span>Causa terciÃ¡ria</div>
+    <div class="flex items-center gap-2"><span class="w-3 h-3 rotate-45 flex-shrink-0 border-2" style="border-color:#888;background:#f0f0f0"></span>Tema transversal</div>
+  </div>
+  <div class="mt-3 pt-3 border-t border-gray-100 space-y-1.5 text-xs text-gray-600">
+    <p class="text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-2">ConexÃµes</p>
+    <div class="flex items-center gap-2"><span class="w-5 h-px bg-gray-300 flex-shrink-0"></span>HierÃ¡rquica</div>
+    <div class="flex items-center gap-2"><svg width="20" height="4" class="flex-shrink-0"><line x1="0" y1="2" x2="20" y2="2" stroke="#A78BFA" stroke-width="2" stroke-dasharray="4 3"/></svg>Transversal</div>
+  </div>
+</div>
+
+<!-- Painel filtros -->
+<div id="panel" class="absolute bottom-5 right-5 bg-white/95 rounded-2xl shadow-lg border border-gray-100 z-10 w-72">
+  <div class="flex items-center justify-between px-4 pt-4 pb-3 border-b border-gray-100">
+    <p class="text-[10px] font-bold uppercase tracking-widest text-gray-400">Filtros</p>
+    <button id="btn-panel" class="w-7 h-7 rounded-lg bg-gray-100 hover:bg-gray-200 flex items-center justify-center">
+      <svg id="ic-d" class="w-3.5 h-3.5 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg>
+      <svg id="ic-u" class="w-3.5 h-3.5 text-gray-500 hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 15l7-7 7 7"/></svg>
+    </button>
+  </div>
+  <div id="pb" class="p-4 space-y-4">
+
+    <!-- Busca -->
+    <div class="relative">
+      <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path stroke-linecap="round" d="M21 21l-4.35-4.35"/></svg>
+      <input id="search" type="text" placeholder="Pesquisar na Ã¡rvore..."
+        class="w-full pl-9 pr-3 py-2 bg-gray-50 border border-gray-200 rounded-xl text-xs text-gray-700 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-300">
+    </div>
+
+    <!-- VisualizaÃ§Ã£o -->
     <div>
-      <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-3">Eixos</p>
-      <div id="eixo-list" class="space-y-1.5 filter-section"></div>
-      <div class="flex gap-3 mt-3">
-        <button onclick="toggleAllEixos(true)" class="text-[10px] font-bold text-indigo-600 hover:underline">Todos</button>
-        <button onclick="toggleAllEixos(false)" class="text-[10px] font-bold text-gray-400 hover:underline">Nenhum</button>
+      <p class="text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-2">VisualizaÃ§Ã£o</p>
+      <div class="grid grid-cols-3 gap-1.5">
+        <button data-view="completa"     class="vbtn py-2 text-[10px] rounded-xl font-semibold bg-indigo-600 text-white px-1 leading-tight">Completa</button>
+        <button data-view="transversais" class="vbtn py-2 text-[10px] rounded-xl font-semibold bg-gray-100 text-gray-500 px-1 leading-tight">SÃ³ trans.</button>
+        <button data-view="minuto"       class="vbtn py-2 text-[10px] rounded-xl font-semibold bg-gray-100 text-gray-500 px-1 leading-tight">1 minuto</button>
       </div>
     </div>
 
+    <!-- PriorizaÃ§Ã£o -->
     <div>
-      <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-3">Tema Transversal</p>
-      <div id="cat-list" class="space-y-1 filter-section"></div>
+      <p class="text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-2">PriorizaÃ§Ã£o</p>
+      <div class="grid grid-cols-4 gap-1.5">
+        <button data-min="0" class="pbtn py-1.5 text-[11px] rounded-lg font-semibold bg-indigo-600 text-white">Todas</button>
+        <button data-min="1" class="pbtn py-1.5 text-[11px] rounded-lg font-semibold bg-gray-100 text-gray-500">1+â­</button>
+        <button data-min="4" class="pbtn py-1.5 text-[11px] rounded-lg font-semibold bg-gray-100 text-gray-500">4+â­</button>
+        <button data-min="5" class="pbtn py-1.5 text-[11px] rounded-lg font-semibold bg-gray-100 text-gray-500">5+â­</button>
+      </div>
     </div>
-  </div>
-</div>
 
-<div id="modal" class="fixed inset-0 z-[110] hidden items-center justify-center p-4">
-  <div id="modal-box" class="bg-white rounded-[32px] shadow-2xl w-full max-w-lg overflow-hidden transform transition-all duration-300">
-    <div class="p-8">
-      <div class="flex justify-between items-start mb-6">
-        <span id="m-nivel" class="text-[10px] font-black uppercase tracking-[0.2em] text-indigo-500 bg-indigo-50 px-3 py-1 rounded-full"></span>
-        <button onclick="closeModal()" class="text-gray-300 hover:text-gray-600 text-2xl">&times;</button>
-      </div>
-      <h2 id="m-eixo" class="text-[11px] font-bold text-slate-400 uppercase mb-2"></h2>
-      <h3 id="m-causa" class="text-lg font-semibold text-gray-800 leading-snug mb-6"></h3>
-      
-      <div id="m-cat-wrap" class="p-5 bg-gray-50 rounded-2xl border border-gray-100">
-        <p class="text-[10px] font-bold text-gray-400 uppercase mb-2">Conexão Transversal:</p>
-        <div id="m-cat" class="text-sm font-medium text-gray-700"></div>
+    <!-- Eixos -->
+    <div>
+      <p class="text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-2">Eixos</p>
+      <ul id="eixo-ul" class="space-y-1 max-h-28 overflow-y-auto pr-1 text-xs"></ul>
+      <div class="flex gap-2 mt-2">
+        <button id="sel-all"   class="flex-1 py-1.5 text-[11px] font-semibold rounded-lg bg-indigo-50 text-indigo-600 hover:bg-indigo-100">Todos</button>
+        <button id="desel-all" class="flex-1 py-1.5 text-[11px] font-semibold rounded-lg bg-gray-100 text-gray-500 hover:bg-gray-200">Nenhum</button>
       </div>
     </div>
-    <div class="px-8 py-5 bg-gray-50 flex justify-end">
-      <button onclick="closeModal()" class="px-8 py-3 bg-indigo-600 text-white text-xs font-bold rounded-2xl hover:bg-indigo-700 transition-all">Fechar</button>
+
+    <!-- Tema transversal -->
+    <div>
+      <p class="text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-2">Tema transversal</p>
+      <ul id="cat-ul" class="space-y-0.5 max-h-40 overflow-y-auto pr-1 text-xs"></ul>
     </div>
+
   </div>
 </div>
 
 <script>
-const CSV_URL = "https://raw.githubusercontent.com/sme-upge/sme-upge.github.io/refs/heads/main/GT%20de%20Alfabetiza%C3%A7%C3%A3o/%C3%81rvore%20de%20Problemas%20-%20Alfabetiza%C3%A7%C3%A3o%20(3).csv";
-const MACRO = "Baixa aprendizagem na alfabetização";
-const EIXO_NOMES = {"Eixo 1": "Responsabilidades", "Eixo 2": "Formação", "Eixo 3": "Infraestrutura", "Eixo 4": "Incentivos", "Eixo 5": "Acomp. e Monitoramento", "Eixo 6": "Avaliação", "Eixo 7": "Currículo e Materiais"};
-const CORES = { macro: "#EF4444", eixo: "#F97316", problema: "#EAB308", causa1: "#22C55E", causa2: "#3B82F6", causa3: "#A855F7", hub: "#6366F1" };
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+// CONFIGURAÃ‡ÃƒO
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+const CSV_URL    = "https://raw.githubusercontent.com/sme-upge/sme-upge.github.io/refs/heads/main/GT%20de%20Alfabetiza%C3%A7%C3%A3o/%C3%81rvore%20de%20Problemas%20-%20Alfabetiza%C3%A7%C3%A3o%20(3).csv";
+const MACRO      = "Baixa aprendizagem na alfabetizaÃ§Ã£o";
+const EIXO_NOMES = {"Eixo 1": "Responsabilidades", "Eixo 2": "FormaÃ§Ã£o", "Eixo 3": "Infraestrutura", "Eixo 4": "Incentivos", "Eixo 5": "Acomp. e Monitoramento", "Eixo 6": "AvaliaÃ§Ã£o", "Eixo 7": "CurrÃ­culo e Materiais"};
+const CAT_CORES  = {"Alta rotatividade de professores": "#FC8181", "Alto nÃºmero de estudantes por turma": "#F6AD55", "AusÃªncia de critÃ©rios para retenÃ§Ã£o de professores alfabetizadores": "#FEB2B2", "Baixo uso dos dados das avaliaÃ§Ãµes para planejamento e acompanhamento pedagÃ³gico": "#76E4F7", "Desafios na integraÃ§Ã£o do cronograma formativo por ciclos e na conexÃ£o das temÃ¡ticas com a realidade cotidiana e as necessidades dos territÃ³rios": "#B794F4", "Excesso e sobreposiÃ§Ã£o de avaliaÃ§Ãµes  no calendÃ¡rio escolar": "#ECC94B", "Fragilidade na articulaÃ§Ã£o curricular, planejamento integrado e continuidade pedagÃ³gica entre as etapas de ensino (Ed. Infantil e Ciclo de AlfabetizaÃ§Ã£o)": "#68D391", "Fragilidade na comunicaÃ§Ã£o e planejamento integrado entre SME, DREs e UEs": "#63B3ED", "Fragilidade na formaÃ§Ã£o continuada de professores e trio gestor acerca da alfabetizaÃ§Ã£o": "#D6BCFA", "Fragilidade na formaÃ§Ã£o para uso e anÃ¡lise de dados de avaliaÃ§Ã£o": "#4FD1C5", "Fragilidade na integraÃ§Ã£o entre currÃ­culo, materiais didÃ¡ticos, prÃ¡ticas pedagÃ³gicas e avaliaÃ§Ãµes": "#81E6D9", "Fragilidade no atendimento dos estudantes em suas individualidades (AEE e vulnerabilidades)": "#F6AD55", "Fragilidade no planejamento do acompanhamento pedagÃ³gico dos estudantes e das prÃ¡ticas docentes": "#9AE6B4", "Fragilidades na consolidaÃ§Ã£o de identidades e sobrecarga de demandas do Trio Gestor (Diretores, ADs e CPs) e POA, impactando o planejamento integrado": "#FBD38D", "FragmentaÃ§Ã£o da concepÃ§Ã£o e prÃ¡tica de alfabetizaÃ§Ã£o, com entendimentos distintos entre intÃ¢ncias e atores da rede sobre instrumentos normativos": "#FFA07A", "ParticipaÃ§Ã£o desigual de professores nas formaÃ§Ãµes (JEIF e Contratados)": "#F687B3"};
 
-let G = { nodes: [], edges: [], eixos: [], cats: [] };
-let network = null;
-let visData = null;
+// cores por nÃ­vel hierÃ¡rquico
+const COR = {
+  macro:    {background:"#E53E3E", border:"#C53030"},
+  eixo:     {background:"#DD6B20", border:"#C05621"},
+  problema: {background:"#D69E2E", border:"#B7791F"},
+  causa1:   {background:"#38A169", border:"#276749"},
+  causa2:   {background:"#3182CE", border:"#2C5282"},
+  causa3:   {background:"#805AD5", border:"#553C9A"},
+  faded:    {background:"#E2E8F0", border:"#CBD5E0"},
+};
+
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+// ESTADO GLOBAL
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+let G        = null;   // grafo processado
+let HUBS     = null;   // Set de hub IDs
+let HUB_COR  = {};     // cor original de cada hub
+let vNodes   = null;   // vis.DataSet nodes
+let vEdges   = null;   // vis.DataSet edges
+let network  = null;
+
+// estado dos filtros
 let selEixos = new Set();
-let selCat = "__ALL__";
+let selCat   = "__ALL__";
+let minV     = 0;
+let viewMode = "completa";
 
-async function init() {
-  const resp = await fetch(CSV_URL);
-  const text = await resp.text();
-  parseData(text);
-  render();
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+// PARSER CSV
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+function parseCsv(text) {
+  const rows = [];
+  const lines = text.split(/\r?\n/);
+  for(let i = 1; i < lines.length; i++) {
+    const line = lines[i].trim();
+    if(!line) continue;
+    const cols = []; let col = "", inQ = false;
+    for(const ch of line) {
+      if(ch === '"') { inQ = !inQ; }
+      else if(ch === ';' && !inQ) { cols.push(col.trim()); col = ""; }
+      else { col += ch; }
+    }
+    cols.push(col.trim());
+    // forÃ§a 9 colunas, limpa marcadores vazios
+    while(cols.length < 9) cols.push("");
+    const clean = cols.slice(0,9).map(v => ["?","-","â€“","â€”"].includes(v) ? "" : v);
+    rows.push(clean);
+  }
+  return rows;
 }
 
-function parseData(text) {
-  const rows = text.split(/\r?\n/).slice(1).map(line => {
-    let cols = []; let c="", inQ=false;
-    for(let char of line){
-      if(char==='"') inQ=!inQ;
-      else if(char===';' && !inQ){ cols.push(c.trim()); c=""; }
-      else c+=char;
-    }
-    cols.push(c.trim()); return cols;
-  });
-
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+// PROCESSAMENTO DOS DADOS
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+function processData(rows) {
   const nodesMap = new Map();
-  const edges = [];
+  const edgesList = [];
+  const edgesSet  = new Set();
+  const connCount = new Map();
+  const eixosSet  = new Set();
 
-  const addNode = (id, group, level, eixo, cat) => {
-    if(!id || id === "-" || id === "") return;
+  function addNode(id, group, level, eixo, cat, votos) {
+    if(!id) return;
+    id = id.trim(); if(!id) return;
     if(!nodesMap.has(id)) {
-      const ek = (eixo || (group === "eixo" ? id : "")).slice(0,6);
-      nodesMap.set(id, { id, label: id, group, level, eixo: ek, cat: cat || "", causa_real: id, eixo_nome: EIXO_NOMES[ek] || "" });
+      const ek = group==="eixo" ? id.slice(0,6) : (eixo||"").slice(0,6);
+      nodesMap.set(id, {
+        id,
+        label: id.length > 60 ? id.slice(0,60)+"â€¦" : id,
+        title: id,
+        causa_real: id,
+        group, level,
+        eixo: ek,
+        eixo_nome: EIXO_NOMES[ek] || "",
+        cat: cat || "",
+        votos: votos || 0,
+        // cor inicial pelo grupo
+        color: COR[group] || COR.causa2,
+      });
+      if(level === 0) nodesMap.get(id).mass = 10;
+      connCount.set(id, 0);
+    } else {
+      const n = nodesMap.get(id);
+      if((votos||0) > n.votos) n.votos = votos;
+      if(cat && !n.cat) n.cat = cat;
     }
-  };
+  }
 
-  addNode(MACRO, "macro", 0);
-  rows.forEach(r => {
-    const [eixo, prob, c1, cat1, c2, cat2, v, c3, cat3] = r;
-    if(!eixo) return;
-    const ek = eixo.slice(0,6); G.eixos.push(ek);
-    addNode(ek, "eixo", 1); edges.push({from: MACRO, to: ek});
-    if(prob){ addNode(prob, "problema", 2, ek, cat1); edges.push({from: ek, to: prob}); }
-    if(c1){ addNode(c1, "causa1", 3, ek, cat1); edges.push({from: prob, to: c1}); }
-    if(c2){ addNode(c2, "causa2", 4, ek, cat2); edges.push({from: c1, to: c2}); }
-    if(c3){ addNode(c3, "causa3", 5, ek, cat3); edges.push({from: c2, to: c3}); }
+  function addEdge(from, to) {
+    from = (from||"").trim(); to = (to||"").trim();
+    if(!from || !to) return;
+    const k = from + "â†’" + to;
+    if(edgesSet.has(k)) return;
+    edgesSet.add(k);
+    edgesList.push({from, to, arrows:{to:{enabled:false}}});
+    connCount.set(from, (connCount.get(from)||0)+1);
+    connCount.set(to,   (connCount.get(to)||0)+1);
+  }
+
+  addNode(MACRO, "macro", 0, "", "", 0);
+
+  for(const cols of rows) {
+    const [eixo,,prob,cat1,cs,cat2,votosRaw,ct,cat3] = cols;
+    // cols: [0]=eixo [1]=prob_central [2]=cp [3]=cat1 [4]=cs [5]=cat2 [6]=votos [7]=ct [8]=cat3
+    const eixoNome = cols[0]||"";
+    const probC    = cols[1]||"";
+    const cp       = cols[2]||"";
+    const c1       = cols[3]||"";
+    const cs_      = cols[4]||"";
+    const c2       = cols[5]||"";
+    const vts      = parseInt(cols[6])||0;
+    const ct_      = cols[7]||"";
+    const c3       = cols[8]||"";
+
+    if(!eixoNome) continue;
+    const ek = eixoNome.slice(0,6);
+    eixosSet.add(ek);
+
+    addNode(ek,    "eixo",     1, ek,  "",  0);   addEdge(MACRO, ek);
+    if(probC) { addNode(probC, "problema", 2, ek, c1,  0);   addEdge(ek, probC); }
+    if(probC&&cp)  { addNode(cp,   "causa1",   3, ek, c1,  0);   addEdge(probC, cp); }
+    if(probC&&cp&&cs_) { addNode(cs_, "causa2", 4, ek, c2, vts);  addEdge(cp, cs_); }
+    if(probC&&cp&&cs_&&ct_) { addNode(ct_, "causa3", 5, ek, c3, 0); addEdge(cs_, ct_); }
+  }
+
+  // tamanhos pelo nÃºmero de conexÃµes + votos
+  nodesMap.forEach(n => {
+    const c = connCount.get(n.id)||0, v = n.votos||0;
+    if(n.level===0)     n.value = 3000;
+    else if(n.level<=2) n.value = 500;
+    else                n.value = Math.max(30, 30 + v*100 + c*10);
   });
 
-  G.eixos = [...new Set(G.eixos)].sort();
-  G.nodes = [...nodesMap.values()];
-  G.cats = [...new Set(G.nodes.map(n => n.cat).filter(c => c))].sort();
-  
-  // Hubs de temas transversais
-  G.cats.forEach(cat => {
+  // hubs de categoria (diamante por tema transversal)
+  const catMap = new Map();
+  nodesMap.forEach(n => {
+    if(n.cat && n.level >= 3) {
+      if(!catMap.has(n.cat)) catMap.set(n.cat, []);
+      catMap.get(n.cat).push(n.id);
+    }
+  });
+
+  const hubNodes = [], hubEdges = [], hubIds = new Set();
+  catMap.forEach((nids, cat) => {
+    const eixosCat = new Set(nids.map(id => nodesMap.get(id)?.eixo).filter(Boolean));
+    if(eixosCat.size < 2) return;
+
     const hid = "__hub__" + cat;
-    G.nodes.push({ id: hid, label: cat, group: "hub", isHub: true, causa_real: cat });
-    G.nodes.filter(n => n.cat === cat).forEach(n => {
-      edges.push({ from: n.id, to: hid, color: "#6366F1", dashes: true, isTransversal: true });
+    const cor  = CAT_CORES[cat] || "#A78BFA";
+    hubIds.add(hid);
+    hubNodes.push({
+      id: hid,
+      label: cat.length > 40 ? cat.slice(0,40)+"â€¦" : cat,
+      title: cat,
+      causa_real: "Tema transversal: " + cat,
+      group: "hub", level: 99,
+      eixo: "", eixo_nome: "Tema transversal",
+      cat, votos: 0,
+      value: 50 + nids.length * 15,
+      shape: "diamond",
+      color: {background: cor + "33", border: cor},
+      font:  {size: 10, color: "#374151"},
+    });
+    nids.forEach(nid => {
+      hubEdges.push({
+        from: nid, to: hid,
+        cat, color: cor,
+        transversal: true,
+        dashes: [5,4], width: 1.5,
+      });
     });
   });
 
-  G.edges = edges;
-  selEixos = new Set(G.eixos);
+  return {
+    nodes:  [...nodesMap.values(), ...hubNodes],
+    edges:  [...edgesList, ...hubEdges],
+    hubs:   hubIds,
+    eixos:  [...eixosSet].sort(),
+    cats:   Object.keys(CAT_CORES),
+  };
 }
 
-function render() {
-  visData = {
-    nodes: new vis.DataSet(G.nodes.map(n => ({
-      id: n.id, 
-      label: n.label.length > 30 ? n.label.slice(0,30) + "..." : n.label,
-      title: n.label,
-      color: CORES[n.group],
-      size: n.isHub ? 20 : (25 - n.level*3),
-      shape: n.isHub ? "diamond" : "dot"
-    }))),
-    edges: new vis.DataSet(G.edges.map((e, i) => ({ ...e, id: i, color: "#E2E8F0", width: 1.5 })))
-  };
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+// FILTRO â€” lÃ³gica central
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+function climb(id, visited) {
+  let cur = id;
+  while(cur) {
+    if(visited.has(cur)) break;
+    visited.add(cur);
+    const pe = vEdges.get({filter: e => e.to === cur && !e.transversal});
+    cur = pe.length ? pe[0].from : null;
+  }
+}
 
-  network = new vis.Network(document.getElementById("mynetwork"), visData, {
-    nodes: { font: { face: "Inter", size: 11, color: "#475569" } },
-    edges: { arrows: { to: { enabled: true, scaleFactor: 0.5 } }, smooth: { type: "cubicBezier" } },
-    physics: { stabilization: true, barnesHut: { gravitationalConstant: -2000 } }
+function applyFilter() {
+  if(!G || !vNodes || !vEdges) return;
+  if(viewMode === "minuto") return;
+
+  const search = document.getElementById("search").value.toLowerCase().trim();
+  const allN   = vNodes.get();
+  const allE   = vEdges.get();
+  const transOnly = viewMode === "transversais";
+
+  // â€” eixo â€”
+  const okEixo = new Set([MACRO]);
+  if(selEixos.size === G.eixos.length) {
+    allN.forEach(n => okEixo.add(n.id));
+  } else {
+    allN.forEach(n => {
+      if(!HUBS.has(n.id) && n.eixo && selEixos.has(n.eixo))
+        climb(n.id, okEixo);
+    });
+  }
+
+  // â€” priorizaÃ§Ã£o â€”
+  const okPrio = new Set([MACRO]);
+  if(minV === 0) { allN.forEach(n => okPrio.add(n.id)); }
+  else { allN.forEach(n => { if((n.votos||0) >= minV) climb(n.id, okPrio); }); }
+
+  // â€” busca â€”
+  const okSrch = new Set([MACRO]);
+  if(!search) { allN.forEach(n => okSrch.add(n.id)); }
+  else { allN.forEach(n => {
+    if((n.causa_real||n.title||"").toLowerCase().includes(search))
+      climb(n.id, okSrch);
+  }); }
+
+  // â€” combinado hierÃ¡rquico â€”
+  const hierOk = id => okEixo.has(id) && okPrio.has(id) && okSrch.has(id);
+
+  // â€” categoria transversal â€”
+  // ao selecionar um tema: destaca nÃ³s desse tema, esmaece os outros
+  // mas NUNCA usa hidden:true em nÃ³s hierÃ¡rquicos â€” sÃ³ muda a cor
+  const temCat = selCat !== "__ALL__";
+  const okCat  = new Set([MACRO]);
+  if(temCat) {
+    allN.forEach(n => {
+      if(!HUBS.has(n.id) && n.cat === selCat) climb(n.id, okCat);
+    });
+  } else {
+    allN.forEach(n => okCat.add(n.id));
+  }
+
+  // â€” atualiza nÃ³s â€”
+  const nUpd = allN.map(n => {
+    // HUBS: hidden quando categoria nÃ£o bate
+    if(HUBS.has(n.id)) {
+      const show = !temCat || n.cat === selCat;
+      return {
+        id: n.id,
+        hidden: !show,
+        color: show
+          ? (HUB_COR[n.id] || {background:(CAT_CORES[n.cat]||"#888")+"33", border:CAT_CORES[n.cat]||"#888"})
+          : COR.faded,
+      };
+    }
+
+    // modo sÃ³-transversais: esconde causas individuais (nÃ­vel >= 3)
+    if(transOnly) {
+      return {id: n.id, hidden: n.level >= 3, color: COR[n.group] || COR.causa2};
+    }
+
+    // nÃ³s hierÃ¡rquicos: NUNCA hidden â€” sÃ³ muda cor
+    const ok = hierOk(n.id) && okCat.has(n.id);
+    return {
+      id: n.id,
+      hidden: false,
+      color: ok ? (COR[n.group] || COR.causa2) : COR.faded,
+    };
+  });
+  vNodes.update(nUpd);
+
+  // â€” atualiza arestas â€”
+  const eUpd = allE.map(e => {
+    if(e.transversal) {
+      const catOk  = !temCat || e.cat === selCat;
+      const nodeOk = hierOk(e.from);
+      const show   = catOk && (transOnly || nodeOk);
+      return {
+        id: e.id,
+        hidden: !show,
+        color:  {color: show ? (e.color||"#A78BFA") : "#E2E8F0"},
+        width:  show ? 1.5 : 0,
+        dashes: show ? [5,4] : false,
+      };
+    }
+    // hierÃ¡rquica
+    if(transOnly) return {id: e.id, hidden: true};
+    const ok = hierOk(e.from) && hierOk(e.to)
+               && okCat.has(e.from) && okCat.has(e.to);
+    return {
+      id: e.id,
+      hidden: false,
+      color:  {color: ok ? "#D1D5DB" : "#EDF2F7"},
+      width:  ok ? 0.8 : 0.3,
+    };
+  });
+  vEdges.update(eUpd);
+}
+
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+// INICIALIZAÃ‡ÃƒO
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+document.addEventListener("DOMContentLoaded", () => {
+  fetch(CSV_URL)
+    .then(r => r.arrayBuffer())
+    .then(buf => {
+      let text;
+      try { text = new TextDecoder("utf-8", {fatal:true}).decode(buf); }
+      catch(e) { text = new TextDecoder("windows-1252").decode(buf); }
+      return text;
+    })
+    .then(text => {
+      const rows = parseCsv(text);
+      G = processData(rows);
+      HUBS = G.hubs;
+      selEixos = new Set(G.eixos);
+      G.nodes.forEach(n => { if(HUBS.has(n.id) && n.color) HUB_COR[n.id] = n.color; });
+      initGraph();
+    })
+    .catch(err => {
+      document.getElementById("loading").innerHTML =
+        `<p class="text-red-500 font-semibold">Erro ao carregar CSV.</p>
+         <p class="text-gray-400 text-xs mt-1">${err.message}</p>`;
+    });
+});
+
+function initGraph() {
+  vNodes = new vis.DataSet(G.nodes);
+  vEdges = new vis.DataSet(G.edges);
+
+  network = new vis.Network(document.getElementById("net"), {nodes:vNodes, edges:vEdges}, {
+    nodes: {
+      shape: "dot",
+      scaling: {min:5, max:55, label:{enabled:false}},
+      font: {size:11, color:"#374151", face:"Inter", strokeWidth:3, strokeColor:"#F7F8FA"},
+      borderWidth: 1.5,
+      shadow: {enabled:true, color:"rgba(0,0,0,0.07)", size:6, x:0, y:2},
+    },
+    edges: {
+      width: 0.8,
+      color: {color:"#D1D5DB", highlight:"#9CA3AF", hover:"#9CA3AF"},
+      smooth: {enabled:true, type:"continuous", roundness:0.3},
+    },
+    interaction: {hover:true, tooltipDelay:400, keyboard:true, dragNodes:true, hideEdgesOnDrag:true},
+    physics: {
+      enabled: true,
+      barnesHut: {gravitationalConstant:-35000, centralGravity:0.25, springLength:180,
+                  springConstant:0.035, damping:0.1, avoidOverlap:0.9},
+      solver: "barnesHut",
+      stabilization: {iterations:250, updateInterval:40, fit:false},
+    },
   });
 
   network.once("stabilizationIterationsDone", () => {
     document.getElementById("loading").style.display = "none";
+    network.setOptions({physics:{enabled:false}});
+    network.focus(MACRO, {scale:1.8, animation:false});
+    setTimeout(() => network.fit({animation:{duration:1600, easingFunction:"easeInOutQuad"}}), 60);
     buildUI();
     applyFilter();
   });
 
+  // modal
+  const modal = document.getElementById("modal");
+  const mbox  = document.getElementById("mbox");
+  const NL = {macro:"Problema macro",eixo:"Eixo temÃ¡tico",problema:"Problema central",
+              causa1:"Causa primÃ¡ria",causa2:"Causa secundÃ¡ria",causa3:"Causa terciÃ¡ria",hub:"Tema transversal"};
+
   network.on("click", p => { if(p.nodes.length) openModal(p.nodes[0]); });
+
+  window.openModal = id => {
+    const n = vNodes.get(id); if(!n) return;
+    document.getElementById("m-nivel").textContent = NL[n.group]||n.group;
+    const el = document.getElementById("m-eixo");
+    if(n.eixo_nome && n.group !== "macro") { el.textContent = n.eixo_nome; el.style.display = ""; }
+    else el.style.display = "none";
+    document.getElementById("m-causa").textContent = n.causa_real||n.title;
+    const cw = document.getElementById("m-cat-wrap");
+    const ce = document.getElementById("m-cat");
+    if(n.cat) {
+      const cor = CAT_CORES[n.cat]||"#888";
+      ce.innerHTML = `<span style="width:8px;height:8px;border-radius:50%;background:${cor};flex-shrink:0;display:inline-block"></span><span>${n.cat}</span>`;
+      ce.style.cssText = `background:${cor}20;color:#374151;border:1px solid ${cor}50;`;
+      cw.style.display = "";
+    } else cw.style.display = "none";
+    const vw = document.getElementById("m-votos-wrap");
+    if(n.votos > 0) {
+      document.getElementById("m-votos").textContent = `â­ ${n.votos} estrelinha${n.votos>1?"s":""} na priorizaÃ§Ã£o`;
+      vw.classList.remove("hidden");
+    } else vw.classList.add("hidden");
+    modal.classList.remove("hidden"); modal.classList.add("flex");
+    setTimeout(() => mbox.classList.remove("scale-95","opacity-0"), 10);
+  };
+  window.closeModal = () => {
+    mbox.classList.add("scale-95","opacity-0");
+    setTimeout(() => { modal.classList.add("hidden"); modal.classList.remove("flex"); }, 200);
+  };
+  window.addEventListener("keydown", e => { if(e.key==="Escape") closeModal(); });
+  modal.addEventListener("click", e => { if(e.target===modal) closeModal(); });
 }
 
-function applyFilter() {
-  const search = document.getElementById("search").value.toLowerCase();
-  const visible = new Set();
-
-  G.nodes.forEach(n => {
-    if(n.isHub) return;
-    const matchEixo = selEixos.has(n.eixo) || n.group === "macro";
-    const matchCat = selCat === "__ALL__" || n.cat === selCat;
-    const matchSearch = !search || n.causa_real.toLowerCase().includes(search);
-
-    if(matchEixo && matchCat && matchSearch) {
-      visible.add(n.id);
-      // Subir a árvore para garantir conexão com o macro
-      let curr = n.id;
-      while(true) {
-        let parent = G.edges.find(e => e.to === curr && !e.isTransversal);
-        if(parent) { visible.add(parent.from); curr = parent.from; }
-        else break;
-      }
-    }
-  });
-
-  visData.nodes.update(G.nodes.map(n => ({
-    id: n.id,
-    opacity: (visible.has(n.id) || (n.isHub && (selCat === "__ALL__" || n.id === "__hub__"+selCat))) ? 1 : 0.05
-  })));
-
-  visData.edges.update(G.edges.map((e, i) => ({
-    id: i,
-    opacity: (visible.has(e.from) && visible.has(e.to)) ? 1 : 0.05
-  })));
-}
-
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+// UI DOS FILTROS
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 function buildUI() {
-  const eList = document.getElementById("eixo-list");
+  // visualizaÃ§Ã£o
+  document.querySelectorAll(".vbtn").forEach(b => {
+    b.addEventListener("click", function() {
+      document.querySelectorAll(".vbtn").forEach(x =>
+        x.className="vbtn py-2 text-[10px] rounded-xl font-semibold bg-gray-100 text-gray-500 px-1 leading-tight");
+      this.className="vbtn py-2 text-[10px] rounded-xl font-semibold bg-indigo-600 text-white px-1 leading-tight";
+      viewMode = this.dataset.view;
+      if(viewMode === "minuto") {
+        vNodes.update(G.nodes.map(n => ({
+          id:n.id,
+          hidden: !HUBS.has(n.id) && (n.level===1 || n.level>3),
+          font:   {size: n.level>0&&n.level<4 ? 18 : 11},
+          color:  HUBS.has(n.id) ? (HUB_COR[n.id]||undefined) : (COR[n.group]||COR.causa2),
+        })));
+        network.setOptions({physics:{enabled:true, barnesHut:{springLength:90}}});
+        network.once("stabilizationIterationsDone", () => {
+          network.setOptions({physics:{enabled:false}});
+          network.fit({animation:{duration:700, easingFunction:"easeInOutQuad"}});
+        });
+        network.stabilize(120);
+      } else {
+        // restaura hidden:false em todos antes de filtrar
+        vNodes.update(G.nodes.map(n => ({id:n.id, hidden:false, font:{size:11}})));
+        applyFilter();
+      }
+    });
+  });
+
+  // priorizaÃ§Ã£o
+  document.querySelectorAll(".pbtn").forEach(b => {
+    b.addEventListener("click", function() {
+      document.querySelectorAll(".pbtn").forEach(x =>
+        x.className="pbtn py-1.5 text-[11px] rounded-lg font-semibold bg-gray-100 text-gray-500");
+      this.className="pbtn py-1.5 text-[11px] rounded-lg font-semibold bg-indigo-600 text-white";
+      minV = parseInt(this.dataset.min);
+      applyFilter();
+    });
+  });
+
+  // eixos
+  const eul = document.getElementById("eixo-ul");
   G.eixos.forEach(e => {
-    const div = document.createElement("div");
-    div.className = "flex items-center gap-2 p-2 rounded-lg cursor-pointer hover:bg-gray-50 transition-all";
-    div.innerHTML = `<input type="checkbox" checked class="w-4 h-4 accent-indigo-600"> <span class="text-xs text-gray-600 font-medium">${EIXO_NOMES[e] || e}</span>`;
-    div.onclick = (event) => {
-      const cb = div.querySelector('input');
-      if(event.target !== cb) cb.checked = !cb.checked;
-      cb.checked ? selEixos.add(e) : selEixos.delete(e);
+    const li = document.createElement("li");
+    li.className = "flex items-center gap-2 px-2.5 py-1.5 rounded-lg cursor-pointer text-gray-600 hover:bg-gray-50 bg-indigo-50 font-medium";
+    li.innerHTML = `<span style="width:6px;height:6px;border-radius:50%;background:#818CF8;flex-shrink:0;display:inline-block"></span>${EIXO_NOMES[e]||e}`;
+    li.dataset.id = e;
+    li.addEventListener("click", () => {
+      selEixos.has(e) ? selEixos.delete(e) : selEixos.add(e);
+      li.classList.toggle("bg-indigo-50",  selEixos.has(e));
+      li.classList.toggle("font-medium",   selEixos.has(e));
+      li.classList.toggle("text-gray-400", !selEixos.has(e));
+      li.classList.toggle("text-gray-600", selEixos.has(e));
       applyFilter();
-    };
-    eList.appendChild(div);
+    });
+    eul.appendChild(li);
+  });
+  document.getElementById("sel-all").addEventListener("click", () => {
+    selEixos = new Set(G.eixos);
+    eul.querySelectorAll("li").forEach(l => {
+      l.classList.add("bg-indigo-50","font-medium","text-gray-600");
+      l.classList.remove("text-gray-400");
+    });
+    applyFilter();
+  });
+  document.getElementById("desel-all").addEventListener("click", () => {
+    selEixos.clear();
+    eul.querySelectorAll("li").forEach(l => {
+      l.classList.remove("bg-indigo-50","font-medium","text-gray-600");
+      l.classList.add("text-gray-400");
+    });
+    applyFilter();
   });
 
-  const cList = document.getElementById("cat-list");
-  [{id:"__ALL__", n:"Todas as Conexões"}, ...G.cats.map(c=>({id:c, n:c}))].forEach(c => {
-    const div = document.createElement("div");
-    div.className = `text-[11px] p-2.5 rounded-xl cursor-pointer transition-all border border-transparent ${selCat === c.id ? 'bg-indigo-50 text-indigo-700 font-bold border-indigo-100' : 'text-gray-500 hover:bg-gray-50'}`;
-    div.textContent = c.n;
-    div.onclick = () => {
-      selCat = c.id;
-      document.querySelectorAll("#cat-list div").forEach(d => d.className = "text-[11px] p-2.5 rounded-xl cursor-pointer text-gray-500 hover:bg-gray-50 border border-transparent");
-      div.className = "text-[11px] p-2.5 rounded-xl cursor-pointer bg-indigo-50 text-indigo-700 font-bold border-indigo-100";
+  // categorias transversais
+  const cul = document.getElementById("cat-ul");
+  function addCatLi(cat, label, cor) {
+    const li = document.createElement("li");
+    li.className = "flex items-center gap-2 px-2.5 py-1.5 rounded-lg cursor-pointer text-gray-600 hover:bg-gray-50";
+    li.innerHTML = cor
+      ? `<span style="width:8px;height:8px;border-radius:50%;background:${cor};flex-shrink:0;display:inline-block"></span><span class="truncate">${label}</span>`
+      : `<span style="width:8px;height:8px;border-radius:50%;background:#CBD5E0;flex-shrink:0;display:inline-block"></span><span>${label}</span>`;
+    li.dataset.cat = cat;
+    li.addEventListener("click", () => {
+      selCat = cat;
+      cul.querySelectorAll("li").forEach(x => {
+        x.classList.toggle("bg-indigo-50",  x.dataset.cat === selCat);
+        x.classList.toggle("font-semibold", x.dataset.cat === selCat);
+      });
       applyFilter();
-    };
-    cList.appendChild(div);
+    });
+    cul.appendChild(li);
+  }
+  addCatLi("__ALL__", "Todas as conexÃµes", null);
+  G.cats.forEach(cat => addCatLi(cat, cat, CAT_CORES[cat]));
+  // marca "Todas" como ativo inicialmente
+  cul.querySelector("li").classList.add("bg-indigo-50","font-semibold");
+
+  // busca
+  document.getElementById("search").addEventListener("input", applyFilter);
+
+  // toggle painel
+  document.getElementById("btn-panel").addEventListener("click", () => {
+    document.getElementById("panel").classList.toggle("min");
+    document.getElementById("ic-d").classList.toggle("hidden");
+    document.getElementById("ic-u").classList.toggle("hidden");
   });
-
-  document.getElementById("search").oninput = applyFilter;
 }
-
-function toggleAllEixos(val) {
-  document.querySelectorAll("#eixo-list input").forEach(i => i.checked = val);
-  val ? G.eixos.forEach(e => selEixos.add(e)) : selEixos.clear();
-  applyFilter();
-}
-
-function openModal(id) {
-  const n = G.nodes.find(x => x.id === id); if(!n) return;
-  const labels = { macro: "Problema Macro", eixo: "Eixo Pedagógico", problema: "Problema Central", causa1: "Causa Primária", causa2: "Causa Secundária", causa3: "Causa Terciária", hub: "Conexão Transversal" };
-  
-  document.getElementById("m-nivel").textContent = labels[n.group];
-  document.getElementById("m-eixo").textContent = n.eixo_nome || "Geral";
-  document.getElementById("m-causa").textContent = n.causa_real;
-  document.getElementById("m-cat").textContent = n.cat || (n.isHub ? "Ponto de convergência" : "Nenhuma conexão transversal");
-  
-  document.getElementById("modal").classList.remove("hidden");
-  document.getElementById("modal").classList.add("flex");
-}
-
-function closeModal() {
-  document.getElementById("modal").classList.add("hidden");
-  document.getElementById("modal").classList.remove("flex");
-}
-
-document.addEventListener("DOMContentLoaded", init);
 </script>
 </body>
 </html>
