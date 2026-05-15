@@ -11,68 +11,85 @@
   *{box-sizing:border-box;}
   html,body{height:100%;margin:0;padding:0;overflow:hidden;font-family:"Inter",sans-serif;background:#F7F8FA;}
   #mynetwork{width:100%;height:100vh;background:#F7F8FA;}
-  .vis-tooltip{background:rgba(17,24,39,.95)!important;color:#fff!important;border-radius:8px!important;padding:8px!important;font-size:12px!important;box-shadow:0 4px 12px rgba(0,0,0,0.1)!important;}
-  #panel{transition: transform 0.3s ease; z-index: 50;}
-  #panel.minimized { transform: translateY(calc(100% - 45px)); }
-  .active-filter { border-color: #6366F1 !important; background-color: #EEF2FF !important; color: #4338CA !important; }
-  ::-webkit-scrollbar{width:5px;}
-  ::-webkit-scrollbar-thumb{background:#CBD5E1;border-radius:10px;}
+  
+  /* Legenda Fixa à Esquerda */
+  #legend-box { position: absolute; bottom: 30px; left: 30px; z-index: 10; }
+  
+  /* Painel de Filtros à Direita */
+  #panel { position: absolute; top: 30px; right: 30px; bottom: 30px; width: 320px; z-index: 20; display: flex; flex-direction: column; }
+  
+  .filter-section { max-height: 40vh; overflow-y: auto; scrollbar-width: thin; }
+  .filter-section::-webkit-scrollbar { width: 4px; }
+  .filter-section::-webkit-scrollbar-thumb { background: #CBD5E1; border-radius: 4px; }
+
+  /* Ajustes de Clique e Modal */
+  #modal { background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(4px); }
+  
+  /* Estilo das conexões vis.js */
+  .vis-tooltip { background: #1e293b !important; color: #fff !important; border-radius: 8px !important; padding: 10px !important; font-size: 12px !important; border: none !important; }
 </style>
 </head>
 <body>
 
-<div id="loading" class="absolute inset-0 z-[100] flex flex-col items-center justify-center bg-white/90 backdrop-blur-sm">
-  <div class="w-12 h-12 border-4 border-indigo-500 border-t-transparent rounded-full animate-spin"></div>
-  <p class="mt-4 font-bold text-gray-700 tracking-tight">Processando Conexões...</p>
+<div id="loading" class="absolute inset-0 z-[100] flex flex-col items-center justify-center bg-white">
+  <div class="w-10 h-10 border-4 border-indigo-500 border-t-transparent rounded-full animate-spin"></div>
+  <p class="mt-4 font-bold text-gray-600">Restaurando Árvore...</p>
 </div>
 
 <div id="mynetwork"></div>
 
-<div id="modal" class="fixed inset-0 z-[110] hidden items-center justify-center p-4 bg-slate-900/40 backdrop-blur-[2px]">
-  <div id="modal-box" class="bg-white rounded-3xl shadow-2xl w-full max-w-lg overflow-hidden transform transition-all scale-95 opacity-0">
-    <div class="p-8">
-      <div class="flex justify-between items-start mb-6">
-        <div>
-          <span id="m-nivel" class="text-[10px] font-black uppercase tracking-[0.2em] text-indigo-500 bg-indigo-50 px-2.5 py-1 rounded-lg"></span>
-          <h2 id="m-eixo" class="mt-3 text-xs font-bold text-slate-400"></h2>
-        </div>
-        <button onclick="closeModal()" class="text-slate-300 hover:text-slate-600 transition-colors text-2xl">&times;</button>
-      </div>
-      <p class="text-[10px] font-bold text-slate-400 uppercase mb-2">Relato coletado:</p>
-      <h3 id="m-causa" class="text-lg font-semibold text-slate-800 leading-snug mb-6"></h3>
-      
-      <div id="m-cat-wrap" class="p-4 bg-slate-50 rounded-2xl border border-slate-100">
-        <p class="text-[10px] font-bold text-slate-400 uppercase mb-2">Tema Transversal Relacionado:</p>
-        <div id="m-cat" class="text-sm font-medium text-slate-700"></div>
+<div id="legend-box" class="bg-white/90 p-5 rounded-2xl shadow-lg border border-gray-100 hidden sm:block">
+  <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-3">Hierarquia</p>
+  <div class="space-y-2">
+    <div class="flex items-center gap-2 text-[11px] font-medium text-gray-600"><span class="w-3 h-3 rounded-full bg-[#EF4444]"></span> Problema Macro</div>
+    <div class="flex items-center gap-2 text-[11px] font-medium text-gray-600"><span class="w-3 h-3 rounded-full bg-[#F97316]"></span> Eixo</div>
+    <div class="flex items-center gap-2 text-[11px] font-medium text-gray-600"><span class="w-3 h-3 rounded-full bg-[#EAB308]"></span> Problema Central</div>
+    <div class="flex items-center gap-2 text-[11px] font-medium text-gray-600"><span class="w-3 h-3 rounded-full bg-[#22C55E]"></span> Causa Primária</div>
+    <div class="flex items-center gap-2 text-[11px] font-medium text-gray-600"><span class="w-3 h-3 rounded-full bg-[#3B82F6]"></span> Causa Secundária</div>
+    <div class="flex items-center gap-2 text-[11px] font-medium text-gray-600"><span class="w-3 h-3 rounded-full bg-[#A855F7]"></span> Causa Terciária</div>
+  </div>
+</div>
+
+<div id="panel" class="bg-white shadow-2xl rounded-3xl border border-gray-100 overflow-hidden">
+  <div class="p-6 border-b border-gray-50">
+    <h1 class="text-lg font-bold text-gray-800">Filtros</h1>
+    <input id="search" type="text" placeholder="Pesquisar na árvore..." class="w-full mt-4 px-4 py-2 bg-gray-50 border border-gray-100 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 outline-none">
+  </div>
+
+  <div class="p-6 flex-1 overflow-y-auto space-y-8">
+    <div>
+      <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-3">Eixos</p>
+      <div id="eixo-list" class="space-y-1.5 filter-section"></div>
+      <div class="flex gap-3 mt-3">
+        <button onclick="toggleAllEixos(true)" class="text-[10px] font-bold text-indigo-600 hover:underline">Todos</button>
+        <button onclick="toggleAllEixos(false)" class="text-[10px] font-bold text-gray-400 hover:underline">Nenhum</button>
       </div>
     </div>
-    <div class="px-8 py-5 bg-slate-50 flex justify-end">
-      <button onclick="closeModal()" class="px-8 py-3 bg-indigo-600 text-white text-xs font-bold rounded-2xl hover:bg-indigo-700 transition-all shadow-lg shadow-indigo-200">Fechar</button>
+
+    <div>
+      <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-3">Tema Transversal</p>
+      <div id="cat-list" class="space-y-1 filter-section"></div>
     </div>
   </div>
 </div>
 
-<div id="panel" class="absolute bottom-6 right-6 w-80 bg-white/95 backdrop-blur shadow-2xl rounded-[32px] border border-slate-100 overflow-hidden">
-  <div class="px-6 py-4 border-b border-slate-50 flex justify-between items-center cursor-pointer" onclick="togglePanel()">
-    <h3 class="text-xs font-black uppercase tracking-widest text-slate-500">Painel de Navegação</h3>
-    <span id="panel-arrow" class="text-slate-400 transition-transform">▼</span>
-  </div>
-  
-  <div id="panel-content" class="p-6 space-y-6 max-h-[60vh] overflow-y-auto">
-    <input id="search" type="text" placeholder="Pesquisar termo..." class="w-full px-4 py-3 bg-slate-50 border border-slate-100 rounded-2xl text-sm focus:ring-2 focus:ring-indigo-500 outline-none transition-all">
-    
-    <div>
-      <p class="text-[10px] font-black text-slate-400 uppercase mb-3 tracking-wider">Filtrar por Eixo</p>
-      <div id="eixo-list" class="flex flex-wrap gap-2"></div>
-      <div class="mt-3 flex gap-4">
-        <button onclick="selectAllEixos(true)" class="text-[10px] font-bold text-indigo-600">Ver Todos</button>
-        <button onclick="selectAllEixos(false)" class="text-[10px] font-bold text-slate-400">Limpar</button>
+<div id="modal" class="fixed inset-0 z-[110] hidden items-center justify-center p-4">
+  <div id="modal-box" class="bg-white rounded-[32px] shadow-2xl w-full max-w-lg overflow-hidden transform transition-all duration-300">
+    <div class="p-8">
+      <div class="flex justify-between items-start mb-6">
+        <span id="m-nivel" class="text-[10px] font-black uppercase tracking-[0.2em] text-indigo-500 bg-indigo-50 px-3 py-1 rounded-full"></span>
+        <button onclick="closeModal()" class="text-gray-300 hover:text-gray-600 text-2xl">&times;</button>
+      </div>
+      <h2 id="m-eixo" class="text-[11px] font-bold text-slate-400 uppercase mb-2"></h2>
+      <h3 id="m-causa" class="text-lg font-semibold text-gray-800 leading-snug mb-6"></h3>
+      
+      <div id="m-cat-wrap" class="p-5 bg-gray-50 rounded-2xl border border-gray-100">
+        <p class="text-[10px] font-bold text-gray-400 uppercase mb-2">Conexão Transversal:</p>
+        <div id="m-cat" class="text-sm font-medium text-gray-700"></div>
       </div>
     </div>
-
-    <div>
-      <p class="text-[10px] font-black text-slate-400 uppercase mb-3 tracking-wider">Filtro Transversal</p>
-      <div id="cat-list" class="space-y-1.5"></div>
+    <div class="px-8 py-5 bg-gray-50 flex justify-end">
+      <button onclick="closeModal()" class="px-8 py-3 bg-indigo-600 text-white text-xs font-bold rounded-2xl hover:bg-indigo-700 transition-all">Fechar</button>
     </div>
   </div>
 </div>
@@ -81,24 +98,25 @@
 const CSV_URL = "https://raw.githubusercontent.com/sme-upge/sme-upge.github.io/refs/heads/main/GT%20de%20Alfabetiza%C3%A7%C3%A3o/%C3%81rvore%20de%20Problemas%20-%20Alfabetiza%C3%A7%C3%A3o%20(3).csv";
 const MACRO = "Baixa aprendizagem na alfabetização";
 const EIXO_NOMES = {"Eixo 1": "Responsabilidades", "Eixo 2": "Formação", "Eixo 3": "Infraestrutura", "Eixo 4": "Incentivos", "Eixo 5": "Acomp. e Monitoramento", "Eixo 6": "Avaliação", "Eixo 7": "Currículo e Materiais"};
-const GC = {
-  macro: "#EF4444", eixo: "#F97316", problema: "#EAB308",
-  causa1: "#22C55E", causa2: "#3B82F6", causa3: "#A855F7", hub: "#6366F1"
-};
+const CORES = { macro: "#EF4444", eixo: "#F97316", problema: "#EAB308", causa1: "#22C55E", causa2: "#3B82F6", causa3: "#A855F7", hub: "#6366F1" };
 
 let G = { nodes: [], edges: [], eixos: [], cats: [] };
-let visData = null;
 let network = null;
+let visData = null;
 let selEixos = new Set();
 let selCat = "__ALL__";
 
-// Parser de CSV
-async function loadData() {
+async function init() {
   const resp = await fetch(CSV_URL);
   const text = await resp.text();
-  const rows = text.split(/\r?\n/).slice(1).map(row => {
+  parseData(text);
+  render();
+}
+
+function parseData(text) {
+  const rows = text.split(/\r?\n/).slice(1).map(line => {
     let cols = []; let c="", inQ=false;
-    for(let char of row){
+    for(let char of line){
       if(char==='"') inQ=!inQ;
       else if(char===';' && !inQ){ cols.push(c.trim()); c=""; }
       else c+=char;
@@ -108,12 +126,12 @@ async function loadData() {
 
   const nodesMap = new Map();
   const edges = [];
-  
+
   const addNode = (id, group, level, eixo, cat) => {
     if(!id || id === "-" || id === "") return;
-    if(!nodesMap.has(id)){
+    if(!nodesMap.has(id)) {
       const ek = (eixo || (group === "eixo" ? id : "")).slice(0,6);
-      nodesMap.set(id, { id, label: id.length > 40 ? id.slice(0,40)+"..." : id, group, level, eixo: ek, cat: cat || "", causa_real: id });
+      nodesMap.set(id, { id, label: id, group, level, eixo: ek, cat: cat || "", causa_real: id, eixo_nome: EIXO_NOMES[ek] || "" });
     }
   };
 
@@ -131,148 +149,139 @@ async function loadData() {
 
   G.eixos = [...new Set(G.eixos)].sort();
   G.nodes = [...nodesMap.values()];
+  G.cats = [...new Set(G.nodes.map(n => n.cat).filter(c => c))].sort();
   
-  // Criar Hubs de Categorias
-  const catsFound = [...new Set(G.nodes.map(n => n.cat).filter(c => c))];
-  G.cats = catsFound;
-  catsFound.forEach(cat => {
-    const hid = "__hub__"+cat;
+  // Hubs de temas transversais
+  G.cats.forEach(cat => {
+    const hid = "__hub__" + cat;
     G.nodes.push({ id: hid, label: cat, group: "hub", isHub: true, causa_real: cat });
     G.nodes.filter(n => n.cat === cat).forEach(n => {
-      edges.push({ from: n.id, to: hid, color: "#6366F1", dashes: true, width: 1, isTransversal: true });
+      edges.push({ from: n.id, to: hid, color: "#6366F1", dashes: true, isTransversal: true });
     });
   });
 
   G.edges = edges;
   selEixos = new Set(G.eixos);
-  initGraph();
 }
 
-function initGraph() {
+function render() {
   visData = {
-    nodes: new vis.DataSet(G.nodes.map(n => ({...n, color: GC[n.group], size: 25 - n.level*3}))),
-    edges: new vis.DataSet(G.edges.map((e,i) => ({...e, id: i, color: "#CBD5E1", width: 1.5})))
+    nodes: new vis.DataSet(G.nodes.map(n => ({
+      id: n.id, 
+      label: n.label.length > 30 ? n.label.slice(0,30) + "..." : n.label,
+      title: n.label,
+      color: CORES[n.group],
+      size: n.isHub ? 20 : (25 - n.level*3),
+      shape: n.isHub ? "diamond" : "dot"
+    }))),
+    edges: new vis.DataSet(G.edges.map((e, i) => ({ ...e, id: i, color: "#E2E8F0", width: 1.5 })))
   };
 
   network = new vis.Network(document.getElementById("mynetwork"), visData, {
-    nodes: { shape: "dot", font: { face: "Inter", size: 12, color: "#475569" } },
-    edges: { smooth: { type: "cubicBezier", roundness: 0.5 } },
-    physics: { stabilization: true, barnesHut: { gravitationalConstant: -3000, springLength: 120 } }
+    nodes: { font: { face: "Inter", size: 11, color: "#475569" } },
+    edges: { arrows: { to: { enabled: true, scaleFactor: 0.5 } }, smooth: { type: "cubicBezier" } },
+    physics: { stabilization: true, barnesHut: { gravitationalConstant: -2000 } }
   });
 
   network.once("stabilizationIterationsDone", () => {
     document.getElementById("loading").style.display = "none";
-    network.setOptions({ physics: false });
     buildUI();
     applyFilter();
   });
 
-  network.on("click", (p) => { if(p.nodes.length) openModal(p.nodes[0]); });
+  network.on("click", p => { if(p.nodes.length) openModal(p.nodes[0]); });
 }
 
 function applyFilter() {
   const search = document.getElementById("search").value.toLowerCase();
-  const highlighted = new Set();
+  const visible = new Set();
 
   G.nodes.forEach(n => {
     if(n.isHub) return;
     const matchEixo = selEixos.has(n.eixo) || n.group === "macro";
     const matchCat = selCat === "__ALL__" || n.cat === selCat;
     const matchSearch = !search || n.causa_real.toLowerCase().includes(search);
-    
+
     if(matchEixo && matchCat && matchSearch) {
-      highlighted.add(n.id);
-      // Incluir ancestrais para não quebrar a árvore
-      let current = n.id;
-      let pathFound = true;
-      while(pathFound) {
-        let parentEdge = G.edges.find(e => e.to === current && !e.isTransversal);
-        if(parentEdge) { highlighted.add(parentEdge.from); current = parentEdge.from; }
-        else pathFound = false;
+      visible.add(n.id);
+      // Subir a árvore para garantir conexão com o macro
+      let curr = n.id;
+      while(true) {
+        let parent = G.edges.find(e => e.to === curr && !e.isTransversal);
+        if(parent) { visible.add(parent.from); curr = parent.from; }
+        else break;
       }
     }
   });
 
-  visData.nodes.update(G.nodes.map(n => {
-    const isVisible = highlighted.has(n.id) || (n.isHub && (selCat === "__ALL__" || n.id === "__hub__"+selCat));
-    return { id: n.id, opacity: isVisible ? 1 : 0.08, color: isVisible ? GC[n.group] : "#E2E8F0" };
-  }));
+  visData.nodes.update(G.nodes.map(n => ({
+    id: n.id,
+    opacity: (visible.has(n.id) || (n.isHub && (selCat === "__ALL__" || n.id === "__hub__"+selCat))) ? 1 : 0.05
+  })));
 
-  visData.edges.update(G.edges.map((e, i) => {
-    const isVisible = highlighted.has(e.from) && highlighted.has(e.to);
-    return { id: i, opacity: isVisible ? 1 : (e.isTransversal ? 0 : 0.05) };
-  }));
+  visData.edges.update(G.edges.map((e, i) => ({
+    id: i,
+    opacity: (visible.has(e.from) && visible.has(e.to)) ? 1 : 0.05
+  })));
 }
 
 function buildUI() {
   const eList = document.getElementById("eixo-list");
   G.eixos.forEach(e => {
-    const btn = document.createElement("button");
-    btn.className = "text-[10px] font-bold px-3 py-1.5 rounded-full border border-slate-200 text-slate-500 transition-all";
-    btn.textContent = EIXO_NOMES[e] || e;
-    btn.onclick = () => {
-      if(selEixos.has(e)) selEixos.delete(e); else selEixos.add(e);
-      btn.classList.toggle("active-filter");
+    const div = document.createElement("div");
+    div.className = "flex items-center gap-2 p-2 rounded-lg cursor-pointer hover:bg-gray-50 transition-all";
+    div.innerHTML = `<input type="checkbox" checked class="w-4 h-4 accent-indigo-600"> <span class="text-xs text-gray-600 font-medium">${EIXO_NOMES[e] || e}</span>`;
+    div.onclick = (event) => {
+      const cb = div.querySelector('input');
+      if(event.target !== cb) cb.checked = !cb.checked;
+      cb.checked ? selEixos.add(e) : selEixos.delete(e);
       applyFilter();
     };
-    if(selEixos.has(e)) btn.classList.add("active-filter");
-    eList.appendChild(btn);
+    eList.appendChild(div);
   });
 
   const cList = document.getElementById("cat-list");
   [{id:"__ALL__", n:"Todas as Conexões"}, ...G.cats.map(c=>({id:c, n:c}))].forEach(c => {
-    const item = document.createElement("div");
-    item.className = "text-[11px] p-2.5 rounded-xl cursor-pointer border border-transparent hover:bg-slate-50 text-slate-600 transition-all";
-    if(selCat === c.id) item.classList.add("bg-indigo-50", "text-indigo-600", "font-bold", "border-indigo-100");
-    item.textContent = c.n;
-    item.onclick = () => {
+    const div = document.createElement("div");
+    div.className = `text-[11px] p-2.5 rounded-xl cursor-pointer transition-all border border-transparent ${selCat === c.id ? 'bg-indigo-50 text-indigo-700 font-bold border-indigo-100' : 'text-gray-500 hover:bg-gray-50'}`;
+    div.textContent = c.n;
+    div.onclick = () => {
       selCat = c.id;
-      document.querySelectorAll("#cat-list div").forEach(d => d.className = "text-[11px] p-2.5 rounded-xl cursor-pointer border border-transparent hover:bg-slate-50 text-slate-600");
-      item.className = "text-[11px] p-2.5 rounded-xl cursor-pointer border bg-indigo-50 text-indigo-600 font-bold border-indigo-100";
+      document.querySelectorAll("#cat-list div").forEach(d => d.className = "text-[11px] p-2.5 rounded-xl cursor-pointer text-gray-500 hover:bg-gray-50 border border-transparent");
+      div.className = "text-[11px] p-2.5 rounded-xl cursor-pointer bg-indigo-50 text-indigo-700 font-bold border-indigo-100";
       applyFilter();
     };
-    cList.appendChild(item);
+    cList.appendChild(div);
   });
 
   document.getElementById("search").oninput = applyFilter;
 }
 
-function selectAllEixos(val) {
-  selEixos = val ? new Set(G.eixos) : new Set();
-  document.querySelectorAll("#eixo-list button").forEach(b => {
-    val ? b.classList.add("active-filter") : b.classList.remove("active-filter");
-  });
+function toggleAllEixos(val) {
+  document.querySelectorAll("#eixo-list input").forEach(i => i.checked = val);
+  val ? G.eixos.forEach(e => selEixos.add(e)) : selEixos.clear();
   applyFilter();
 }
 
 function openModal(id) {
   const n = G.nodes.find(x => x.id === id); if(!n) return;
-  const labels = { macro: "Problema Macro", eixo: "Eixo de Atuação", problema: "Problema Central", causa1: "Causa Primária", causa2: "Causa Secundária", causa3: "Causa Terciária", hub: "Tema Transversal" };
+  const labels = { macro: "Problema Macro", eixo: "Eixo Pedagógico", problema: "Problema Central", causa1: "Causa Primária", causa2: "Causa Secundária", causa3: "Causa Terciária", hub: "Conexão Transversal" };
   
   document.getElementById("m-nivel").textContent = labels[n.group];
-  document.getElementById("m-eixo").textContent = n.eixo_nome || "Conexão Geral da Rede";
+  document.getElementById("m-eixo").textContent = n.eixo_nome || "Geral";
   document.getElementById("m-causa").textContent = n.causa_real;
-  document.getElementById("m-cat").textContent = n.cat || (n.isHub ? "Este é um ponto de convergência de vários problemas." : "Nenhum tema transversal específico.");
+  document.getElementById("m-cat").textContent = n.cat || (n.isHub ? "Ponto de convergência" : "Nenhuma conexão transversal");
   
   document.getElementById("modal").classList.remove("hidden");
-  setTimeout(() => {
-    document.getElementById("modal-box").classList.replace("scale-95", "scale-100");
-    document.getElementById("modal-box").classList.replace("opacity-0", "opacity-100");
-  }, 10);
+  document.getElementById("modal").classList.add("flex");
 }
 
 function closeModal() {
-  document.getElementById("modal-box").classList.replace("scale-100", "scale-95");
-  document.getElementById("modal-box").classList.replace("opacity-100", "opacity-0");
-  setTimeout(() => document.getElementById("modal").classList.add("hidden"), 200);
+  document.getElementById("modal").classList.add("hidden");
+  document.getElementById("modal").classList.remove("flex");
 }
 
-function togglePanel() {
-  document.getElementById("panel").classList.toggle("minimized");
-  document.getElementById("panel-arrow").style.transform = document.getElementById("panel").classList.contains("minimized") ? "rotate(180deg)" : "rotate(0deg)";
-}
-
-document.addEventListener("DOMContentLoaded", loadData);
+document.addEventListener("DOMContentLoaded", init);
 </script>
 </body>
 </html>
