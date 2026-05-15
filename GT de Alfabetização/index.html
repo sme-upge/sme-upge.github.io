@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Ãrvore de Problemas â€” GT de AlfabetizaÃ§Ã£o Â· SME-SP</title>
+<title>Árvore de Problemas — GT de Alfabetização · SME-SP</title>
 <script src="https://cdn.tailwindcss.com"></script>
 <script src="https://unpkg.com/vis-network/standalone/umd/vis-network.min.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -15,12 +15,6 @@
   #panel{transition:width .2s,height .2s;}
   #panel.min{width:44px!important;height:44px!important;overflow:hidden;border-radius:12px;}
   #panel.min #pb{display:none;}
-  .tsw{position:relative;display:inline-block;width:34px;height:18px;flex-shrink:0;}
-  .tsw input{opacity:0;width:0;height:0;}
-  .sl{position:absolute;cursor:pointer;inset:0;background:#D1D5DB;border-radius:18px;transition:.2s;}
-  .sl:before{position:absolute;content:"";height:12px;width:12px;left:3px;bottom:3px;background:#fff;border-radius:50%;transition:.2s;box-shadow:0 1px 3px rgba(0,0,0,.2);}
-  input:checked+.sl{background:#6366F1;}
-  input:checked+.sl:before{transform:translateX(16px);}
   ::-webkit-scrollbar{width:4px;}::-webkit-scrollbar-track{background:transparent;}::-webkit-scrollbar-thumb{background:#D1D5DB;border-radius:4px;}
   @media(max-width:640px){#legend,#panel{display:none!important;}}
 </style>
@@ -32,22 +26,21 @@
     <div class="absolute inset-0 rounded-full border-4 border-indigo-100"></div>
     <div class="absolute inset-0 rounded-full border-4 border-indigo-500 border-t-transparent animate-spin"></div>
   </div>
-  <p class="text-base font-semibold text-gray-700">Montando a Ã¡rvore de problemas</p>
-  <p class="text-xs text-gray-400 mt-1">GT de AlfabetizaÃ§Ã£o Â· SME-SP Â· 2026</p>
+  <p class="text-base font-semibold text-gray-700">Montando a árvore de problemas</p>
+  <p class="text-xs text-gray-400 mt-1">GT de Alfabetização · SME-SP · 2026</p>
 </div>
 
 <div class="absolute top-0 left-0 right-0 z-10 pointer-events-none">
   <div class="flex items-center justify-center gap-3 px-6 pt-5 pb-10" style="background:linear-gradient(to bottom,rgba(247,248,250,1) 0%,rgba(247,248,250,0) 100%);">
     <div class="text-center">
-      <h1 class="text-lg font-bold text-gray-800 tracking-tight">Ãrvore de Problemas</h1>
-      <p class="text-xs text-gray-400 mt-0.5">GT de AlfabetizaÃ§Ã£o Â· SME-SP Â· 2026</p>
+      <h1 class="text-lg font-bold text-gray-800 tracking-tight">Árvore de Problemas</h1>
+      <p class="text-xs text-gray-400 mt-0.5">GT de Alfabetização · SME-SP · 2026</p>
     </div>
   </div>
 </div>
 
 <div id="mynetwork"></div>
 
-<!-- Modal -->
 <div id="modal" class="fixed inset-0 z-[100] hidden items-center justify-center p-4" style="background:rgba(17,24,39,.5);backdrop-filter:blur(4px);">
   <div id="modal-box" class="bg-white rounded-2xl shadow-2xl w-full max-w-lg transform transition-all duration-200 scale-95 opacity-0 overflow-hidden">
     <div class="px-6 pt-6 pb-4 border-b border-gray-100">
@@ -60,16 +53,15 @@
           <p class="text-[10px] font-semibold uppercase tracking-wider text-gray-400 mb-1.5">O que o grupo disse</p>
           <h3 id="m-causa" class="text-sm font-semibold text-gray-800 leading-relaxed"></h3>
         </div>
-        <button onclick="closeModal()" class="w-8 h-8 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center text-gray-500 text-lg flex-shrink-0 mt-1">Ã—</button>
+        <button onclick="closeModal()" class="w-8 h-8 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center text-gray-500 text-lg flex-shrink-0 mt-1">×</button>
       </div>
     </div>
     <div id="m-cat-wrap" class="px-6 py-4 border-b border-gray-100">
-      <p class="text-[10px] font-semibold uppercase tracking-wider text-gray-400 mb-2">ConexÃ£o temÃ¡tica</p>
+      <p class="text-[10px] font-semibold uppercase tracking-wider text-gray-400 mb-2">Conexão temática</p>
       <div id="m-cat" class="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs font-medium"></div>
-      <p class="text-[10px] text-gray-400 mt-2 leading-relaxed italic">Instrumento analÃ­tico para identificar conexÃµes entre eixos â€” nÃ£o Ã© uma fala do grupo.</p>
     </div>
     <div id="m-votos-wrap" class="px-6 py-4 hidden">
-      <p class="text-[10px] font-semibold uppercase tracking-wider text-gray-400 mb-2">PriorizaÃ§Ã£o</p>
+      <p class="text-[10px] font-semibold uppercase tracking-wider text-gray-400 mb-2">Priorização</p>
       <span id="m-votos" class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-amber-50 text-amber-700 rounded-xl text-xs font-semibold"></span>
     </div>
     <div class="px-6 py-4 bg-gray-50 flex justify-end">
@@ -78,484 +70,207 @@
   </div>
 </div>
 
-<!-- Legenda -->
 <div id="legend" class="absolute bottom-5 left-5 bg-white/95 rounded-2xl shadow-lg border border-gray-100 p-4 z-10" style="min-width:175px;">
   <p class="text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-3">Hierarquia</p>
   <div class="space-y-2">
     <div class="flex items-center gap-2.5"><span class="w-4 h-4 rounded-full" style="background:#E53E3E"></span><span class="text-xs text-gray-600">Problema macro</span></div>
     <div class="flex items-center gap-2.5"><span class="w-3.5 h-3.5 rounded-full" style="background:#DD6B20"></span><span class="text-xs text-gray-600">Eixo</span></div>
     <div class="flex items-center gap-2.5"><span class="w-3 h-3 rounded-full" style="background:#D69E2E"></span><span class="text-xs text-gray-600">Problema central</span></div>
-    <div class="flex items-center gap-2.5"><span class="w-2.5 h-2.5 rounded-full" style="background:#38A169"></span><span class="text-xs text-gray-600">Causa primÃ¡ria</span></div>
-    <div class="flex items-center gap-2.5"><span class="w-2 h-2 rounded-full" style="background:#3182CE"></span><span class="text-xs text-gray-600">Causa secundÃ¡ria</span></div>
-    <div class="flex items-center gap-2.5"><span class="w-1.5 h-1.5 rounded-full" style="background:#805AD5"></span><span class="text-xs text-gray-600">Causa terciÃ¡ria</span></div>
-  </div>
-  <div class="mt-3 pt-3 border-t border-gray-100">
-    <p class="text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-2">ConexÃµes</p>
-    <div class="flex items-center gap-2.5 mb-1.5"><span class="w-5 h-px bg-gray-300 flex-shrink-0"></span><span class="text-xs text-gray-600">HierÃ¡rquica</span></div>
-    <div class="flex items-center gap-2.5"><svg width="20" height="4"><line x1="0" y1="2" x2="20" y2="2" stroke="#A78BFA" stroke-width="2" stroke-dasharray="4 3"/></svg><span class="text-xs text-gray-600">Transversal</span></div>
+    <div class="flex items-center gap-2.5"><span class="w-2.5 h-2.5 rounded-full" style="background:#38A169"></span><span class="text-xs text-gray-600">Causa primária</span></div>
+    <div class="flex items-center gap-2.5"><span class="w-2 h-2 rounded-full" style="background:#3182CE"></span><span class="text-xs text-gray-600">Causa secundária</span></div>
+    <div class="flex items-center gap-2.5"><span class="w-1.5 h-1.5 rounded-full" style="background:#805AD5"></span><span class="text-xs text-gray-600">Causa terciária</span></div>
   </div>
 </div>
 
-<!-- Painel -->
 <div id="panel" class="absolute bottom-5 right-5 bg-white/95 rounded-2xl shadow-lg border border-gray-100 z-10 w-72">
   <div class="flex items-center justify-between px-4 pt-4 pb-3 border-b border-gray-100">
     <p class="text-[10px] font-bold uppercase tracking-widest text-gray-400">Filtros</p>
     <button id="toggle-panel" class="w-7 h-7 rounded-lg bg-gray-100 hover:bg-gray-200 flex items-center justify-center">
       <svg id="ic-down" class="w-3.5 h-3.5 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg>
-      <svg id="ic-up" class="w-3.5 h-3.5 text-gray-500 hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 15l7-7 7 7"/></svg>
     </button>
   </div>
   <div id="pb" class="p-4 space-y-4">
-    <div class="relative">
-      <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path stroke-linecap="round" d="M21 21l-4.35-4.35"/></svg>
-      <input id="search" type="text" placeholder="Pesquisar na Ã¡rvore..."
-        class="w-full pl-9 pr-3 py-2 bg-gray-50 border border-gray-200 rounded-xl text-xs text-gray-700 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-300 focus:border-transparent">
-    </div>
+    <input id="search" type="text" placeholder="Pesquisar..." class="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-xl text-xs focus:ring-2 focus:ring-indigo-300 outline-none">
     <div>
-      <p class="text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-2">VisualizaÃ§Ã£o</p>
+      <p class="text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-2">Visualização</p>
       <div class="grid grid-cols-3 gap-1.5">
-        <button data-view="completa"     class="view-btn py-2 text-[10px] rounded-xl font-semibold bg-indigo-600 text-white leading-tight px-1">Completa</button>
-        <button data-view="transversais" class="view-btn py-2 text-[10px] rounded-xl font-semibold bg-gray-100 text-gray-500 hover:bg-gray-200 leading-tight px-1">SÃ³ transversais</button>
-        <button data-view="minuto"       class="view-btn py-2 text-[10px] rounded-xl font-semibold bg-gray-100 text-gray-500 hover:bg-gray-200 leading-tight px-1">1 minuto</button>
-      </div>
-    </div>
-    <div>
-      <p class="text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-2">PriorizaÃ§Ã£o</p>
-      <div class="grid grid-cols-4 gap-1.5">
-        <button data-min="0" class="prio py-1.5 text-[11px] rounded-lg font-semibold bg-indigo-600 text-white">Todas</button>
-        <button data-min="1" class="prio py-1.5 text-[11px] rounded-lg font-semibold bg-gray-100 text-gray-500 hover:bg-gray-200">1+â­</button>
-        <button data-min="4" class="prio py-1.5 text-[11px] rounded-lg font-semibold bg-gray-100 text-gray-500 hover:bg-gray-200">4+â­</button>
-        <button data-min="5" class="prio py-1.5 text-[11px] rounded-lg font-semibold bg-gray-100 text-gray-500 hover:bg-gray-200">5+â­</button>
+        <button data-view="completa" class="v-btn py-2 text-[10px] rounded-xl font-semibold bg-indigo-600 text-white">Completa</button>
+        <button data-view="transversais" class="v-btn py-2 text-[10px] rounded-xl font-semibold bg-gray-100 text-gray-500">Transv.</button>
+        <button data-view="minuto" class="v-btn py-2 text-[10px] rounded-xl font-semibold bg-gray-100 text-gray-500">1 min</button>
       </div>
     </div>
     <div>
       <p class="text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-2">Eixos</p>
-      <ul id="eixo-list" class="space-y-1 max-h-28 overflow-y-auto pr-1"></ul>
-      <div class="flex gap-2 mt-2">
-        <button id="sel-all"   class="flex-1 py-1.5 text-[11px] font-semibold rounded-lg bg-indigo-50 text-indigo-600 hover:bg-indigo-100">Todos</button>
-        <button id="desel-all" class="flex-1 py-1.5 text-[11px] font-semibold rounded-lg bg-gray-100 text-gray-500 hover:bg-gray-200">Nenhum</button>
-      </div>
+      <ul id="eixo-list" class="space-y-1 max-h-28 overflow-y-auto pr-1 text-[11px] text-gray-600"></ul>
     </div>
     <div>
       <p class="text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-2">Tema transversal</p>
-      <ul id="cat-list" class="space-y-0.5 max-h-40 overflow-y-auto pr-1"></ul>
+      <ul id="cat-list" class="space-y-0.5 max-h-40 overflow-y-auto pr-1 text-[10px] text-gray-500"></ul>
     </div>
   </div>
 </div>
 
 <script>
-// â”€â”€ ConfiguraÃ§Ã£o â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-const CSV_URL    = "https://raw.githubusercontent.com/sme-upge/sme-upge.github.io/refs/heads/main/GT%20de%20Alfabetiza%C3%A7%C3%A3o/%C3%81rvore%20de%20Problemas%20-%20Alfabetiza%C3%A7%C3%A3o%20(3).csv";
-const MACRO      = "Baixa aprendizagem na alfabetizaÃ§Ã£o";
-const EIXO_NOMES = {"Eixo 1": "Responsabilidades", "Eixo 2": "FormaÃ§Ã£o", "Eixo 3": "Infraestrutura", "Eixo 4": "Incentivos", "Eixo 5": "Acomp. e Monitoramento", "Eixo 6": "AvaliaÃ§Ã£o", "Eixo 7": "CurrÃ­culo e Materiais"};
-const CAT_CORES  = {"Alta rotatividade de professores": "#FC8181", "Alto nÃºmero de estudantes por turma": "#F6AD55", "AusÃªncia de critÃ©rios para retenÃ§Ã£o de professores alfabetizadores": "#FEB2B2", "Baixo uso dos dados das avaliaÃ§Ãµes para planejamento e acompanhamento pedagÃ³gico": "#76E4F7", "Desafios na integraÃ§Ã£o do cronograma formativo por ciclos e na conexÃ£o das temÃ¡ticas com a realidade cotidiana e as necessidades dos territÃ³rios": "#B794F4", "Excesso e sobreposiÃ§Ã£o de avaliaÃ§Ãµes  no calendÃ¡rio escolar": "#FAF089", "Fragilidade na articulaÃ§Ã£o curricular, planejamento integrado e continuidade pedagÃ³gica entre as etapas de ensino (Ed. Infantil e Ciclo de AlfabetizaÃ§Ã£o)": "#68D391", "Fragilidade na comunicaÃ§Ã£o e planejamento integrado entre SME, DREs e UEs": "#63B3ED", "Fragilidade na formaÃ§Ã£o continuada de professores e trio gestor acerca da alfabetizaÃ§Ã£o": "#D6BCFA", "Fragilidade na formaÃ§Ã£o para uso e anÃ¡lise de dados de avaliaÃ§Ã£o": "#76E4F7", "Fragilidade na integraÃ§Ã£o entre currÃ­culo, materiais didÃ¡ticos, prÃ¡ticas pedagÃ³gicas e avaliaÃ§Ãµes": "#4FD1C5", "Fragilidade no atendimento dos estudantes em suas individualidades (AEE e vulnerabilidades)": "#F6AD55", "Fragilidade no planejamento do acompanhamento pedagÃ³gico dos estudantes e das prÃ¡ticas docentes": "#9AE6B4", "Fragilidades na consolidaÃ§Ã£o de identidades e sobrecarga de demandas do Trio Gestor (Diretores, ADs e CPs) e POA, impactando o planejamento integrado": "#FBD38D", "FragmentaÃ§Ã£o da concepÃ§Ã£o e prÃ¡tica de alfabetizaÃ§Ã£o, com entendimentos distintos entre intÃ¢ncias e atores da rede sobre instrumentos normativos": "#FFA07A", "ParticipaÃ§Ã£o desigual de professores nas formaÃ§Ãµes (JEIF e Contratados)": "#F687B3"};
-const GC         = {"macro": {"background": "#E53E3E", "border": "#C53030"}, "eixo": {"background": "#DD6B20", "border": "#C05621"}, "problema": {"background": "#D69E2E", "border": "#B7791F"}, "causa1": {"background": "#38A169", "border": "#276749"}, "causa2": {"background": "#3182CE", "border": "#2C5282"}, "causa3": {"background": "#805AD5", "border": "#553C9A"}};
-const FADED_N    = {background:"#E9EBF0", border:"#D1D5DB"};
-const FADED_E    = "#E9EBF0";
-const NL         = {
-  macro:"Problema macro", eixo:"Eixo temÃ¡tico", problema:"Problema central",
-  causa1:"Causa primÃ¡ria", causa2:"Causa secundÃ¡ria", causa3:"Causa terciÃ¡ria", hub:"ConexÃ£o transversal"
-};
+const CSV_URL = "https://raw.githubusercontent.com/sme-upge/sme-upge.github.io/refs/heads/main/GT%20de%20Alfabetiza%C3%A7%C3%A3o/%C3%81rvore%20de%20Problemas%20-%20Alfabetiza%C3%A7%C3%A3o%20(3).csv";
+const MACRO_ID = "Baixa aprendizagem na alfabetização";
+const GC = {"macro": "#E53E3E", "eixo": "#DD6B20", "problema": "#D69E2E", "causa1": "#38A169", "causa2": "#3182CE", "causa3": "#805AD5", "hub": "#A78BFA"};
+const EIXO_NOMES = {"Eixo 1": "Responsabilidades", "Eixo 2": "Formação", "Eixo 3": "Infraestrutura", "Eixo 4": "Incentivos", "Eixo 5": "Acomp. e Monitoramento", "Eixo 6": "Avaliação", "Eixo 7": "Currículo e Materiais"};
 
-// â”€â”€ Parser CSV com separador ; e encoding Latin-1 â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-function parseCsv(text) {
-  const rows = [];
-  const lines = text.split(/\r?\n/);
-  // cabeÃ§alho na linha 0 â€” pula
-  for(let i = 1; i < lines.length; i++) {
-    const line = lines[i].trim();
-    if(!line) continue;
-    // split por ; respeitando aspas
-    const cols = [];
-    let col = "", inQ = false;
-    for(let c = 0; c < line.length; c++) {
-      const ch = line[c];
-      if(ch === '"') { inQ = !inQ; }
-      else if(ch === ';' && !inQ) { cols.push(col.trim()); col = ""; }
-      else { col += ch; }
-    }
-    cols.push(col.trim());
-    // limpa "?" que vÃªm de caracteres especiais mal codificados â€” mantÃ©m o texto
-    rows.push(cols.map(v => v === "?" || v === "â€“" || v === "-" ? "" : v));
-  }
-  return rows;
-}
+let network, nodesDS, edgesDS, rawNodes = [], hubIds = new Set();
+let selEixos = new Set(), selCat = "__ALL__", viewMode = "completa";
 
-// â”€â”€ Processa dados (mesma lÃ³gica do PE, adaptada para 9 colunas) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-function processData(rows) {
-  const nodes  = new Map();
-  const edges  = [];
-  const edgesS = new Set();
-  const conn   = new Map();
-  const eixos  = new Set();
+// Carregamento robusto
+fetch(CSV_URL)
+  .then(res => res.arrayBuffer())
+  .then(buf => {
+    const text = new TextDecoder("windows-1252").decode(buf);
+    const lines = text.split(/\r?\n/).filter(l => l.trim());
+    const nodesMap = new Map();
+    const edgesList = [];
+    const catMap = new Map();
 
-  const addNode = (id, label, group, level, eixo, cat, votos) => {
-    if(!id || !id.trim()) return null;
-    id = id.trim();
-    if(!nodes.has(id)) {
-      const eixoKey = id.slice(0,6);
-      nodes.set(id, {
-        id, label: id.length>60 ? id.slice(0,60)+"â€¦" : id,
-        title: id, causa_real: id,
-        group, level,
-        eixo:      group==="eixo" ? id.slice(0,6) : (eixo||"").slice(0,6),
-        eixo_nome: EIXO_NOMES[(group==="eixo" ? id : eixo||"").slice(0,6)] || "",
-        cat: cat||"", votos: votos||0,
-      });
-      if(level===0) nodes.get(id).mass = 10;
-      conn.set(id, 0);
-    } else {
-      if((votos||0) > (nodes.get(id).votos||0)) nodes.get(id).votos = votos;
-      if(cat && !nodes.get(id).cat) nodes.get(id).cat = cat;
-    }
-    return nodes.get(id);
-  };
+    nodesMap.set(MACRO_ID, { id: MACRO_ID, label: "Baixa aprendizagem\nna alfabetização", group: 'macro', level: 0, value: 40 });
 
-  const addEdge = (from, to) => {
-    from = from.trim(); to = to.trim();
-    if(!from || !to) return;
-    const k = from+"â†’"+to;
-    if(edgesS.has(k)) return;
-    edgesS.add(k);
-    edges.push({from, to, arrows:{to:{enabled:false}}});
-    conn.set(from, (conn.get(from)||0)+1);
-    conn.set(to,   (conn.get(to)||0)+1);
-  };
+    lines.slice(1).forEach(line => {
+      const c = line.split(';').map(v => v.replace(/^"|"$/g, '').trim());
+      if(c.length < 3) return;
+      
+      const [eixoFull, prob, cp, cat1, cs, cat2, v2, ct, cat3] = c;
+      const eId = eixoFull ? eixoFull.split(' - ')[0] : null;
 
-  addNode(MACRO, MACRO, "macro", 0, "", "", 0);
-
-  rows.forEach(cols => {
-    // cols: [eixo, prob, cp, cat1, cs, cat2, votos, ct, cat3]
-    const [eixo, prob, cp, cat1, cs, cat2, votosRaw, ct, cat3] = cols;
-    if(!eixo) return;
-    const votos = parseInt(votosRaw)||0;
-    const eixoKey = eixo.slice(0,6);
-    eixos.add(eixoKey);
-
-    addNode(eixoKey, EIXO_NOMES[eixoKey]||eixo, "eixo", 1, eixoKey, "", 0);
-    addEdge(MACRO, eixoKey);
-
-    if(prob) {
-      addNode(prob, prob, "problema", 2, eixoKey, cat1, 0);
-      addEdge(eixoKey, prob);
-      if(cp) {
-        addNode(cp, cp, "causa1", 3, eixoKey, cat1, 0);
-        addEdge(prob, cp);
-        if(cs) {
-          addNode(cs, cs, "causa2", 4, eixoKey, cat2, votos);
-          addEdge(cp, cs);
-          if(ct) {
-            addNode(ct, ct, "causa3", 5, eixoKey, cat3, 0);
-            addEdge(cs, ct);
-          }
+      if (eId && !nodesMap.has(eId)) {
+        nodesMap.set(eId, { id: eId, label: EIXO_NOMES[eId]||eId, group: 'eixo', level: 1, eixo: eId });
+        edgesList.push({ from: MACRO_ID, to: eId });
+        selEixos.add(eId);
+      }
+      if (prob && eId) {
+        if(!nodesMap.has(prob)) {
+            nodesMap.set(prob, { id: prob, label: prob.length > 30 ? prob.substring(0,30)+'...' : prob, group: 'problema', level: 2, eixo: eId, causa_real: prob });
+            edgesList.push({ from: eId, to: prob });
+        }
+        if(cp) {
+           if(!nodesMap.has(cp)) {
+               nodesMap.set(cp, { id: cp, label: cp.substring(0,25)+'...', group: 'causa1', level: 3, eixo: eId, causa_real: cp, cat: cat1 });
+               edgesList.push({ from: prob, to: cp });
+           }
+           if(cs) {
+              if(!nodesMap.has(cs)) {
+                  nodesMap.set(cs, { id: cs, label: cs.substring(0,25)+'...', group: 'causa2', level: 4, eixo: eId, causa_real: cs, cat: cat2, votos: v2 });
+                  edgesList.push({ from: cp, to: cs });
+              }
+           }
         }
       }
-    }
-  });
 
-  // Tamanhos
-  nodes.forEach(n => {
-    const c = conn.get(n.id)||0, v = n.votos||0;
-    if(n.level===0)      n.value = 3000;
-    else if(n.level<=2)  n.value = 500;
-    else                 n.value = Math.max(30, 30+v*100+c*10);
-  });
-
-  // Hubs por categoria
-  const catNodes = new Map();
-  nodes.forEach(n => {
-    if(n.cat && n.level>=3) {
-      if(!catNodes.has(n.cat)) catNodes.set(n.cat, []);
-      catNodes.get(n.cat).push(n.id);
-    }
-  });
-
-  const hubNodes = [], hubEdges = [], hubIds = new Set();
-  catNodes.forEach((nids, cat) => {
-    const eixosCat = new Set(nids.map(id => nodes.get(id)?.eixo));
-    if(eixosCat.size < 2) return;
-    const hubId = "__hub__"+cat;
-    const cor   = CAT_CORES[cat] || "#A78BFA";
-    hubIds.add(hubId);
-    hubNodes.push({
-      id: hubId, label: cat, title: cat, causa_real: "Tema transversal: "+cat,
-      group: "hub", level: 99, eixo: "", eixo_nome: "Tema transversal",
-      cat, votos: 0, value: 60+nids.length*15,
-      color: {background: cor+"30", border: cor},
-      shape: "diamond", font: {size:11, color:"#374151", strokeWidth:0},
-    });
-    nids.forEach(nid => {
-      hubEdges.push({
-        from: nid, to: hubId, cat, color: cor,
-        transversal: true, dashes: [5,4], width: 2,
+      [cat1, cat2, cat3].forEach(cat => {
+        if(cat && cat.length > 2) {
+          if(!catMap.has(cat)) catMap.set(cat, new Set());
+          catMap.get(cat).add(cs || cp || prob);
+        }
       });
     });
+
+    catMap.forEach((targets, cat) => {
+      const hId = "__hub__" + cat; hubIds.add(hId);
+      nodesMap.set(hId, { id: hId, label: cat, group: 'hub', shape: 'diamond', level: 6, cat: cat });
+      targets.forEach(t => t && edgesList.push({ from: t, to: hId, dashes: true, color: "#A78BFA", opacity: 0.4 }));
+    });
+
+    rawNodes = Array.from(nodesMap.values());
+    initNetwork(rawNodes, edgesList, catMap);
   });
 
-  return {
-    nodes: [...nodes.values(), ...hubNodes],
-    edges: [...edges, ...hubEdges],
-    hubs:  [...hubIds],
-    eixos: [...eixos].sort(),
-    cats:  Object.keys(CAT_CORES),
-  };
-}
+function initNetwork(nodes, edges, catMap) {
+  nodesDS = new vis.DataSet(nodes.map(n => ({
+    ...n, color: { background: GC[n.group], border: '#fff' },
+    font: { size: 11, face: 'Inter' },
+    margin: 10
+  })));
+  edgesDS = new vis.DataSet(edges);
 
-// â”€â”€ Estado â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-let selEixos = new Set();
-let selCat   = "__ALL__";
-let minV     = 0;
-let viewMode = "completa";
-let HUB_COLORS = {};
-let network, visData;
-
-// â”€â”€ InicializaÃ§Ã£o â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-document.addEventListener("DOMContentLoaded", () => {
-  // Tenta fetch com Latin-1 e, se falhar encoding, tenta UTF-8
-  fetch(CSV_URL)
-    .then(r => r.arrayBuffer())
-    .then(buf => {
-      // Decodifica Latin-1 (Windows-1252)
-      let text;
-      try { text = new TextDecoder("windows-1252").decode(buf); }
-      catch(e) { text = new TextDecoder("utf-8").decode(buf); }
-      return text;
-    })
-    .then(text => {
-      const rows = parseCsv(text);
-      const graph = processData(rows);
-      initGraph(graph);
-    })
-    .catch(err => {
-      document.getElementById("loading").innerHTML =
-        `<p class="text-red-500 font-semibold text-sm">Erro ao carregar o CSV.</p>
-         <p class="text-gray-400 text-xs mt-1">${err.message}</p>`;
-    });
-});
-
-function initGraph(graph) {
-  selEixos = new Set(graph.eixos);
-  const HUBS = new Set(graph.hubs);
-  graph.nodes.forEach(n => { if(HUBS.has(n.id) && n.color) HUB_COLORS[n.id] = n.color; });
-
-  visData = {
-    nodes: new vis.DataSet(graph.nodes),
-    edges: new vis.DataSet(graph.edges),
-  };
-
-  network = new vis.Network(document.getElementById("mynetwork"), visData, {
-    nodes:{
-      shape:"dot", scaling:{min:5, max:55, label:{enabled:false}},
-      font:{size:11, color:"#374151", face:"Inter", strokeWidth:3, strokeColor:"#F7F8FA"},
-      borderWidth:1.5,
-      shadow:{enabled:true, color:"rgba(0,0,0,0.07)", size:6, x:0, y:2},
-    },
-    edges:{
-      width:0.8, color:{color:"#D1D5DB", highlight:"#9CA3AF", hover:"#9CA3AF"},
-      smooth:{enabled:true, type:"continuous", roundness:0.3},
-      hoverWidth:1.5,
-    },
-    interaction:{hover:true, tooltipDelay:400, keyboard:true, dragNodes:true, hideEdgesOnDrag:true},
-    physics:{
-      enabled:true,
-      barnesHut:{gravitationalConstant:-35000, centralGravity:0.25, springLength:180, springConstant:0.035, damping:0.1, avoidOverlap:0.9},
-      solver:"barnesHut",
-      stabilization:{iterations:250, updateInterval:40, fit:false},
-    },
+  network = new vis.Network(document.getElementById("mynetwork"), { nodes: nodesDS, edges: edgesDS }, {
+    physics: { solver: 'forceAtlas2Based', forceAtlas2Based: { gravitationalConstant: -100, springLength: 100 }, stabilization: { iterations: 150 } },
+    nodes: { shape: 'dot', scaling: { min: 10, max: 30 } },
+    edges: { arrows: 'to', color: '#cbd5e1', smooth: { type: 'continuous' } }
   });
 
   network.once("stabilizationIterationsDone", () => {
     document.getElementById("loading").style.display = "none";
-    network.setOptions({physics:{enabled:false}});
-    network.focus(MACRO, {scale:1.8, animation:false});
-    setTimeout(() => network.fit({animation:{duration:1600, easingFunction:"easeInOutQuad"}}), 60);
-    buildUI(graph, HUBS);
-    applyFilter(graph, HUBS);
+    setupUI(catMap);
   });
-
-  // Modal
-  const modal    = document.getElementById("modal");
-  const modalBox = document.getElementById("modal-box");
-  network.on("click", p => { if(p.nodes.length) openModal(p.nodes[0]); });
-
-  window.openModal = id => {
-    const n = visData.nodes.get(id); if(!n) return;
-    document.getElementById("m-nivel").textContent = NL[n.group]||n.group;
-    const eixoEl = document.getElementById("m-eixo");
-    if(n.eixo_nome && n.group!=="macro") { eixoEl.textContent=n.eixo_nome; eixoEl.style.display=""; }
-    else { eixoEl.style.display="none"; }
-    document.getElementById("m-causa").textContent = n.causa_real||n.title;
-    const catWrap = document.getElementById("m-cat-wrap");
-    const catEl   = document.getElementById("m-cat");
-    if(n.cat) {
-      const cor = CAT_CORES[n.cat]||"#888";
-      catEl.innerHTML = `<span class="w-2 h-2 rounded-full flex-shrink-0" style="background:${cor}"></span><span>${n.cat}</span>`;
-      catEl.style.cssText = `background:${cor}20;color:#374151;border:1px solid ${cor}50;`;
-      catWrap.style.display="";
-    } else { catWrap.style.display="none"; }
-    const votosWrap = document.getElementById("m-votos-wrap");
-    if(n.votos>0) {
-      document.getElementById("m-votos").innerHTML = `â­ ${n.votos} estrelinha${n.votos>1?"s":""} na priorizaÃ§Ã£o`;
-      votosWrap.classList.remove("hidden");
-    } else { votosWrap.classList.add("hidden"); }
-    modal.classList.remove("hidden"); modal.classList.add("flex");
-    setTimeout(() => modalBox.classList.remove("scale-95","opacity-0"), 10);
-  };
-  window.closeModal = () => {
-    modalBox.classList.add("scale-95","opacity-0");
-    setTimeout(() => { modal.classList.add("hidden"); modal.classList.remove("flex"); }, 200);
-  };
-  window.addEventListener("keydown", e => { if(e.key==="Escape") closeModal(); });
-  modal.addEventListener("click", e => { if(e.target===modal) closeModal(); });
+  network.on("click", p => p.nodes.length && openModal(p.nodes[0]));
 }
 
-function buildUI(graph, HUBS) {
-  // VisualizaÃ§Ã£o
-  document.querySelectorAll(".view-btn").forEach(btn => {
-    btn.addEventListener("click", function() {
-      document.querySelectorAll(".view-btn").forEach(b =>
-        b.className="view-btn py-2 text-[10px] rounded-xl font-semibold bg-gray-100 text-gray-500 hover:bg-gray-200 leading-tight px-1");
-      this.className="view-btn py-2 text-[10px] rounded-xl font-semibold bg-indigo-600 text-white leading-tight px-1";
-      viewMode = this.dataset.view;
-      if(viewMode==="minuto") {
-        visData.nodes.update(graph.nodes.map(n => ({
-          id:n.id, hidden:!HUBS.has(n.id)&&(n.level===1||n.level>3), font:{size:n.level>0&&n.level<4?18:11}
-        })));
-        network.setOptions({physics:{enabled:true, barnesHut:{springLength:90}}});
-        network.once("stabilizationIterationsDone",()=>{
-          network.setOptions({physics:{enabled:false}});
-          network.fit({animation:{duration:700,easingFunction:"easeInOutQuad"}});
-        });
-        network.stabilize(120);
-      } else {
-        visData.nodes.update(graph.nodes.map(n=>({id:n.id,hidden:false,font:{size:11}})));
-        applyFilter(graph, HUBS);
-      }
-    });
+function setupUI(catMap) {
+  const eUl = document.getElementById("eixo-list");
+  selEixos.forEach(e => {
+    const li = document.createElement("li");
+    li.className = "flex items-center gap-2 cursor-pointer hover:bg-gray-100 p-1 rounded";
+    li.innerHTML = `<input type="checkbox" checked> <span>${EIXO_NOMES[e]||e}</span>`;
+    li.onclick = (ev) => {
+      const chk = li.querySelector('input');
+      if(ev.target !== chk) chk.checked = !chk.checked;
+      chk.checked ? selEixos.add(e) : selEixos.delete(e);
+      applyFilters();
+    };
+    eUl.appendChild(li);
   });
 
-  // PriorizaÃ§Ã£o
-  document.querySelectorAll(".prio").forEach(btn => {
-    btn.addEventListener("click", function() {
-      document.querySelectorAll(".prio").forEach(b =>
-        b.className="prio py-1.5 text-[11px] rounded-lg font-semibold bg-gray-100 text-gray-500 hover:bg-gray-200");
-      this.className="prio py-1.5 text-[11px] rounded-lg font-semibold bg-indigo-600 text-white";
-      minV=parseInt(this.dataset.min); applyFilter(graph,HUBS);
-    });
+  const cUl = document.getElementById("cat-list");
+  cUl.innerHTML = '<li class="p-1 cursor-pointer text-indigo-600 font-bold" onclick="selCat=\'__ALL__\';applyFilters()">Todas as conexões</li>';
+  catMap.forEach((_, cat) => {
+    const li = document.createElement("li");
+    li.className = "p-1 cursor-pointer hover:bg-gray-100 rounded truncate";
+    li.textContent = cat;
+    li.onclick = () => { selCat = cat; applyFilters(); };
+    cUl.appendChild(li);
   });
 
-  // Eixos
-  const eixoUl = document.getElementById("eixo-list");
-  graph.eixos.forEach(e => {
-    const li=document.createElement("li");
-    li.className="flex items-center gap-2 px-2.5 py-1.5 rounded-lg cursor-pointer text-xs text-gray-600 hover:bg-gray-50 bg-indigo-50 font-medium transition-colors";
-    li.innerHTML=`<span class="w-1.5 h-1.5 rounded-full bg-indigo-400 flex-shrink-0"></span>${EIXO_NOMES[e]||e}`;
-    li.dataset.id=e;
-    li.addEventListener("click",()=>{
-      selEixos.has(e)?selEixos.delete(e):selEixos.add(e);
-      updateEixoUI(graph.eixos); applyFilter(graph,HUBS);
-    });
-    eixoUl.appendChild(li);
-  });
-  document.getElementById("sel-all").addEventListener("click",()=>{
-    selEixos=new Set(graph.eixos); updateEixoUI(graph.eixos); applyFilter(graph,HUBS);
-  });
-  document.getElementById("desel-all").addEventListener("click",()=>{
-    selEixos.clear(); updateEixoUI(graph.eixos); applyFilter(graph,HUBS);
-  });
-
-  // Categorias
-  const catUl=document.getElementById("cat-list");
-  const addCat=(cat,label,cor)=>{
-    const li=document.createElement("li");
-    li.className="flex items-center gap-2 px-2.5 py-1.5 rounded-lg cursor-pointer text-xs text-gray-600 hover:bg-gray-50 transition-colors";
-    li.innerHTML=cor
-      ?`<span class="w-2 h-2 rounded-full flex-shrink-0" style="background:${cor}"></span><span class="truncate">${label}</span>`
-      :`<span class="w-2 h-2 rounded-full bg-gray-300 flex-shrink-0"></span><span>${label}</span>`;
-    li.dataset.cat=cat;
-    li.addEventListener("click",()=>{selCat=cat;updateCatUI();applyFilter(graph,HUBS);});
-    catUl.appendChild(li);
-  };
-  addCat("__ALL__","Todas as conexÃµes",null);
-  graph.cats.forEach(cat=>addCat(cat,cat,CAT_CORES[cat]));
-  updateCatUI();
-
-  document.getElementById("search").addEventListener("input",()=>applyFilter(graph,HUBS));
-  document.getElementById("toggle-panel").addEventListener("click",()=>{
-    document.getElementById("panel").classList.toggle("min");
-    document.getElementById("ic-down").classList.toggle("hidden");
-    document.getElementById("ic-up").classList.toggle("hidden");
+  document.querySelectorAll(".v-btn").forEach(btn => {
+    btn.onclick = () => {
+      document.querySelectorAll(".v-btn").forEach(b => b.classList.replace("bg-indigo-600", "bg-gray-100"));
+      btn.classList.replace("bg-gray-100", "bg-indigo-600");
+      viewMode = btn.dataset.view;
+      applyFilters();
+    };
   });
 }
 
-function updateEixoUI(eixos) {
-  document.querySelectorAll("#eixo-list li").forEach(l=>{
-    const s=selEixos.has(l.dataset.id);
-    l.classList.toggle("bg-indigo-50",s);
-    l.classList.toggle("font-medium",s);
-    l.classList.toggle("text-gray-400",!s);
-    l.classList.toggle("text-gray-600",s);
-  });
-}
-function updateCatUI() {
-  document.querySelectorAll("#cat-list li").forEach(l=>{
-    l.classList.toggle("bg-indigo-50",l.dataset.cat===selCat);
-    l.classList.toggle("font-semibold",l.dataset.cat===selCat);
-  });
-}
-
-function climb(id, visited, edges) {
-  let cur=id;
-  while(cur) {
-    if(visited.has(cur)) break;
-    visited.add(cur);
-    const pe=edges.filter(e=>e.to===cur&&!e.transversal);
-    cur=pe.length?pe[0].from:null;
-  }
-}
-
-function applyFilter(graph, HUBS) {
-  if(viewMode==="minuto") return;
-  const search=document.getElementById("search").value.toLowerCase().trim();
-  const allN=visData.nodes.get(), allE=visData.edges.get();
-  const edgeArr=allE;
-
-  const eixoOk=new Set([MACRO]);
-  if(selEixos.size===graph.eixos.length) { allN.forEach(n=>eixoOk.add(n.id)); }
-  else { allN.forEach(n=>{ if(!HUBS.has(n.id)&&n.eixo&&selEixos.has(n.eixo)) climb(n.id,eixoOk,edgeArr); }); }
-
-  const prioOk=new Set([MACRO]);
-  if(minV===0) { allN.forEach(n=>prioOk.add(n.id)); }
-  else { allN.forEach(n=>{ if((n.votos||0)>=minV) climb(n.id,prioOk,edgeArr); }); }
-
-  const srchOk=new Set([MACRO]);
-  if(!search) { allN.forEach(n=>srchOk.add(n.id)); }
-  else { allN.forEach(n=>{ if((n.causa_real||n.title).toLowerCase().includes(search)) climb(n.id,srchOk,edgeArr); }); }
-
-  const hierOk=id=>eixoOk.has(id)&&prioOk.has(id)&&srchOk.has(id);
-  const transOnly=viewMode==="transversais";
-
-  visData.nodes.update(allN.map(n=>{
-    if(HUBS.has(n.id)) {
-      const show=(selCat==="__ALL__"||n.cat===selCat);
-      const cor=HUB_COLORS[n.id]||{background:(CAT_CORES[n.cat]||"#888")+"30",border:(CAT_CORES[n.cat]||"#888")};
-      return {id:n.id,hidden:!show,color:show?cor:FADED_N,opacity:show?.9:0};
-    }
-    if(transOnly) return {id:n.id,hidden:n.level>=3};
-    const ok=hierOk(n.id);
-    return {id:n.id,hidden:false,color:ok?(GC[n.group]||null):FADED_N,opacity:ok?1:.08};
-  }));
-
-  visData.edges.update(allE.map(e=>{
-    if(e.transversal) {
-      const show=(selCat==="__ALL__"||e.cat===selCat)&&(transOnly||hierOk(e.from));
-      return {id:e.id,hidden:!show,color:{color:show?(e.color||"#A78BFA"):FADED_E},width:show?1.5:0,dashes:show?[5,4]:false};
-    }
-    if(transOnly) return {id:e.id,hidden:true};
-    const ok=hierOk(e.from)&&hierOk(e.to);
-    return {id:e.id,hidden:false,color:{color:ok?"#D1D5DB":FADED_E},opacity:ok?1:.06,width:ok?.8:.3};
+function applyFilters() {
+  const q = document.getElementById("search").value.toLowerCase();
+  nodesDS.update(rawNodes.map(n => {
+    let show = true;
+    if(n.eixo && !selEixos.has(n.eixo)) show = false;
+    if(viewMode === 'minuto' && n.level > 2 && !hubIds.has(n.id)) show = false;
+    if(viewMode === 'transversais' && !n.cat && n.group !== 'macro') show = false;
+    if(q && !n.causa_real?.toLowerCase().includes(q)) show = false;
+    
+    let op = 1;
+    if(selCat !== "__ALL__" && n.cat !== selCat && !hubIds.has(n.id) && n.group !== 'macro') op = 0.1;
+    if(n.id === MACRO_ID) show = true;
+    return { id: n.id, hidden: !show, opacity: op };
   }));
 }
+
+function openModal(id) {
+  const n = nodesDS.get(id);
+  if(!n || hubIds.has(id)) return;
+  document.getElementById("m-nivel").textContent = n.group;
+  document.getElementById("m-eixo").textContent = EIXO_NOMES[n.eixo] || "Geral";
+  document.getElementById("m-causa").textContent = n.causa_real || n.label;
+  document.getElementById("m-cat-wrap").style.display = n.cat ? "block" : "none";
+  if(n.cat) document.getElementById("m-cat").textContent = n.cat;
+  document.getElementById("modal").classList.replace("hidden", "flex");
+  setTimeout(() => document.getElementById("modal-box").classList.replace("opacity-0", "opacity-100"), 10);
+}
+
+function closeModal() {
+  document.getElementById("modal-box").classList.replace("opacity-100", "opacity-0");
+  setTimeout(() => document.getElementById("modal").classList.replace("flex", "hidden"), 200);
+}
+
+document.getElementById("toggle-panel").onclick = () => document.getElementById("panel").classList.toggle("min");
+document.getElementById("search").oninput = applyFilters;
 </script>
 </body>
 </html>
