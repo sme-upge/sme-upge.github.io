@@ -49,7 +49,6 @@
 
 <div id="mynetwork"></div>
 
-<!-- Modal -->
 <div id="modal" class="fixed inset-0 z-[100] hidden items-center justify-center p-4" style="background:rgba(17,24,39,.5);backdrop-filter:blur(4px);">
   <div id="modal-box" class="bg-white rounded-2xl shadow-2xl w-full max-w-lg transform transition-all duration-200 scale-95 opacity-0 overflow-hidden">
     <div class="px-6 pt-6 pb-4 border-b border-gray-100">
@@ -80,7 +79,6 @@
   </div>
 </div>
 
-<!-- Legenda -->
 <div id="legend" class="absolute bottom-5 left-5 bg-white/95 rounded-2xl shadow-lg border border-gray-100 p-4 z-10" style="min-width:175px;">
   <p class="text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-3">Hierarquia</p>
   <div class="space-y-2">
@@ -98,7 +96,6 @@
   </div>
 </div>
 
-<!-- Painel -->
 <div id="panel" class="absolute bottom-5 right-5 bg-white/95 rounded-2xl shadow-lg border border-gray-100 z-10 w-72">
   <div class="flex items-center justify-between px-4 pt-4 pb-3 border-b border-gray-100">
     <p class="text-[10px] font-bold uppercase tracking-widest text-gray-400">Filtros</p>
@@ -146,38 +143,31 @@
 </div>
 
 <script>
+// --- CONFIGURAÇÕES GERAIS ---
 const CSV_URL    = "https://raw.githubusercontent.com/sme-upge/sme-upge.github.io/refs/heads/main/GT%20de%20Alfabetiza%C3%A7%C3%A3o/%C3%81rvore%20de%20Problemas%20-%20Alfabetiza%C3%A7%C3%A3o%20(3).csv";
 const MACRO      = "Baixa aprendizagem na alfabetização";
 const EIXO_NOMES = {"Eixo 1": "Responsabilidades", "Eixo 2": "Formação", "Eixo 3": "Infraestrutura", "Eixo 4": "Incentivos", "Eixo 5": "Acomp. e Monitoramento", "Eixo 6": "Avaliação", "Eixo 7": "Currículo e Materiais"};
-const CAT_CORES  = {"Alta rotatividade de professores": "#FC8181", "Alto número de estudantes por turma": "#F6AD55", "Ausência de critérios para retenção de professores alfabetizadores": "#FEB2B2", "Baixo uso dos dados das avaliações para planejamento e acompanhamento pedagógico": "#76E4F7", "Desafios na integração do cronograma formativo por ciclos e na conexão das temáticas com a realidade cotidiana e as necessidades dos territórios": "#B794F4", "Excesso e sobreposição de avaliações  no calendário escolar": "#FAF089", "Fragilidade na articulação curricular, planejamento integrado e continuidade pedagógica entre as etapas de ensino (Ed. Infantil e Ciclo de Alfabetização)": "#68D391", "Fragilidade na comunicação e planejamento integrado entre SME, DREs e UEs": "#63B3ED", "Fragilidade na formação continuada de professores e trio gestor acerca da alfabetização": "#D6BCFA", "Fragilidade na formação para uso e análise de dados de avaliação": "#76E4F7", "Fragilidade na integração entre currículo, materiais didáticos, práticas pedagógicas e avaliações": "#4FD1C5", "Fragilidade no atendimento dos estudantes in suas individualidades (AEE e vulnerabilidades)": "#F6AD55", "Fragilidade no planejamento do acompanhamento pedagógico dos estudantes e das práticas docentes": "#9AE6B4", "Fragilidades na consolidação de identidades e sobrecarga de demandas do Trio Gestor (Diretores, ADs e CPs) e POA, impactando o planejamento integrado": "#FBD38D", "Fragmentação da concepção e prática de alfabetização, com entendimentos distintos entre intâncias e atores da rede sobre instrumentos normativos": "#FFA07A", "Participação desigual de professores nas formações (JEIF e Contratados)": "#F687B3"};
+const CAT_CORES  = {"Alta rotatividade de professores": "#FC8181", "Alto número de estudantes por turma": "#F6AD55", "Ausência de critérios para retenção de professores alfabetizadores": "#FEB2B2", "Baixo uso dos dados das avaliações para planejamento e acompanhamento pedagógico": "#76E4F7", "Desafios na integração do cronograma formativo por ciclos e na conexão das temáticas com a realidade cotidiana e as necessidades dos territórios": "#B794F4", "Excesso e sobreposição de avaliações  no calendário escolar": "#FAF089", "Fragilidade na articulação curricular, planejamento integrado e continuidade pedagógica entre as etapas de ensino (Ed. Infantil e Ciclo de Alfabetização)": "#68D391", "Fragilidade na comunicação e planejamento integrado entre SME, DREs e UEs": "#63B3ED", "Fragilidade na formação continuada de professores e trio gestor acerca da alfabetização": "#D6BCFA", "Fragilidade na formação para uso e análise de dados de avaliação": "#76E4F7", "Fragilidade na integração entre currículo, materiais didáticos, práticas pedagógicas e avaliações": "#4FD1C5", "Fragilidade no atendimento dos estudantes em suas individualidades (AEE e vulnerabilidades)": "#F6AD55", "Fragilidade no planejamento do acompanhamento pedagógico dos estudantes e das práticas docentes": "#9AE6B4", "Fragilidades na consolidação de identidades e sobrecarga de demandas do Trio Gestor (Diretores, ADs e CPs) e POA, impactando o planejamento integrado": "#FBD38D", "Fragmentação da concepção e prática de alfabetização, com entendimentos distintos entre intâncias e atores da rede sobre instrumentos normativos": "#FFA07A", "Participação desigual de professores nas formações (JEIF e Contratados)": "#F687B3"};
 const GC         = {"macro": {"background": "#E53E3E", "border": "#C53030"}, "eixo": {"background": "#DD6B20", "border": "#C05621"}, "problema": {"background": "#D69E2E", "border": "#B7791F"}, "causa1": {"background": "#38A169", "border": "#276749"}, "causa2": {"background": "#3182CE", "border": "#2C5282"}, "causa3": {"background": "#805AD5", "border": "#553C9A"}};
-const FADED_N    = {background:"#E9EBF0", border:"#D1D5DB"};
-const FADED_E    = "#E9EBF0";
-const NL = {
-  macro:"Problema macro", eixo:"Eixo temático", problema:"Problema central",
-  causa1:"Causa primária", causa2:"Causa secundária", causa3:"Causa terciária", hub:"Conexão transversal"
-};
+const NL = { macro:"Problema macro", eixo:"Eixo temático", problema:"Problema central", causa1:"Causa primária", causa2:"Causa secundária", causa3:"Causa terciária", hub:"Conexão transversal" };
 
-// ── Estado GLOBAL — acessível por todos os handlers ───────────────────────────
-let G       = null;   // {nodes, edges, hubs, eixos, cats}
-let HUBS    = null;   // Set de IDs de hubs
-let HUB_COR = {};   // cor original de cada hub
+// --- ESTADO GLOBAL ---
+let G       = { nodes: [], edges: [], hubs: new Set(), eixos: [], cats: [] };
 let visData = null;
 let network = null;
 let selEixos = new Set();
 let selCat   = "__ALL__";
 let minV     = 0;
 let viewMode = "completa";
+let HUB_COR  = {};
 
-// ── Parser CSV (sep=; UTF-8) ──────────────────────────────────────────────────
+// --- PARSER CSV ---
 function parseCsv(text) {
   const rows = [];
   const lines = text.split(/\r?\n/);
   for(let i = 1; i < lines.length; i++) {
     const line = lines[i].trim();
     if(!line) continue;
-
-    // split respeitando aspas
     const allCols = []; let col = "", inQ = false;
     for(let c = 0; c < line.length; c++) {
       const ch = line[c];
@@ -186,419 +176,320 @@ function parseCsv(text) {
       else { col+=ch; }
     }
     allCols.push(col.trim());
-
-    // garante exatamente 9 colunas — se vier mais, concatena no índice 7 (causa terciária)
     let cols = allCols.slice(0, 9);
     while(cols.length < 9) cols.push("");
-
-    // limpa marcadores vazios do CSV
-    cols = cols.map(v => (v==="?" || v==="-" || v==="–" || v===" ") ? "" : v);
-    rows.push(cols);
+    rows.push(cols.map(v => (v==="?" || v==="-" || v==="–" || v===" ") ? "" : v));
   }
   return rows;
 }
 
-// ── Processa dados ─────────────────────────────────────────────────────────────
+// --- PROCESSAMENTO ---
 function processData(rows) {
   const nodesMap = new Map();
   const edges    = [];
-  const edgesSet = new Set();
-  const conn     = new Map();
   const eixosSet = new Set();
+  const connCounter = new Map();
 
   const addNode = (id, group, level, eixo, cat, votos) => {
-    if(!id||!id.trim()) return;
+    if(!id) return;
     id = id.trim();
     if(!nodesMap.has(id)) {
       const ek = group==="eixo" ? id.slice(0,6) : (eixo||"").slice(0,6);
       nodesMap.set(id, {
         id, label:id.length>60?id.slice(0,60)+"…":id,
-        title:id, causa_real:id,
-        group, level,
-        eixo: ek,
-        eixo_nome: EIXO_NOMES[ek]||"",
-        cat:cat||"", votos:votos||0,
+        title:id, causa_real:id, group, level, eixo: ek,
+        eixo_nome: EIXO_NOMES[ek]||"", cat:cat||"", votos:votos||0
       });
-      if(level===0) nodesMap.get(id).mass=10;
-      conn.set(id,0);
+      connCounter.set(id, 0);
     } else {
-      if((votos||0)>(nodesMap.get(id).votos||0)) nodesMap.get(id).votos=votos;
-      if(cat&&!nodesMap.get(id).cat) nodesMap.get(id).cat=cat;
+      if(votos > nodesMap.get(id).votos) nodesMap.get(id).votos = votos;
     }
   };
 
-  const addEdge = (from,to) => {
-    from=from.trim(); to=to.trim();
-    if(!from||!to) return;
-    const k=from+"→"+to;
-    if(edgesSet.has(k)) return;
-    edgesSet.add(k);
-    edges.push({from,to,arrows:{to:{enabled:false}}});
-    conn.set(from,(conn.get(from)||0)+1);
-    conn.set(to,(conn.get(to)||0)+1);
+  const addEdge = (from, to) => {
+    if(!from || !to) return;
+    edges.push({from: from.trim(), to: to.trim()});
+    connCounter.set(from.trim(), (connCounter.get(from.trim())||0)+1);
+    connCounter.set(to.trim(), (connCounter.get(to.trim())||0)+1);
   };
 
-  addNode(MACRO,"macro",0,"","",0);
+  addNode(MACRO, "macro", 0, "", "", 0);
 
   rows.forEach(cols => {
-    // cols[0]=eixo, [1]=prob, [2]=cp, [3]=cat1, [4]=cs, [5]=cat2, [6]=votos, [7]=ct, [8]=cat3
-    const eixo=cols[0]||"", prob=cols[1]||"", cp=cols[2]||"", cat1=cols[3]||"",
-          cs=cols[4]||"", cat2=cols[5]||"", votos=parseInt(cols[6])||0,
-          ct=cols[7]||"", cat3=cols[8]||";";
+    const eixo=cols[0], prob=cols[1], cp=cols[2], cat1=cols[3], cs=cols[4], cat2=cols[5], votos=parseInt(cols[6])||0, ct=cols[7], cat3=cols[8];
     if(!eixo) return;
-    const ek=eixo.slice(0,6);
-    eixosSet.add(ek);
+    const ek=eixo.slice(0,6); eixosSet.add(ek);
     addNode(ek,"eixo",1,ek,"",0); addEdge(MACRO,ek);
     if(prob){ addNode(prob,"problema",2,ek,cat1,0); addEdge(ek,prob); }
-    if(prob&&cp){ addNode(cp,"causa1",3,ek,cat1,0); addEdge(prob,cp); }
-    if(prob&&cp&&cs){ addNode(cs,"causa2",4,ek,cat2,votos); addEdge(cp,cs); }
-    if(prob&&cp&&cs&&ct){ addNode(ct,"causa3",5,ek,cat3,0); addEdge(cs,ct); }
+    if(cp){ addNode(cp,"causa1",3,ek,cat1,0); addEdge(prob,cp); }
+    if(cs){ addNode(cs,"causa2",4,ek,cat2,votos); addEdge(cp,cs); }
+    if(ct){ addNode(ct,"causa3",5,ek,cat3,0); addEdge(cs,ct); }
   });
 
-  // Tamanhos
-  nodesMap.forEach(n=>{
-    const c=conn.get(n.id)||0, v=n.votos||0;
-    if(n.level===0) n.value=3000;
-    else if(n.level<=2) n.value=500;
-    else n.value=Math.max(30,30+v*100+c*10);
+  // Cálculo de tamanhos
+  nodesMap.forEach(n => {
+    const c = connCounter.get(n.id) || 0;
+    if(n.level===0) n.value = 3000;
+    else if(n.level <=2) n.value = 500;
+    else n.value = Math.max(30, 30 + n.votos*100 + c*10);
   });
 
-  // Hubs
-  const catMap=new Map();
-  nodesMap.forEach(n=>{
-    if(n.cat&&n.level>=3){
-      if(!catMap.has(n.cat)) catMap.set(n.cat,[]);
-      catMap.get(n.cat).push(n.id);
-    }
-  });
-  const hubNodes=[], hubEdges=[], hubIdsSet=new Set();
-  catMap.forEach((nids,cat)=>{
-    const eixosCat=new Set(nids.map(id=>nodesMap.get(id)?.eixo));
-    if(eixosCat.size<2) return;
-    const hid="__hub__"+cat, cor=CAT_CORES[cat]||"#A78BFA";
-    hubIdsSet.add(hid);
+  // Geração de Hubs Transversais
+  const hubNodes = [], hubEdges = [], hubIds = new Set();
+  const catGroups = {};
+  nodesMap.forEach(n => { if(n.cat && n.level>=3) (catGroups[n.cat] = catGroups[n.cat] || []).push(n.id); });
+  
+  Object.entries(catGroups).forEach(([cat, nids]) => {
+    const hid="__hub__"+cat; hubIds.add(hid);
+    const cor=CAT_CORES[cat]||"#A78BFA";
     hubNodes.push({
-      id:hid, label:cat, title:cat, causa_real:"Tema transversal: "+cat,
-      group:"hub", level:99, eixo:"", eixo_nome:"Tema transversal",
-      cat, votos:0, value:60+nids.length*15,
-      color:{background:cor+"30",border:cor},
-      shape:"diamond", font:{size:11,color:"#374151",strokeWidth:0},
+      id:hid, label:cat, title:cat, group:"hub", level:99, 
+      color:{background:cor+"30", border:cor}, shape:"diamond",
+      value: 60 + nids.length*15, causa_real: "Tema: " + cat
     });
-    nids.forEach(nid=>hubEdges.push({
-      from:nid,to:hid,cat,color:cor,transversal:true,dashes:[5,4],width:2
+    nids.forEach(nid => hubEdges.push({
+      from:nid, to:hid, cat, color:cor, transversal:true, dashes:[5,4], width:2
     }));
   });
 
   return {
-    nodes:[...nodesMap.values(),...hubNodes],
-    edges:[...edges,...hubEdges],
-    hubs:hubIdsSet,
+    nodes:[...nodesMap.values(), ...hubNodes],
+    edges:[...edges, ...hubEdges],
+    hubs:hubIds,
     eixos:[...eixosSet].sort(),
-    cats:Object.keys(CAT_CORES),
+    cats:Object.keys(CAT_CORES)
   };
 }
 
-// ── climb (sobe na hierarquia para incluir pais no filtro) ────────────────────
+// --- LÓGICA DE FILTRAGEM (Onde o problema foi corrigido) ---
 function climb(id, visited) {
-  let cur=id;
-  while(cur) {
-    if(visited.has(cur)) break;
-    visited.add(cur);
-    const pe=visData.edges.get({filter:e=>e.to===cur&&!e.transversal});
-    cur=pe.length?pe[0].from:null;
-  }
+  if (!id || visited.has(id)) return;
+  visited.add(id);
+  // Procurar o pai nas arestas originais de G (mais confiável que visData)
+  G.edges.forEach(e => {
+    if (e.to === id && !e.transversal) climb(e.from, visited);
+  });
 }
 
-// ── applyFilter (usa estado global) ──────────────────────────────────────────
 function applyFilter() {
-  if(!G||!visData||viewMode==="minuto") return;
-  const search=document.getElementById("search").value.toLowerCase().trim();
-  const allN=visData.nodes.get(), allE=visData.edges.get();
-  const transOnly=viewMode==="transversais";
+  if(!G || !visData || viewMode === "minuto") return;
+  
+  const search = document.getElementById("search").value.toLowerCase().trim();
+  const transOnly = viewMode === "transversais";
+  const corFaded = {background: "#E9EBF0", border: "#D1D5DB"};
 
-  // cores originais por grupo — sempre válidas
-  const corOriginal = {
-    macro:    {background:"#E53E3E",border:"#C53030"},
-    eixo:     {background:"#DD6B20",border:"#C05621"},
-    problema: {background:"#D69E2E",border:"#B7791F"},
-    causa1:   {background:"#38A169",border:"#276749"},
-    causa2:   {background:"#3182CE",border:"#2C5282"},
-    causa3:   {background:"#805AD5",border:"#553C9A"},
-  };
-  const corEsmaecida = {background:"#E9EBF0",border:"#D1D5DB"};
+  // 1. Identificar quem passa no filtro base (Eixo + Votos + Busca)
+  const baseOk = new Set();
+  G.nodes.forEach(n => {
+    if (HUBS.has(n.id)) return;
+    
+    const passaEixo = (selEixos.size === G.eixos.length) || (n.eixo && selEixos.has(n.eixo)) || (n.group === "eixo" && selEixos.has(n.id));
+    const passaVotos = (n.votos || 0) >= minV;
+    const passaBusca = !search || n.causa_real.toLowerCase().includes(search);
+    
+    if (passaEixo && passaVotos && passaBusca) climb(n.id, baseOk);
+  });
+  baseOk.add(MACRO);
 
-  // ── filtro de eixo ──
-  const eixoOk=new Set([MACRO]);
-  if(selEixos.size===G.eixos.length){
-    allN.forEach(n=>eixoOk.add(n.id));
-  } else {
-    allN.forEach(n=>{
-      if(!HUBS.has(n.id)) {
-        if(n.group === "eixo" && selEixos.has(n.id)) {
-          climb(n.id, eixoOk);
-        } else if(n.eixo && selEixos.has(n.eixo)) {
-          climb(n.id,eixoOk);
-        }
-      }
-    });
+  // 2. Identificar quem pertence à categoria transversal selecionada
+  const temCat = selCat !== "__ALL__";
+  const catOk = new Set();
+  if(temCat) {
+    G.nodes.forEach(n => { if(n.cat === selCat) climb(n.id, catOk); });
+    catOk.add(MACRO);
   }
 
-  // ── filtro de priorização ──
-  const prioOk=new Set([MACRO]);
-  if(minV===0){ allN.forEach(n=>prioOk.add(n.id)); }
-  else { allN.forEach(n=>{ if((n.votos||0)>=minV) climb(n.id,prioOk); }); }
-
-  // ── filtro de busca ──
-  const srchOk=new Set([MACRO]);
-  if(!search){ allN.forEach(n=>srchOk.add(n.id)); }
-  else { allN.forEach(n=>{ if((n.causa_real||n.title||"").toLowerCase().includes(search)) climb(n.id,srchOk); }); }
-
-  // ── hierárquico combinado ──
-  const hierOk=id=>eixoOk.has(id)&&prioOk.has(id)&&srchOk.has(id);
-
-  // ── destaque de categoria transversal ──
-  const temCat = selCat!=="__ALL__";
-  const catDestaque=new Set([MACRO]);
-  if(temCat){
-    allN.forEach(n=>{
-      if(!HUBS.has(n.id)&&n.cat&&n.cat===selCat) climb(n.id,catDestaque);
-    });
-  }
-
-  // ── atualiza nós ──
-  const nodeUpdates=[];
-  allN.forEach(n=>{
-    if(HUBS.has(n.id)){
-      const show=!temCat||n.cat===selCat;
-      const cor=HUB_COR[n.id]||{
-        background:(CAT_CORES[n.cat]||"#888888")+"30",
-        border:(CAT_CORES[n.cat]||"#888888")
-      };
-      nodeUpdates.push({
-        id:n.id,
-        hidden:!show,
-        color:show?cor:corEsmaecida,
-        opacity:show?0.9:0,
-      });
-      return;
+  // 3. Atualizar Nós
+  visData.nodes.update(G.nodes.map(n => {
+    if (HUBS.has(n.id)) {
+      const showHub = !temCat || n.id === "__hub__"+selCat;
+      return { id: n.id, hidden: !showHub, opacity: showHub ? 0.9 : 0 };
     }
 
-    if(transOnly){
-      nodeUpdates.push({id:n.id, hidden:n.level>=3, opacity:1});
-      return;
-    }
+    if (transOnly) return { id: n.id, hidden: n.level >= 3, opacity: 1 };
 
-    const passaHier=hierOk(n.id);
-    const passaCat=!temCat||catDestaque.has(n.id);
-    const ok=passaHier&&passaCat;
+    const estaNaBase = baseOk.has(n.id);
+    const estaNaCat  = !temCat || catOk.has(n.id);
+    const destaque   = estaNaBase && estaNaCat;
 
-    nodeUpdates.push({
-      id:n.id,
-      hidden:false,
-      color: ok
-        ? (corOriginal[n.group]||{background:"#94A3B8",border:"#64748B"})
-        : corEsmaecida,
-      opacity: ok ? 1 : (passaHier ? 0.15 : 0.08),
-    });
-  });
-  visData.nodes.update(nodeUpdates);
+    return {
+      id: n.id,
+      hidden: false,
+      color: destaque ? (GC[n.group] || corFaded) : corFaded,
+      opacity: destaque ? 1 : (estaNaBase ? 0.15 : 0.05)
+    };
+  }));
 
-  // ── atualiza arestas ──
-  const edgeUpdates=[];
-  allE.forEach(e=>{
-    if(e.transversal){
-      const catOk=!temCat||e.cat===selCat;
-      const nodeOk=hierOk(e.from);
-      const show=catOk&&(transOnly||nodeOk);
-      edgeUpdates.push({
-        id:e.id,
-        hidden:!show,
-        color:{color:show?(e.color||"#A78BFA"):"#E9EBF0"},
-        width:show?1.5:0,
-        dashes:show?[5,4]:false,
-        opacity:show?0.8:0,
-      });
-      return;
+  // 4. Atualizar Arestas
+  visData.edges.update(G.edges.map((e, idx) => {
+    if (e.transversal) {
+      const showTrans = baseOk.has(e.from) && (!temCat || e.cat === selCat);
+      return { id: idx, hidden: !showTrans, opacity: showTrans ? 0.8 : 0 };
     }
-    if(transOnly){
-      edgeUpdates.push({id:e.id, hidden:true});
-      return;
-    }
-    const ok=hierOk(e.from)&&hierOk(e.to);
-    const passaCatFrom=!temCat||catDestaque.has(e.from);
-    const passaCatTo=!temCat||catDestaque.has(e.to);
-    const destaca=ok&&passaCatFrom&&passaCatTo;
-    edgeUpdates.push({
-      id:e.id,
-      hidden:false,
-      color:{color:ok?"#D1D5DB":"#E9EBF0"},
-      opacity: destaca ? 1 : (ok ? 0.2 : 0.04),
-      width: ok ? 0.8 : 0.3,
-    });
-  });
-  visData.edges.update(edgeUpdates);
+    
+    if (transOnly) return { id: idx, hidden: true };
+
+    const okBase = baseOk.has(e.from) && baseOk.has(e.to);
+    const okCat  = !temCat || (catOk.has(e.from) && catOk.has(e.to));
+    const destaque = okBase && okCat;
+
+    return {
+      id: idx,
+      hidden: false,
+      color: { color: destaque ? "#D1D5DB" : "#E9EBF0" },
+      opacity: destaque ? 1 : (okBase ? 0.2 : 0.05),
+      width: destaque ? 1 : 0.5
+    };
+  }));
 }
 
-// ── Inicialização ─────────────────────────────────────────────────────────────
+// --- INICIALIZAÇÃO ---
 document.addEventListener("DOMContentLoaded", () => {
   fetch(CSV_URL)
-    .then(r=>r.arrayBuffer())
-    .then(buf=>{
+    .then(r => r.arrayBuffer())
+    .then(buf => {
       let text;
-      try {
-        text = new TextDecoder("utf-8", {fatal:true}).decode(buf);
-      } catch(e) {
-        text = new TextDecoder("windows-1252").decode(buf);
-      }
+      try { text = new TextDecoder("utf-8", {fatal:true}).decode(buf); }
+      catch(e) { text = new TextDecoder("windows-1252").decode(buf); }
       return text;
     })
-    .then(text=>{
-      const rows=parseCsv(text);
-      G=processData(rows);
-      HUBS=G.hubs;
-      selEixos=new Set(G.eixos);
-      G.nodes.forEach(n=>{ if(HUBS.has(n.id)&&n.color) HUB_COR[n.id]=n.color; });
+    .then(text => {
+      G = processData(parseCsv(text));
+      selEixos = new Set(G.eixos);
       initGraph();
     })
-    .catch(err=>{
-      document.getElementById("loading").innerHTML=
-        `<p class="text-red-500 font-semibold">Erro ao carregar o CSV.</p><p class="text-gray-400 text-xs mt-1">${err.message}</p>`;
+    .catch(err => {
+      document.getElementById("loading").innerHTML = `<p class="text-red-500 font-semibold">Erro ao carregar dados.</p>`;
     });
 });
 
 function initGraph() {
-  visData={nodes:new vis.DataSet(G.nodes),edges:new vis.DataSet(G.edges)};
-  network=new vis.Network(document.getElementById("mynetwork"),visData,{
-    nodes:{shape:"dot",scaling:{min:5,max:55,label:{enabled:false}},
-      font:{size:11,color:"#374151",face:"Inter",strokeWidth:3,strokeColor:"#F7F8FA"},
-      borderWidth:1.5,shadow:{enabled:true,color:"rgba(0,0,0,0.07)",size:6,x:0,y:2}},
-    edges:{width:0.8,color:{color:"#D1D5DB",highlight:"#9CA3AF",hover:"#9CA3AF"},
-      smooth:{enabled:true,type:"continuous",roundness:0.3},hoverWidth:1.5},
-    interaction:{hover:true,tooltipDelay:400,keyboard:true,dragNodes:true,hideEdgesOnDrag:true},
-    physics:{enabled:true,
-      barnesHut:{gravitationalConstant:-35000,centralGravity:0.25,springLength:180,springConstant:0.035,damping:0.1,avoidOverlap:0.9},
-      solver:"barnesHut",stabilization:{iterations:250,updateInterval:40,fit:false}},
-  });
+  visData = { 
+    nodes: new vis.DataSet(G.nodes), 
+    edges: new vis.DataSet(G.edges.map((e, i) => ({...e, id: i}))) 
+  };
 
-  network.once("stabilizationIterationsDone",()=>{
-    document.getElementById("loading").style.display="none";
-    network.setOptions({physics:{enabled:false}});
-    network.focus(MACRO,{scale:1.8,animation:false});
-    setTimeout(()=>network.fit({animation:{duration:1600,easingFunction:"easeInOutQuad"}}),60);
+  const container = document.getElementById("mynetwork");
+  const options = {
+    nodes: { shape: "dot", scaling: { min: 10, max: 50 }, font: { size: 11, face: "Inter" }, borderWidth: 1.5 },
+    edges: { smooth: { type: "continuous" }, color: "#D1D5DB" },
+    physics: { 
+      barnesHut: { gravitationalConstant: -30000, springLength: 150 },
+      stabilization: { iterations: 200 }
+    },
+    interaction: { hover: true, tooltipDelay: 300 }
+  };
+
+  network = new vis.Network(container, visData, options);
+
+  network.once("stabilizationIterationsDone", () => {
+    document.getElementById("loading").style.display = "none";
+    network.setOptions({ physics: false });
+    network.fit();
     buildUI();
     applyFilter();
   });
 
-  // Modal
-  const modal=document.getElementById("modal"), modalBox=document.getElementById("modal-box");
-  network.on("click",p=>{if(p.nodes.length)openModal(p.nodes[0]);});
-  window.openModal=id=>{
-    const n=visData.nodes.get(id); if(!n) return;
-    document.getElementById("m-nivel").textContent=NL[n.group]||n.group;
-    const eixoEl=document.getElementById("m-eixo");
-    if(n.eixo_nome&&n.group!=="macro"){eixoEl.textContent=n.eixo_nome;eixoEl.style.display="";}
-    else{eixoEl.style.display="none";}
-    document.getElementById("m-causa").textContent=n.causa_real||n.title;
-    const catWrap=document.getElementById("m-cat-wrap"),catEl=document.getElementById("m-cat");
-    if(n.cat){
-      const cor=CAT_CORES[n.cat]||"#888";
-      catEl.innerHTML=`<span class="w-2 h-2 rounded-full flex-shrink-0" style="background:${cor}"></span><span>${n.cat}</span>`;
-      catEl.style.cssText=`background:${cor}20;color:#374151;border:1px solid ${cor}50;`;
-      catWrap.style.display="";
-    }else{catWrap.style.display="none";}
-    const votosWrap=document.getElementById("m-votos-wrap");
-    if(n.votos>0){document.getElementById("m-votos").innerHTML=`⭐ ${n.votos} estrelinha${n.votos>1?"s":""} na priorização`;votosWrap.classList.remove("hidden");}
-    else{votosWrap.classList.add("hidden");}
-    modal.classList.remove("hidden");modal.classList.add("flex");
-    setTimeout(()=>modalBox.classList.remove("scale-95","opacity-0"),10);
-  };
-  window.closeModal=()=>{
-    modalBox.classList.add("scale-95","opacity-0");
-    setTimeout(()=>{modal.classList.add("hidden");modal.classList.remove("flex");},200);
-  };
-  window.addEventListener("keydown",e=>{if(e.key==="Escape")closeModal();});
-  modal.addEventListener("click",e=>{if(e.target===modal)closeModal();});
+  network.on("click", p => { if(p.nodes.length) openModal(p.nodes[0]); });
 }
 
+// --- INTERFACE (UI) ---
 function buildUI() {
-  // Visualização
-  document.querySelectorAll(".view-btn").forEach(btn=>{
-    btn.addEventListener("click",function(){
-      document.querySelectorAll(".view-btn").forEach(b=>
-        b.className="view-btn py-2 text-[10px] rounded-xl font-semibold bg-gray-100 text-gray-500 hover:bg-gray-200 leading-tight px-1");
-      this.className="view-btn py-2 text-[10px] rounded-xl font-semibold bg-indigo-600 text-white leading-tight px-1";
-      viewMode=this.dataset.view;
-      if(viewMode==="minuto"){
-        visData.nodes.update(G.nodes.map(n=>({id:n.id,hidden:!HUBS.has(n.id)&&(n.level===1||n.level>3),font:{size:n.level>0&&n.level<4?18:11}})));
-        network.setOptions({physics:{enabled:true,barnesHut:{springLength:90}}});
-        network.once("stabilizationIterationsDone",()=>{network.setOptions({physics:{enabled:false}});network.fit({animation:{duration:700,easingFunction:"easeInOutQuad"}});});
-        network.stabilize(120);
-      }else{
-        visData.nodes.update(G.nodes.map(n=>({id:n.id,hidden:false,font:{size:11}})));
-        applyFilter();
+  // Botoes de View
+  document.querySelectorAll(".view-btn").forEach(btn => {
+    btn.onclick = () => {
+      document.querySelectorAll(".view-btn").forEach(b => b.className = "view-btn py-2 text-[10px] rounded-xl font-semibold bg-gray-100 text-gray-500 px-1");
+      btn.className = "view-btn py-2 text-[10px] rounded-xl font-semibold bg-indigo-600 text-white px-1";
+      viewMode = btn.dataset.view;
+      if(viewMode === "minuto") {
+         visData.nodes.update(G.nodes.map(n => ({id: n.id, hidden: !G.hubs.has(n.id) && n.level !== 1 && n.level !== 0, opacity: 1})));
+         network.setOptions({physics: true});
+         setTimeout(() => { network.setOptions({physics: false}); network.fit(); }, 1000);
+      } else {
+         applyFilter();
       }
-    });
+    };
   });
 
-  // Priorização
-  document.querySelectorAll(".prio").forEach(btn=>{
-    btn.addEventListener("click",function(){
-      document.querySelectorAll(".prio").forEach(b=>b.className="prio py-1.5 text-[11px] rounded-lg font-semibold bg-gray-100 text-gray-500 hover:bg-gray-200");
-      this.className="prio py-1.5 text-[11px] rounded-lg font-semibold bg-indigo-600 text-white";
-      minV=parseInt(this.dataset.min); applyFilter();
-    });
-  });
-
-  // Eixos
-  const eixoUl=document.getElementById("eixo-list");
-  G.eixos.forEach(e=>{
-    const li=document.createElement("li");
-    li.className="flex items-center gap-2 px-2.5 py-1.5 rounded-lg cursor-pointer text-xs text-gray-600 hover:bg-gray-50 bg-indigo-50 font-medium transition-colors";
-    li.innerHTML=`<span class="w-1.5 h-1.5 rounded-full bg-indigo-400 flex-shrink-0"></span>${EIXO_NOMES[e]||e}`;
-    li.dataset.id=e;
-    li.addEventListener("click",()=>{
-      selEixos.has(e)?selEixos.delete(e):selEixos.add(e);
-      updateEixoUI(); applyFilter();
-    });
+  // Filtro de Eixos
+  const eixoUl = document.getElementById("eixo-list");
+  G.eixos.forEach(e => {
+    const li = document.createElement("li");
+    li.className = "flex items-center gap-2 px-2.5 py-1.5 rounded-lg cursor-pointer text-xs bg-indigo-50 text-indigo-700 font-medium";
+    li.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-indigo-400"></span>${EIXO_NOMES[e] || e}`;
+    li.onclick = () => {
+      selEixos.has(e) ? selEixos.delete(e) : selEixos.add(e);
+      li.className = selEixos.has(e) ? "flex items-center gap-2 px-2.5 py-1.5 rounded-lg cursor-pointer text-xs bg-indigo-50 text-indigo-700 font-medium" : "flex items-center gap-2 px-2.5 py-1.5 rounded-lg cursor-pointer text-xs text-gray-400";
+      applyFilter();
+    };
     eixoUl.appendChild(li);
   });
-  document.getElementById("sel-all").addEventListener("click",()=>{selEixos=new Set(G.eixos);updateEixoUI();applyFilter();});
-  document.getElementById("desel-all").addEventListener("click",()=>{selEixos.clear();updateEixoUI();applyFilter();});
 
-  // Categorias
-  const catUl=document.getElementById("cat-list");
-  const addCat=(cat,label,cor)=>{
-    const li=document.createElement("li");
-    li.className="flex items-center gap-2 px-2.5 py-1.5 rounded-lg cursor-pointer text-xs text-gray-600 hover:bg-gray-50 transition-colors";
-    li.innerHTML=cor?`<span class="w-2 h-2 rounded-full flex-shrink-0" style="background:${cor}"></span><span class="truncate">${label}</span>`:`<span class="w-2 h-2 rounded-full bg-gray-300 flex-shrink-0"></span><span>${label}</span>`;
-    li.dataset.cat=cat;
-    li.addEventListener("click",()=>{selCat=cat;updateCatUI();applyFilter();});
+  // Filtro de Categorias
+  const catUl = document.getElementById("cat-list");
+  const createCatLi = (id, name, color) => {
+    const li = document.createElement("li");
+    li.className = "px-2.5 py-1.5 rounded-lg cursor-pointer text-xs " + (selCat === id ? "bg-indigo-100 font-bold" : "");
+    li.innerHTML = color ? `<span class="inline-block w-2 h-2 rounded-full mr-2" style="background:${color}"></span>${name}` : name;
+    li.onclick = () => {
+      selCat = id;
+      document.querySelectorAll("#cat-list li").forEach(l => l.classList.remove("bg-indigo-100", "font-bold"));
+      li.classList.add("bg-indigo-100", "font-bold");
+      applyFilter();
+    };
     catUl.appendChild(li);
   };
-  addCat("__ALL__","Todas as conexões",null);
-  G.cats.forEach(cat=>addCat(cat,cat,CAT_CORES[cat]));
-  updateCatUI();
+  createCatLi("__ALL__", "Todas as conexões");
+  G.cats.forEach(c => createCatLi(c, c, CAT_CORES[c]));
 
-  document.getElementById("search").addEventListener("input",applyFilter);
-  document.getElementById("toggle-panel").addEventListener("click",()=>{
+  // Priorização
+  document.querySelectorAll(".prio").forEach(btn => {
+    btn.onclick = () => {
+      minV = parseInt(btn.dataset.min);
+      document.querySelectorAll(".prio").forEach(b => b.className = "prio py-1.5 text-[11px] rounded-lg font-semibold bg-gray-100 text-gray-500");
+      btn.className = "prio py-1.5 text-[11px] rounded-lg font-semibold bg-indigo-600 text-white";
+      applyFilter();
+    };
+  });
+
+  document.getElementById("search").oninput = applyFilter;
+  document.getElementById("toggle-panel").onclick = () => {
     document.getElementById("panel").classList.toggle("min");
     document.getElementById("ic-down").classList.toggle("hidden");
     document.getElementById("ic-up").classList.toggle("hidden");
-  });
+  };
+  document.getElementById("sel-all").onclick = () => { selEixos = new Set(G.eixos); location.reload(); };
+  document.getElementById("desel-all").onclick = () => { selEixos.clear(); document.querySelectorAll("#eixo-list li").forEach(l => l.className = "flex items-center gap-2 px-2.5 py-1.5 rounded-lg cursor-pointer text-xs text-gray-400"); applyFilter(); };
 }
 
-function updateEixoUI(){
-  document.querySelectorAll("#eixo-list li").forEach(l=>{
-    const s=selEixos.has(l.dataset.id);
-    l.classList.toggle("bg-indigo-50",s);l.classList.toggle("font-medium",s);
-    l.classList.toggle("text-gray-400",!s);l.classList.toggle("text-gray-600",s);
-  });
+// --- MODAL ---
+function openModal(id) {
+  const n = G.nodes.find(x => x.id === id); if(!n) return;
+  document.getElementById("m-nivel").textContent = NL[n.group] || "";
+  document.getElementById("m-eixo").textContent = n.eixo_nome || "";
+  document.getElementById("m-causa").textContent = n.causa_real;
+  
+  const mCat = document.getElementById("m-cat");
+  if(n.cat) {
+    mCat.textContent = n.cat;
+    document.getElementById("m-cat-wrap").style.display = "block";
+  } else {
+    document.getElementById("m-cat-wrap").style.display = "none";
+  }
+
+  const vWrap = document.getElementById("m-votos-wrap");
+  if(n.votos > 0) {
+    document.getElementById("m-votos").textContent = `⭐ ${n.votos} votos`;
+    vWrap.style.display = "block";
+  } else { vWrap.style.display = "none"; }
+
+  document.getElementById("modal").classList.replace("hidden", "flex");
+  setTimeout(() => document.getElementById("modal-box").classList.replace("opacity-0", "opacity-100"), 10);
 }
-function updateCatUI(){
-  document.querySelectorAll("#cat-list li").forEach(l=>{
-    l.classList.toggle("bg-indigo-50",l.dataset.cat===selCat);
-    l.classList.toggle("font-semibold",l.dataset.cat===selCat);
-  });
+
+function closeModal() {
+  document.getElementById("modal-box").classList.replace("opacity-100", "opacity-0");
+  setTimeout(() => document.getElementById("modal").classList.replace("flex", "hidden"), 200);
 }
 </script>
 </body>
