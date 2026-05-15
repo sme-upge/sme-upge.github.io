@@ -50,7 +50,7 @@
             <span id="m-nivel" class="text-[10px] font-semibold uppercase tracking-widest text-gray-400 bg-gray-100 px-2 py-0.5 rounded-md"></span>
             <span id="m-eixo" class="text-[10px] font-semibold text-white px-2.5 py-0.5 rounded-full" style="background:#1E3A5F"></span>
           </div>
-          <p class="text-[10px] font-semibold uppercase tracking-wider text-gray-400 mb-1.5">O que o grupo disse</p>
+          <p class="text-[10px] font-semibold uppercase tracking-wider text-gray-400 mb-1.5">Conteúdo</p>
           <h3 id="m-causa" class="text-sm font-semibold text-gray-800 leading-relaxed"></h3>
         </div>
         <button onclick="closeModal()" class="w-8 h-8 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center text-gray-500 text-lg flex-shrink-0 mt-1">×</button>
@@ -79,6 +79,7 @@
     <div class="flex items-center gap-2.5"><span class="w-2.5 h-2.5 rounded-full" style="background:#38A169"></span><span class="text-xs text-gray-600">Causa primária</span></div>
     <div class="flex items-center gap-2.5"><span class="w-2 h-2 rounded-full" style="background:#3182CE"></span><span class="text-xs text-gray-600">Causa secundária</span></div>
     <div class="flex items-center gap-2.5"><span class="w-1.5 h-1.5 rounded-full" style="background:#805AD5"></span><span class="text-xs text-gray-600">Causa terciária</span></div>
+    <div class="flex items-center gap-2.5"><span class="w-3 h-3 bg-[#A78BFA] rotate-45" style="clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%);"></span><span class="text-xs text-gray-600">Conexão Transversal</span></div>
   </div>
 </div>
 
@@ -100,6 +101,15 @@
       </div>
     </div>
     <div>
+        <p class="text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-2">Priorização</p>
+        <div class="grid grid-cols-4 gap-1.5">
+          <button data-min="0" class="prio-btn py-1.5 text-[11px] rounded-lg font-semibold bg-indigo-600 text-white">Todas</button>
+          <button data-min="1" class="prio-btn py-1.5 text-[11px] rounded-lg font-semibold bg-gray-100 text-gray-500">1+⭐</button>
+          <button data-min="4" class="prio-btn py-1.5 text-[11px] rounded-lg font-semibold bg-gray-100 text-gray-500">4+⭐</button>
+          <button data-min="5" class="prio-btn py-1.5 text-[11px] rounded-lg font-semibold bg-gray-100 text-gray-500">5+⭐</button>
+        </div>
+      </div>
+    <div>
       <p class="text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-2">Eixos</p>
       <ul id="eixo-list" class="space-y-1 max-h-28 overflow-y-auto pr-1 text-[11px] text-gray-600"></ul>
     </div>
@@ -113,13 +123,23 @@
 <script>
 const CSV_URL = "https://raw.githubusercontent.com/sme-upge/sme-upge.github.io/refs/heads/main/GT%20de%20Alfabetiza%C3%A7%C3%A3o/%C3%81rvore%20de%20Problemas%20-%20Alfabetiza%C3%A7%C3%A3o%20(3).csv";
 const MACRO_ID = "Baixa aprendizagem na alfabetização";
-const GC = {"macro": "#E53E3E", "eixo": "#DD6B20", "problema": "#D69E2E", "causa1": "#38A169", "causa2": "#3182CE", "causa3": "#805AD5", "hub": "#A78BFA"};
+
+// Cores rigorosas de acordo com a legenda
+const GC = {
+  "macro": "#E53E3E",
+  "eixo": "#DD6B20",
+  "problema": "#D69E2E",
+  "causa1": "#38A169",
+  "causa2": "#3182CE",
+  "causa3": "#805AD5",
+  "hub": "#A78BFA"
+};
+
 const EIXO_NOMES = {"Eixo 1": "Responsabilidades", "Eixo 2": "Formação", "Eixo 3": "Infraestrutura", "Eixo 4": "Incentivos", "Eixo 5": "Acomp. e Monitoramento", "Eixo 6": "Avaliação", "Eixo 7": "Currículo e Materiais"};
 
 let network, nodesDS, edgesDS, rawNodes = [], hubIds = new Set();
-let selEixos = new Set(), selCat = "__ALL__", viewMode = "completa";
+let selEixos = new Set(), selCat = "__ALL__", viewMode = "completa", minVotos = 0;
 
-// Carregamento robusto
 fetch(CSV_URL)
   .then(res => res.arrayBuffer())
   .then(buf => {
@@ -129,14 +149,15 @@ fetch(CSV_URL)
     const edgesList = [];
     const catMap = new Map();
 
-    nodesMap.set(MACRO_ID, { id: MACRO_ID, label: "Baixa aprendizagem\nna alfabetização", group: 'macro', level: 0, value: 40 });
+    nodesMap.set(MACRO_ID, { id: MACRO_ID, label: "Baixa aprendizagem\nna alfabetização", group: 'macro', level: 0 });
 
     lines.slice(1).forEach(line => {
       const c = line.split(';').map(v => v.replace(/^"|"$/g, '').trim());
       if(c.length < 3) return;
       
-      const [eixoFull, prob, cp, cat1, cs, cat2, v2, ct, cat3] = c;
+      const [eixoFull, prob, cp, cat1, cs, cat2, vRaw, ct, cat3] = c;
       const eId = eixoFull ? eixoFull.split(' - ')[0] : null;
+      const v2 = parseInt(vRaw) || 0;
 
       if (eId && !nodesMap.has(eId)) {
         nodesMap.set(eId, { id: eId, label: EIXO_NOMES[eId]||eId, group: 'eixo', level: 1, eixo: eId });
@@ -158,6 +179,12 @@ fetch(CSV_URL)
                   nodesMap.set(cs, { id: cs, label: cs.substring(0,25)+'...', group: 'causa2', level: 4, eixo: eId, causa_real: cs, cat: cat2, votos: v2 });
                   edgesList.push({ from: cp, to: cs });
               }
+              if(ct) {
+                if(!nodesMap.has(ct)) {
+                    nodesMap.set(ct, { id: ct, label: ct.substring(0,25)+'...', group: 'causa3', level: 5, eixo: eId, causa_real: ct, cat: cat3 });
+                    edgesList.push({ from: cs, to: ct });
+                }
+              }
            }
         }
       }
@@ -165,15 +192,15 @@ fetch(CSV_URL)
       [cat1, cat2, cat3].forEach(cat => {
         if(cat && cat.length > 2) {
           if(!catMap.has(cat)) catMap.set(cat, new Set());
-          catMap.get(cat).add(cs || cp || prob);
+          catMap.get(cat).add(cs || cp || prob || ct);
         }
       });
     });
 
     catMap.forEach((targets, cat) => {
       const hId = "__hub__" + cat; hubIds.add(hId);
-      nodesMap.set(hId, { id: hId, label: cat, group: 'hub', shape: 'diamond', level: 6, cat: cat });
-      targets.forEach(t => t && edgesList.push({ from: t, to: hId, dashes: true, color: "#A78BFA", opacity: 0.4 }));
+      nodesMap.set(hId, { id: hId, label: cat, group: 'hub', shape: 'diamond', level: 6, causa_real: "Tema Transversal: " + cat });
+      targets.forEach(t => t && edgesList.push({ from: t, to: hId, dashes: true, color: GC.hub, opacity: 0.6 }));
     });
 
     rawNodes = Array.from(nodesMap.values());
@@ -182,15 +209,15 @@ fetch(CSV_URL)
 
 function initNetwork(nodes, edges, catMap) {
   nodesDS = new vis.DataSet(nodes.map(n => ({
-    ...n, color: { background: GC[n.group], border: '#fff' },
-    font: { size: 11, face: 'Inter' },
-    margin: 10
+    ...n, 
+    color: { background: GC[n.group] || '#999', border: GC[n.group] || '#999', highlight: { background: GC[n.group], border: '#000' } },
+    font: { size: 12, face: 'Inter', color: '#333' },
+    size: n.group === 'macro' ? 30 : (n.group === 'eixo' ? 20 : 15)
   })));
   edgesDS = new vis.DataSet(edges);
 
   network = new vis.Network(document.getElementById("mynetwork"), { nodes: nodesDS, edges: edgesDS }, {
-    physics: { solver: 'forceAtlas2Based', forceAtlas2Based: { gravitationalConstant: -100, springLength: 100 }, stabilization: { iterations: 150 } },
-    nodes: { shape: 'dot', scaling: { min: 10, max: 30 } },
+    physics: { solver: 'forceAtlas2Based', forceAtlas2Based: { gravitationalConstant: -150, springLength: 120 }, stabilization: { iterations: 200 } },
     edges: { arrows: 'to', color: '#cbd5e1', smooth: { type: 'continuous' } }
   });
 
@@ -198,10 +225,14 @@ function initNetwork(nodes, edges, catMap) {
     document.getElementById("loading").style.display = "none";
     setupUI(catMap);
   });
-  network.on("click", p => p.nodes.length && openModal(p.nodes[0]));
+  
+  network.on("click", p => {
+      if(p.nodes.length) openModal(p.nodes[0]);
+  });
 }
 
 function setupUI(catMap) {
+  // Eixos
   const eUl = document.getElementById("eixo-list");
   selEixos.forEach(e => {
     const li = document.createElement("li");
@@ -216,6 +247,7 @@ function setupUI(catMap) {
     eUl.appendChild(li);
   });
 
+  // Categorias
   const cUl = document.getElementById("cat-list");
   cUl.innerHTML = '<li class="p-1 cursor-pointer text-indigo-600 font-bold" onclick="selCat=\'__ALL__\';applyFilters()">Todas as conexões</li>';
   catMap.forEach((_, cat) => {
@@ -226,6 +258,17 @@ function setupUI(catMap) {
     cUl.appendChild(li);
   });
 
+  // Filtro Estrelas
+  document.querySelectorAll(".prio-btn").forEach(btn => {
+    btn.onclick = () => {
+      document.querySelectorAll(".prio-btn").forEach(b => b.classList.replace("bg-indigo-600", "bg-gray-100"));
+      btn.classList.replace("bg-gray-100", "bg-indigo-600");
+      minVotos = parseInt(btn.dataset.min);
+      applyFilters();
+    };
+  });
+
+  // Filtro Visualização
   document.querySelectorAll(".v-btn").forEach(btn => {
     btn.onclick = () => {
       document.querySelectorAll(".v-btn").forEach(b => b.classList.replace("bg-indigo-600", "bg-gray-100"));
@@ -242,7 +285,8 @@ function applyFilters() {
     let show = true;
     if(n.eixo && !selEixos.has(n.eixo)) show = false;
     if(viewMode === 'minuto' && n.level > 2 && !hubIds.has(n.id)) show = false;
-    if(viewMode === 'transversais' && !n.cat && n.group !== 'macro') show = false;
+    if(viewMode === 'transversais' && !n.cat && n.group !== 'macro' && n.group !== 'hub') show = false;
+    if(minVotos > 0 && (n.votos || 0) < minVotos && n.group !== 'macro' && n.group !== 'eixo') show = false;
     if(q && !n.causa_real?.toLowerCase().includes(q)) show = false;
     
     let op = 1;
@@ -254,17 +298,47 @@ function applyFilters() {
 
 function openModal(id) {
   const n = nodesDS.get(id);
-  if(!n || hubIds.has(id)) return;
-  document.getElementById("m-nivel").textContent = n.group;
-  document.getElementById("m-eixo").textContent = EIXO_NOMES[n.eixo] || "Geral";
+  if(!n) return;
+
+  const labels = {
+      macro: "Problema Macro",
+      eixo: "Eixo Temático",
+      problema: "Problema Central",
+      causa1: "Causa Primária",
+      causa2: "Causa Secundária",
+      causa3: "Causa Terciária",
+      hub: "Conexão Transversal"
+  };
+
+  document.getElementById("m-nivel").textContent = labels[n.group] || n.group;
+  document.getElementById("m-eixo").textContent = EIXO_NOMES[n.eixo] || (hubIds.has(id) ? "Transversal" : "Geral");
   document.getElementById("m-causa").textContent = n.causa_real || n.label;
-  document.getElementById("m-cat-wrap").style.display = n.cat ? "block" : "none";
-  if(n.cat) document.getElementById("m-cat").textContent = n.cat;
+  
+  // Votos
+  const vWrap = document.getElementById("m-votos-wrap");
+  if(n.votos > 0) {
+      vWrap.classList.remove("hidden");
+      document.getElementById("m-votos").innerHTML = `⭐ ${n.votos} estrela(s) na priorização`;
+  } else {
+      vWrap.classList.add("hidden");
+  }
+
+  // Categoria
+  const catWrap = document.getElementById("m-cat-wrap");
+  if(n.cat || hubIds.has(id)) {
+      catWrap.style.display = "block";
+      document.getElementById("m-cat").textContent = n.cat || n.label;
+  } else {
+      catWrap.style.display = "none";
+  }
+
   document.getElementById("modal").classList.replace("hidden", "flex");
+  setTimeout(() => document.getElementById("modal-box").classList.replace("scale-95", "scale-100"), 10);
   setTimeout(() => document.getElementById("modal-box").classList.replace("opacity-0", "opacity-100"), 10);
 }
 
 function closeModal() {
+  document.getElementById("modal-box").classList.replace("scale-100", "scale-95");
   document.getElementById("modal-box").classList.replace("opacity-100", "opacity-0");
   setTimeout(() => document.getElementById("modal").classList.replace("flex", "hidden"), 200);
 }
