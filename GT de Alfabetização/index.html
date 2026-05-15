@@ -158,10 +158,11 @@ const NL = {
   causa1:"Causa primária", causa2:"Causa secundária", causa3:"Causa terciária", hub:"Conexão transversal"
 };
 
-// ── Estado GLOBAL — acessível por todos os handlers ───────────────────────────
-let G       = null;   // {nodes, edges, hubs, eixos, cats}
-let HUBS    = null;   // Set de IDs de hubs
-let HUB_COR = {};   // cor original de cada hub
+// ── Estado GLOBAL ───────────────────────────────────────────────────────────
+let G       = null;
+let parentMap = new Map(); // Mapa de suporte para filtros
+let HUBS    = null;
+let HUB_COR = {};
 let visData = null;
 let network = null;
 let selEixos = new Set();
@@ -169,15 +170,12 @@ let selCat   = "__ALL__";
 let minV     = 0;
 let viewMode = "completa";
 
-// ── Parser CSV (sep=; UTF-8) ──────────────────────────────────────────────────
 function parseCsv(text) {
   const rows = [];
   const lines = text.split(/\r?\n/);
   for(let i = 1; i < lines.length; i++) {
     const line = lines[i].trim();
     if(!line) continue;
-
-    // split respeitando aspas
     const allCols = []; let col = "", inQ = false;
     for(let c = 0; c < line.length; c++) {
       const ch = line[c];
@@ -186,25 +184,21 @@ function parseCsv(text) {
       else { col+=ch; }
     }
     allCols.push(col.trim());
-
-    // garante exatamente 9 colunas — se vier mais, concatena no índice 7 (causa terciária)
     let cols = allCols.slice(0, 9);
     while(cols.length < 9) cols.push("");
-
-    // limpa marcadores vazios do CSV
     cols = cols.map(v => (v==="?" || v==="-" || v==="–" || v===" ") ? "" : v);
     rows.push(cols);
   }
   return rows;
 }
 
-// ── Processa dados ─────────────────────────────────────────────────────────────
 function processData(rows) {
   const nodesMap = new Map();
   const edges    = [];
   const edgesSet = new Set();
   const conn     = new Map();
   const eixosSet = new Set();
+  parentMap.clear();
 
   const addNode = (id, group, level, eixo, cat, votos) => {
     if(!id||!id.trim()) return;
@@ -236,12 +230,12 @@ function processData(rows) {
     edges.push({from,to,arrows:{to:{enabled:false}}});
     conn.set(from,(conn.get(from)||0)+1);
     conn.set(to,(conn.get(to)||0)+1);
+    parentMap.set(to, from); // Guarda o pai para o filtro climb
   };
 
   addNode(MACRO,"macro",0,"","",0);
 
   rows.forEach(cols => {
-    // cols[0]=eixo, [1]=prob, [2]=cp, [3]=cat1, [4]=cs, [5]=cat2, [6]=votos, [7]=ct, [8]=cat3
     const eixo=cols[0]||"", prob=cols[1]||"", cp=cols[2]||"", cat1=cols[3]||"",
           cs=cols[4]||"", cat2=cols[5]||"", votos=parseInt(cols[6])||0,
           ct=cols[7]||"", cat3=cols[8]||"";
@@ -255,7 +249,6 @@ function processData(rows) {
     if(prob&&cp&&cs&&ct){ addNode(ct,"causa3",5,ek,cat3,0); addEdge(cs,ct); }
   });
 
-  // Tamanhos
   nodesMap.forEach(n=>{
     const c=conn.get(n.id)||0, v=n.votos||0;
     if(n.level===0) n.value=3000;
@@ -263,7 +256,6 @@ function processData(rows) {
     else n.value=Math.max(30,30+v*100+c*10);
   });
 
-  // Hubs
   const catMap=new Map();
   nodesMap.forEach(n=>{
     if(n.cat&&n.level>=3){
@@ -298,72 +290,82 @@ function processData(rows) {
   };
 }
 
-// ── climb (sobe na hierarquia para incluir pais no filtro) ────────────────────
-function climb(id, visited) {
-  let cur=id;
-  while(cur) {
-    if(visited.has(cur)) break;
-    visited.add(cur);
-    const pe=visData.edges.get({filter:e=>e.to===cur&&!e.transversal});
-    cur=pe.length?pe[0].from:null;
+function climb(id, setOk) {
+  let cur = id;
+  while (cur) {
+    if (setOk.has(cur)) break;
+    setOk.add(cur);
+    cur = parentMap.get(cur);
   }
 }
 
-// ── applyFilter (usa estado global) ──────────────────────────────────────────
 function applyFilter() {
   if(!G||!visData||viewMode==="minuto") return;
-  const search=document.getElementById("search").value.toLowerCase().trim();
-  const allN=visData.nodes.get(), allE=visData.edges.get();
+  const search = document.getElementById("search").value.toLowerCase().trim();
+  const allN = visData.nodes.get(); 
+  const allE = visData.edges.get();
 
-  const eixoOk=new Set([MACRO]);
-  if(selEixos.size===G.eixos.length){ allN.forEach(n=>eixoOk.add(n.id)); }
-  else{ allN.forEach(n=>{ if(!HUBS.has(n.id)&&n.eixo&&selEixos.has(n.eixo)) climb(n.id,eixoOk); }); }
+  const eixoOk = new Set();
+  const prioOk = new Set();
+  const srchOk = new Set();
+  [eixoOk, prioOk, srchOk].forEach(s => s.add(MACRO));
 
-  const prioOk=new Set([MACRO]);
-  if(minV===0){ allN.forEach(n=>prioOk.add(n.id)); }
-  else{ allN.forEach(n=>{ if((n.votos||0)>=minV) climb(n.id,prioOk); }); }
+  if (selEixos.size === G.eixos.length) {
+    allN.forEach(n => eixoOk.add(n.id));
+  } else {
+    allN.forEach(n => {
+      if (!HUBS.has(n.id) && n.eixo && selEixos.has(n.eixo)) climb(n.id, eixoOk);
+    });
+  }
 
-  const srchOk=new Set([MACRO]);
-  if(!search){ allN.forEach(n=>srchOk.add(n.id)); }
-  else{ allN.forEach(n=>{ if((n.causa_real||n.title).toLowerCase().includes(search)) climb(n.id,srchOk); }); }
+  if (minV === 0) {
+    allN.forEach(n => prioOk.add(n.id));
+  } else {
+    allN.forEach(n => {
+      if ((n.votos || 0) >= minV) climb(n.id, prioOk);
+    });
+  }
 
-  const hierOk=id=>eixoOk.has(id)&&prioOk.has(id)&&srchOk.has(id);
-  const transOnly=viewMode==="transversais";
+  if (!search) {
+    allN.forEach(n => srchOk.add(n.id));
+  } else {
+    allN.forEach(n => {
+      const txt = (n.causa_real || n.title || "").toLowerCase();
+      if (txt.includes(search)) climb(n.id, srchOk);
+    });
+  }
 
-  visData.nodes.update(allN.map(n=>{
-    if(HUBS.has(n.id)){
-      const show=selCat==="__ALL__"||n.cat===selCat;
-      const cor=HUB_COR[n.id]||{background:(CAT_CORES[n.cat]||"#888")+"30",border:(CAT_CORES[n.cat]||"#888")};
-      return {id:n.id,hidden:!show,color:show?cor:FADED_N,opacity:show?.9:0};
+  const transOnly = (viewMode === "transversais");
+
+  visData.nodes.update(allN.map(n => {
+    if (HUBS.has(n.id)) {
+      const show = (selCat === "__ALL__" || n.cat === selCat);
+      const cor = HUB_COR[n.id] || { background: "#88830", border: "#888" };
+      return { id: n.id, hidden: !show, color: show ? cor : FADED_N, opacity: show ? 0.9 : 0 };
     }
-    if(transOnly) return {id:n.id,hidden:n.level>=3};
-    const ok=hierOk(n.id);
-    return {id:n.id,hidden:false,color:ok?(GC[n.group]||null):FADED_N,opacity:ok?1:.08};
+    if (transOnly) return { id: n.id, hidden: n.level >= 3 };
+    const ok = eixoOk.has(n.id) && prioOk.has(n.id) && srchOk.has(n.id);
+    return { id: n.id, hidden: false, color: ok ? (GC[n.group] || null) : FADED_N, opacity: ok ? 1 : 0.08 };
   }));
 
-  visData.edges.update(allE.map(e=>{
-    if(e.transversal){
-      const show=(selCat==="__ALL__"||e.cat===selCat)&&(transOnly||hierOk(e.from));
-      return {id:e.id,hidden:!show,color:{color:show?(e.color||"#A78BFA"):FADED_E},width:show?1.5:0,dashes:show?[5,4]:false};
+  visData.edges.update(allE.map(e => {
+    if (e.transversal) {
+      const show = (selCat === "__ALL__" || e.cat === selCat) && (transOnly || (eixoOk.has(e.from) && prioOk.has(e.from) && srchOk.has(e.from)));
+      return { id: e.id, hidden: !show, color: { color: show ? (e.color || "#A78BFA") : FADED_E }, width: show ? 1.5 : 0 };
     }
-    if(transOnly) return {id:e.id,hidden:true};
-    const ok=hierOk(e.from)&&hierOk(e.to);
-    return {id:e.id,hidden:false,color:{color:ok?"#D1D5DB":FADED_E},opacity:ok?1:.06,width:ok?.8:.3};
+    if (transOnly) return { id: e.id, hidden: true };
+    const ok = (eixoOk.has(e.from) && prioOk.has(e.from) && srchOk.has(e.from)) && (eixoOk.has(e.to) && prioOk.has(e.to) && srchOk.has(e.to));
+    return { id: e.id, hidden: false, color: { color: ok ? "#D1D5DB" : FADED_E }, opacity: ok ? 1 : 0.06 };
   }));
 }
 
-// ── Inicialização ─────────────────────────────────────────────────────────────
 document.addEventListener("DOMContentLoaded", () => {
   fetch(CSV_URL)
     .then(r=>r.arrayBuffer())
     .then(buf=>{
-      // Tenta UTF-8; se falhar (caracteres inválidos), usa Windows-1252 (Latin-1)
       let text;
-      try {
-        text = new TextDecoder("utf-8", {fatal:true}).decode(buf);
-      } catch(e) {
-        text = new TextDecoder("windows-1252").decode(buf);
-      }
+      try { text = new TextDecoder("utf-8", {fatal:true}).decode(buf); }
+      catch(e) { text = new TextDecoder("windows-1252").decode(buf); }
       return text;
     })
     .then(text=>{
@@ -375,8 +377,7 @@ document.addEventListener("DOMContentLoaded", () => {
       initGraph();
     })
     .catch(err=>{
-      document.getElementById("loading").innerHTML=
-        `<p class="text-red-500 font-semibold">Erro ao carregar o CSV.</p><p class="text-gray-400 text-xs mt-1">${err.message}</p>`;
+      document.getElementById("loading").innerHTML= `<p class="text-red-500 font-semibold">Erro ao carregar o CSV.</p>`;
     });
 });
 
@@ -403,7 +404,6 @@ function initGraph() {
     applyFilter();
   });
 
-  // Modal
   const modal=document.getElementById("modal"), modalBox=document.getElementById("modal-box");
   network.on("click",p=>{if(p.nodes.length)openModal(p.nodes[0]);});
   window.openModal=id=>{
@@ -430,16 +430,12 @@ function initGraph() {
     modalBox.classList.add("scale-95","opacity-0");
     setTimeout(()=>{modal.classList.add("hidden");modal.classList.remove("flex");},200);
   };
-  window.addEventListener("keydown",e=>{if(e.key==="Escape")closeModal();});
-  modal.addEventListener("click",e=>{if(e.target===modal)closeModal();});
 }
 
 function buildUI() {
-  // Visualização
   document.querySelectorAll(".view-btn").forEach(btn=>{
     btn.addEventListener("click",function(){
-      document.querySelectorAll(".view-btn").forEach(b=>
-        b.className="view-btn py-2 text-[10px] rounded-xl font-semibold bg-gray-100 text-gray-500 hover:bg-gray-200 leading-tight px-1");
+      document.querySelectorAll(".view-btn").forEach(b=> b.className="view-btn py-2 text-[10px] rounded-xl font-semibold bg-gray-100 text-gray-500 hover:bg-gray-200 leading-tight px-1");
       this.className="view-btn py-2 text-[10px] rounded-xl font-semibold bg-indigo-600 text-white leading-tight px-1";
       viewMode=this.dataset.view;
       if(viewMode==="minuto"){
@@ -454,7 +450,6 @@ function buildUI() {
     });
   });
 
-  // Priorização
   document.querySelectorAll(".prio").forEach(btn=>{
     btn.addEventListener("click",function(){
       document.querySelectorAll(".prio").forEach(b=>b.className="prio py-1.5 text-[11px] rounded-lg font-semibold bg-gray-100 text-gray-500 hover:bg-gray-200");
@@ -463,7 +458,6 @@ function buildUI() {
     });
   });
 
-  // Eixos
   const eixoUl=document.getElementById("eixo-list");
   G.eixos.forEach(e=>{
     const li=document.createElement("li");
@@ -479,7 +473,6 @@ function buildUI() {
   document.getElementById("sel-all").addEventListener("click",()=>{selEixos=new Set(G.eixos);updateEixoUI();applyFilter();});
   document.getElementById("desel-all").addEventListener("click",()=>{selEixos.clear();updateEixoUI();applyFilter();});
 
-  // Categorias
   const catUl=document.getElementById("cat-list");
   const addCat=(cat,label,cor)=>{
     const li=document.createElement("li");
