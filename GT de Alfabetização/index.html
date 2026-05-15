@@ -102,12 +102,14 @@
   </div>
   <div id="pb" class="p-4 space-y-4">
 
+    <!-- Busca -->
     <div class="relative">
       <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path stroke-linecap="round" d="M21 21l-4.35-4.35"/></svg>
       <input id="search" type="text" placeholder="Pesquisar na árvore..."
         class="w-full pl-9 pr-3 py-2 bg-gray-50 border border-gray-200 rounded-xl text-xs text-gray-700 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-300">
     </div>
 
+    <!-- Visualização -->
     <div>
       <p class="text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-2">Visualização</p>
       <div class="grid grid-cols-3 gap-1.5">
@@ -117,6 +119,7 @@
       </div>
     </div>
 
+    <!-- Priorização -->
     <div>
       <p class="text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-2">Priorização</p>
       <div class="grid grid-cols-4 gap-1.5">
@@ -127,6 +130,7 @@
       </div>
     </div>
 
+    <!-- Eixos -->
     <div>
       <p class="text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-2">Eixos</p>
       <ul id="eixo-ul" class="space-y-1 max-h-28 overflow-y-auto pr-1 text-xs"></ul>
@@ -136,6 +140,7 @@
       </div>
     </div>
 
+    <!-- Tema transversal -->
     <div>
       <p class="text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-2">Tema transversal</p>
       <ul id="cat-ul" class="space-y-0.5 max-h-40 overflow-y-auto pr-1 text-xs"></ul>
@@ -145,6 +150,7 @@
 </div>
 
 <script>
+// CONFIGURAÇÃO
 const CSV_URL    = "https://raw.githubusercontent.com/sme-upge/sme-upge.github.io/refs/heads/main/GT%20de%20Alfabetiza%C3%A7%C3%A3o/%C3%81rvore%20de%20Problemas%20-%20Alfabetiza%C3%A7%C3%A3o%20(3).csv";
 const MACRO      = "Baixa aprendizagem na alfabetização";
 const EIXO_NOMES = {
@@ -175,6 +181,7 @@ const CAT_CORES  = {
   "Participação desigual de professores nas formações (JEIF e Contratados)": "#F687B3"
 };
 
+// cores por nível hierárquico
 const COR = {
   macro:    {background:"#E53E3E", border:"#C53030"},
   eixo:     {background:"#DD6B20", border:"#C05621"},
@@ -185,6 +192,7 @@ const COR = {
   faded:    {background:"#E2E8F0", border:"#CBD5E0"},
 };
 
+// ESTADO GLOBAL
 let G        = null;
 let HUBS     = null;
 let HUB_COR  = {};
@@ -192,25 +200,27 @@ let vNodes   = null;
 let vEdges   = null;
 let network  = null;
 
+// estado dos filtros
 let selEixos = new Set();
 let selCat   = "__ALL__";
 let minV     = 0;
 let viewMode = "completa";
 
+// PARSER CSV
 function parseCsv(text) {
   const rows = [];
   const lines = text.split(/\r?\n/);
   for(let i = 1; i < lines.length; i++) {
     const line = lines[i].trim();
     if(!line) continue;
-    const cols = [];
-    let col = "", inQ = false;
+    const cols = []; let col = "", inQ = false;
     for(const ch of line) {
-      if(ch === '"') inQ = !inQ;
+      if(ch === '"') { inQ = !inQ; }
       else if(ch === ';' && !inQ) { cols.push(col.trim()); col = ""; }
-      else col += ch;
+      else { col += ch; }
     }
     cols.push(col.trim());
+    // força 9 colunas, limpa marcadores vazios
     while(cols.length < 9) cols.push("");
     const clean = cols.slice(0,9).map(v => ["?","-","–","—"].includes(v) ? "" : v);
     rows.push(clean);
@@ -218,6 +228,7 @@ function parseCsv(text) {
   return rows;
 }
 
+// PROCESSAMENTO DOS DADOS
 function processData(rows) {
   const nodesMap = new Map();
   const edgesList = [];
@@ -229,12 +240,11 @@ function processData(rows) {
     if(!id) return;
     id = id.trim();
     if(!id) return;
-
     if(!nodesMap.has(id)) {
-      const ek = group === "eixo" ? id.slice(0,6) : (eixo || "").slice(0,6);
+      const ek = group==="eixo" ? id.slice(0,6) : (eixo||"").slice(0,6);
       nodesMap.set(id, {
         id,
-        label: id.length > 60 ? id.slice(0,60) + "…" : id,
+        label: id.length > 60 ? id.slice(0,60)+"…" : id,
         title: id,
         causa_real: id,
         group, level,
@@ -248,14 +258,13 @@ function processData(rows) {
       connCount.set(id, 0);
     } else {
       const n = nodesMap.get(id);
-      if((votos || 0) > n.votos) n.votos = votos;
+      if((votos||0) > n.votos) n.votos = votos;
       if(cat && !n.cat) n.cat = cat;
     }
   }
 
   function addEdge(from, to) {
-    from = (from || "").trim();
-    to   = (to || "").trim();
+    from = (from||"").trim(); to = (to||"").trim();
     if(!from || !to) return;
     const k = from + "→" + to;
     if(edgesSet.has(k)) return;
@@ -268,15 +277,15 @@ function processData(rows) {
   addNode(MACRO, "macro", 0, "", "", 0);
 
   for(const cols of rows) {
-    const eixoNome = cols[0] || "";
-    const probC    = cols[1] || "";
-    const cp       = cols[2] || "";
-    const c1       = cols[3] || "";
-    const cs_      = cols[4] || "";
-    const c2       = cols[5] || "";
-    const vts      = parseInt(cols[6]) || 0;
-    const ct_      = cols[7] || "";
-    const c3       = cols[8] || "";
+    const eixoNome = cols[0]||"";
+    const probC    = cols[1]||"";
+    const cp       = cols[2]||"";
+    const c1       = cols[3]||"";
+    const cs_      = cols[4]||"";
+    const c2       = cols[5]||"";
+    const vts      = parseInt(cols[6])||0;
+    const ct_      = cols[7]||"";
+    const c3       = cols[8]||"";
 
     if(!eixoNome) continue;
     const ek = eixoNome.slice(0,6);
@@ -284,22 +293,18 @@ function processData(rows) {
 
     addNode(ek, "eixo", 1, ek, "", 0);
     addEdge(MACRO, ek);
-
     if(probC) {
       addNode(probC, "problema", 2, ek, c1, 0);
       addEdge(ek, probC);
     }
-
     if(probC && cp) {
       addNode(cp, "causa1", 3, ek, c1, 0);
       addEdge(probC, cp);
     }
-
     if(probC && cp && cs_) {
       addNode(cs_, "causa2", 4, ek, c2, vts);
       addEdge(cp, cs_);
     }
-
     if(probC && cp && cs_ && ct_) {
       addNode(ct_, "causa3", 5, ek, c3, 0);
       addEdge(cs_, ct_);
@@ -307,11 +312,10 @@ function processData(rows) {
   }
 
   nodesMap.forEach(n => {
-    const c = connCount.get(n.id) || 0;
-    const v = n.votos || 0;
-    if(n.level === 0) n.value = 3000;
-    else if(n.level <= 2) n.value = 500;
-    else n.value = Math.max(30, 30 + v * 100 + c * 10);
+    const c = connCount.get(n.id)||0, v = n.votos||0;
+    if(n.level===0)     n.value = 3000;
+    else if(n.level<=2) n.value = 500;
+    else                n.value = Math.max(30, 30 + v*100 + c*10);
   });
 
   const catMap = new Map();
@@ -325,26 +329,22 @@ function processData(rows) {
   const hubNodes = [];
   const hubEdges = [];
   const hubIds = new Set();
-
   catMap.forEach((nids, cat) => {
     const eixosCat = new Set(nids.map(id => nodesMap.get(id)?.eixo).filter(Boolean));
     if(eixosCat.size < 2) return;
 
     const hid = "__hub__" + cat;
-    const cor = CAT_CORES[cat] || "#A78BFA";
+    const cor  = CAT_CORES[cat] || "#A78BFA";
     hubIds.add(hid);
 
     hubNodes.push({
       id: hid,
-      label: cat.length > 40 ? cat.slice(0,40) + "…" : cat,
+      label: cat.length > 40 ? cat.slice(0,40)+"…" : cat,
       title: cat,
       causa_real: "Tema transversal: " + cat,
-      group: "hub",
-      level: 99,
-      eixo: "",
-      eixo_nome: "Tema transversal",
-      cat,
-      votos: 0,
+      group: "hub", level: 99,
+      eixo: "", eixo_nome: "Tema transversal",
+      cat, votos: 0,
       value: 50 + nids.length * 15,
       shape: "diamond",
       color: {background: cor + "33", border: cor},
@@ -353,26 +353,24 @@ function processData(rows) {
 
     nids.forEach(nid => {
       hubEdges.push({
-        from: nid,
-        to: hid,
-        cat,
-        color: cor,
+        from: nid, to: hid,
+        cat, color: cor,
         transversal: true,
-        dashes: [5,4],
-        width: 1.5,
+        dashes: [5,4], width: 1.5,
       });
     });
   });
 
   return {
-    nodes: [...nodesMap.values(), ...hubNodes],
-    edges: [...edgesList, ...hubEdges],
-    hubs: hubIds,
-    eixos: [...eixosSet].sort(),
-    cats: Object.keys(CAT_CORES),
+    nodes:  [...nodesMap.values(), ...hubNodes],
+    edges:  [...edgesList, ...hubEdges],
+    hubs:   hubIds,
+    eixos:  [...eixosSet].sort(),
+    cats:   Object.keys(CAT_CORES),
   };
 }
 
+// SUBIR NA ÁRVORE (climb)
 function climb(id, visited) {
   let cur = id;
   while(cur) {
@@ -383,106 +381,130 @@ function climb(id, visited) {
   }
 }
 
+// FILTRO — LÓGICA CORRIGIDA (não apaga mais tudo)
 function applyFilter() {
   if(!G || !vNodes || !vEdges) return;
   if(viewMode === "minuto") return;
 
-  const search = document.getElementById("search").value.toLowerCase().trim();
+  const search = document.getElementById("search").value.trim().toLowerCase();
   const allN   = vNodes.get();
   const allE   = vEdges.get();
   const transOnly = viewMode === "transversais";
 
+  // 1. EIXOS
   const okEixo = new Set([MACRO]);
   if(selEixos.size === G.eixos.length) {
     allN.forEach(n => okEixo.add(n.id));
   } else {
     allN.forEach(n => {
-      if(!HUBS.has(n.id) && n.eixo && selEixos.has(n.eixo)) climb(n.id, okEixo);
+      if(!HUBS.has(n.id) && n.eixo && selEixos.has(n.eixo)) {
+        const visited = new Set();
+        visited.add(n.id);
+        climb(n.id, visited);
+        visited.forEach(id => okEixo.add(id));
+      }
     });
   }
 
+  // 2. PRIORIZAÇÃO
   const okPrio = new Set([MACRO]);
   if(minV === 0) {
     allN.forEach(n => okPrio.add(n.id));
   } else {
     allN.forEach(n => {
-      if((n.votos || 0) >= minV) climb(n.id, okPrio);
+      if((n.votos || 0) >= minV) {
+        const visited = new Set();
+        visited.add(n.id);
+        climb(n.id, visited);
+        visited.forEach(id => okPrio.add(id));
+      }
     });
   }
 
+  // 3. BUSCA
   const okSrch = new Set([MACRO]);
   if(!search) {
     allN.forEach(n => okSrch.add(n.id));
   } else {
     allN.forEach(n => {
-      if((n.causa_real || n.title || "").toLowerCase().includes(search)) climb(n.id, okSrch);
+      const txt = (n.causa_real || n.title || "").toLowerCase();
+      if(txt.includes(search)) {
+        const visited = new Set();
+        visited.add(n.id);
+        climb(n.id, visited);
+        visited.forEach(id => okSrch.add(id));
+      }
     });
   }
 
-  const hierOk = id => okEixo.has(id) && okPrio.has(id) && okSrch.has(id);
-
+  // 4. CATEGORIA (tema transversal)
   const temCat = selCat !== "__ALL__";
   const okCat  = new Set([MACRO]);
   if(temCat) {
     allN.forEach(n => {
-      if(!HUBS.has(n.id) && n.cat === selCat) climb(n.id, okCat);
+      if(!HUBS.has(n.id) && n.cat === selCat) {
+        const visited = new Set();
+        visited.add(n.id);
+        climb(n.id, visited);
+        visited.forEach(id => okCat.add(id));
+      }
     });
   } else {
     allN.forEach(n => okCat.add(n.id));
   }
 
+  // 5. NÓS VISÍVEIS / NÃO VISÍVEIS
   const nUpd = allN.map(n => {
-    if(HUBS.has(n.id)) {
-      const show = !temCat || n.cat === selCat;
-      return {
-        id: n.id,
-        hidden: !show,
-        color: show
-          ? (HUB_COR[n.id] || {background:(CAT_CORES[n.cat]||"#888")+"33", border:CAT_CORES[n.cat]||"#888"})
-          : COR.faded,
-      };
-    }
+    const hid = HUBS.has(n.id);
+    const vis = (hid ? (temCat ? n.cat === selCat : true) : true) && (!transOnly || n.level < 3);
+    const eixoOk = okEixo.has(n.id);
+    const prioOk = okPrio.has(n.id);
+    const srchOk = okSrch.has(n.id);
+    const catOk  = okCat.has(n.id);
+    const isOk = eixoOk && prioOk && srchOk && catOk;
+    const cor = hid
+      ? (HUB_COR[n.id] || {background:(CAT_CORES[n.cat]||"#888")+"33", border:CAT_CORES[n.cat]||"#888"})
+      : (COR[n.group] || COR.causa2);
 
-    if(transOnly) {
-      return {id: n.id, hidden: n.level >= 3, color: COR[n.group] || COR.causa2};
-    }
-
-    const ok = hierOk(n.id) && okCat.has(n.id);
     return {
       id: n.id,
       hidden: false,
-      color: ok ? (COR[n.group] || COR.causa2) : COR.faded,
+      color: isOk ? cor : {background:"#F3F4F6", border:"#E5E7EB", highlight: {background:cor.background, border:cor.border}},
     };
   });
   vNodes.update(nUpd);
 
+  // 6. ARESTAS
   const eUpd = allE.map(e => {
     if(e.transversal) {
       const catOk  = !temCat || e.cat === selCat;
-      const nodeOk = hierOk(e.from);
+      const nodeOk = okEixo.has(e.from) && okPrio.has(e.from) && okSrch.has(e.from) && okCat.has(e.from);
       const show   = catOk && (transOnly || nodeOk);
       return {
         id: e.id,
-        hidden: !show,
-        color: {color: show ? (e.color || "#A78BFA") : "#E2E8F0"},
-        width: show ? 1.5 : 0,
+        hidden: false,
+        color:  {color: show ? (e.color||"#A78BFA") : "#E2E8F0"},
+        width:  show ? 1.5 : 0.6,
         dashes: show ? [5,4] : false,
       };
     }
 
     if(transOnly) return {id: e.id, hidden: true};
 
-    const ok = hierOk(e.from) && hierOk(e.to) && okCat.has(e.from) && okCat.has(e.to);
+    const ok = okEixo.has(e.from) && okPrio.has(e.from) && okSrch.has(e.from) && okCat.has(e.from)
+             && okEixo.has(e.to)   && okPrio.has(e.to)   && okSrch.has(e.to)   && okCat.has(e.to);
+
     return {
       id: e.id,
       hidden: false,
-      color: {color: ok ? "#D1D5DB" : "#EDF2F7"},
-      width: ok ? 0.8 : 0.3,
+      color:  {color: ok ? "#D1D5DB" : "#E5E7EB"},
+      width:  ok ? 0.8 : 0.3,
     };
   });
   vEdges.update(eUpd);
 }
 
+// INICIALIZAÇÃO DO GRAFO
 document.addEventListener("DOMContentLoaded", () => {
   fetch(CSV_URL)
     .then(r => r.arrayBuffer())
@@ -510,6 +532,9 @@ document.addEventListener("DOMContentLoaded", () => {
 function initGraph() {
   vNodes = new vis.DataSet(G.nodes);
   vEdges = new vis.DataSet(G.edges);
+
+  // garante que tudo comece exibido, sem nós escondidos
+  vNodes.update(vNodes.get().map(n => ({id:n.id, hidden:false})));
 
   network = new vis.Network(document.getElementById("net"), {nodes:vNodes, edges:vEdges}, {
     nodes: {
@@ -546,9 +571,10 @@ function initGraph() {
     network.focus(MACRO, {scale:1.8, animation:false});
     setTimeout(() => network.fit({animation:{duration:1600, easingFunction:"easeInOutQuad"}}), 60);
     buildUI();
-    applyFilter();
+    applyFilter(); // aplica filtro imediatamente, mas sem apagar o macro
   });
 
+  // modal
   const modal = document.getElementById("modal");
   const mbox  = document.getElementById("mbox");
   const NL = {
@@ -564,10 +590,9 @@ function initGraph() {
   network.on("click", p => { if(p.nodes.length) openModal(p.nodes[0]); });
 
   window.openModal = id => {
-    const n = vNodes.get(id);
-    if(!n) return;
+    const n = vNodes.get(id); if(!n) return;
 
-    document.getElementById("m-nivel").textContent = NL[n.group] || n.group;
+    document.getElementById("m-nivel").textContent = NL[n.group]||n.group;
 
     const el = document.getElementById("m-eixo");
     if(n.eixo_nome && n.group !== "macro") {
@@ -577,12 +602,12 @@ function initGraph() {
       el.style.display = "none";
     }
 
-    document.getElementById("m-causa").textContent = n.causa_real || n.title;
+    document.getElementById("m-causa").textContent = n.causa_real||n.title;
 
     const cw = document.getElementById("m-cat-wrap");
     const ce = document.getElementById("m-cat");
     if(n.cat) {
-      const cor = CAT_CORES[n.cat] || "#888";
+      const cor = CAT_CORES[n.cat]||"#888";
       ce.innerHTML = `<span style="width:8px;height:8px;border-radius:50%;background:${cor};flex-shrink:0;display:inline-block"></span><span>${n.cat}</span>`;
       ce.style.cssText = `background:${cor}20;color:#374151;border:1px solid ${cor}50;`;
       cw.style.display = "";
@@ -592,7 +617,7 @@ function initGraph() {
 
     const vw = document.getElementById("m-votos-wrap");
     if(n.votos > 0) {
-      document.getElementById("m-votos").textContent = `⭐ ${n.votos} estrelinha${n.votos > 1 ? "s" : ""} na priorização`;
+      document.getElementById("m-votos").textContent = `⭐ ${n.votos} estrelinha${n.votos>1?"s":""} na priorização`;
       vw.classList.remove("hidden");
     } else {
       vw.classList.add("hidden");
@@ -611,31 +636,29 @@ function initGraph() {
     }, 200);
   };
 
-  window.addEventListener("keydown", e => { if(e.key === "Escape") closeModal(); });
-  modal.addEventListener("click", e => { if(e.target === modal) closeModal(); });
+  window.addEventListener("keydown", e => { if(e.key==="Escape") closeModal(); });
+  modal.addEventListener("click", e => { if(e.target===modal) closeModal(); });
 }
 
+// UI DOS FILTROS
 function buildUI() {
   document.querySelectorAll(".vbtn").forEach(b => {
     b.addEventListener("click", function() {
       document.querySelectorAll(".vbtn").forEach(x =>
         x.className="vbtn py-2 text-[10px] rounded-xl font-semibold bg-gray-100 text-gray-500 px-1 leading-tight");
       this.className="vbtn py-2 text-[10px] rounded-xl font-semibold bg-indigo-600 text-white px-1 leading-tight";
-
       viewMode = this.dataset.view;
-
       if(viewMode === "minuto") {
         vNodes.update(G.nodes.map(n => ({
           id:n.id,
-          hidden: !HUBS.has(n.id) && (n.level === 1 || n.level > 3),
-          font: {size: n.level > 0 && n.level < 4 ? 18 : 11},
-          color: HUBS.has(n.id) ? (HUB_COR[n.id] || undefined) : (COR[n.group] || COR.causa2),
+          hidden: !HUBS.has(n.id) && (n.level===1 || n.level>3),
+          font:   {size: n.level>0&&n.level<4 ? 18 : 11},
+          color:  HUBS.has(n.id) ? (HUB_COR[n.id]||undefined) : (COR[n.group]||COR.causa2),
         })));
-
         network.setOptions({physics:{enabled:true, barnesHut:{springLength:90}}});
         network.once("stabilizationIterationsDone", () => {
           network.setOptions({physics:{enabled:false}});
-          network.fit({animation:{duration:700, easingFunction:"easeInOutQuad"}});
+          network.fit({animation:{duration:700, easingFunction:"easeInOutQuad"}}); // 700ms
         });
         network.stabilize(120);
       } else {
@@ -659,12 +682,12 @@ function buildUI() {
   G.eixos.forEach(e => {
     const li = document.createElement("li");
     li.className = "flex items-center gap-2 px-2.5 py-1.5 rounded-lg cursor-pointer text-gray-600 hover:bg-gray-50 bg-indigo-50 font-medium";
-    li.innerHTML = `<span style="width:6px;height:6px;border-radius:50%;background:#818CF8;flex-shrink:0;display:inline-block"></span>${EIXO_NOMES[e] || e}`;
+    li.innerHTML = `<span style="width:6px;height:6px;border-radius:50%;background:#818CF8;flex-shrink:0;display:inline-block"></span>${EIXO_NOMES[e]||e}`;
     li.dataset.id = e;
     li.addEventListener("click", () => {
       selEixos.has(e) ? selEixos.delete(e) : selEixos.add(e);
-      li.classList.toggle("bg-indigo-50", selEixos.has(e));
-      li.classList.toggle("font-medium", selEixos.has(e));
+      li.classList.toggle("bg-indigo-50",  selEixos.has(e));
+      li.classList.toggle("font-medium",   selEixos.has(e));
       li.classList.toggle("text-gray-400", !selEixos.has(e));
       li.classList.toggle("text-gray-600", selEixos.has(e));
       applyFilter();
@@ -697,19 +720,17 @@ function buildUI() {
     li.innerHTML = cor
       ? `<span style="width:8px;height:8px;border-radius:50%;background:${cor};flex-shrink:0;display:inline-block"></span><span class="truncate">${label}</span>`
       : `<span style="width:8px;height:8px;border-radius:50%;background:#CBD5E0;flex-shrink:0;display:inline-block"></span><span>${label}</span>`;
-
     li.dataset.cat = cat;
     li.addEventListener("click", () => {
       selCat = cat;
       cul.querySelectorAll("li").forEach(x => {
-        x.classList.toggle("bg-indigo-50", x.dataset.cat === selCat);
+        x.classList.toggle("bg-indigo-50",  x.dataset.cat === selCat);
         x.classList.toggle("font-semibold", x.dataset.cat === selCat);
       });
       applyFilter();
     });
     cul.appendChild(li);
   }
-
   addCatLi("__ALL__", "Todas as conexões", null);
   G.cats.forEach(cat => addCatLi(cat, cat, CAT_CORES[cat]));
   cul.querySelector("li").classList.add("bg-indigo-50","font-semibold");
