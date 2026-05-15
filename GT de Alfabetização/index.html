@@ -1,5 +1,3 @@
---- START OF FILE Paste May 15, 2026 - 8:26AM ---
-
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
@@ -51,7 +49,6 @@
 
 <div id="mynetwork"></div>
 
-<!-- Modal -->
 <div id="modal" class="fixed inset-0 z-[100] hidden items-center justify-center p-4" style="background:rgba(17,24,39,.5);backdrop-filter:blur(4px);">
   <div id="modal-box" class="bg-white rounded-2xl shadow-2xl w-full max-w-lg transform transition-all duration-200 scale-95 opacity-0 overflow-hidden">
     <div class="px-6 pt-6 pb-4 border-b border-gray-100">
@@ -70,11 +67,6 @@
     <div id="m-cat-wrap" class="px-6 py-4 border-b border-gray-100">
       <p class="text-[10px] font-semibold uppercase tracking-wider text-gray-400 mb-2">Conexão temática</p>
       <div id="m-cat" class="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs font-medium"></div>
-      <p class="text-[10px] text-gray-400 mt-2 leading-relaxed italic">Instrumento analítico para identificar conexões entre eixos — não é uma fala do grupo.</p>
-    </div>
-    <div id="m-votos-wrap" class="px-6 py-4 hidden">
-      <p class="text-[10px] font-semibold uppercase tracking-wider text-gray-400 mb-2">Priorização</p>
-      <span id="m-votos" class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-amber-50 text-amber-700 rounded-xl text-xs font-semibold"></span>
     </div>
     <div class="px-6 py-4 bg-gray-50 flex justify-end">
       <button onclick="closeModal()" class="px-5 py-2 bg-gray-900 hover:bg-gray-700 text-white text-xs font-semibold rounded-xl transition-colors">Fechar</button>
@@ -82,7 +74,6 @@
   </div>
 </div>
 
-<!-- Legenda -->
 <div id="legend" class="absolute bottom-5 left-5 bg-white/95 rounded-2xl shadow-lg border border-gray-100 p-4 z-10" style="min-width:175px;">
   <p class="text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-3">Hierarquia</p>
   <div class="space-y-2">
@@ -93,14 +84,8 @@
     <div class="flex items-center gap-2.5"><span class="w-2 h-2 rounded-full" style="background:#3182CE"></span><span class="text-xs text-gray-600">Causa secundária</span></div>
     <div class="flex items-center gap-2.5"><span class="w-1.5 h-1.5 rounded-full" style="background:#805AD5"></span><span class="text-xs text-gray-600">Causa terciária</span></div>
   </div>
-  <div class="mt-3 pt-3 border-t border-gray-100">
-    <p class="text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-2">Conexões</p>
-    <div class="flex items-center gap-2.5 mb-1.5"><span class="w-5 h-px bg-gray-300 flex-shrink-0"></span><span class="text-xs text-gray-600">Hierárquica</span></div>
-    <div class="flex items-center gap-2.5"><svg width="20" height="4"><line x1="0" y1="2" x2="20" y2="2" stroke="#A78BFA" stroke-width="2" stroke-dasharray="4 3"/></svg><span class="text-xs text-gray-600">Transversal</span></div>
-  </div>
 </div>
 
-<!-- Painel -->
 <div id="panel" class="absolute bottom-5 right-5 bg-white/95 rounded-2xl shadow-lg border border-gray-100 z-10 w-72">
   <div class="flex items-center justify-between px-4 pt-4 pb-3 border-b border-gray-100">
     <p class="text-[10px] font-bold uppercase tracking-widest text-gray-400">Filtros</p>
@@ -111,33 +96,31 @@
   </div>
   <div id="pb" class="p-4 space-y-4">
     <div class="relative">
-      <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path stroke-linecap="round" d="M21 21l-4.35-4.35"/></svg>
-      <input id="search" type="text" placeholder="Pesquisar na árvore..."
-        class="w-full pl-9 pr-3 py-2 bg-gray-50 border border-gray-200 rounded-xl text-xs text-gray-700 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-300 focus:border-transparent">
+      <input id="search" type="text" placeholder="Pesquisar na árvore..." class="w-full pl-3 pr-3 py-2 bg-gray-50 border border-gray-200 rounded-xl text-xs">
     </div>
     <div>
       <p class="text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-2">Visualização</p>
       <div class="grid grid-cols-3 gap-1.5">
-        <button data-view="completa"     class="view-btn py-2 text-[10px] rounded-xl font-semibold bg-indigo-600 text-white leading-tight px-1">Completa</button>
-        <button data-view="transversais" class="view-btn py-2 text-[10px] rounded-xl font-semibold bg-gray-100 text-gray-500 hover:bg-gray-200 leading-tight px-1">Só transversais</button>
-        <button data-view="minuto"       class="view-btn py-2 text-[10px] rounded-xl font-semibold bg-gray-100 text-gray-500 hover:bg-gray-200 leading-tight px-1">1 minuto</button>
+        <button data-view="completa" class="view-btn py-2 text-[10px] rounded-xl font-semibold bg-indigo-600 text-white px-1">Completa</button>
+        <button data-view="transversais" class="view-btn py-2 text-[10px] rounded-xl font-semibold bg-gray-100 text-gray-500 px-1">Só transversais</button>
+        <button data-view="minuto" class="view-btn py-2 text-[10px] rounded-xl font-semibold bg-gray-100 text-gray-500 px-1">1 minuto</button>
       </div>
     </div>
     <div>
       <p class="text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-2">Priorização</p>
       <div class="grid grid-cols-4 gap-1.5">
         <button data-min="0" class="prio py-1.5 text-[11px] rounded-lg font-semibold bg-indigo-600 text-white">Todas</button>
-        <button data-min="1" class="prio py-1.5 text-[11px] rounded-lg font-semibold bg-gray-100 text-gray-500 hover:bg-gray-200">1+⭐</button>
-        <button data-min="4" class="prio py-1.5 text-[11px] rounded-lg font-semibold bg-gray-100 text-gray-500 hover:bg-gray-200">4+⭐</button>
-        <button data-min="5" class="prio py-1.5 text-[11px] rounded-lg font-semibold bg-gray-100 text-gray-500 hover:bg-gray-200">5+⭐</button>
+        <button data-min="1" class="prio py-1.5 text-[11px] rounded-lg font-semibold bg-gray-100 text-gray-500">1+⭐</button>
+        <button data-min="4" class="prio py-1.5 text-[11px] rounded-lg font-semibold bg-gray-100 text-gray-500">4+⭐</button>
+        <button data-min="5" class="prio py-1.5 text-[11px] rounded-lg font-semibold bg-gray-100 text-gray-500">5+⭐</button>
       </div>
     </div>
     <div>
       <p class="text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-2">Eixos</p>
       <ul id="eixo-list" class="space-y-1 max-h-28 overflow-y-auto pr-1"></ul>
       <div class="flex gap-2 mt-2">
-        <button id="sel-all"   class="flex-1 py-1.5 text-[11px] font-semibold rounded-lg bg-indigo-50 text-indigo-600 hover:bg-indigo-100">Todos</button>
-        <button id="desel-all" class="flex-1 py-1.5 text-[11px] font-semibold rounded-lg bg-gray-100 text-gray-500 hover:bg-gray-200">Nenhum</button>
+        <button id="sel-all" class="flex-1 py-1.5 text-[11px] font-semibold rounded-lg bg-indigo-50 text-indigo-600">Todos</button>
+        <button id="desel-all" class="flex-1 py-1.5 text-[11px] font-semibold rounded-lg bg-gray-100 text-gray-500">Nenhum</button>
       </div>
     </div>
     <div>
@@ -148,363 +131,247 @@
 </div>
 
 <script>
-const CSV_URL    = "https://raw.githubusercontent.com/sme-upge/sme-upge.github.io/refs/heads/main/GT%20de%20Alfabetiza%C3%A7%C3%A3o/%C3%81rvore%20de%20Problemas%20-%20Alfabetiza%C3%A7%C3%A3o%20(3).csv";
-const MACRO      = "Baixa aprendizagem na alfabetização";
+const CSV_URL = "https://raw.githubusercontent.com/sme-upge/sme-upge.github.io/refs/heads/main/GT%20de%20Alfabetiza%C3%A7%C3%A3o/%C3%81rvore%20de%20Problemas%20-%20Alfabetiza%C3%A7%C3%A3o%20(3).csv";
+const MACRO = "Baixa aprendizagem na alfabetização";
 const EIXO_NOMES = {"Eixo 1": "Responsabilidades", "Eixo 2": "Formação", "Eixo 3": "Infraestrutura", "Eixo 4": "Incentivos", "Eixo 5": "Acomp. e Monitoramento", "Eixo 6": "Avaliação", "Eixo 7": "Currículo e Materiais"};
-const CAT_CORES  = {"Alta rotatividade de professores": "#FC8181", "Alto número de estudantes por turma": "#F6AD55", "Ausência de critérios para retenção de professores alfabetizadores": "#FEB2B2", "Baixo uso dos dados das avaliações para planejamento e acompanhamento pedagógico": "#76E4F7", "Desafios na integração do cronograma formativo por ciclos e na conexão das temáticas com a realidade cotidiana e as necessidades dos territórios": "#B794F4", "Excesso e sobreposição de avaliações  no calendário escolar": "#FAF089", "Fragilidade na articulação curricular, planejamento integrado e continuidade pedagógica entre as etapas de ensino (Ed. Infantil e Ciclo de Alfabetização)": "#68D391", "Fragilidade na comunicação e planejamento integrado entre SME, DREs e UEs": "#63B3ED", "Fragilidade na formação continuada de professores e trio gestor acerca da alfabetização": "#D6BCFA", "Fragilidade na formação para uso e análise de dados de avaliação": "#76E4F7", "Fragilidade na integração entre currículo, materiais didáticos, práticas pedagógicas e avaliações": "#4FD1C5", "Fragilidade no atendimento dos estudantes em suas individualidades (AEE e vulnerabilidades)": "#F6AD55", "Fragilidade no planejamento do acompanhamento pedagógico dos estudantes e das práticas docentes": "#9AE6B4", "Fragilidades na consolidação de identidades e sobrecarga de demandas do Trio Gestor (Diretores, ADs e CPs) e POA, impactando o planejamento integrado": "#FBD38D", "Fragmentação da concepção e prática de alfabetização, com entendimentos distintos entre intâncias e atores da rede sobre instrumentos normativos": "#FFA07A", "Participação desigual de professores nas formações (JEIF e Contratados)": "#F687B3"};
-const GC         = {"macro": {"background": "#E53E3E", "border": "#C53030"}, "eixo": {"background": "#DD6B20", "border": "#C05621"}, "problema": {"background": "#D69E2E", "border": "#B7791F"}, "causa1": {"background": "#38A169", "border": "#276749"}, "causa2": {"background": "#3182CE", "border": "#2C5282"}, "causa3": {"background": "#805AD5", "border": "#553C9A"}};
-const FADED_N    = {background:"#E9EBF0", border:"#D1D5DB"};
-const FADED_E    = "#E9EBF0";
-const NL = {
-  macro:"Problema macro", eixo:"Eixo temático", problema:"Problema central",
-  causa1:"Causa primária", causa2:"Causa secundária", causa3:"Causa terciária", hub:"Conexão transversal"
-};
+const CAT_CORES = {"Alta rotatividade de professores": "#FC8181", "Alto número de estudantes por turma": "#F6AD55", "Ausência de critérios para retenção de professores alfabetizadores": "#FEB2B2", "Baixo uso dos dados das avaliações para planejamento e acompanhamento pedagógico": "#76E4F7", "Desafios na integração do cronograma formativo por ciclos e na conexão das temáticas com a realidade cotidiana e as necessidades dos territórios": "#B794F4", "Excesso e sobreposição de avaliações  no calendário escolar": "#FAF089", "Fragilidade na articulação curricular, planejamento integrado e continuidade pedagógica entre as etapas de ensino (Ed. Infantil e Ciclo de Alfabetização)": "#68D391", "Fragilidade na comunicação e planejamento integrado entre SME, DREs e UEs": "#63B3ED", "Fragilidade na formação continuada de professores e trio gestor acerca da alfabetização": "#D6BCFA", "Fragilidade na formação para uso e análise de dados de avaliação": "#76E4F7", "Fragilidade na integração entre currículo, materiais didáticos, práticas pedagógicas e avaliações": "#4FD1C5", "Fragilidade no atendimento dos estudantes em suas individualidades (AEE e vulnerabilidades)": "#F6AD55", "Fragilidade no planejamento do acompanhamento pedagógico dos estudantes e das práticas docentes": "#9AE6B4", "Fragilidades na consolidação de identidades e sobrecarga de demandas do Trio Gestor (Diretores, ADs e CPs) e POA, impactando o planejamento integrado": "#FBD38D", "Fragmentação da concepção e prática de alfabetização, com entendimentos distintos entre intâncias e atores da rede sobre instrumentos normativos": "#FFA07A", "Participação desigual de professores nas formações (JEIF e Contratados)": "#F687B3"};
+const GC = {"macro": {"background": "#E53E3E", "border": "#C53030"}, "eixo": {"background": "#DD6B20", "border": "#C05621"}, "problema": {"background": "#D69E2E", "border": "#B7791F"}, "causa1": {"background": "#38A169", "border": "#276749"}, "causa2": {"background": "#3182CE", "border": "#2C5282"}, "causa3": {"background": "#805AD5", "border": "#553C9A"}};
+const FADED_N = {background:"#E9EBF0", border:"#D1D5DB"};
+const FADED_E = "#E9EBF0";
+const NL = {macro:"Problema macro", eixo:"Eixo temático", problema:"Problema central", causa1:"Causa primária", causa2:"Causa secundária", causa3:"Causa terciária", hub:"Conexão transversal"};
 
-// ── Estado GLOBAL ───────────────────────────────────────────────────────────
-let G       = null;
-let parentMap = new Map(); // ADICIONADO: Mapa para busca ultra-rápida de pais
-let HUBS    = null;
+let G = null;
+let parentMap = new Map(); // Mapa de suporte técnico para os filtros
+let HUBS = null;
 let HUB_COR = {};
 let visData = null;
 let network = null;
 let selEixos = new Set();
-let selCat   = "__ALL__";
-let minV     = 0;
+let selCat = "__ALL__";
+let minV = 0;
 let viewMode = "completa";
 
-// ── Parser CSV ───────────────────────────────────────────────────────────────
 function parseCsv(text) {
   const rows = [];
   const lines = text.split(/\r?\n/);
   for(let i = 1; i < lines.length; i++) {
     const line = lines[i].trim();
     if(!line) continue;
-    const allCols = []; let col = "", inQ = false;
+    const cols = []; let col = "", inQ = false;
     for(let c = 0; c < line.length; c++) {
       const ch = line[c];
-      if(ch==='"') { inQ=!inQ; }
-      else if(ch===';'&&!inQ) { allCols.push(col.trim()); col=""; }
-      else { col+=ch; }
+      if(ch==='"') inQ=!inQ;
+      else if(ch===';'&&!inQ) { cols.push(col.trim()); col=""; }
+      else col+=ch;
     }
-    allCols.push(col.trim());
-    let cols = allCols.slice(0, 9);
+    cols.push(col.trim());
     while(cols.length < 9) cols.push("");
-    cols = cols.map(v => (v==="?" || v==="-" || v==="–" || v===" ") ? "" : v);
-    rows.push(cols);
+    rows.push(cols.map(v => (v==="?" || v==="-" || v==="–" || v===" ") ? "" : v));
   }
   return rows;
 }
 
-// ── Processa dados ─────────────────────────────────────────────────────────────
 function processData(rows) {
   const nodesMap = new Map();
-  const edges    = [];
-  const edgesSet = new Set();
-  const conn     = new Map();
+  const edges = [];
   const eixosSet = new Set();
   parentMap.clear();
 
   const addNode = (id, group, level, eixo, cat, votos) => {
-    if(!id||!id.trim()) return;
+    if(!id) return;
     id = id.trim();
     if(!nodesMap.has(id)) {
       const ek = group==="eixo" ? id.slice(0,6) : (eixo||"").slice(0,6);
-      nodesMap.set(id, {
-        id, label:id.length>60?id.slice(0,60)+"…":id,
-        title:id, causa_real:id,
-        group, level,
-        eixo: ek,
-        eixo_nome: EIXO_NOMES[ek]||"",
-        cat:cat||"", votos:votos||0,
-      });
-      if(level===0) nodesMap.get(id).mass=10;
-      conn.set(id,0);
+      nodesMap.set(id, { id, label:id.length>60?id.slice(0,60)+"…":id, title:id, causa_real:id, group, level, eixo:ek, eixo_nome:EIXO_NOMES[ek]||"", cat:cat||"", votos:votos||0 });
     } else {
-      if((votos||0)>(nodesMap.get(id).votos||0)) nodesMap.get(id).votos=votos;
-      if(cat&&!nodesMap.get(id).cat) nodesMap.get(id).cat=cat;
+      if(votos > nodesMap.get(id).votos) nodesMap.get(id).votos = votos;
+      if(cat && !nodesMap.get(id).cat) nodesMap.get(id).cat = cat;
     }
   };
 
-  const addEdge = (from,to) => {
-    from=from.trim(); to=to.trim();
-    if(!from||!to) return;
-    const k=from+"→"+to;
-    if(edgesSet.has(k)) return;
-    edgesSet.add(k);
-    edges.push({from,to,arrows:{to:{enabled:false}}});
-    conn.set(from,(conn.get(from)||0)+1);
-    conn.set(to,(conn.get(to)||0)+1);
-    parentMap.set(to, from); // AJUSTE: Guarda o pai para a função climb funcionar
+  const addEdge = (from, to) => {
+    if(!from || !to) return;
+    edges.push({from, to, arrows:{to:{enabled:false}}});
+    parentMap.set(to, from);
   };
 
-  addNode(MACRO,"macro",0,"","",0);
+  addNode(MACRO, "macro", 0, "", "", 0);
 
   rows.forEach(cols => {
-    const eixo=cols[0]||"", prob=cols[1]||"", cp=cols[2]||"", cat1=cols[3]||"",
-          cs=cols[4]||"", cat2=cols[5]||"", votos=parseInt(cols[6])||0,
-          ct=cols[7]||"", cat3=cols[8]||"";
+    const eixo=cols[0], prob=cols[1], cp=cols[2], cat1=cols[3], cs=cols[4], cat2=cols[5], votos=parseInt(cols[6])||0, ct=cols[7], cat3=cols[8];
     if(!eixo) return;
-    const ek=eixo.slice(0,6);
-    eixosSet.add(ek);
-    addNode(ek,"eixo",1,ek,"",0); addEdge(MACRO,ek);
-    if(prob){ addNode(prob,"problema",2,ek,cat1,0); addEdge(ek,prob); }
-    if(prob&&cp){ addNode(cp,"causa1",3,ek,cat1,0); addEdge(prob,cp); }
-    if(prob&&cp&&cs){ addNode(cs,"causa2",4,ek,cat2,votos); addEdge(cp,cs); }
-    if(prob&&cp&&cs&&ct){ addNode(ct,"causa3",5,ek,cat3,0); addEdge(cs,ct); }
+    const ek = eixo.slice(0,6); eixosSet.add(ek);
+    addNode(ek, "eixo", 1, ek, "", 0); addEdge(MACRO, ek);
+    if(prob){ addNode(prob, "problema", 2, ek, cat1, 0); addEdge(ek, prob); }
+    if(cp){ addNode(cp, "causa1", 3, ek, cat1, 0); addEdge(prob, cp); }
+    if(cs){ addNode(cs, "causa2", 4, ek, cat2, votos); addEdge(cp, cs); }
+    if(ct){ addNode(ct, "causa3", 5, ek, cat3, 0); addEdge(cs, ct); }
   });
 
-  nodesMap.forEach(n=>{
-    const c=conn.get(n.id)||0, v=n.votos||0;
-    if(n.level===0) n.value=3000;
-    else if(n.level<=2) n.value=500;
-    else n.value=Math.max(30,30+v*100+c*10);
+  const hubNodes = [], hubEdges = [], hubIds = new Set();
+  const catMap = new Map();
+  nodesMap.forEach(n => { if(n.cat) { if(!catMap.has(n.cat)) catMap.set(n.cat, []); catMap.get(n.cat).push(n.id); } });
+  
+  catMap.forEach((nids, cat) => {
+    const hid = "__hub__"+cat; hubIds.add(hid);
+    const cor = CAT_CORES[cat]||"#A78BFA";
+    hubNodes.push({ id:hid, label:cat, group:"hub", level:99, cat, color:{background:cor+"30",border:cor}, shape:"diamond" });
+    nids.forEach(nid => hubEdges.push({ from:nid, to:hid, cat, color:cor, transversal:true, dashes:[5,4] }));
   });
 
-  const catMap=new Map();
-  nodesMap.forEach(n=>{
-    if(n.cat&&n.level>=3){
-      if(!catMap.has(n.cat)) catMap.set(n.cat,[]);
-      catMap.get(n.cat).push(n.id);
-    }
-  });
-  const hubNodes=[], hubEdges=[], hubIdsSet=new Set();
-  catMap.forEach((nids,cat)=>{
-    const eixosCat=new Set(nids.map(id=>nodesMap.get(id)?.eixo));
-    if(eixosCat.size<2) return;
-    const hid="__hub__"+cat, cor=CAT_CORES[cat]||"#A78BFA";
-    hubIdsSet.add(hid);
-    hubNodes.push({
-      id:hid, label:cat, title:cat, causa_real:"Tema transversal: "+cat,
-      group:"hub", level:99, eixo:"", eixo_nome:"Tema transversal",
-      cat, votos:0, value:60+nids.length*15,
-      color:{background:cor+"30",border:cor},
-      shape:"diamond", font:{size:11,color:"#374151",strokeWidth:0},
-    });
-    nids.forEach(nid=>hubEdges.push({
-      from:nid,to:hid,cat,color:cor,transversal:true,dashes:[5,4],width:2
-    }));
-  });
-
-  return {
-    nodes:[...nodesMap.values(),...hubNodes],
-    edges:[...edges,...hubEdges],
-    hubs:hubIdsSet,
-    eixos:[...eixosSet].sort(),
-    cats:Object.keys(CAT_CORES),
-  };
+  return { nodes:[...nodesMap.values(), ...hubNodes], edges:[...edges, ...hubEdges], hubs:hubIds, eixos:[...eixosSet].sort(), cats:Object.keys(CAT_CORES) };
 }
 
-// ── AJUSTE: Função Climb Corrigida ──────────────────────────────────────────
 function climb(id, setOk) {
   let cur = id;
   while(cur) {
     if(setOk.has(cur)) break;
     setOk.add(cur);
-    cur = parentMap.get(cur); // Usa o mapa de pais preenchido no processData
+    cur = parentMap.get(cur);
   }
 }
 
-// ── AJUSTE: Função ApplyFilter Corrigida ────────────────────────────────────
 function applyFilter() {
-  if(!G||!visData||viewMode==="minuto") return;
+  if(!G || !visData || viewMode === "minuto") return;
   const search = document.getElementById("search").value.toLowerCase().trim();
   const allN = visData.nodes.get();
   const allE = visData.edges.get();
-
+  
   const activeNodes = new Set();
   activeNodes.add(MACRO);
 
-  // Determina quais nós passam em TODOS os critérios (Interseção)
   allN.forEach(n => {
-    if(HUBS.has(n.id)) return;
-    
-    const matchesEixo = (selEixos.size === G.eixos.length) || (n.eixo && selEixos.has(n.eixo));
-    const matchesPrio = (n.votos || 0) >= minV;
-    const matchesSearch = !search || (n.causa_real || n.title || "").toLowerCase().includes(search);
-    const matchesCat = (selCat === "__ALL__") || (n.cat === selCat);
+    if(G.hubs.has(n.id)) return;
+    const mEixo = (selEixos.size === G.eixos.length) || (n.eixo && selEixos.has(n.eixo));
+    const mPrio = (n.votos || 0) >= minV;
+    const mSearch = !search || n.causa_real.toLowerCase().includes(search);
+    const mCat = (selCat === "__ALL__") || (n.cat === selCat);
 
-    if(matchesEixo && matchesPrio && matchesSearch && matchesCat) {
+    if(mEixo && mPrio && mSearch && mCat) {
       climb(n.id, activeNodes);
     }
   });
 
-  const transOnly = (viewMode === "transversais");
-
   visData.nodes.update(allN.map(n => {
-    if(HUBS.has(n.id)) {
-      const showHub = (selCat === "__ALL__" || n.cat === selCat);
-      return { id:n.id, hidden:!showHub, opacity:showHub?1:0 };
+    if(G.hubs.has(n.id)) {
+      const show = (selCat === "__ALL__" || n.cat === selCat);
+      return { id:n.id, hidden:!show, opacity:show?1:0 };
     }
-    const isVisible = activeNodes.has(n.id);
-    if(transOnly && n.level >= 3 && !isVisible) return { id:n.id, hidden:true };
-    
-    return { 
-      id:n.id, 
-      hidden:false,
-      color: isVisible ? (GC[n.group] || null) : FADED_N, 
-      opacity: isVisible ? 1 : 0.08 
-    };
+    const isOk = activeNodes.has(n.id);
+    const transOnly = (viewMode === "transversais");
+    return { id:n.id, hidden: transOnly && n.level >= 3 && !isOk, color: isOk?(GC[n.group]||null):FADED_N, opacity: isOk?1:0.08 };
   }));
 
   visData.edges.update(allE.map(e => {
     if(e.transversal) {
-      const showEdge = (selCat === "__ALL__" || e.cat === selCat) && activeNodes.has(e.from);
-      return { id:e.id, hidden:!showEdge, opacity:showEdge?1:0, color:{color:showEdge?(e.color||"#A78BFA"):FADED_E} };
+      const show = (selCat === "__ALL__" || e.cat === selCat) && activeNodes.has(e.from);
+      return { id:e.id, hidden:!show, opacity:show?1:0, color:{color:show?(e.color||"#A78BFA"):FADED_E} };
     }
-    const isVisible = activeNodes.has(e.from) && activeNodes.has(e.to);
-    return { id:e.id, hidden:transOnly, color:{color:isVisible?"#D1D5DB":FADED_E}, opacity:isVisible?1:0.05 };
+    const isOk = activeNodes.has(e.from) && activeNodes.has(e.to);
+    return { id:e.id, hidden:(viewMode === "transversais"), color:{color:isOk?"#D1D5DB":FADED_E}, opacity:isOk?1:0.05 };
   }));
 }
 
-// ── Resto do código original (sem alterações) ───────────────────────────────
 document.addEventListener("DOMContentLoaded", () => {
-  fetch(CSV_URL)
-    .then(r=>r.arrayBuffer())
-    .then(buf=>{
-      let text;
-      try { text = new TextDecoder("utf-8", {fatal:true}).decode(buf); }
-      catch(e) { text = new TextDecoder("windows-1252").decode(buf); }
-      return text;
-    })
-    .then(text=>{
-      const rows=parseCsv(text);
-      G=processData(rows);
-      HUBS=G.hubs;
-      selEixos=new Set(G.eixos);
-      G.nodes.forEach(n=>{ if(HUBS.has(n.id)&&n.color) HUB_COR[n.id]=n.color; });
-      initGraph();
-    })
-    .catch(err=>{
-      document.getElementById("loading").innerHTML= `<p class="text-red-500 font-semibold">Erro ao carregar o CSV.</p>`;
-    });
+  fetch(CSV_URL).then(r => r.arrayBuffer()).then(buf => {
+    let text;
+    try { text = new TextDecoder("utf-8", {fatal:true}).decode(buf); }
+    catch(e) { text = new TextDecoder("windows-1252").decode(buf); }
+    G = processData(parseCsv(text));
+    HUBS = G.hubs;
+    selEixos = new Set(G.eixos);
+    initGraph();
+  });
 });
 
 function initGraph() {
-  visData={nodes:new vis.DataSet(G.nodes),edges:new vis.DataSet(G.edges)};
-  network=new vis.Network(document.getElementById("mynetwork"),visData,{
-    nodes:{shape:"dot",scaling:{min:5,max:55,label:{enabled:false}},
-      font:{size:11,color:"#374151",face:"Inter",strokeWidth:3,strokeColor:"#F7F8FA"},
-      borderWidth:1.5,shadow:{enabled:true,color:"rgba(0,0,0,0.07)",size:6,x:0,y:2}},
-    edges:{width:0.8,color:{color:"#D1D5DB",highlight:"#9CA3AF",hover:"#9CA3AF"},
-      smooth:{enabled:true,type:"continuous",roundness:0.3},hoverWidth:1.5},
-    interaction:{hover:true,tooltipDelay:400,keyboard:true,dragNodes:true,hideEdgesOnDrag:true},
-    physics:{enabled:true,
-      barnesHut:{gravitationalConstant:-35000,centralGravity:0.25,springLength:180,springConstant:0.035,damping:0.1,avoidOverlap:0.9},
-      solver:"barnesHut",stabilization:{iterations:250,updateInterval:40,fit:false}},
+  visData = { nodes: new vis.DataSet(G.nodes), edges: new vis.DataSet(G.edges) };
+  network = new vis.Network(document.getElementById("mynetwork"), visData, {
+    nodes:{shape:"dot", font:{size:11, face:"Inter", strokeWidth:3, strokeColor:"#F7F8FA"}},
+    edges:{width:0.8, color:{color:"#D1D5DB"}, smooth:{enabled:true, type:"continuous"}},
+    physics:{enabled:true, barnesHut:{gravitationalConstant:-35000, centralGravity:0.25, springLength:180}},
   });
-
-  network.once("stabilizationIterationsDone",()=>{
+  network.once("stabilizationIterationsDone", () => {
     document.getElementById("loading").style.display="none";
-    network.setOptions({physics:{enabled:false}});
-    network.focus(MACRO,{scale:1.8,animation:false});
-    setTimeout(()=>network.fit({animation:{duration:1600,easingFunction:"easeInOutQuad"}}),60);
-    buildUI();
-    applyFilter();
+    network.setOptions({physics:false});
+    buildUI(); applyFilter();
   });
-
-  const modal=document.getElementById("modal"), modalBox=document.getElementById("modal-box");
-  network.on("click",p=>{if(p.nodes.length)openModal(p.nodes[0]);});
-  window.openModal=id=>{
-    const n=visData.nodes.get(id); if(!n) return;
-    document.getElementById("m-nivel").textContent=NL[n.group]||n.group;
-    const eixoEl=document.getElementById("m-eixo");
-    if(n.eixo_nome&&n.group!=="macro"){eixoEl.textContent=n.eixo_nome;eixoEl.style.display="";}
-    else{eixoEl.style.display="none";}
-    document.getElementById("m-causa").textContent=n.causa_real||n.title;
-    const catWrap=document.getElementById("m-cat-wrap"),catEl=document.getElementById("m-cat");
-    if(n.cat){
-      const cor=CAT_CORES[n.cat]||"#888";
-      catEl.innerHTML=`<span class="w-2 h-2 rounded-full flex-shrink-0" style="background:${cor}"></span><span>${n.cat}</span>`;
-      catEl.style.cssText=`background:${cor}20;color:#374151;border:1px solid ${cor}50;`;
-      catWrap.style.display="";
-    }else{catWrap.style.display="none";}
-    const votosWrap=document.getElementById("m-votos-wrap");
-    if(n.votos>0){document.getElementById("m-votos").innerHTML=`⭐ ${n.votos} estrelinha${n.votos>1?"s":""} na priorização`;votosWrap.classList.remove("hidden");}
-    else{votosWrap.classList.add("hidden");}
-    modal.classList.remove("hidden");modal.classList.add("flex");
-    setTimeout(()=>modalBox.classList.remove("scale-95","opacity-0"),10);
-  };
-  window.closeModal=()=>{
-    modalBox.classList.add("scale-95","opacity-0");
-    setTimeout(()=>{modal.classList.add("hidden");modal.classList.remove("flex");},200);
-  };
+  network.on("click", p => { if(p.nodes.length) window.openModal(p.nodes[0]); });
 }
 
 function buildUI() {
-  document.querySelectorAll(".view-btn").forEach(btn=>{
-    btn.addEventListener("click",function(){
-      document.querySelectorAll(".view-btn").forEach(b=> b.className="view-btn py-2 text-[10px] rounded-xl font-semibold bg-gray-100 text-gray-500 hover:bg-gray-200 leading-tight px-1");
-      this.className="view-btn py-2 text-[10px] rounded-xl font-semibold bg-indigo-600 text-white leading-tight px-1";
-      viewMode=this.dataset.view;
-      if(viewMode==="minuto"){
-        visData.nodes.update(G.nodes.map(n=>({id:n.id,hidden:!HUBS.has(n.id)&&(n.level===1||n.level>3),font:{size:n.level>0&&n.level<4?18:11}})));
-        network.setOptions({physics:{enabled:true,barnesHut:{springLength:90}}});
-        network.once("stabilizationIterationsDone",()=>{network.setOptions({physics:{enabled:false}});network.fit({animation:{duration:700,easingFunction:"easeInOutQuad"}});});
-        network.stabilize(120);
-      }else{
-        visData.nodes.update(G.nodes.map(n=>({id:n.id,hidden:false,font:{size:11}})));
-        applyFilter();
-      }
-    });
+  document.querySelectorAll(".view-btn").forEach(btn => {
+    btn.onclick = function() {
+      document.querySelectorAll(".view-btn").forEach(b=>b.className="view-btn py-2 text-[10px] rounded-xl font-semibold bg-gray-100 text-gray-500 px-1");
+      this.className="view-btn py-2 text-[10px] rounded-xl font-semibold bg-indigo-600 text-white px-1";
+      viewMode = this.dataset.view; applyFilter();
+    };
   });
-
-  document.querySelectorAll(".prio").forEach(btn=>{
-    btn.addEventListener("click",function(){
-      document.querySelectorAll(".prio").forEach(b=>b.className="prio py-1.5 text-[11px] rounded-lg font-semibold bg-gray-100 text-gray-500 hover:bg-gray-200");
+  document.querySelectorAll(".prio").forEach(btn => {
+    btn.onclick = function() {
+      document.querySelectorAll(".prio").forEach(b=>b.className="prio py-1.5 text-[11px] rounded-lg font-semibold bg-gray-100 text-gray-500");
       this.className="prio py-1.5 text-[11px] rounded-lg font-semibold bg-indigo-600 text-white";
-      minV=parseInt(this.dataset.min); applyFilter();
-    });
+      minV = parseInt(this.dataset.min); applyFilter();
+    };
   });
-
-  const eixoUl=document.getElementById("eixo-list");
-  G.eixos.forEach(e=>{
-    const li=document.createElement("li");
-    li.className="flex items-center gap-2 px-2.5 py-1.5 rounded-lg cursor-pointer text-xs text-gray-600 hover:bg-gray-50 bg-indigo-50 font-medium transition-colors";
-    li.innerHTML=`<span class="w-1.5 h-1.5 rounded-full bg-indigo-400 flex-shrink-0"></span>${EIXO_NOMES[e]||e}`;
-    li.dataset.id=e;
-    li.addEventListener("click",()=>{
-      selEixos.has(e)?selEixos.delete(e):selEixos.add(e);
-      updateEixoUI(); applyFilter();
-    });
+  const eixoUl = document.getElementById("eixo-list");
+  G.eixos.forEach(e => {
+    const li = document.createElement("li");
+    li.className = "flex items-center gap-2 px-2.5 py-1.5 rounded-lg cursor-pointer text-xs bg-indigo-50 text-indigo-600 mb-1";
+    li.textContent = EIXO_NOMES[e]||e;
+    li.onclick = () => { selEixos.has(e)?selEixos.delete(e):selEixos.add(e); li.classList.toggle("bg-indigo-50"); li.classList.toggle("text-indigo-600"); applyFilter(); };
     eixoUl.appendChild(li);
   });
-  document.getElementById("sel-all").addEventListener("click",()=>{selEixos=new Set(G.eixos);updateEixoUI();applyFilter();});
-  document.getElementById("desel-all").addEventListener("click",()=>{selEixos.clear();updateEixoUI();applyFilter();});
-
-  const catUl=document.getElementById("cat-list");
-  const addCat=(cat,label,cor)=>{
-    const li=document.createElement("li");
-    li.className="flex items-center gap-2 px-2.5 py-1.5 rounded-lg cursor-pointer text-xs text-gray-600 hover:bg-gray-50 transition-colors";
-    li.innerHTML=cor?`<span class="w-2 h-2 rounded-full flex-shrink-0" style="background:${cor}"></span><span class="truncate">${label}</span>`:`<span class="w-2 h-2 rounded-full bg-gray-300 flex-shrink-0"></span><span>${label}</span>`;
-    li.dataset.cat=cat;
-    li.addEventListener("click",()=>{selCat=cat;updateCatUI();applyFilter();});
+  document.getElementById("sel-all").onclick = () => { selEixos = new Set(G.eixos); updateEixoUI(); applyFilter(); };
+  document.getElementById("desel-all").onclick = () => { selEixos.clear(); updateEixoUI(); applyFilter(); };
+  const catUl = document.getElementById("cat-list");
+  const addC = (id, label, cor) => {
+    const li = document.createElement("li");
+    li.className = "px-2.5 py-1.5 text-xs cursor-pointer rounded-lg hover:bg-gray-50";
+    li.innerHTML = cor ? `<span class="inline-block w-2 h-2 rounded-full mr-2" style="background:${cor}"></span>${label}` : label;
+    li.onclick = () => { selCat = id; applyFilter(); };
     catUl.appendChild(li);
   };
-  addCat("__ALL__","Todas as conexões",null);
-  G.cats.forEach(cat=>addCat(cat,cat,CAT_CORES[cat]));
-  updateCatUI();
-
-  document.getElementById("search").addEventListener("input",applyFilter);
-  document.getElementById("toggle-panel").addEventListener("click",()=>{
-    document.getElementById("panel").classList.toggle("min");
-    document.getElementById("ic-down").classList.toggle("hidden");
-    document.getElementById("ic-up").classList.toggle("hidden");
-  });
+  addC("__ALL__", "Todas as conexões");
+  G.cats.forEach(c => addC(c, c, CAT_CORES[c]));
+  document.getElementById("search").oninput = applyFilter;
+  document.getElementById("toggle-panel").onclick = () => document.getElementById("panel").classList.toggle("min");
 }
 
 function updateEixoUI(){
   document.querySelectorAll("#eixo-list li").forEach(l=>{
     const s=selEixos.has(l.dataset.id);
-    l.classList.toggle("bg-indigo-50",s);l.classList.toggle("font-medium",s);
-    l.classList.toggle("text-gray-400",!s);l.classList.toggle("text-gray-600",s);
+    l.classList.toggle("bg-indigo-50",s); l.classList.toggle("text-indigo-600",s);
   });
 }
 function updateCatUI(){
   document.querySelectorAll("#cat-list li").forEach(l=>{
     l.classList.toggle("bg-indigo-50",l.dataset.cat===selCat);
-    l.classList.toggle("font-semibold",l.dataset.cat===selCat);
   });
 }
+
+window.openModal = id => {
+  const n = visData.nodes.get(id); if(!n || G.hubs.has(id)) return;
+  document.getElementById("m-nivel").textContent = NL[n.group];
+  document.getElementById("m-eixo").textContent = n.eixo_nome;
+  document.getElementById("m-causa").textContent = n.causa_real;
+  const catWrap = document.getElementById("m-cat-wrap");
+  if(n.cat) { 
+    const cor = CAT_CORES[n.cat] || "#888";
+    const catEl = document.getElementById("m-cat");
+    catEl.innerHTML = `<span class="w-2 h-2 rounded-full" style="background:${cor}"></span><span>${n.cat}</span>`;
+    catEl.style.cssText = `background:${cor}20;color:#374151;border:1px solid ${cor}50;`;
+    catWrap.style.display="block"; 
+  }
+  else catWrap.style.display="none";
+  document.getElementById("modal").classList.remove("hidden");
+  document.getElementById("modal").classList.add("flex");
+  setTimeout(()=>document.getElementById("modal-box").classList.remove("scale-95","opacity-0"),10);
+};
+window.closeModal = () => {
+  document.getElementById("modal-box").classList.add("scale-95","opacity-0");
+  setTimeout(()=>document.getElementById("modal").classList.add("hidden"), 200);
+};
 </script>
 </body>
 </html>
