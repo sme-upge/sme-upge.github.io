@@ -143,7 +143,7 @@
 </div>
 
 <script>
-// --- CONFIGURAÇÕES GERAIS ---
+// --- CONFIGURAÇÕES ---
 const CSV_URL    = "https://raw.githubusercontent.com/sme-upge/sme-upge.github.io/refs/heads/main/GT%20de%20Alfabetiza%C3%A7%C3%A3o/%C3%81rvore%20de%20Problemas%20-%20Alfabetiza%C3%A7%C3%A3o%20(3).csv";
 const MACRO      = "Baixa aprendizagem na alfabetização";
 const EIXO_NOMES = {"Eixo 1": "Responsabilidades", "Eixo 2": "Formação", "Eixo 3": "Infraestrutura", "Eixo 4": "Incentivos", "Eixo 5": "Acomp. e Monitoramento", "Eixo 6": "Avaliação", "Eixo 7": "Currículo e Materiais"};
@@ -151,7 +151,7 @@ const CAT_CORES  = {"Alta rotatividade de professores": "#FC8181", "Alto número
 const GC         = {"macro": {"background": "#E53E3E", "border": "#C53030"}, "eixo": {"background": "#DD6B20", "border": "#C05621"}, "problema": {"background": "#D69E2E", "border": "#B7791F"}, "causa1": {"background": "#38A169", "border": "#276749"}, "causa2": {"background": "#3182CE", "border": "#2C5282"}, "causa3": {"background": "#805AD5", "border": "#553C9A"}};
 const NL = { macro:"Problema macro", eixo:"Eixo temático", problema:"Problema central", causa1:"Causa primária", causa2:"Causa secundária", causa3:"Causa terciária", hub:"Conexão transversal" };
 
-// --- ESTADO GLOBAL ---
+// --- ESTADO ---
 let G       = { nodes: [], edges: [], hubs: new Set(), eixos: [], cats: [] };
 let visData = null;
 let network = null;
@@ -159,26 +159,24 @@ let selEixos = new Set();
 let selCat   = "__ALL__";
 let minV     = 0;
 let viewMode = "completa";
-let HUB_COR  = {};
 
-// --- PARSER CSV ---
+// --- PARSER ---
 function parseCsv(text) {
   const rows = [];
   const lines = text.split(/\r?\n/);
   for(let i = 1; i < lines.length; i++) {
-    const line = lines[i].trim();
-    if(!line) continue;
+    const line = lines[i].trim(); if(!line) continue;
     const allCols = []; let col = "", inQ = false;
     for(let c = 0; c < line.length; c++) {
       const ch = line[c];
-      if(ch==='"') { inQ=!inQ; }
+      if(ch==='"') inQ=!inQ;
       else if(ch===';'&&!inQ) { allCols.push(col.trim()); col=""; }
-      else { col+=ch; }
+      else col+=ch;
     }
     allCols.push(col.trim());
     let cols = allCols.slice(0, 9);
     while(cols.length < 9) cols.push("");
-    rows.push(cols.map(v => (v==="?" || v==="-" || v==="–" || v===" ") ? "" : v));
+    rows.push(cols.map(v => (v==="?" || v==="-" || v===" ") ? "" : v));
   }
   return rows;
 }
@@ -186,7 +184,7 @@ function parseCsv(text) {
 // --- PROCESSAMENTO ---
 function processData(rows) {
   const nodesMap = new Map();
-  const edges    = [];
+  const edges = [];
   const eixosSet = new Set();
   const connCounter = new Map();
 
@@ -196,9 +194,8 @@ function processData(rows) {
     if(!nodesMap.has(id)) {
       const ek = group==="eixo" ? id.slice(0,6) : (eixo||"").slice(0,6);
       nodesMap.set(id, {
-        id, label:id.length>60?id.slice(0,60)+"…":id,
-        title:id, causa_real:id, group, level, eixo: ek,
-        eixo_nome: EIXO_NOMES[ek]||"", cat:cat||"", votos:votos||0
+        id, label:id.length>60?id.slice(0,60)+"…":id, title:id, causa_real:id, 
+        group, level, eixo: ek, eixo_nome: EIXO_NOMES[ek]||"", cat:cat||"", votos:votos||0
       });
       connCounter.set(id, 0);
     } else {
@@ -214,7 +211,6 @@ function processData(rows) {
   };
 
   addNode(MACRO, "macro", 0, "", "", 0);
-
   rows.forEach(cols => {
     const eixo=cols[0], prob=cols[1], cp=cols[2], cat1=cols[3], cs=cols[4], cat2=cols[5], votos=parseInt(cols[6])||0, ct=cols[7], cat3=cols[8];
     if(!eixo) return;
@@ -226,7 +222,6 @@ function processData(rows) {
     if(ct){ addNode(ct,"causa3",5,ek,cat3,0); addEdge(cs,ct); }
   });
 
-  // Cálculo de tamanhos
   nodesMap.forEach(n => {
     const c = connCounter.get(n.id) || 0;
     if(n.level===0) n.value = 3000;
@@ -234,7 +229,6 @@ function processData(rows) {
     else n.value = Math.max(30, 30 + n.votos*100 + c*10);
   });
 
-  // Geração de Hubs Transversais
   const hubNodes = [], hubEdges = [], hubIds = new Set();
   const catGroups = {};
   nodesMap.forEach(n => { if(n.cat && n.level>=3) (catGroups[n.cat] = catGroups[n.cat] || []).push(n.id); });
@@ -242,125 +236,83 @@ function processData(rows) {
   Object.entries(catGroups).forEach(([cat, nids]) => {
     const hid="__hub__"+cat; hubIds.add(hid);
     const cor=CAT_CORES[cat]||"#A78BFA";
-    hubNodes.push({
-      id:hid, label:cat, title:cat, group:"hub", level:99, 
-      color:{background:cor+"30", border:cor}, shape:"diamond",
-      value: 60 + nids.length*15, causa_real: "Tema: " + cat
-    });
-    nids.forEach(nid => hubEdges.push({
-      from:nid, to:hid, cat, color:cor, transversal:true, dashes:[5,4], width:2
-    }));
+    hubNodes.push({ id:hid, label:cat, group:"hub", level:99, color:{background:cor+"30", border:cor}, shape:"diamond", value: 100, causa_real:cat });
+    nids.forEach(nid => hubEdges.push({ from:nid, to:hid, cat, color:cor, transversal:true, dashes:[5,4] }));
   });
 
-  return {
-    nodes:[...nodesMap.values(), ...hubNodes],
-    edges:[...edges, ...hubEdges],
-    hubs:hubIds,
-    eixos:[...eixosSet].sort(),
-    cats:Object.keys(CAT_CORES)
-  };
+  return { nodes:[...nodesMap.values(), ...hubNodes], edges:[...edges, ...hubEdges], hubs:hubIds, eixos:[...eixosSet].sort(), cats:Object.keys(CAT_CORES) };
 }
 
-// --- LÓGICA DE FILTRAGEM (Onde o problema foi corrigido) ---
+// --- FILTRO ---
 function climb(id, visited) {
   if (!id || visited.has(id)) return;
   visited.add(id);
-  // Procurar o pai nas arestas originais de G (mais confiável que visData)
-  G.edges.forEach(e => {
-    if (e.to === id && !e.transversal) climb(e.from, visited);
-  });
+  G.edges.forEach(e => { if (e.to === id && !e.transversal) climb(e.from, visited); });
 }
 
 function applyFilter() {
-  if(!G || !visData || viewMode === "minuto") return;
-  
+  if(!G || !visData) return;
   const search = document.getElementById("search").value.toLowerCase().trim();
-  const transOnly = viewMode === "transversais";
-  const corFaded = {background: "#E9EBF0", border: "#D1D5DB"};
+  const visibleNodes = new Set();
+  const dimmedNodes = new Set();
 
-  // 1. Identificar quem passa no filtro base (Eixo + Votos + Busca)
-  const baseOk = new Set();
+  // 1. Decidir quem deve estar em destaque
   G.nodes.forEach(n => {
-    if (HUBS.has(n.id)) return;
-    
-    const passaEixo = (selEixos.size === G.eixos.length) || (n.eixo && selEixos.has(n.eixo)) || (n.group === "eixo" && selEixos.has(n.id));
-    const passaVotos = (n.votos || 0) >= minV;
+    if (G.hubs.has(n.id)) return;
+    const passaEixo = (selEixos.size === 0 || selEixos.has(n.eixo) || (n.group==="eixo" && selEixos.has(n.id)));
+    const passaVotos = (n.votos >= minV);
     const passaBusca = !search || n.causa_real.toLowerCase().includes(search);
-    
-    if (passaEixo && passaVotos && passaBusca) climb(n.id, baseOk);
-  });
-  baseOk.add(MACRO);
+    const passaCat = (selCat === "__ALL__" || n.cat === selCat);
 
-  // 2. Identificar quem pertence à categoria transversal selecionada
-  const temCat = selCat !== "__ALL__";
-  const catOk = new Set();
-  if(temCat) {
-    G.nodes.forEach(n => { if(n.cat === selCat) climb(n.id, catOk); });
-    catOk.add(MACRO);
-  }
-
-  // 3. Atualizar Nós
-  visData.nodes.update(G.nodes.map(n => {
-    if (HUBS.has(n.id)) {
-      const showHub = !temCat || n.id === "__hub__"+selCat;
-      return { id: n.id, hidden: !showHub, opacity: showHub ? 0.9 : 0 };
+    if (passaEixo && passaVotos && passaBusca && passaCat) {
+      climb(n.id, visibleNodes);
     }
+  });
+  visibleNodes.add(MACRO);
 
-    if (transOnly) return { id: n.id, hidden: n.level >= 3, opacity: 1 };
-
-    const estaNaBase = baseOk.has(n.id);
-    const estaNaCat  = !temCat || catOk.has(n.id);
-    const destaque   = estaNaBase && estaNaCat;
-
+  // 2. Atualizar todos os nós de uma vez
+  visData.nodes.update(G.nodes.map(n => {
+    if (G.hubs.has(n.id)) {
+      const isMyHub = (selCat === "__ALL__" || n.id === "__hub__"+selCat);
+      return { id: n.id, hidden: !isMyHub, opacity: 0.9 };
+    }
+    const isVisible = visibleNodes.has(n.id);
+    const color = isVisible ? (GC[n.group] || {background:"#D1D5DB", border:"#9CA3AF"}) : {background:"#F3F4F6", border:"#E5E7EB"};
+    
     return {
       id: n.id,
-      hidden: false,
-      color: destaque ? (GC[n.group] || corFaded) : corFaded,
-      opacity: destaque ? 1 : (estaNaBase ? 0.15 : 0.05)
+      color: color,
+      opacity: isVisible ? 1 : 0.08,
+      hidden: (viewMode === "transversais" && n.level >= 3)
     };
   }));
 
-  // 4. Atualizar Arestas
+  // 3. Atualizar arestas
   visData.edges.update(G.edges.map((e, idx) => {
+    const isVisible = visibleNodes.has(e.from) && visibleNodes.has(e.to);
     if (e.transversal) {
-      const showTrans = baseOk.has(e.from) && (!temCat || e.cat === selCat);
-      return { id: idx, hidden: !showTrans, opacity: showTrans ? 0.8 : 0 };
+      const showTrans = visibleNodes.has(e.from) && (selCat === "__ALL__" || e.cat === selCat);
+      return { id: idx, hidden: !showTrans, opacity: 0.6 };
     }
-    
-    if (transOnly) return { id: idx, hidden: true };
-
-    const okBase = baseOk.has(e.from) && baseOk.has(e.to);
-    const okCat  = !temCat || (catOk.has(e.from) && catOk.has(e.to));
-    const destaque = okBase && okCat;
-
     return {
       id: idx,
-      hidden: false,
-      color: { color: destaque ? "#D1D5DB" : "#E9EBF0" },
-      opacity: destaque ? 1 : (okBase ? 0.2 : 0.05),
-      width: destaque ? 1 : 0.5
+      opacity: isVisible ? 1 : 0.05,
+      hidden: (viewMode === "transversais"),
+      color: isVisible ? "#9CA3AF" : "#E5E7EB"
     };
   }));
 }
 
-// --- INICIALIZAÇÃO ---
+// --- BOOTSTRAP ---
 document.addEventListener("DOMContentLoaded", () => {
-  fetch(CSV_URL)
-    .then(r => r.arrayBuffer())
-    .then(buf => {
-      let text;
-      try { text = new TextDecoder("utf-8", {fatal:true}).decode(buf); }
-      catch(e) { text = new TextDecoder("windows-1252").decode(buf); }
-      return text;
-    })
-    .then(text => {
-      G = processData(parseCsv(text));
-      selEixos = new Set(G.eixos);
-      initGraph();
-    })
-    .catch(err => {
-      document.getElementById("loading").innerHTML = `<p class="text-red-500 font-semibold">Erro ao carregar dados.</p>`;
-    });
+  fetch(CSV_URL).then(r => r.arrayBuffer()).then(buf => {
+    let text;
+    try { text = new TextDecoder("utf-8", {fatal:true}).decode(buf); }
+    catch(e) { text = new TextDecoder("windows-1252").decode(buf); }
+    G = processData(parseCsv(text));
+    selEixos = new Set(G.eixos);
+    initGraph();
+  });
 });
 
 function initGraph() {
@@ -368,129 +320,80 @@ function initGraph() {
     nodes: new vis.DataSet(G.nodes), 
     edges: new vis.DataSet(G.edges.map((e, i) => ({...e, id: i}))) 
   };
-
-  const container = document.getElementById("mynetwork");
-  const options = {
-    nodes: { shape: "dot", scaling: { min: 10, max: 50 }, font: { size: 11, face: "Inter" }, borderWidth: 1.5 },
-    edges: { smooth: { type: "continuous" }, color: "#D1D5DB" },
-    physics: { 
-      barnesHut: { gravitationalConstant: -30000, springLength: 150 },
-      stabilization: { iterations: 200 }
-    },
-    interaction: { hover: true, tooltipDelay: 300 }
-  };
-
-  network = new vis.Network(container, visData, options);
-
+  network = new vis.Network(document.getElementById("mynetwork"), visData, {
+    nodes: { shape: "dot", scaling: { min: 10, max: 50 }, font: { face: "Inter" } },
+    edges: { smooth: { type: "continuous" } },
+    physics: { barnesHut: { gravitationalConstant: -30000 }, stabilization: { iterations: 150 } }
+  });
   network.once("stabilizationIterationsDone", () => {
     document.getElementById("loading").style.display = "none";
     network.setOptions({ physics: false });
-    network.fit();
     buildUI();
     applyFilter();
   });
-
   network.on("click", p => { if(p.nodes.length) openModal(p.nodes[0]); });
 }
 
-// --- INTERFACE (UI) ---
 function buildUI() {
-  // Botoes de View
-  document.querySelectorAll(".view-btn").forEach(btn => {
-    btn.onclick = () => {
-      document.querySelectorAll(".view-btn").forEach(b => b.className = "view-btn py-2 text-[10px] rounded-xl font-semibold bg-gray-100 text-gray-500 px-1");
-      btn.className = "view-btn py-2 text-[10px] rounded-xl font-semibold bg-indigo-600 text-white px-1";
-      viewMode = btn.dataset.view;
-      if(viewMode === "minuto") {
-         visData.nodes.update(G.nodes.map(n => ({id: n.id, hidden: !G.hubs.has(n.id) && n.level !== 1 && n.level !== 0, opacity: 1})));
-         network.setOptions({physics: true});
-         setTimeout(() => { network.setOptions({physics: false}); network.fit(); }, 1000);
-      } else {
-         applyFilter();
-      }
-    };
-  });
-
-  // Filtro de Eixos
+  // Eixos
   const eixoUl = document.getElementById("eixo-list");
   G.eixos.forEach(e => {
     const li = document.createElement("li");
     li.className = "flex items-center gap-2 px-2.5 py-1.5 rounded-lg cursor-pointer text-xs bg-indigo-50 text-indigo-700 font-medium";
     li.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-indigo-400"></span>${EIXO_NOMES[e] || e}`;
     li.onclick = () => {
-      selEixos.has(e) ? selEixos.delete(e) : selEixos.add(e);
-      li.className = selEixos.has(e) ? "flex items-center gap-2 px-2.5 py-1.5 rounded-lg cursor-pointer text-xs bg-indigo-50 text-indigo-700 font-medium" : "flex items-center gap-2 px-2.5 py-1.5 rounded-lg cursor-pointer text-xs text-gray-400";
+      if(selEixos.has(e)) selEixos.delete(e); else selEixos.add(e);
+      li.classList.toggle("opacity-40");
       applyFilter();
     };
     eixoUl.appendChild(li);
   });
 
-  // Filtro de Categorias
+  // Categorias
   const catUl = document.getElementById("cat-list");
-  const createCatLi = (id, name, color) => {
+  const cats = [{id:"__ALL__", n:"Todas as conexões"}, ...G.cats.map(c=>({id:c, n:c}))];
+  cats.forEach(c => {
     const li = document.createElement("li");
-    li.className = "px-2.5 py-1.5 rounded-lg cursor-pointer text-xs " + (selCat === id ? "bg-indigo-100 font-bold" : "");
-    li.innerHTML = color ? `<span class="inline-block w-2 h-2 rounded-full mr-2" style="background:${color}"></span>${name}` : name;
+    li.className = "px-2.5 py-1.5 rounded-lg cursor-pointer text-xs " + (selCat === c.id ? "bg-indigo-100 font-bold" : "");
+    li.textContent = c.n;
     li.onclick = () => {
-      selCat = id;
+      selCat = c.id;
       document.querySelectorAll("#cat-list li").forEach(l => l.classList.remove("bg-indigo-100", "font-bold"));
       li.classList.add("bg-indigo-100", "font-bold");
       applyFilter();
     };
     catUl.appendChild(li);
-  };
-  createCatLi("__ALL__", "Todas as conexões");
-  G.cats.forEach(c => createCatLi(c, c, CAT_CORES[c]));
+  });
 
-  // Priorização
-  document.querySelectorAll(".prio").forEach(btn => {
-    btn.onclick = () => {
-      minV = parseInt(btn.dataset.min);
-      document.querySelectorAll(".prio").forEach(b => b.className = "prio py-1.5 text-[11px] rounded-lg font-semibold bg-gray-100 text-gray-500");
-      btn.className = "prio py-1.5 text-[11px] rounded-lg font-semibold bg-indigo-600 text-white";
-      applyFilter();
-    };
+  // Outros Controles
+  document.querySelectorAll(".view-btn").forEach(b => b.onclick = () => {
+    document.querySelectorAll(".view-btn").forEach(x => x.classList.replace("bg-indigo-600", "bg-gray-100"));
+    b.classList.replace("bg-gray-100", "bg-indigo-600");
+    viewMode = b.dataset.view;
+    applyFilter();
+  });
+
+  document.querySelectorAll(".prio").forEach(b => b.onclick = () => {
+    minV = parseInt(b.dataset.min);
+    document.querySelectorAll(".prio").forEach(x => x.classList.replace("bg-indigo-600", "bg-gray-100"));
+    b.classList.replace("bg-gray-100", "bg-indigo-600");
+    applyFilter();
   });
 
   document.getElementById("search").oninput = applyFilter;
-  document.getElementById("toggle-panel").onclick = () => {
-    document.getElementById("panel").classList.toggle("min");
-    document.getElementById("ic-down").classList.toggle("hidden");
-    document.getElementById("ic-up").classList.toggle("hidden");
-  };
-  document.getElementById("sel-all").onclick = () => { selEixos = new Set(G.eixos); location.reload(); };
-  document.getElementById("desel-all").onclick = () => { selEixos.clear(); document.querySelectorAll("#eixo-list li").forEach(l => l.className = "flex items-center gap-2 px-2.5 py-1.5 rounded-lg cursor-pointer text-xs text-gray-400"); applyFilter(); };
+  document.getElementById("toggle-panel").onclick = () => document.getElementById("panel").classList.toggle("min");
+  document.getElementById("sel-all").onclick = () => { selEixos = new Set(G.eixos); applyFilter(); };
+  document.getElementById("desel-all").onclick = () => { selEixos.clear(); applyFilter(); };
 }
 
-// --- MODAL ---
 function openModal(id) {
   const n = G.nodes.find(x => x.id === id); if(!n) return;
   document.getElementById("m-nivel").textContent = NL[n.group] || "";
-  document.getElementById("m-eixo").textContent = n.eixo_nome || "";
   document.getElementById("m-causa").textContent = n.causa_real;
-  
-  const mCat = document.getElementById("m-cat");
-  if(n.cat) {
-    mCat.textContent = n.cat;
-    document.getElementById("m-cat-wrap").style.display = "block";
-  } else {
-    document.getElementById("m-cat-wrap").style.display = "none";
-  }
-
-  const vWrap = document.getElementById("m-votos-wrap");
-  if(n.votos > 0) {
-    document.getElementById("m-votos").textContent = `⭐ ${n.votos} votos`;
-    vWrap.style.display = "block";
-  } else { vWrap.style.display = "none"; }
-
   document.getElementById("modal").classList.replace("hidden", "flex");
   setTimeout(() => document.getElementById("modal-box").classList.replace("opacity-0", "opacity-100"), 10);
 }
-
-function closeModal() {
-  document.getElementById("modal-box").classList.replace("opacity-100", "opacity-0");
-  setTimeout(() => document.getElementById("modal").classList.replace("flex", "hidden"), 200);
-}
+function closeModal() { document.getElementById("modal").classList.replace("flex", "hidden"); }
 </script>
 </body>
 </html>
