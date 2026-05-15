@@ -3,311 +3,276 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Árvore de Problemas — GT de Alfabetização</title>
+<title>Árvore de Problemas — GT Alfabetização 2026</title>
 <script src="https://cdn.tailwindcss.com"></script>
 <script src="https://unpkg.com/vis-network/standalone/umd/vis-network.min.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
-  html,body{height:100%;margin:0;padding:0;overflow:hidden;font-family:"Inter",sans-serif;background:#f0f2f5;}
-  #mynetwork{width:100%;height:100vh;background:#f0f2f5;}
-  #panel.min{width:52px;height:44px;overflow:hidden;}
+  *{box-sizing:border-box;}
+  html,body{height:100%;margin:0;padding:0;overflow:hidden;font-family:"Inter",sans-serif;background:#F7F8FA;}
+  #mynetwork{width:100%;height:100vh;background:#F7F8FA;}
+  .vis-tooltip{background:rgba(17,24,39,0.92)!important;color:#F9FAFB!important;border:none!important;border-radius:8px!important;font-size:11px!important;padding:7px 11px!important;max-width:260px!important;line-height:1.5!important;box-shadow:0 4px 16px rgba(0,0,0,.2)!important;}
+  #panel.min{width:44px!important;height:44px!important;overflow:hidden;border-radius:12px;}
   #panel.min #pb{display:none;}
-  .tsw{position:relative;display:inline-block;width:36px;height:20px;}
+  .tsw{position:relative;display:inline-block;width:34px;height:18px;flex-shrink:0;}
   .tsw input{opacity:0;width:0;height:0;}
-  .sl{position:absolute;cursor:pointer;inset:0;background:#ccc;border-radius:20px;transition:.2s;}
-  .sl:before{position:absolute;content:"";height:14px;width:14px;left:3px;bottom:3px;background:#fff;border-radius:50%;transition:.2s;}
-  input:checked+.sl{background:#4f46e5;}
+  .sl{position:absolute;cursor:pointer;inset:0;background:#D1D5DB;border-radius:18px;transition:.2s;}
+  .sl:before{position:absolute;content:"";height:12px;width:12px;left:3px;bottom:3px;background:#fff;border-radius:50%;transition:.2s;}
+  input:checked+.sl{background:#6366F1;}
   input:checked+.sl:before{transform:translateX(16px);}
-  @media(max-width:640px){#legend,#panel{display:none;}}
+  ::-webkit-scrollbar{width:4px;}::-webkit-scrollbar-thumb{background:#D1D5DB;border-radius:4px;}
 </style>
 </head>
 <body>
 
-<div id="loading" class="absolute inset-0 bg-white/80 backdrop-blur-sm flex flex-col items-center justify-center z-50">
-  <div class="animate-spin h-10 w-10 border-4 border-indigo-600 border-t-transparent rounded-full mb-4"></div>
-  <p class="text-sm font-bold text-gray-600">Carregando dados da planilha...</p>
+<div id="loading" class="absolute inset-0 z-50 flex flex-col items-center justify-center bg-white/90">
+  <div class="animate-spin h-10 w-10 border-4 border-indigo-500 border-t-transparent rounded-full mb-4"></div>
+  <p class="text-gray-600 font-bold">Lendo dados da planilha...</p>
 </div>
 
-<!-- Título Superior Central -->
-<div class="absolute top-4 left-0 w-full z-10 flex justify-center pointer-events-none">
-  <div class="bg-white/90 px-6 py-3 rounded-2xl shadow-md border border-gray-200 text-center pointer-events-auto">
-    <h1 class="text-lg font-bold text-gray-800">Árvore de Problemas</h1>
-    <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">GT de Alfabetização · SME-SP · 2026</p>
+<!-- Título Superior -->
+<div class="absolute top-0 left-0 right-0 z-10 pointer-events-none">
+  <div class="flex items-center justify-center gap-3 px-6 pt-5 pb-10">
+    <div class="text-center bg-white/70 p-3 rounded-2xl border border-white shadow-sm pointer-events-auto">
+      <h1 class="text-lg font-bold text-gray-800">Árvore de Problemas</h1>
+      <p class="text-xs font-semibold text-indigo-600 uppercase tracking-widest">Grupo de Trabalho - Alfabetização 2026</p>
+    </div>
   </div>
 </div>
 
 <div id="mynetwork"></div>
 
 <!-- Modal -->
-<div id="modal" class="fixed inset-0 bg-black/40 z-[1050] hidden items-center justify-center p-4">
-  <div id="modal-box" class="bg-white rounded-2xl shadow-2xl w-full max-w-lg transform transition-all duration-200 scale-95 opacity-0 overflow-hidden">
-    <div class="p-6 border-b flex justify-between items-start gap-3">
-      <div class="flex-1">
-        <div class="flex items-center gap-2 mb-2">
-          <span id="m-nivel" class="px-2 py-0.5 rounded text-[10px] font-bold bg-gray-100 text-gray-500 uppercase tracking-widest"></span>
-          <span id="m-eixo" class="px-2.5 py-0.5 rounded-full text-[10px] font-bold text-white shadow-sm" style="background:#1e3a8a"></span>
+<div id="modal" class="fixed inset-0 z-[100] hidden items-center justify-center p-4 bg-black/40">
+  <div id="modal-box" class="bg-white rounded-2xl shadow-2xl w-full max-w-lg transform transition-all scale-95 opacity-0 overflow-hidden">
+    <div class="px-6 pt-6 pb-4 border-b">
+      <div class="flex items-start justify-between gap-4">
+        <div class="flex-1 min-w-0">
+          <div class="flex items-center gap-2 mb-3 flex-wrap">
+            <span id="m-nivel" class="text-[10px] font-bold uppercase bg-gray-100 px-2 py-0.5 rounded text-gray-500"></span>
+            <span id="m-eixo" class="text-[10px] font-bold text-white px-2.5 py-0.5 rounded-full"></span>
+          </div>
+          <h3 id="m-causa" class="text-sm font-semibold text-gray-800 leading-relaxed"></h3>
         </div>
-        <h3 id="m-causa" class="text-sm font-semibold text-gray-800 leading-relaxed"></h3>
-      </div>
-      <button onclick="closeModal()" class="text-gray-300 hover:text-gray-600 text-2xl leading-none">&times;</button>
-    </div>
-    <div id="m-cat-wrap" class="px-6 py-4 bg-gray-50">
-      <p class="text-[10px] text-gray-400 font-bold uppercase mb-1.5">Conexão temática</p>
-      <div id="m-cat" class="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs font-medium bg-white border border-gray-200 text-indigo-700 shadow-sm"></div>
-    </div>
-    <div class="p-4 bg-white border-t text-right">
-      <button onclick="closeModal()" class="px-6 py-2 bg-indigo-600 text-white text-xs font-bold rounded-xl hover:bg-indigo-700">Fechar</button>
-    </div>
-  </div>
-</div>
-
-<!-- Legenda (Hierarquia) -->
-<div id="legend" class="absolute bottom-4 left-4 bg-white/90 p-4 rounded-xl shadow-lg border border-gray-200 z-10 text-[10px] space-y-1.5">
-  <p class="font-bold text-gray-700 mb-2 uppercase tracking-widest">Hierarquia</p>
-  <div class="flex items-center gap-2"><span class="w-3 h-3 rounded-full bg-[#f43f5e]"></span>Problema macro</div>
-  <div class="flex items-center gap-2"><span class="w-3 h-3 rounded-full bg-[#f97316]"></span>Eixo</div>
-  <div class="flex items-center gap-2"><span class="w-3 h-3 rounded-full bg-[#eab308]"></span>Problema central</div>
-  <div class="flex items-center gap-2"><span class="w-3 h-3 rounded-full bg-[#22c55e]"></span>Causa primária</div>
-  <div class="flex items-center gap-2"><span class="w-3 h-3 rounded-full bg-[#3b82f6]"></span>Causa secundária</div>
-  <div class="flex items-center gap-2"><span class="w-3.5 h-3.5 rotate-45 border-2 border-indigo-600 bg-white inline-block"></span>Conexão transversal</div>
-</div>
-
-<!-- Painel Filtros -->
-<div id="panel" class="absolute bottom-4 right-4 bg-white/95 rounded-xl shadow-2xl border border-gray-200 z-10 w-64 transition-all">
-  <button id="toggle-panel" class="absolute top-2 right-2 text-gray-400 hover:text-gray-700 p-1">
-    <svg id="ic-down" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg>
-  </button>
-  <div id="pb" class="p-4 space-y-4">
-    <input id="search" type="text" placeholder="🔍 Pesquisar problema..." class="w-full px-3 py-1.5 border border-gray-300 rounded-lg text-xs outline-none focus:ring-2 focus:ring-indigo-400">
-    
-    <div class="space-y-2">
-      <div class="flex items-center justify-between text-[11px] text-gray-600 font-bold uppercase tracking-wider">
-        <span>Versão de 1 minuto</span>
-        <label class="tsw"><input type="checkbox" id="f-summary" onchange="applyFilters()"><span class="sl"></span></label>
-      </div>
-      <div class="flex items-center justify-between text-[11px] text-gray-600 font-bold uppercase tracking-wider">
-        <span>Conexões transversais</span>
-        <label class="tsw"><input type="checkbox" id="f-hubs" checked onchange="applyFilters()"><span class="sl"></span></label>
+        <button onclick="closeModal()" class="text-gray-400 hover:text-gray-600 text-2xl">×</button>
       </div>
     </div>
-
-    <div>
-      <p class="text-[10px] font-bold uppercase text-gray-400 mb-2">Priorização ⭐</p>
-      <div class="grid grid-cols-4 gap-1">
-        <button onclick="setStars(0, this)" class="p-btn py-1 text-[10px] rounded bg-indigo-600 text-white font-bold shadow-sm">Todas</button>
-        <button onclick="setStars(1, this)" class="p-btn py-1 text-[10px] rounded bg-gray-100 text-gray-500 font-medium">1+</button>
-        <button onclick="setStars(4, this)" class="p-btn py-1 text-[10px] rounded bg-gray-100 text-gray-500 font-medium">4+</button>
-        <button onclick="setStars(5, this)" class="p-btn py-1 text-[10px] rounded bg-gray-100 text-gray-500 font-medium">5+</button>
-      </div>
+    <div id="m-cat-wrap" class="px-6 py-4 bg-gray-50 border-b">
+      <p class="text-[10px] font-bold uppercase text-gray-400 mb-2">Conexão temática</p>
+      <div id="m-cat" class="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs font-medium bg-white border border-gray-200 text-indigo-700"></div>
     </div>
-
-    <div>
-      <p class="text-[10px] font-bold uppercase text-gray-400 mb-1">Eixos</p>
-      <ul id="eixo-list" class="space-y-0.5 max-h-24 overflow-y-auto text-[10px]"></ul>
+    <div class="px-6 py-4 bg-white flex justify-end">
+      <button onclick="closeModal()" class="px-5 py-2 bg-gray-900 text-white text-xs font-semibold rounded-xl">Fechar</button>
     </div>
-
-    <div>
-      <p class="text-[10px] font-bold uppercase text-gray-400 mb-1">Destaque Transversal</p>
-      <ul id="cat-list" class="space-y-0.5 max-h-32 overflow-y-auto text-[10px] pr-1"></ul>
-    </div>
-  </div>
-</div>
-
 <script>
-// CONFIGURAÇÕES DE DADOS E CORES
+// 1. CONSTANTES (Mantendo suas definições originais)
 const CSV_URL = "https://raw.githubusercontent.com/sme-upge/sme-upge.github.io/refs/heads/main/GT%20de%20Alfabetiza%C3%A7%C3%A3o/%C3%81rvore%20de%20Problemas%20-%20Alfabetiza%C3%A7%C3%A3o%20(3).csv";
-const MACRO_ID = "Baixa aprendizagem na alfabetização";
+const MACRO_ID = "Revisão da Política de Alfabetização";
 
-const EIXO_COLORS = {
-  "Eixo 1": "#2563eb", "Eixo 2": "#16a34a", "Eixo 4": "#ea580c", 
-  "Eixo 5": "#9333ea", "Eixo 6": "#0891b2", "Eixo 7": "#db2777"
+// Cores e Configurações (Mantendo seus nomes GC e CAT_CORES)
+const GC = {
+    "macro": {"background": "#E53E3E", "border": "#C53030"},
+    "eixo": {"background": "#DD6B20", "border": "#C05621"},
+    "problema": {"background": "#D69E2E", "border": "#B7791F"},
+    "causa1": {"background": "#38A169", "border": "#276749"},
+    "causa2": {"background": "#3182CE", "border": "#2C5282"},
+    "causa3": {"background": "#805AD5", "border": "#553C9A"},
+    "hub": {"background": "#FFFFFF", "border": "#6366F1"}
 };
 
-const HIER_COLORS = {
-  macro: "#f43f5e", eixo: "#f97316", problema: "#eab308", 
-  causa1: "#22c55e", causa2: "#3b82f6", causa3: "#8b5cf6"
-};
-
+// ESTADOS GLOBAIS (O que faltava para o código não quebrar)
 let network, nodesDS, edgesDS;
-let activeStars = 0, activeEixos = new Set(), selCat = "__ALL__";
-let rawNodes = [], rawEdges = [], hubIds = new Set();
+let rawNodes = [];
+let hubIds = new Set();
+let activeEixos = new Set();
+let activeStars = 0;
+let activeCat = "__ALL__";
+let currentView = 'completa';
 
-// CARREGAR E PROCESSAR CSV
+// 2. CARREGAMENTO DO CSV
 fetch(CSV_URL)
-  .then(r => r.arrayBuffer())
-  .then(buf => {
-    let text = new TextDecoder("windows-1252").decode(buf);
-    parseCsvToTree(text);
+  .then(res => res.arrayBuffer())
+  .then(buffer => {
+    let decoder = new TextDecoder('windows-1252');
+    let text = decoder.decode(buffer);
+    processCSV(text);
   });
 
-function parseCsvToTree(text) {
-    const lines = text.split(/\r?\n/).filter(l => l.trim());
-    const nodesMap = new Map();
-    const edgesList = [];
-    const categories = new Map();
+function processCSV(text) {
+  const lines = text.split(/\r?\n/).filter(l => l.trim());
+  const nodesMap = new Map();
+  const edgesList = [];
+  const categoryMap = new Map();
 
-    // Inserir Macro
-    nodesMap.set(MACRO_ID, { id: MACRO_ID, label: "BAIXA APRENDIZAGEM\nNA ALFABETIZAÇÃO", group: 'macro', value: 3000, level: 0, causa_real: MACRO_ID });
+  // Inserir Macro
+  nodesMap.set(MACRO_ID, { id: MACRO_ID, label: "Revisão da Política\nde Alfabetização", group: 'macro', value: 3000, level: 0, causa_real: MACRO_ID });
 
-    lines.slice(1).forEach(line => {
-        const cols = line.split(';').map(c => c.replace(/^"|"$/g, '').trim());
-        if (cols.length < 7) return;
+  lines.slice(1).forEach(line => {
+    const cols = line.split(';').map(v => v.replace(/^"|"$/g, '').trim());
+    if(cols.length < 5) return;
 
-        const [eixoFull, prob, c1, cat1, c2, cat2, v2] = cols;
-        const eixoId = eixoFull.split(' - ')[0];
+    const [eixoFull, prob, c1, cat1, c2, cat2, v2] = cols;
+    const eixoId = eixoFull.split(' - ')[0];
 
-        // Criar Eixos
-        if (!nodesMap.has(eixoId)) {
-            nodesMap.set(eixoId, { id: eixoId, label: eixoId, group: 'eixo', value: 800, level: 1, eixo: eixoId, causa_real: eixoFull });
-            edgesList.push({ from: MACRO_ID, to: eixoId });
-            activeEixos.add(eixoId);
-        }
-        // Criar Problemas Centrais
-        if (prob && !nodesMap.has(prob)) {
-            nodesMap.set(prob, { id: prob, label: prob.substring(0,40)+'...', group: 'problema', value: 500, level: 2, eixo: eixoId, causa_real: prob });
-            edgesList.push({ from: eixoId, to: prob });
-        }
-        // Causa Primária
-        if (c1 && !nodesMap.has(c1)) {
-            nodesMap.set(c1, { id: c1, label: c1.substring(0,30)+'...', group: 'causa1', value: 150, level: 3, eixo: eixoId, causa_real: c1, cat: cat1 });
-            edgesList.push({ from: prob, to: c1 });
-        }
-        // Causa Secundária (Com Votos)
-        if (c2 && !nodesMap.has(c2)) {
-            const votos = parseInt(v2) || 0;
-            nodesMap.set(c2, { id: c2, label: c2.substring(0,30)+'...', group: 'causa2', value: 100 + (votos * 60), level: 4, eixo: eixoId, causa_real: c2, votos: votos, cat: cat2 });
-            edgesList.push({ from: c1, to: c2 });
-        }
+    // Eixo
+    if (!nodesMap.has(eixoId)) {
+      nodesMap.set(eixoId, { id: eixoId, label: eixoId, group: 'eixo', value: 800, level: 1, eixo: eixoId, causa_real: eixoFull });
+      edgesList.push({ from: MACRO_ID, to: eixoId });
+      activeEixos.add(eixoId); // Alimenta os eixos ativos para o filtro
+    }
+    // Problema
+    if (prob && !nodesMap.has(prob)) {
+      nodesMap.set(prob, { id: prob, label: prob.substring(0,35)+'...', group: 'problema', value: 500, level: 2, eixo: eixoId, causa_real: prob });
+      edgesList.push({ from: eixoId, to: prob });
+    }
+    // Causa 1
+    if (c1 && !nodesMap.has(c1)) {
+      nodesMap.set(c1, { id: c1, label: c1.substring(0,25)+'...', group: 'causa1', value: 150, level: 3, eixo: eixoId, causa_real: c1, cat: cat1 });
+      edgesList.push({ from: prob, to: c1 });
+    }
+    // Causa 2
+    if (c2 && !nodesMap.has(c2)) {
+      const votos = parseInt(v2) || 0;
+      nodesMap.set(c2, { id: c2, label: c2.substring(0,25)+'...', group: 'causa2', value: 120 + (votos * 60), level: 4, eixo: eixoId, causa_real: c2, votos: votos, cat: cat2 });
+      edgesList.push({ from: c1, to: c2 });
+    }
 
-        // Mapear Transversais
-        [cat1, cat2].forEach(cat => {
-            if (cat && cat.length > 3) {
-                if (!categories.has(cat)) categories.set(cat, new Set());
-                if (c1) categories.get(cat).add(c1);
-                if (c2) categories.get(cat).add(c2);
-            }
-        });
+    // Preparar Hubs (Temas Transversais)
+    [cat1, cat2].forEach(cat => {
+      if(cat && cat.length > 2) {
+        if(!categoryMap.has(cat)) categoryMap.set(cat, new Set());
+        if(c1 && cat === cat1) categoryMap.get(cat).add(c1);
+        if(c2 && cat === cat2) categoryMap.get(cat).add(c2);
+      }
     });
+  });
 
-    // Criar Diamantes (Hubs)
-    categories.forEach((targets, cat) => {
-        const hubId = "__hub__" + cat;
-        hubIds.add(hubId);
-        nodesMap.set(hubId, { id: hubId, label: cat, group: 'hub', shape: 'diamond', value: 250, level: 99, cat: cat, causa_real: "Tema Transversal: " + cat });
-        targets.forEach(t => edgesList.push({ from: t, to: hubId, dashes: true, transversal: true, color: "#6366f1" }));
-    });
+  // Criar Hubs
+  categoryMap.forEach((targets, cat) => {
+    const hubId = "__hub__" + cat;
+    hubIds.add(hubId);
+    nodesMap.set(hubId, { id: hubId, label: cat, group: 'hub', shape: 'diamond', value: 200, level: 5, cat: cat, causa_real: "Tema Transversal: " + cat });
+    targets.forEach(t => edgesList.push({ from: t, to: hubId, dashes: true }));
+  });
 
-    rawNodes = Array.from(nodesMap.values());
-    rawEdges = edgesList;
-    initVis();
-    buildSidebar(categories);
+  rawNodes = Array.from(nodesMap.values());
+  initNetwork(rawNodes, edgesList);
+  setupSidebar(categoryMap);
 }
 
-function initVis() {
-    nodesDS = new vis.DataSet(rawNodes.map(n => {
-        const isHub = hubIds.has(n.id);
-        const eixoCor = isHub ? "#ffffff" : (EIXO_COLORS[n.eixo] || HIER_COLORS[n.group]);
-        return {
-            ...n,
-            color: { background: eixoCor, border: isHub ? "#6366f1" : eixoCor },
-            font: { color: "#1e293b", size: 13, strokeWidth: 5, strokeColor: "#ffffff", face: 'Inter', weight: 'bold' }
-        };
-    }));
-    edgesDS = new vis.DataSet(rawEdges);
+function initNetwork(nodes, edges) {
+  nodesDS = new vis.DataSet(nodes.map(n => ({
+    ...n,
+    color: GC[n.group] || GC.causa1,
+    font: { color: "#1e293b", size: 13, face: 'Inter', weight: 'bold' }
+  })));
+  edgesDS = new vis.DataSet(edges);
 
-    network = new vis.Network(document.getElementById("mynetwork"), { nodes: nodesDS, edges: edgesDS }, {
-        nodes: { shape: "dot", scaling: { min: 10, max: 120 } },
-        edges: { color: "#cbd5e1", arrows: { to: { enabled: false } }, smooth: { type: "continuous" } },
-        physics: { barnesHut: { gravitationalConstant: -20000, springLength: 200 } }
-    });
+  const container = document.getElementById("mynetwork");
+  network = new vis.Network(container, { nodes: nodesDS, edges: edgesDS }, {
+    nodes: { shape: 'dot', scaling: { min: 10, max: 50 } },
+    edges: { arrows: "to", color: "#cbd5e1", smooth: { type: "continuous" } },
+    physics: { barnesHut: { gravitationalConstant: -2000, springLength: 150 }, stabilization: { iterations: 100 } }
+  });
 
-    network.once("stabilizationIterationsDone", () => {
-        document.getElementById("loading").style.display = "none";
-        network.setOptions({ physics: false });
-    });
-    network.on("click", p => p.nodes.length && openModal(p.nodes[0]));
+  network.once("stabilizationIterationsDone", () => {
+    document.getElementById("loading").style.display = "none";
+  });
+  
+  network.on("click", p => p.nodes.length && openModal(p.nodes[0]));
 }
 
+// 3. FUNÇÕES DE FILTRO (Fieis à sua lógica de botões)
 function applyFilters() {
-    const q = document.getElementById("search").value.toLowerCase();
-    const sum = document.getElementById("f-summary").checked;
-    const showTrans = document.getElementById("f-hubs").checked;
+  const q = document.getElementById("search").value.toLowerCase();
+  
+  nodesDS.update(rawNodes.map(n => {
+    let visible = true;
+    let opacity = 1;
+    const isHub = hubIds.has(n.id);
+
+    if (currentView === 'minuto' && n.level > 2 && !isHub) visible = false;
+    if (n.eixo && !activeEixos.has(n.eixo)) visible = false;
+    if (n.votos !== undefined && n.votos < activeStars) visible = false;
+    if (q && !n.causa_real?.toLowerCase().includes(q)) visible = false;
     
-    nodesDS.update(rawNodes.map(n => {
-        let vis = true;
-        let op = 1;
-        const isHub = hubIds.has(n.id);
+    // Logica de destaque para Transversais
+    if (activeCat !== "__ALL__" && n.cat !== activeCat && !isHub && n.group !== 'macro') opacity = 0.1;
+    if (n.group === 'macro') visible = true;
 
-        if (sum && n.level > 2 && !isHub) vis = false;
-        if (isHub && !showTrans) vis = false;
-        if (vis && n.eixo && !activeEixos.has(n.eixo)) vis = false;
-        if (vis && n.votos !== undefined && n.votos < activeStars) vis = false;
-        if (vis && selCat !== "__ALL__" && n.cat !== selCat) op = 0.08;
-        if (vis && q && !n.causa_real?.toLowerCase().includes(q)) vis = false;
-        if (n.group === 'macro') vis = true;
-
-        return { id: n.id, hidden: !vis, opacity: op };
-    }));
+    return { id: n.id, hidden: !visible, opacity: opacity };
+  }));
 }
 
-function buildSidebar(catMap) {
-    const eixoUl = document.getElementById("eixo-list");
-    const catUl = document.getElementById("cat-list");
-    
-    // Eixos
-    activeEixos.forEach(e => {
-        const li = document.createElement("li");
-        li.innerHTML = `<label class="flex items-center gap-2 cursor-pointer"><input type="checkbox" checked class="eixo-chk rounded"> <span>${e}</span></label>`;
-        li.querySelector('input').onchange = (ev) => { ev.target.checked ? activeEixos.add(e) : activeEixos.delete(e); applyFilters(); };
-        eixoUl.appendChild(li);
-    });
+function setViewMode(mode) {
+  currentView = mode;
+  document.querySelectorAll('.v-btn').forEach(b => b.classList.replace('bg-indigo-600', 'bg-gray-100'));
+  document.getElementById('v-' + mode).classList.replace('bg-gray-100', 'bg-indigo-600');
+  applyFilters();
+}
 
-    // Transversais
-    const addCatBtn = (id, label) => {
-        const li = document.createElement("li");
-        li.className = "px-2 py-1 rounded cursor-pointer hover:bg-white text-slate-600 truncate";
-        li.textContent = label;
-        li.onclick = () => { selCat = id; applyFilters(); };
-        catUl.appendChild(li);
+function setStars(val) {
+  activeStars = val;
+  document.querySelectorAll('.s-btn').forEach(b => b.classList.replace('bg-indigo-600', 'bg-gray-100'));
+  document.getElementById('s-' + val).classList.replace('bg-gray-100', 'bg-indigo-600');
+  applyFilters();
+}
+
+function setupSidebar(catMap) {
+  const eixoUl = document.getElementById("eixo-list");
+  eixoUl.innerHTML = '';
+  // Pegar nomes dos eixos do nodesMap
+  const eixosPresentes = [...new Set(rawNodes.filter(n => n.group === 'eixo').map(n => n.id))];
+  eixosPresentes.forEach(e => {
+    const li = document.createElement("li");
+    li.innerHTML = `<label class="flex items-center gap-2 cursor-pointer"><input type="checkbox" checked class="eixo-chk" data-eixo="${e}"> <span>${e}</span></label>`;
+    li.querySelector('input').onchange = (ev) => {
+      ev.target.checked ? activeEixos.add(e) : activeEixos.delete(e);
+      applyFilters();
     };
-    addCatBtn("__ALL__", "Todos");
-    Array.from(catMap.keys()).forEach(c => addCatBtn(c, c));
-}
+    eixoUl.appendChild(li);
+  });
 
-function setStars(v, btn) {
-    activeStars = v;
-    document.querySelectorAll('.p-btn').forEach(b => {
-        b.classList.remove('bg-indigo-600', 'text-white');
-        b.classList.add('bg-gray-100', 'text-gray-500');
-    });
-    btn.classList.replace('bg-gray-100', 'bg-indigo-600');
-    btn.classList.replace('text-gray-500', 'text-white');
-    applyFilters();
+  const catUl = document.getElementById("cat-list");
+  catUl.innerHTML = '<li class="px-2 py-1 cursor-pointer hover:bg-gray-100 text-indigo-600 font-bold" onclick="activeCat=\'__ALL__\';applyFilters()">Limpar Filtro</li>';
+  catMap.forEach((targets, cat) => {
+    const li = document.createElement("li");
+    li.className = "px-2 py-1 rounded cursor-pointer hover:bg-gray-100 truncate text-[10px]";
+    li.textContent = cat;
+    li.onclick = () => { activeCat = cat; applyFilters(); };
+    catUl.appendChild(li);
+  });
 }
 
 function toggleAllEixos(s) {
-  document.querySelectorAll('.eixo-chk').forEach(c => { c.checked = s; });
-  activeEixos = s ? new Set(Object.keys(EIXO_COLORS)) : new Set();
+  document.querySelectorAll('.eixo-chk').forEach(c => {
+    c.checked = s;
+    const e = c.getAttribute('data-eixo');
+    s ? activeEixos.add(e) : activeEixos.delete(e);
+  });
   applyFilters();
 }
 
 function openModal(id) {
-    const n = nodesDS.get(id);
-    document.getElementById("m-nivel").textContent = n.group;
-    document.getElementById("m-eixo").textContent = n.eixo || "GERAL";
-    document.getElementById("m-causa").textContent = n.causa_real || n.label;
-    document.getElementById("m-cat-wrap").style.display = n.cat ? "block" : "none";
-    if(n.cat) document.getElementById("m-cat").textContent = n.cat;
-    document.getElementById("modal").classList.replace("hidden", "flex");
-    setTimeout(() => document.getElementById("modal-box").classList.replace("opacity-0", "opacity-100"), 10);
+  const n = nodesDS.get(id);
+  if(!n) return;
+  document.getElementById("m-nivel").textContent = n.group;
+  document.getElementById("m-eixo").textContent = n.eixo || "GERAL";
+  document.getElementById("m-eixo").style.backgroundColor = (GC[n.group] || GC.eixo).background;
+  document.getElementById("m-causa").textContent = n.causa_real;
+  document.getElementById("m-cat-wrap").style.display = n.cat ? "block" : "none";
+  if(n.cat) document.getElementById("m-cat").textContent = n.cat;
+  
+  document.getElementById("modal").classList.remove("hidden");
+  document.getElementById("modal").classList.add("flex");
+  setTimeout(() => document.getElementById("modal-box").classList.replace("opacity-0", "opacity-100"), 10);
 }
 
 function closeModal() {
-    document.getElementById("modal-box").classList.replace("opacity-100", "opacity-0");
-    setTimeout(() => document.getElementById("modal").classList.replace("flex", "hidden"), 200);
+  document.getElementById("modal-box").classList.replace("opacity-100", "opacity-0");
+  setTimeout(() => document.getElementById("modal").classList.replace("flex", "hidden"), 200);
 }
+
 document.getElementById("toggle-panel").onclick = () => document.getElementById("panel").classList.toggle("min");
 document.getElementById("search").oninput = applyFilters;
 </script>
-</body>
-</html>
