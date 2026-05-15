@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Árvore de Problemas — GT Alfabetização 2026</title>
+<title>Árvore de Problemas — GT de Alfabetização · SME-SP</title>
 <script src="https://cdn.tailwindcss.com"></script>
 <script src="https://unpkg.com/vis-network/standalone/umd/vis-network.min.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -11,56 +11,61 @@
   *{box-sizing:border-box;}
   html,body{height:100%;margin:0;padding:0;overflow:hidden;font-family:"Inter",sans-serif;background:#F7F8FA;}
   #mynetwork{width:100%;height:100vh;background:#F7F8FA;}
-  .vis-tooltip{background:rgba(17,24,39,0.92)!important;color:#F9FAFB!important;border:none!important;border-radius:8px!important;font-size:11px!important;padding:7px 11px!important;max-width:260px!important;line-height:1.5!important;box-shadow:0 4px 16px rgba(0,0,0,.2)!important;}
+  .vis-tooltip{background:rgba(17,24,39,.92)!important;color:#F9FAFB!important;border:none!important;border-radius:8px!important;font-size:11px!important;padding:7px 11px!important;max-width:260px!important;line-height:1.5!important;box-shadow:0 4px 16px rgba(0,0,0,.2)!important;}
   #panel{transition:width .2s,height .2s;}
   #panel.min{width:44px!important;height:44px!important;overflow:hidden;border-radius:12px;}
   #panel.min #pb{display:none;}
-  ::-webkit-scrollbar{width:4px;}::-webkit-scrollbar-thumb{background:#D1D5DB;border-radius:4px;}
+  ::-webkit-scrollbar{width:4px;}::-webkit-scrollbar-track{background:transparent;}::-webkit-scrollbar-thumb{background:#D1D5DB;border-radius:4px;}
   @media(max-width:640px){#legend,#panel{display:none!important;}}
 </style>
 </head>
 <body>
 
-<div id="loading" class="absolute inset-0 z-50 flex flex-col items-center justify-center bg-white/90">
-  <div class="animate-spin h-10 w-10 border-4 border-indigo-500 border-t-transparent rounded-full mb-4"></div>
-  <p class="text-gray-600 font-bold">Lendo dados da planilha...</p>
+<div id="loading" class="absolute inset-0 z-50 flex flex-col items-center justify-center" style="background:rgba(247,248,250,.95);backdrop-filter:blur(8px);">
+  <div class="relative w-14 h-14 mb-5">
+    <div class="absolute inset-0 rounded-full border-4 border-indigo-100"></div>
+    <div class="absolute inset-0 rounded-full border-4 border-indigo-500 border-t-transparent animate-spin"></div>
+  </div>
+  <p class="text-base font-semibold text-gray-700">Montando a árvore de problemas</p>
+  <p class="text-xs text-gray-400 mt-1">GT de Alfabetização · SME-SP · 2026</p>
 </div>
 
 <div class="absolute top-0 left-0 right-0 z-10 pointer-events-none">
-  <div class="flex items-center justify-center gap-3 px-6 pt-5 pb-10">
-    <div class="text-center bg-white/70 p-3 rounded-2xl border border-white shadow-sm pointer-events-auto">
-      <h1 class="text-lg font-bold text-gray-800">Árvore de Problemas</h1>
-      <p class="text-xs font-semibold text-indigo-600 uppercase tracking-widest">Grupo de Trabalho - Alfabetização 2026</p>
+  <div class="flex items-center justify-center gap-3 px-6 pt-5 pb-10" style="background:linear-gradient(to bottom,rgba(247,248,250,1) 0%,rgba(247,248,250,0) 100%);">
+    <div class="text-center">
+      <h1 class="text-lg font-bold text-gray-800 tracking-tight">Árvore de Problemas</h1>
+      <p class="text-xs text-gray-400 mt-0.5">GT de Alfabetização · SME-SP · 2026</p>
     </div>
   </div>
 </div>
 
 <div id="mynetwork"></div>
 
-<div id="modal" class="fixed inset-0 z-[100] hidden items-center justify-center p-4 bg-black/40">
-  <div id="modal-box" class="bg-white rounded-2xl shadow-2xl w-full max-w-lg transform transition-all scale-95 opacity-0 overflow-hidden">
-    <div class="px-6 pt-6 pb-4 border-b">
+<div id="modal" class="fixed inset-0 z-[100] hidden items-center justify-center p-4" style="background:rgba(17,24,39,.5);backdrop-filter:blur(4px);">
+  <div id="modal-box" class="bg-white rounded-2xl shadow-2xl w-full max-w-lg transform transition-all duration-200 scale-95 opacity-0 overflow-hidden">
+    <div class="px-6 pt-6 pb-4 border-b border-gray-100">
       <div class="flex items-start justify-between gap-4">
         <div class="flex-1 min-w-0">
           <div class="flex items-center gap-2 mb-3 flex-wrap">
-            <span id="m-nivel" class="text-[10px] font-bold uppercase bg-gray-100 px-2 py-0.5 rounded text-gray-500"></span>
-            <span id="m-eixo" class="text-[10px] font-bold text-white px-2.5 py-0.5 rounded-full"></span>
+            <span id="m-nivel" class="text-[10px] font-semibold uppercase tracking-widest text-gray-400 bg-gray-100 px-2 py-0.5 rounded-md"></span>
+            <span id="m-eixo" class="text-[10px] font-semibold text-white px-2.5 py-0.5 rounded-full" style="background:#1E3A5F"></span>
           </div>
+          <p class="text-[10px] font-semibold uppercase tracking-wider text-gray-400 mb-1.5">O que o grupo disse</p>
           <h3 id="m-causa" class="text-sm font-semibold text-gray-800 leading-relaxed"></h3>
         </div>
-        <button onclick="closeModal()" class="text-gray-400 hover:text-gray-600 text-2xl">×</button>
+        <button onclick="closeModal()" class="w-8 h-8 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center text-gray-500 text-lg flex-shrink-0 mt-1">×</button>
       </div>
     </div>
-    <div id="m-cat-wrap" class="px-6 py-4 bg-gray-50 border-b">
-      <p class="text-[10px] font-bold uppercase text-gray-400 mb-2">Conexão temática</p>
-      <div id="m-cat" class="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs font-medium bg-white border border-gray-200 text-indigo-700"></div>
+    <div id="m-cat-wrap" class="px-6 py-4 border-b border-gray-100">
+      <p class="text-[10px] font-semibold uppercase tracking-wider text-gray-400 mb-2">Conexão temática</p>
+      <div id="m-cat" class="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs font-medium"></div>
     </div>
     <div id="m-votos-wrap" class="px-6 py-4 hidden">
-        <p class="text-[10px] font-bold uppercase text-gray-400 mb-2">Priorização</p>
-        <span id="m-votos" class="text-xs font-semibold text-amber-600"></span>
+      <p class="text-[10px] font-semibold uppercase tracking-wider text-gray-400 mb-2">Priorização</p>
+      <span id="m-votos" class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-amber-50 text-amber-700 rounded-xl text-xs font-semibold"></span>
     </div>
-    <div class="px-6 py-4 bg-white flex justify-end">
-      <button onclick="closeModal()" class="px-5 py-2 bg-gray-900 text-white text-xs font-semibold rounded-xl">Fechar</button>
+    <div class="px-6 py-4 bg-gray-50 flex justify-end">
+      <button onclick="closeModal()" class="px-5 py-2 bg-gray-900 hover:bg-gray-700 text-white text-xs font-semibold rounded-xl transition-colors">Fechar</button>
     </div>
   </div>
 </div>
@@ -78,32 +83,31 @@
 </div>
 
 <div id="panel" class="absolute bottom-5 right-5 bg-white/95 rounded-2xl shadow-lg border border-gray-100 z-10 w-72">
-  <div class="flex items-center justify-between px-4 pt-4 pb-3 border-b">
+  <div class="flex items-center justify-between px-4 pt-4 pb-3 border-b border-gray-100">
     <p class="text-[10px] font-bold uppercase tracking-widest text-gray-400">Filtros</p>
-    <button id="toggle-panel" class="w-7 h-7 rounded-lg bg-gray-100 flex items-center justify-center">
-      <svg id="ic-down" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path d="M19 9l-7 7-7-7"/></svg>
+    <button id="toggle-panel" class="w-7 h-7 rounded-lg bg-gray-100 hover:bg-gray-200 flex items-center justify-center">
+      <svg id="ic-down" class="w-3.5 h-3.5 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg>
     </button>
   </div>
   <div id="pb" class="p-4 space-y-4">
-    <input id="search" type="text" placeholder="Pesquisar..." class="w-full px-3 py-2 bg-gray-50 border rounded-xl text-xs outline-none focus:ring-2 focus:ring-indigo-300">
-    
+    <div class="relative">
+      <input id="search" type="text" placeholder="Pesquisar na árvore..." class="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-xl text-xs text-gray-700 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-300">
+    </div>
     <div>
-      <p class="text-[10px] font-bold uppercase text-gray-400 mb-2">Visualização</p>
-      <div class="grid grid-cols-3 gap-1">
-        <button data-view="completa" class="view-btn py-2 text-[10px] rounded-lg bg-indigo-600 text-white">Completa</button>
-        <button data-view="transversais" class="view-btn py-2 text-[10px] rounded-lg bg-gray-100 text-gray-500">Só Transv.</button>
-        <button data-view="minuto" class="view-btn py-2 text-[10px] rounded-lg bg-gray-100 text-gray-500">1 min</button>
+      <p class="text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-2">Visualização</p>
+      <div class="grid grid-cols-3 gap-1.5">
+        <button data-view="completa" class="v-btn py-2 text-[10px] rounded-xl font-semibold bg-indigo-600 text-white leading-tight px-1">Completa</button>
+        <button data-view="transversais" class="v-btn py-2 text-[10px] rounded-xl font-semibold bg-gray-100 text-gray-500 hover:bg-gray-200 leading-tight px-1">Transv.</button>
+        <button data-view="minuto" class="v-btn py-2 text-[10px] rounded-xl font-semibold bg-gray-100 text-gray-500 hover:bg-gray-200 leading-tight px-1">1 min</button>
       </div>
     </div>
-
     <div>
-      <p class="text-[10px] font-bold uppercase text-gray-400 mb-2">Eixos</p>
-      <ul id="eixo-list" class="space-y-1 max-h-28 overflow-y-auto text-[11px]"></ul>
+      <p class="text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-2">Eixos</p>
+      <ul id="eixo-list" class="space-y-1 max-h-28 overflow-y-auto pr-1 text-[11px] text-gray-600"></ul>
     </div>
-
     <div>
-      <p class="text-[10px] font-bold uppercase text-gray-400 mb-2">Tema transversal</p>
-      <ul id="cat-list" class="space-y-0.5 max-h-32 overflow-y-auto text-[10px]"></ul>
+      <p class="text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-2">Tema transversal</p>
+      <ul id="cat-list" class="space-y-0.5 max-h-40 overflow-y-auto pr-1 text-[10px] text-gray-500"></ul>
     </div>
   </div>
 </div>
@@ -111,173 +115,163 @@
 <script>
 // --- CONFIGURAÇÃO ---
 const CSV_URL = "https://raw.githubusercontent.com/sme-upge/sme-upge.github.io/refs/heads/main/GT%20de%20Alfabetiza%C3%A7%C3%A3o/%C3%81rvore%20de%20Problemas%20-%20Alfabetiza%C3%A7%C3%A3o%20(3).csv";
-const MACRO = "Baixa aprendizagem na alfabetização";
+const MACRO_ID = "Baixa aprendizagem na alfabetização";
+const GC = {
+    "macro": "#E53E3E", "eixo": "#DD6B20", "problema": "#D69E2E", 
+    "causa1": "#38A169", "causa2": "#3182CE", "causa3": "#805AD5", "hub": "#A78BFA"
+};
 const EIXO_NOMES = {"Eixo 1": "Responsabilidades", "Eixo 2": "Formação", "Eixo 3": "Infraestrutura", "Eixo 4": "Incentivos", "Eixo 5": "Acomp. e Monitoramento", "Eixo 6": "Avaliação", "Eixo 7": "Currículo e Materiais"};
-const GC = {"macro": "#E53E3E", "eixo": "#DD6B20", "problema": "#D69E2E", "causa1": "#38A169", "causa2": "#3182CE", "causa3": "#805AD5", "hub": "#A78BFA"};
 
-let network, visData, rawNodes = [], hubIds = new Set();
+let network, nodesDS, edgesDS, rawNodes = [], hubIds = new Set();
 let selEixos = new Set(), selCat = "__ALL__", viewMode = "completa";
 
-// 1. CARREGAMENTO COM ENCODING CORRETO
+// --- CARREGAMENTO ---
 fetch(CSV_URL)
   .then(res => res.arrayBuffer())
-  .then(buffer => {
-    const text = new TextDecoder('windows-1252').decode(buffer);
-    processData(text);
+  .then(buf => {
+    const text = new TextDecoder("windows-1252").decode(buf);
+    processCSV(text);
   });
 
-function processData(text) {
+function processCSV(text) {
     const lines = text.split(/\r?\n/).filter(l => l.trim());
     const nodesMap = new Map();
     const edgesList = [];
-    const categoryMap = new Map();
+    const catMap = new Map();
 
-    nodesMap.set(MACRO, { id: MACRO, label: "Baixa aprendizagem\nna alfabetização", group: 'macro', level: 0, value: 50 });
+    nodesMap.set(MACRO_ID, { id: MACRO_ID, label: "Baixa aprendizagem\nna alfabetização", group: 'macro', level: 0, value: 50 });
 
     lines.slice(1).forEach(line => {
-        const cols = line.split(';').map(v => v.replace(/^"|"$/g, '').trim());
-        if(cols.length < 5) return;
-        const [eixoFull, prob, cp, cat1, cs, cat2, votos, ct, cat3] = cols;
-        const eixoId = eixoFull.split(' - ')[0];
+        const c = line.split(';').map(v => v.replace(/^"|"$/g, '').trim());
+        if(c.length < 5) return;
+        const [eixoFull, prob, cp, cat1, cs, cat2, v2, ct, cat3] = c;
+        const eId = eixoFull.split(' - ')[0];
 
-        // Hierarquia
-        if (!nodesMap.has(eixoId)) {
-            nodesMap.set(eixoId, { id: eixoId, label: EIXO_NOMES[eixoId]||eixoId, group: 'eixo', level: 1, eixo: eixoId });
-            edgesList.push({ from: MACRO, to: eixoId });
-            selEixos.add(eixoId);
+        if (!nodesMap.has(eId)) {
+            nodesMap.set(eId, { id: eId, label: EIXO_NOMES[eId]||eId, group: 'eixo', level: 1, eixo: eId });
+            edgesList.push({ from: MACRO_ID, to: eId });
+            selEixos.add(eId);
         }
         if (prob && !nodesMap.has(prob)) {
-            nodesMap.set(prob, { id: prob, label: prob.substring(0,30)+'...', group: 'problema', level: 2, eixo: eixoId, causa_real: prob });
-            edgesList.push({ from: eixoId, to: prob });
+            nodesMap.set(prob, { id: prob, label: prob.substring(0,25)+'...', group: 'problema', level: 2, eixo: eId, causa_real: prob });
+            edgesList.push({ from: eId, to: prob });
         }
         if (cp && !nodesMap.has(cp)) {
-            nodesMap.set(cp, { id: cp, label: cp.substring(0,25)+'...', group: 'causa1', level: 3, eixo: eixoId, causa_real: cp, cat: cat1 });
+            nodesMap.set(cp, { id: cp, label: cp.substring(0,20)+'...', group: 'causa1', level: 3, eixo: eId, causa_real: cp, cat: cat1 });
             edgesList.push({ from: prob, to: cp });
         }
         if (cs && !nodesMap.has(cs)) {
-            nodesMap.set(cs, { id: cs, label: cs.substring(0,25)+'...', group: 'causa2', level: 4, eixo: eixoId, causa_real: cs, cat: cat2, votos: votos });
+            nodesMap.set(cs, { id: cs, label: cs.substring(0,20)+'...', group: 'causa2', level: 4, eixo: eId, causa_real: cs, cat: cat2, votos: v2 });
             edgesList.push({ from: cp, to: cs });
         }
 
-        // Categorias para os HUBS
         [cat1, cat2, cat3].forEach(cat => {
             if(cat && cat.length > 2) {
-                if(!categoryMap.has(cat)) categoryMap.set(cat, []);
-                categoryMap.get(cat).push(cs || cp);
+                if(!catMap.has(cat)) catMap.set(cat, new Set());
+                catMap.get(cat).add(cs || cp || prob);
             }
         });
     });
 
-    // Criar os HUBS (Diamantes roxos)
-    categoryMap.forEach((targets, cat) => {
-        const hubId = "__hub__" + cat;
-        hubIds.add(hubId);
-        nodesMap.set(hubId, { id: hubId, label: cat, group: 'hub', shape: 'diamond', level: 6, cat: cat });
-        [...new Set(targets)].forEach(t => {
-            if(t) edgesList.push({ from: t, to: hubId, dashes: true, color: "#A78BFA" });
-        });
+    catMap.forEach((targets, cat) => {
+        const hId = "__hub__" + cat;
+        hubIds.add(hId);
+        nodesMap.set(hId, { id: hId, label: cat, group: 'hub', shape: 'diamond', level: 6, cat: cat });
+        targets.forEach(t => t && edgesList.push({ from: t, to: hId, dashes: true, color: "#A78BFA" }));
     });
 
     rawNodes = Array.from(nodesMap.values());
-    initNetwork(rawNodes, edgesList, categoryMap);
+    initNetwork(rawNodes, edgesList, catMap);
 }
 
 function initNetwork(nodes, edges, catMap) {
-    visData = {
-        nodes: new vis.DataSet(nodes.map(n => ({
-            ...n,
-            color: { background: GC[n.group], border: '#fff' },
-            font: { size: 12, face: 'Inter' }
-        }))),
-        edges: new vis.DataSet(edges)
-    };
+    nodesDS = new vis.DataSet(nodes.map(n => ({
+        ...n, 
+        color: { background: GC[n.group], border: '#fff' },
+        font: { size: 11, face: 'Inter' }
+    })));
+    edgesDS = new vis.DataSet(edges);
 
-    network = new vis.Network(document.getElementById("mynetwork"), visData, {
-        physics: { barnesHut: { gravitationalConstant: -2000 } },
-        edges: { arrows: 'to', smooth: { type: 'continuous' } }
+    network = new vis.Network(document.getElementById("mynetwork"), { nodes: nodesDS, edges: edgesDS }, {
+        physics: { barnesHut: { gravitationalConstant: -3000, springLength: 150 } },
+        nodes: { shape: 'dot', scaling: { min: 10, max: 40 } },
+        edges: { arrows: 'to', color: '#cbd5e1', smooth: { type: 'continuous' } }
     });
 
     network.once("stabilizationIterationsDone", () => {
         document.getElementById("loading").style.display = "none";
-        buildUI(catMap);
+        setupUI(catMap);
     });
 
     network.on("click", p => p.nodes.length && openModal(p.nodes[0]));
 }
 
-function buildUI(catMap) {
-    // Lista de Eixos
-    const eixoUl = document.getElementById("eixo-list");
-    Object.keys(EIXO_NOMES).forEach(e => {
+function setupUI(catMap) {
+    const eUl = document.getElementById("eixo-list");
+    selEixos.forEach(e => {
         const li = document.createElement("li");
-        li.className = "flex items-center gap-2 cursor-pointer p-1 hover:bg-indigo-50 rounded";
-        li.innerHTML = `<input type="checkbox" checked data-eixo="${e}"> ${EIXO_NOMES[e]}`;
+        li.className = "flex items-center gap-2 cursor-pointer hover:bg-gray-100 p-1 rounded";
+        li.innerHTML = `<input type="checkbox" checked> <span>${EIXO_NOMES[e]||e}</span>`;
         li.onclick = (ev) => {
             const chk = li.querySelector('input');
             if(ev.target !== chk) chk.checked = !chk.checked;
             chk.checked ? selEixos.add(e) : selEixos.delete(e);
-            applyFilter();
+            applyFilters();
         };
-        eixoUl.appendChild(li);
+        eUl.appendChild(li);
     });
 
-    // Lista de Categorias
-    const catUl = document.getElementById("cat-list");
-    const liAll = document.createElement("li");
-    liAll.className = "cursor-pointer p-1 text-indigo-600 font-bold";
-    liAll.textContent = "Todas as conexões";
-    liAll.onclick = () => { selCat = "__ALL__"; applyFilter(); };
-    catUl.appendChild(liAll);
-
+    const cUl = document.getElementById("cat-list");
+    cUl.innerHTML = '<li class="p-1 cursor-pointer text-indigo-600 font-bold" id="clear-cat">Todas as conexões</li>';
+    document.getElementById("clear-cat").onclick = () => { selCat = "__ALL__"; applyFilters(); };
+    
     catMap.forEach((_, cat) => {
         const li = document.createElement("li");
-        li.className = "cursor-pointer p-1 hover:bg-gray-100 rounded truncate";
+        li.className = "p-1 cursor-pointer hover:bg-gray-100 rounded truncate";
         li.textContent = cat;
-        li.onclick = () => { selCat = cat; applyFilter(); };
-        catUl.appendChild(li);
+        li.onclick = () => { selCat = cat; applyFilters(); };
+        cUl.appendChild(li);
     });
 
-    // Botões de View
-    document.querySelectorAll(".view-btn").forEach(btn => {
+    document.querySelectorAll(".v-btn").forEach(btn => {
         btn.onclick = () => {
-            document.querySelectorAll(".view-btn").forEach(b => b.classList.replace("bg-indigo-600", "bg-gray-100"));
+            document.querySelectorAll(".v-btn").forEach(b => b.classList.replace("bg-indigo-600", "bg-gray-100"));
             btn.classList.replace("bg-gray-100", "bg-indigo-600");
             viewMode = btn.dataset.view;
-            applyFilter();
+            applyFilters();
         };
     });
 }
 
-function applyFilter() {
+function applyFilters() {
     const q = document.getElementById("search").value.toLowerCase();
-    visData.nodes.update(rawNodes.map(n => {
+    nodesDS.update(rawNodes.map(n => {
         let show = true;
         if(n.eixo && !selEixos.has(n.eixo)) show = false;
-        if(viewMode === "minuto" && n.level > 2 && !hubIds.has(n.id)) show = false;
-        if(viewMode === "transversais" && !n.cat && n.group !== 'macro') show = false;
+        if(viewMode === 'minuto' && n.level > 2 && !hubIds.has(n.id)) show = false;
+        if(viewMode === 'transversais' && !n.cat && n.group !== 'macro') show = false;
         if(q && !n.causa_real?.toLowerCase().includes(q)) show = false;
         
         let op = 1;
         if(selCat !== "__ALL__" && n.cat !== selCat && !hubIds.has(n.id) && n.group !== 'macro') op = 0.1;
-        if(n.id === MACRO) show = true;
-
+        if(n.id === MACRO_ID) show = true;
         return { id: n.id, hidden: !show, opacity: op };
     }));
 }
 
 function openModal(id) {
-    const n = visData.nodes.get(id);
+    const n = nodesDS.get(id);
     if(!n || hubIds.has(id)) return;
     document.getElementById("m-nivel").textContent = n.group;
     document.getElementById("m-eixo").textContent = EIXO_NOMES[n.eixo] || "Geral";
     document.getElementById("m-eixo").style.backgroundColor = GC[n.group] || "#1E3A5F";
     document.getElementById("m-causa").textContent = n.causa_real || n.label;
     
-    const vWrap = document.getElementById("m-votos-wrap");
-    if(n.votos) {
-        vWrap.classList.remove("hidden");
-        document.getElementById("m-votos").textContent = "⭐ " + n.votos + " votos";
-    } else vWrap.classList.add("hidden");
+    const catWrap = document.getElementById("m-cat-wrap");
+    if(n.cat) {
+        catWrap.style.display = "block";
+        document.getElementById("m-cat").textContent = n.cat;
+    } else catWrap.style.display = "none";
 
     document.getElementById("modal").classList.replace("hidden", "flex");
     setTimeout(() => document.getElementById("modal-box").classList.replace("opacity-0", "opacity-100"), 10);
@@ -289,7 +283,7 @@ function closeModal() {
 }
 
 document.getElementById("toggle-panel").onclick = () => document.getElementById("panel").classList.toggle("min");
-document.getElementById("search").oninput = applyFilter;
+document.getElementById("search").oninput = applyFilters;
 </script>
 </body>
 </html>
