@@ -25,6 +25,24 @@ html,body{height:100%;margin:0;padding:0;overflow:hidden;font-family:"Inter",san
 .slider:before {position:absolute;content:"";height:14px;width:14px;left:3px;bottom:3px;background-color:white;border-radius:50%;transition:.2s}
 input:checked + .slider {background-color:#2563EB}
 input:checked + .slider:before {transform:translateX(14px)}
+
+/* Quebra de linha ajustada para o menu esquerdo */
+.btn-sidebar-item {
+    width: 100%;
+    text-align: left;
+    padding: 10px 12px;
+    border-radius: 12px;
+    font-size: 12px;
+    margin-bottom: 4px;
+    display: flex;
+    align-items: start;
+    gap: 10px;
+    transition: all 0.2s ease;
+    white-space: normal !important;
+    word-break: break-word !important;
+}
+.btn-sidebar-item:hover { background-color: #F8FAFC; }
+.btn-sidebar-text { flex: 1; min-width: 0; font-weight: 600; color: #334155; line-height: 1.4; }
 </style>
 </head>
 <body>
@@ -44,7 +62,6 @@ input:checked + .slider:before {transform:translateX(14px)}
   </div>
 
   <div id="controles-aba2" class="px-5 py-3 bg-slate-50 border-b border-slate-100 flex-col gap-3 flex-shrink-0 hidden">
-    
     <div class="flex flex-col gap-1 w-full border-b border-slate-200 pb-2">
       <span class="text-[10px] font-bold text-amber-600 uppercase tracking-wider">Mínimo de Relevância (⭐)</span>
       <select id="select-votos-hierarquica" class="bg-white border border-slate-200 rounded-lg p-1.5 text-xs font-medium text-slate-700 focus:outline-none" onchange="renderizarEstruturaHierarquica()">
@@ -150,7 +167,6 @@ async function inicializar() {
             });
         });
 
-        // Alimenta o combo de Temas Transversais da Aba 2
         const comboTema = document.getElementById("select-tema-transversal");
         Array.from(listaTemasUnicos).sort().forEach(t => {
             const opt = document.createElement("option");
@@ -160,7 +176,7 @@ async function inicializar() {
 
         construirCheckboxEixos();
         processarDadosAba1(); 
-        renderizarEstruturaRadial(); // Renderiza aba 1 por padrão
+        renderizarEstruturaRadial();
 
     } catch (e) {
         console.error(e);
@@ -204,7 +220,7 @@ function toggleVisibilidadeComboTema() {
 }
 
 // ==========================================
-// --- RECUPERAÇÃO DA LÓGICA ORIGINAL DA ABA 1
+// --- PROCESSAMENTO DA LÓGICA DA ABA 1
 // ==========================================
 function processarDadosAba1() {
     G_aba1 = { nodes: [], edges: [], details: {}, originalEdges: [] };
@@ -335,9 +351,15 @@ function buildSidebarRadialAba1() {
     const renderGrupo = (titulo, classeCor, lista) => {
         if (!lista.length) return;
         const h = document.createElement("p"); h.className = `text-[10px] font-bold uppercase tracking-widest mt-4 mb-2 px-2 ${classeCor}`; h.textContent = titulo; list.appendChild(h);
+        
         lista.forEach(item => {
-            const b = document.createElement("button"); b.className = "w-full text-left p-2 rounded-xl text-xs mb-1 flex items-center gap-2 hover:bg-slate-50";
-            b.innerHTML = `<span class="w-2.5 h-2.5 rounded-full" style="background:${item.cor}"></span><span class="flex-1 truncate font-semibold text-slate-700">${item.cat}</span><span class="text-[10px] font-bold text-slate-400">${item.volumeCausas}</span>`;
+            const b = document.createElement("button"); 
+            b.className = "btn-sidebar-item";
+            b.innerHTML = `
+                <span class="w-2.5 h-2.5 rounded-full mt-1.5 flex-shrink-0" style="background:${item.cor}"></span>
+                <span class="btn-sidebar-text">${item.cat}</span>
+                <span class="text-[10px] font-bold text-slate-400 mt-0.5 flex-shrink-0">${item.volumeCausas}</span>
+            `;
             b.onclick = () => aoClicarNoNodeRadial(`__cat__${item.cat}`);
             list.appendChild(b);
         });
@@ -348,7 +370,7 @@ function buildSidebarRadialAba1() {
 
 
 // ==========================================
-// --- LÓGICA PURA DA ABA 2 (CORRIGIDA E RESPONSIVA)
+// --- LÓGICA RIGOROSA DA ABA 2 (ÁRVORE DETALHADA)
 // ==========================================
 function renderizarEstruturaHierarquica() {
     if (currentTab !== "hierarquica") return;
@@ -362,14 +384,17 @@ function renderizarEstruturaHierarquica() {
     const hNodes = []; const hEdges = []; const nosCriadosUnicos = new Set();
     hNodesDetails = {}; 
 
-    // Nó Raiz Central Macro
+    // Nó Raiz
     const macroId = "H2_MACRO_ROOT";
     hNodes.push({
         id: macroId, label: "BAIXA\nALFABETIZAÇÃO", shape: "dot", size: 30,
         color: { background: "#E11D48", border: "#BE123C" }, font: { bold: true, size: 10, color: "#FFFFFF" }
     });
 
-    const mapaRecorrenciaTexto = {}; const mapaTextoParaEixos = {}; const mapaTextoParaCategorias = {};
+    // Mapeador estrito de recorrência e cruzamento qualitativo por string exata
+    const mapaRecorrenciaTexto = {}; 
+    const mapaTextoParaEixos = {}; 
+    const mapaTextoParaCategorias = {};
     const mapaNodesParaTeia = {};
 
     rawRows.forEach(r => {
@@ -378,25 +403,48 @@ function renderizarEstruturaHierarquica() {
         [[cp, cat_p], [cs, cat_s], [ct, cat_t]].forEach(([txt, cat]) => {
             if (txt && txt.trim() !== "") {
                 const cleanTxt = txt.trim();
-                mapaRecorrenciaTexto[cleanTxt] = (mapaRecorrenciaTexto[cleanTxt] || 0) + 1;
-                if (!mapaTextoParaEixos[cleanTxt]) mapaTextoParaEixos[cleanTxt] = new Set();
-                mapaTextoParaEixos[cleanTxt].add(sigla);
+                if (!mapaTextoParaEixos[cleanTxt]) {
+                    mapaTextoParaEixos[cleanTxt] = new Set();
+                    mapaRecorrenciaTexto[cleanTxt] = 0;
+                }
+                // Evita duplicar contagem na mesma linha se strings forem idênticas
+                if (!mapaTextoParaEixos[cleanTxt].has(sigla)) {
+                    mapaTextoParaEixos[cleanTxt].add(sigla);
+                    mapaRecorrenciaTexto[cleanTxt]++;
+                }
                 if (cat && cat.trim() !== "") mapaTextoParaCategorias[cleanTxt] = cat.trim();
             }
         });
     });
 
+    // Auditoria Real de Volumetria Interna por Eixo
     const metricasEixos = {};
-    eixosSelecionados.forEach(ex => { metricasEixos[ex] = { totalP: 0, totalS: 0, totalT: 0, transversais: 0, estrelas: 0, probCentral: "" }; });
+    eixosSelecionados.forEach(ex => { 
+        metricasEixos[ex] = { totalP: 0, totalS: 0, totalT: 0, transversais: 0, estrelas: 0, probCentral: "" }; 
+    });
 
     rawRows.forEach(r => {
-        const [eixoCompleto, probCentral, cp, , cs, , votos, ct] = r; if (!eixoCompleto) return;
+        const [eixoCompleto, probCentral, cp, cat_p, cs, cat_s, votos, ct, cat_t] = r; if (!eixoCompleto) return;
         const sigla = eixoCompleto.split(" - ")[0]; if (!eixosSelecionados.includes(sigla)) return;
+        
         metricasEixos[sigla].probCentral = probCentral;
         const vNum = parseInt(votos) || 0;
-        if (cp && cp.trim() !== "") { metricasEixos[sigla].totalP++; if(mapaRecorrenciaTexto[cp.trim()] > 1) metricasEixos[sigla].transversais++; if(vNum >= 1) metricasEixos[sigla].estrelas++; }
-        if (cs && cs.trim() !== "") { metricasEixos[sigla].totalS++; if(mapaRecorrenciaTexto[cs.trim()] > 1) metricasEixos[sigla].transversais++; if(vNum >= 1) metricasEixos[sigla].estrelas++; }
-        if (ct && ct.trim() !== "") { metricasEixos[sigla].totalT++; if(mapaRecorrenciaTexto[ct.trim()] > 1) metricasEixos[sigla].transversais++; if(vNum >= 1) metricasEixos[sigla].estrelas++; }
+
+        if (cp && cp.trim() !== "") { 
+            metricasEixos[sigla].totalP++; 
+            if(mapaRecorrenciaTexto[cp.trim()] > 1) metricasEixos[sigla].transversais++; 
+            if(vNum >= 1) metricasEixos[sigla].estrelas++; 
+        }
+        if (cs && cs.trim() !== "") { 
+            metricasEixos[sigla].totalS++; 
+            if(mapaRecorrenciaTexto[cs.trim()] > 1) metricasEixos[sigla].transversais++; 
+            if(vNum >= 1) metricasEixos[sigla].estrelas++; 
+        }
+        if (ct && ct.trim() !== "") { 
+            metricasEixos[sigla].totalT++; 
+            if(mapaRecorrenciaTexto[ct.trim()] > 1) metricasEixos[sigla].transversais++; 
+            if(vNum >= 1) metricasEixos[sigla].estrelas++; 
+        }
     });
 
     const linhasFiltradas = rawRows.filter(r => r[0] && eixosSelecionados.includes(r[0].split(" - ")[0]));
@@ -414,7 +462,7 @@ function renderizarEstruturaHierarquica() {
             hNodes.push({ id: eixoId, label: siglaEixo, shape: "dot", size: 22, color: { background: corEixo, border: corEixo }, font: { bold: true, size: 11 } });
             hEdges.push({ from: macroId, to: eixoId, color: { color: "#CBD5E0", opacity: 0.5 }, width: 2 });
             nosCriadosUnicos.add(eixoId);
-            hNodesDetails[eixoId] = { tipo: "eixo", titulo: eixoCompleto, cor: corEixo, dados: metricasEixos[siglaEixo] };
+            hNodesDetails[eixoId] = { tipo: "eixo", titulo: eixoCompleto, sigla: siglaEixo, cor: corEixo, dados: metricasEixos[siglaEixo] };
         }
 
         const montarNo = (texto, categoria, paiId, camadaLabel, tamanho, corPadrao) => {
@@ -442,8 +490,14 @@ function renderizarEstruturaHierarquica() {
             hEdges.push({ from: paiId, to: noId, color: { color: "#CBD5E0", opacity: 0.4 }, width: 1 });
 
             hNodesDetails[noId] = {
-                tipo: "causa", camada: camadaLabel === "1" ? "Primária" : camadaLabel === "2" ? "Secundária" : "Terciária",
-                texto: txt, tema: temaReal, votos: vNum, eixos: Array.from(mapaTextoParaEixos[txt] || [siglaEixo]), ehTransversal: ehTransversal
+                tipo: "causa", 
+                camada: camadaLabel === "1" ? "Primária" : camadaLabel === "2" ? "Secundária" : "Terciária",
+                texto: txt, 
+                tema: temaReal, 
+                votos: vNum, 
+                eixoOrigem: eixoCompleto,
+                eixos: Array.from(mapaTextoParaEixos[txt] || [siglaEixo]), 
+                ehTransversal: ehTransversal
             };
             nosCriadosUnicos.add(noId); return noId;
         };
@@ -467,7 +521,7 @@ function renderizarEstruturaHierarquica() {
         });
     }
 
-    document.getElementById("sidebar-list").innerHTML = `<div class="p-4 bg-indigo-50/60 border rounded-xl text-[11px] text-slate-600 leading-relaxed"><p class="font-bold text-indigo-900 mb-1">✨ Constelação Ativa</p>Filtros de órbita ([1ª], [2ª], [3ª]) e teias tracejadas em tempo real. Clique nos nós para auditar.</div>`;
+    document.getElementById("sidebar-list").innerHTML = `<div class="p-4 bg-indigo-50/60 border rounded-xl text-[11px] text-slate-600 leading-relaxed"><p class="font-bold text-indigo-900 mb-1">✨ Constelação Ativa</p>Filtros de órbita operacionalizados. Clique nos nós para mapeamento analítico completo.</div>`;
 
     nodesDataSet.clear(); nodesDataSet.add(hNodes);
     edgesDataSet.clear(); edgesDataSet.add(hEdges);
@@ -485,7 +539,7 @@ function renderizarEstruturaHierarquica() {
             document.getElementById("p-cor").style.background = "#E11D48";
             document.getElementById("p-titulo").textContent = "Baixa Alfabetização";
             document.getElementById("p-sub").textContent = "Problema Macro Central";
-            document.getElementById("painel-body").innerHTML = `<p class="text-xs text-slate-600 font-medium leading-relaxed">Ponto de amarração central da Árvore. Todos os eixos e frentes se ramificam obrigatoriamente a partir desta vulnerabilidade.</p>`;
+            document.getElementById("painel-body").innerHTML = `<p class="text-xs text-slate-600 font-medium leading-relaxed">Nó Central Diagnóstico.</p>`;
             document.getElementById("painel").classList.add("open"); document.getElementById("net").style.right = "480px";
             return;
         }
@@ -495,13 +549,16 @@ function renderizarEstruturaHierarquica() {
 
         if(det.tipo === "eixo") {
             document.getElementById("p-titulo").textContent = det.titulo;
-            document.getElementById("p-sub").textContent = "Métricas do Eixo Selecionado";
+            document.getElementById("p-sub").textContent = "Métricas Consolidadas do Eixo";
             document.getElementById("painel-body").innerHTML = `
-                <div class="p-3 bg-slate-50 border rounded-xl text-xs font-semibold mb-3 text-slate-700">${det.dados.probCentral}</div>
+                <div class="mb-4">
+                    <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-1">Problema do Eixo:</span>
+                    <div class="p-3 bg-slate-50 border rounded-xl text-xs font-semibold text-slate-700 leading-relaxed">${det.dados.probCentral}</div>
+                </div>
                 <div class="grid grid-cols-2 gap-2 text-xs">
-                    <div class="p-3 bg-white border rounded-xl shadow-sm"><span class="text-slate-400 block text-[10px]">Causas 1ª</span><span class="text-base font-bold text-slate-700">${det.dados.totalP}</span></div>
-                    <div class="p-3 bg-white border rounded-xl shadow-sm"><span class="text-slate-400 block text-[10px]">Causas 2ª/3ª</span><span class="text-base font-bold text-slate-700">${det.dados.totalS + det.dados.totalT}</span></div>
-                    <div class="p-3 bg-indigo-50 border border-indigo-100 rounded-xl"><span class="text-indigo-700 font-bold block text-[10px]">Transversais</span><span class="text-base font-bold text-indigo-800">${det.dados.transversais}</span></div>
+                    <div class="p-3 bg-white border rounded-xl shadow-sm"><span class="text-slate-400 block text-[10px]">Causas Primárias</span><span class="text-base font-bold text-slate-700">${det.dados.totalP}</span></div>
+                    <div class="p-3 bg-white border rounded-xl shadow-sm"><span class="text-slate-400 block text-[10px]">Causas Secundárias</span><span class="text-base font-bold text-slate-700">${det.dados.totalS}</span></div>
+                    <div class="p-3 bg-white border rounded-xl shadow-sm"><span class="text-slate-400 block text-[10px]">Causas Terciárias</span><span class="text-base font-bold text-slate-700">${det.dados.totalT}</span></div>
                     <div class="p-3 bg-amber-50 border border-amber-100 rounded-xl"><span class="text-amber-700 font-bold block text-[10px]">Com Estrelas</span><span class="text-base font-bold text-amber-800">${det.dados.estrelas}</span></div>
                 </div>`;
         } else {
@@ -511,12 +568,16 @@ function renderizarEstruturaHierarquica() {
             const badges = det.eixos.map(ex => `<span class="inline-block px-2 py-0.5 text-[9px] font-bold text-white rounded mr-1" style="background:${EIXO_CORES[ex]}">${ex}</span>`).join("");
             
             document.getElementById("painel-body").innerHTML = `
+                <div class="mb-3">
+                    <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-1">Eixo de Origem:</span>
+                    <p class="text-xs font-bold text-slate-800">${det.eixoOrigem}</p>
+                </div>
                 <div class="p-4 bg-slate-50 border rounded-xl text-xs font-medium text-slate-700 leading-relaxed mb-4">${det.texto}</div>
                 <div class="flex items-center gap-2 p-2 border rounded-xl bg-white text-xs mb-3 font-semibold text-slate-700">
-                    <span class="w-2.5 h-2.5 rounded-full" style="background:${cCat}"></span><span>${det.tema}</span>
-                    ${det.ehTransversal ? `<span class="ml-auto text-[9px] bg-amber-100 text-amber-800 px-1.5 py-0.5 rounded font-bold uppercase">Transversal</span>`:''}
+                    <span class="w-2.5 h-2.5 rounded-full" style="background:${cCat}"></span><span>Tema: ${det.tema}</span>
+                    ${det.ehTransversal ? `<span class="ml-auto text-[9px] bg-amber-100 text-amber-800 px-1.5 py-0.5 rounded font-bold uppercase">Transversal</span>` : `<span class="ml-auto text-[9px] bg-slate-100 text-slate-700 px-1.5 py-0.5 rounded font-bold uppercase">Específica</span>`}
                 </div>
-                <div class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1.5">Eixos Compartilhados</div>
+                <div class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1.5">Cruzamento de Eixos Compartilhados</div>
                 <div class="mb-4">${badges}</div>
                 ${det.votos > 0 ? `<div class="p-2 bg-amber-50 border border-amber-100 rounded-xl text-xs font-bold text-amber-800 text-center">⭐ Priorizada com ${det.votos} Votos</div>`:''}`;
         }
@@ -543,7 +604,6 @@ function mudarAba(aba) {
         ctrl2.classList.remove("hidden"); ctrl2.classList.add("flex"); ctrl1.classList.add("hidden");
         document.getElementById("main-title").textContent = "Constelação Detalhada de Evidências";
         document.getElementById("main-subtitle").textContent = "Desdobramento radial completo (Eixo → Causa 1ª → 2ª → 3ª)";
-        // Inicia o dataset zerado para a árvore detalhada rodar limpa
         nodesDataSet = new vis.DataSet([]);
         edgesDataSet = new vis.DataSet([]);
         networkInstance = new vis.Network(document.getElementById("net"), {nodes: nodesDataSet, edges: edgesDataSet}, {});
