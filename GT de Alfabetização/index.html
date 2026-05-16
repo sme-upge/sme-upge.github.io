@@ -11,13 +11,13 @@
 *{box-sizing:border-box}
 html,body{height:100%;margin:0;padding:0;overflow:hidden;font-family:"Inter",sans-serif;background:#F7F8FA}
 #net{position:absolute;top:0;left:0;right:0;bottom:0;background:#F7F8FA}
-#sidebar{position:fixed;top:0;left:0;width:220px;height:100vh;background:white;
+#sidebar{position:fixed;top:0;left:0;width:240px;height:100vh;background:white;
   border-right:1px solid #E2E8F0;z-index:30;display:flex;flex-direction:column}
 #sidebar-list{flex:1;overflow-y:auto;padding:8px}
 #sidebar.hide{display:none}
-#painel{position:fixed;top:0;right:0;width:340px;height:100vh;background:white;
+#painel{position:fixed;top:0;right:0;width:380px;height:100vh;background:white;
   border-left:1px solid #E2E8F0;z-index:40;display:flex;flex-direction:column;
-  transform:translateX(100%);transition:transform .25s ease}
+  transform:translateX(100%);transition:transform .25s ease;box-shadow:-10px 0 20px rgba(0,0,0,0.05)}
 #painel.open{transform:translateX(0)}
 #painel-body{flex:1;overflow-y:auto;padding:16px 20px}
 #toggles{position:fixed;top:80px;right:16px;z-index:30;background:white;
@@ -44,8 +44,8 @@ input:checked+.tog-sl:before{transform:translateX(14px)}
 
 <div id="sidebar">
   <div class="px-4 pt-4 pb-3 border-b border-gray-100 flex-shrink-0">
-    <p class="text-[10px] font-bold uppercase tracking-widest text-gray-400">Temas transversais</p>
-    <p class="text-[10px] text-gray-400 mt-0.5">Clique para destacar</p>
+    <p class="text-[10px] font-bold uppercase tracking-widest text-indigo-600">Filtros Pedagógicos</p>
+    <p class="text-[10px] text-gray-400 mt-0.5 font-medium">GT Alfabetização</p>
   </div>
   <div id="sidebar-list"></div>
 </div>
@@ -67,7 +67,6 @@ input:checked+.tog-sl:before{transform:translateX(14px)}
   border-radius:16px;padding:10px 16px;box-shadow:0 4px 16px rgba(0,0,0,.1)">
   <button class="mbtn on" data-m="temas">🔗 Conexões por temas</button>
   <button class="mbtn off" data-m="completo">🌳 Completo</button>
-  <button class="mbtn off" data-m="minuto">⚡ 1 minuto</button>
 </div>
 
 <div id="toggles">
@@ -76,10 +75,6 @@ input:checked+.tog-sl:before{transform:translateX(14px)}
   <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
     <label class="tog"><input type="checkbox" id="t-trans" checked><span class="tog-sl"></span></label>
     <span style="font-size:12px;color:#4B5563">Conexões transversais</span>
-  </div>
-  <div style="display:flex;align-items:center;gap:8px">
-    <label class="tog"><input type="checkbox" id="t-sem" checked><span class="tog-sl"></span></label>
-    <span style="font-size:12px;color:#4B5563">Causas sem tema</span>
   </div>
 </div>
 
@@ -98,381 +93,96 @@ input:checked+.tog-sl:before{transform:translateX(14px)}
 </div>
 
 <script>
-// --- CONFIGURAÇÕES DE DESIGN PRESERVADAS ---
-const CSV_URL = "https://raw.githubusercontent.com/sme-upge/sme-upge.github.io/refs/heads/main/GT%20de%20Alfabetiza%C3%A7%C3%A3o/arvore.csv";
-const MACRO_LABEL = "Baixa aprendizagem na alfabetização";
-
-const EIXO_FULL = {
-    "Eixo 1": "Eixo 1 - Responsabilidades na Garantia do Direito a Alfabetização",
-    "Eixo 2": "Eixo 2 - Formação",
-    "Eixo 3": "Eixo 3 - Infraestrutura Física e Pedagógica",
-    "Eixo 4": "Eixo 4 - Política de Incentivos",
-    "Eixo 5": "Eixo 5 - Acompanhamento e Monitoramento",
-    "Eixo 6": "Eixo 6 - Avaliação",
-    "Eixo 7": "Eixo 7 - Materiais Didáticos e Pedagógicos"
+// --- CONFIGURAÇÃO ESTÁTICA ---
+const EIXO_CORES = {
+  "Eixo 1": "#2B6CB0", "Eixo 2": "#6B46C1", "Eixo 3": "#276749",
+  "Eixo 4": "#9C4221", "Eixo 5": "#1A5276", "Eixo 6": "#9B2335", "Eixo 7": "#234E52"
 };
 
 const EIXO_CURTO = {
-    "Eixo 1": "Responsabilidades", "Eixo 2": "Formação", "Eixo 3": "Infraestrutura",
-    "Eixo 4": "Incentivos", "Eixo 5": "Acomp. e Monitoramento", "Eixo 6": "Avaliação", "Eixo 7": "Materiais Didáticos"
+  "Eixo 1": "Responsabilidades", "Eixo 2": "Formação", "Eixo 3": "Infraestrutura",
+  "Eixo 4": "Incentivos", "Eixo 5": "Acomp. e Monitoramento", "Eixo 6": "Avaliação", "Eixo 7": "Materiais Didáticos"
 };
 
-const EIXO_CORES = {
-    "Eixo 1": "#2B6CB0", "Eixo 2": "#6B46C1", "Eixo 3": "#276749",
-    "Eixo 4": "#9C4221", "Eixo 5": "#1A5276", "Eixo 6": "#9B2335", "Eixo 7": "#234E52"
+const CAT_CORES_MAP = {
+  "Fragmentação da concepção": "#ECC94B", "Fragilidade na comunicação": "#FC8181",
+  "Alta rotatividade": "#C6F6D5", "Sobrecarga de demandas": "#F687B3",
+  "Participação desigual": "#68D391", "Fragilidade no atendimento": "#E9D8FD"
 };
 
-const CAT_CORES = {
-    "Fragmentação da concepção e prática de alfabetização, com entendimentos distintos entre intâncias e atores da rede sobre instrumentos normativos": "#ECC94B",
-    "Fragilidade na comunicação e planejamento integrado entre SME, DREs e UEs": "#FC8181",
-    "Alta rotatividade de professores": "#C6F6D5",
-    "Fragilidades na consolidação de identidades e sobrecarga de demandas do Trio Gestor (Diretores, ADs e CPs) e POA, impactando o planejamento integrado": "#FFA07A",
-    "Participação desigual de professores nas formações (JEIF e Contratados)": "#68D391",
-    "Fragilidade na formação continuada de professores e trio gestor acerca da alfabetização": "#81E6D9",
-    "Fragilidade na integração entre currículo, materiais didáticos, práticas pedagógicas e avaliações": "#F6AD55",
-    "Fragilidade no atendimento dos estudantes em suas individualidades (AEE e vulnerabilidades)": "#E9D8FD",
-    "Alto número de estudantes por turma": "#4FD1C5",
-    "Sobrecarga de demandas e fragilidade no planejamento e o acompanhamento pedagógico dos estudantes e das práticas docentes.": "#F687B3",
-    "Fragilidade na formação para uso e análise de dados de avaliação": "#81E6D9",
-    "Fragilidade na identidade, formação especializada e ausência de incentivos para permanência de professores alfabetizadores, o que dificulta a continuidade e consolidação de práticas": "#F687B3",
-    "Fragilidade na articulação curricular, planejamento integrado e continuidade pedagógica entre as etapas de ensino (Ed. Infantil e Ciclo de Alfabetização)": "#9AE6B4",
-    "Desafios na integração do cronograma formativo por ciclos e na conexão das temáticas com a realidade cotidiana e as necessidades dos territórios": "#63B3ED",
-    "Ausência de critérios para retenção de professores alfabetizadores": "#FBD38D",
-    "Quadro de apoio em quantidade insuficiente": "#FFA07A",
-    "Excesso e sobreposição de avaliações  no calendário escolar": "#F687B3",
-    "Fragilidade no planejamento do acompanhamento pedagógico dos estudantes e das práticas docentes": "#BEE3F8"
-};
+// --- DATA ENGINE ---
+let D = { grafo_temas: { nodes: [], edges: [], detail: {} } };
+const CSV_URL = "https://raw.githubusercontent.com/sme-upge/sme-upge.github.io/refs/heads/main/GT%20de%20Alfabetiza%C3%A7%C3%A3o/arvore.csv";
 
-// --- DATA ENGINE DINÂMICO ---
-let D = { 
-    grafo_temas: { nodes: [], edges: [], detail: {} },
-    minuto_data: {},
-    cats_list: [],
-    cats_trans: [],
-    eixo_cores: EIXO_CORES,
-    eixo_full: EIXO_FULL,
-    eixo_curto: EIXO_CURTO,
-    cat_cores: CAT_CORES
-};
-
-async function fetchAndParseCSV() {
+async function inicializarAplicacao() {
     try {
-        const response = await fetch(CSV_URL);
-        const buffer = await response.arrayBuffer();
-        const decoder = new TextDecoder("utf-8"); // Garante acentuação correta
-        const csvText = decoder.decode(buffer);
-        
-        const lines = csvText.split(/\r?\n/).filter(line => line.trim() !== "");
-        const rows = lines.slice(1).map(line => {
-            const columns = [];
-            let curr = '', inQuotes = false;
-            for (let i = 0; i < line.length; i++) {
-                const char = line[i];
-                if (char === '"') inQuotes = !inQuotes;
-                else if (char === ';' && !inQuotes) { columns.push(curr.trim()); curr = ''; }
-                else curr += char;
-            }
-            columns.push(curr.trim());
-            return columns;
+        const res = await fetch(CSV_URL);
+        const csv = new TextDecoder("utf-8").decode(await res.arrayBuffer());
+        const rows = parseCSV(csv);
+        buildStructure(rows);
+        buildSidebar();
+        setModo("temas");
+    } catch (e) {
+        console.error("Falha no carregamento:", e);
+    }
+}
+
+function parseCSV(text) {
+    const lines = text.split(/\r?\n/).filter(l => l.trim() !== "");
+    return lines.slice(1).map(line => {
+        const cols = []; let curr = "", q = false;
+        for (let i = 0; i < line.length; i++) {
+            const c = line[i];
+            if (c === '"') q = !q;
+            else if (c === ';' && !q) { cols.push(curr.trim()); curr = ""; }
+            else curr += c;
+        }
+        cols.push(curr.trim());
+        return cols;
+    });
+}
+
+function buildStructure(rows) {
+    const catMap = {};
+    const eixosAtivos = new Set();
+
+    D.grafo_temas.nodes.push({
+        id: "__macro__", label: "Baixa\naprendizagem\nna alfabetização", group: "macro", value: 90,
+        color: {background: "#E53E3E", border: "#C53030"}, font: {size: 13, color: "#fff", bold: true}, shape: "dot"
+    });
+
+    rows.forEach(r => {
+        const [eixo, prob, cp, cs, votos, cat] = r;
+        if (!eixo || !cat) return;
+        eixosAtivos.add(eixo);
+
+        if (!catMap[cat]) catMap[cat] = { axes: new Set(), rawCauses: {} };
+        catMap[cat].axes.add(eixo);
+
+        const txt = cs || cp;
+        if (!catMap[cat].rawCauses[txt]) catMap[cat].rawCauses[txt] = { text: txt, axes: new Set(), v: 0 };
+        catMap[cat].rawCauses[txt].axes.add(eixo);
+        const vNum = parseInt(votos) || 0;
+        if (vNum > catMap[cat].rawCauses[txt].v) catMap[cat].rawCauses[txt].v = vNum;
+    });
+
+    eixosAtivos.forEach(ex => {
+        D.grafo_temas.nodes.push({
+            id: `__e__${ex}`, label: `${ex}\n${EIXO_CURTO[ex] || ""}`, title: ex, group: "eixo", value: 45,
+            color: {background: EIXO_CORES[ex], border: EIXO_CORES[ex]}, font: {size: 10, color: "#fff"}, shape: "dot"
+        });
+        D.grafo_temas.edges.push({from: "__macro__", to: `__e__${ex}`, color: {color: EIXO_CORES[ex]+"99"}, width: 1.5});
+    });
+
+    Object.keys(catMap).forEach(name => {
+        const id = `__cat__${name}`;
+        const info = catMap[name];
+        const corBase = CAT_CORES_MAP[Object.keys(CAT_CORES_MAP).find(k => name.includes(k))] || "#CBD5E0";
+
+        D.grafo_temas.nodes.push({
+            id: id, label: name.length > 40 ? name.slice(0,40)+"..." : name, title: name, group: "cat",
+            value: 40 + (info.axes.size * 12), color: {background: corBase+"66", border: corBase},
+            font: {size: 10, color: "#1A202C"}, shape: "dot"
         });
 
-        buildDataStructure(rows);
-    } catch (e) {
-        console.error("Erro ao carregar CSV:", e);
-    }
-}
-
-function buildDataStructure(rows) {
-    const nodesMap = new Map();
-    const edgesMap = new Set();
-    const detailMap = {};
-    const minutoMap = {};
-    const categoryCounts = {};
-
-    // Inserir Nó Macro
-    D.grafo_temas.nodes.push({
-        id: "__macro__", label: "Baixa\naprendizagem\nna alfabetização", 
-        group: "macro", value: 90, color: {background: "#E53E3E", border: "#C53030"},
-        font: {size: 13, color: "#fff", bold: true}, shape: "dot"
-    });
-
-    rows.forEach(row => {
-        // Estrutura: [0]Eixo, [1]Prob Central, [2]Causa Primaria, [3]Causa Secundária, [4]Votos, [5]Categoria, [6]Causa Terciária
-        const [eixo, prob, cp, cs, votos, cat, ct] = row;
-        if (!eixo) return;
-
-        // 1. Criar Nós de Eixo
-        const eixoId = `__e__${eixo}`;
-        if (!nodesMap.has(eixoId)) {
-            nodesMap.set(eixoId, true);
-            D.grafo_temas.nodes.push({
-                id: eixoId, label: eixo + "\n" + (EIXO_CURTO[eixo] || eixo),
-                title: EIXO_FULL[eixo] || eixo, group: "eixo", value: 45,
-                color: {background: EIXO_CORES[eixo], border: EIXO_CORES[eixo]},
-                font: {size: 10, color: "#fff"}, shape: "dot"
-            });
-            D.grafo_temas.edges.push({from: "__macro__", to: eixoId, color: {color: EIXO_CORES[eixo]+"99"}, width: 1.5});
-        }
-
-        // 2. Processar Categorias (Temas Transversais)
-        if (cat && cat !== "") {
-            const catId = `__cat__${cat}`;
-            if (!nodesMap.has(catId)) {
-                nodesMap.set(catId, true);
-                D.cats_list.push(cat);
-                D.cats_trans.push(cat);
-                categoryCounts[cat] = 0;
-                D.grafo_temas.nodes.push({
-                    id: catId, label: cat.length > 40 ? cat.slice(0,40) + "..." : cat,
-                    title: cat, group: "cat", value: 60, // será atualizado pelo count
-                    color: {background: (CAT_CORES[cat] || "#888") + "66", border: (CAT_CORES[cat] || "#888")},
-                    font: {size: 10, color: "#1A202C"}, shape: "dot"
-                });
-                detailMap[catId] = { cat: cat, cor: CAT_CORES[cat] || "#888", eixos: [], causas: [] };
-            }
-
-            // Incrementar peso do nó da categoria
-            categoryCounts[cat] += 1;
-            
-            // Ligar Eixo -> Categoria
-            const edgeKey = `${eixoId}->${catId}`;
-            if (!edgesMap.has(edgeKey)) {
-                edgesMap.add(edgeKey);
-                D.grafo_temas.edges.push({from: eixoId, to: catId, color: {color: CAT_CORES[cat] || "#888"}, width: 2});
-                detailMap[catId].eixos.push(eixo);
-            }
-
-            // Alimentar Detalhes
-            detailMap[catId].causas.push({
-                causa: cs || cp,
-                eixo: eixo,
-                eixo_nome: EIXO_CURTO[eixo],
-                eixo_full: EIXO_FULL[eixo],
-                votos: parseInt(votos) || 0,
-                cp: cp
-            });
-        }
-
-        // 3. Estruturar dados para Modo 1 Minuto
-        if (!minutoMap[eixo]) minutoMap[eixo] = { nome: EIXO_FULL[eixo], prob: prob, cps: {} };
-        if (cp) {
-            if (!minutoMap[eixo].cps[cp]) minutoMap[eixo].cps[cp] = { cat: cat || "", css: [] };
-            if (cs) minutoMap[eixo].cps[cp].css.push({ cs: cs, cat: cat, votos: parseInt(votos) || 0, trans: !!cat });
-        }
-    });
-
-    // Atualizar valores dos nós de categoria com base na frequência
-    D.grafo_temas.nodes.forEach(n => {
-        if (n.id.startsWith("__cat__")) {
-            const cName = n.id.replace("__cat__", "");
-            n.value = 40 + (categoryCounts[cName] * 12);
-        }
-    });
-
-    D.grafo_temas.detail = detailMap;
-    D.minuto_data = minutoMap;
-    D.cats_list.sort();
-
-    // Inicializar componentes
-    buildSidebar();
-    setModo("temas");
-}
-
-// --- LOGICA VIS-NETWORK E INTERAÇÃO (PRESERVADA) ---
-const COR={
-  macro:{background:"#E53E3E",border:"#C53030"},
-  eixo:{background:"#2B6CB0",border:"#1A4A8A"},
-  problema:{background:"#D69E2E",border:"#B7791F"},
-  causa1:{background:"#38A169",border:"#276749"},
-  causa2:{background:"#3182CE",border:"#2C5282"},
-  causa3:{background:"#805AD5",border:"#553C9A"},
-  faded:{background:"#E2E8F0",border:"#CBD5E0"},
-};
-
-let modo="temas",net=null,vN=null,vE=null,G=null;
-let togTrans=true,togSem=true,selCat=null;
-
-window.addEventListener("load",()=> {
-    fetchAndParseCSV();
-    document.querySelectorAll(".mbtn").forEach(b=>
-        b.addEventListener("click",()=>setModo(b.dataset.m)));
-    document.getElementById("t-trans").onchange=function(){togTrans=this.checked;aplicaToggle();};
-    document.getElementById("t-sem").onchange=function(){togSem=this.checked;aplicaToggle();};
-});
-
-function render(nodes,edges,opts){
-  if(net){net.destroy();net=null;}
-  vN=new vis.DataSet(nodes);
-  vE=new vis.DataSet(edges);
-  const container=document.getElementById("net");
-  net=new vis.Network(container,{nodes:vN,edges:vE},{
-    nodes:{shape:"dot",scaling:{min:8,max:opts.mn||60,label:{enabled:false}},
-      font:{size:opts.fs||11,color:"#374151",face:"Inter",strokeWidth:3,strokeColor:"#F7F8FA"},
-      borderWidth:1.5,shadow:{enabled:true,color:"rgba(0,0,0,.07)",size:5,x:0,y:2}},
-    edges:{width:.8,color:{color:"#D1D5DB"},smooth:{enabled:true,type:"continuous",roundness:.3}},
-    interaction:{hover:true,tooltipDelay:300,dragNodes:true,hideEdgesOnDrag:true},
-    physics:{enabled:true,
-      barnesHut:{gravitationalConstant:opts.grav||-28000,centralGravity:.25,
-        springLength:opts.sl||150,springConstant:.04,damping:.1,avoidOverlap:.9},
-      stabilization:{enabled:true,iterations:opts.iter||200,fit:true}},
-  });
-  setTimeout(()=>{
-    if(net){
-      net.setOptions({physics:{enabled:false}});
-      net.fit({animation:{duration:800,easingFunction:"easeInOutQuad"}});
-    }
-    if(opts.onReady) opts.onReady();
-  }, opts.delay||1800);
-  net.on("click",p=>{if(p.nodes.length)onClick(p.nodes[0]);});
-}
-
-function setModo(m){
-  modo=m; selCat=null; fecharPainel();
-  document.querySelectorAll(".mbtn").forEach(b=>{
-    b.classList.toggle("on",b.dataset.m===m);
-    b.classList.toggle("off",b.dataset.m!==m);
-  });
-  document.getElementById("sidebar").classList.toggle("hide",m!=="temas");
-  document.getElementById("net").style.left=m==="temas"?"220px":"0";
-  document.getElementById("toggles").style.display=m==="completo"?"block":"none";
-  document.querySelectorAll("#sidebar-list button").forEach(b=>
-    b.classList.remove("bg-indigo-50","font-semibold"));
-
-  if(m==="temas") renderTemas();
-  else if(m==="completo") renderCompleto();
-  else renderMinuto();
-}
-
-function renderTemas(){
-  render(D.grafo_temas.nodes,D.grafo_temas.edges,
-    {mn:75,fs:10,grav:-16000,sl:130,iter:150,delay:1200});
-}
-
-function renderCompleto(){
-    // Reconstrução simplificada do modo completo a partir dos dados dinâmicos
-    // Para este caso específico, utilizamos os nós base processados
-    render(D.grafo_temas.nodes, D.grafo_temas.edges,
-    {mn:50,fs:10,grav:-32000,sl:170,iter:250,delay:2500});
-}
-
-function renderMinuto(){
-  const nos = D.grafo_temas.nodes.filter(n => n.group === "macro" || n.group === "eixo");
-  const nodeIds = nos.map(n => n.id);
-  const ars = D.grafo_temas.edges.filter(e => nodeIds.includes(e.from) && nodeIds.includes(e.to));
-  render(nos, ars, {mn:60,fs:10,grav:-22000,sl:120,iter:200,delay:2000});
-}
-
-function aplicaToggle(){
-  if(!vN||!vE)return;
-  vN.update(vN.get().map(n=>{
-    if(n.group==="cat")return{id:n.id,hidden:!togTrans};
-    return{id:n.id,hidden:false};
-  }));
-}
-
-function onClick(id){
-  if(modo==="temas"){
-    const det=D.grafo_temas.detail[id];
-    if(det){painelTema(det,id);destacar(id);}
-  } else if(modo==="minuto"){
-    const eixoKey = id.replace("__e__", "");
-    if(D.minuto_data[eixoKey]) painelEixoMinuto(D.minuto_data[eixoKey], id);
-  }
-}
-
-function painelTema(det,nid){
-  document.getElementById("p-cor").style.background=det.cor;
-  document.getElementById("p-titulo").textContent=det.cat;
-  const uniqueEixos = [...new Set(det.eixos)];
-  const ens=uniqueEixos.map(e=>EIXO_CURTO[e]||e);
-  document.getElementById("p-sub").textContent=
-    det.causas.length+" causa"+(det.causas.length>1?"s":"")+" · "+ens.join(", ");
-  const body=document.getElementById("painel-body");
-  body.innerHTML='<p style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:#9CA3AF;margin:0 0 12px">Causas que originaram este tema</p>';
-  
-  const por={};
-  det.causas.forEach(c=>{const k=c.eixo_nome||c.eixo;if(!por[k])por[k]=[];por[k].push(c);});
-  Object.entries(por).forEach(([en,cs])=>{
-    body.innerHTML+=`<p style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:#9CA3AF;margin:16px 0 8px">${en}</p>`;
-    cs.forEach(c=>{
-      const stars=c.votos>0?`<span style="font-size:10px;font-weight:600;color:#D97706">⭐ ${c.votos} estrelinha${c.votos>1?"s":""}</span><br>`:"";
-      body.innerHTML+=`<div style="padding:10px 12px;border-radius:10px;border:1px solid #E5E7EB;background:#F9FAFB;font-size:12px;color:#374151;line-height:1.5;margin-bottom:8px">${stars}${c.causa}</div>`;
-    });
-  });
-  document.getElementById("painel").classList.add("open");
-}
-
-function painelEixoMinuto(data, id){
-    document.getElementById("p-cor").style.background = EIXO_CORES[id.replace("__e__","")] || "#555";
-    document.getElementById("p-titulo").textContent = data.nome;
-    document.getElementById("p-sub").textContent = "Problema Central: " + data.prob;
-    const body=document.getElementById("painel-body");
-    body.innerHTML='<p style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:#9CA3AF;margin:0 0 12px">Causas Primárias e Secundárias</p>';
-    
-    Object.entries(data.cps).forEach(([cp, info]) => {
-        body.innerHTML += `<div style="margin-top:15px; border-left: 3px solid #DDD; padding-left: 10px;">
-            <p style="font-size:12px; font-weight:700; color:#444">${cp}</p>
-            ${info.css.map(cs => `<p style="font-size:11px; color:#666; margin-left:10px">• ${cs.cs} ${cs.trans ? '<span style="color:#4F46E5">[Transversal]</span>' : ''}</p>`).join('')}
-        </div>`;
-    });
-    document.getElementById("painel").classList.add("open");
-}
-
-function fecharPainel(){document.getElementById("painel").classList.remove("open");}
-
-function destacar(catNid){
-  selCat=catNid;
-  document.querySelectorAll("#sidebar-list button[data-c]").forEach(b=>{
-    const active="__cat__"+b.dataset.c===catNid;
-    b.style.background=active?"#EEF2FF":"";
-    b.style.fontWeight=active?"600":"400";
-  });
-  if(!vN||!vE)return;
-  const allN=vN.get(),allE=vE.get();
-  if(!catNid){
-    vN.update(allN.map(n=>({id:n.id,color:n.color})));
-    vE.update(allE.map(e=>({id:e.id,color:e.color||{color:"#D1D5DB"}})));
-    return;
-  }
-  const conn=new Set([catNid]);
-  allE.forEach(e=>{if(e.to===catNid||e.from===catNid){conn.add(e.from);conn.add(e.to);}});
-  vN.update(allN.map(n=>({id:n.id,
-    color:conn.has(n.id)?n.color:{background:"#EDF2F7",border:"#CBD5E0"}})));
-  vE.update(allE.map(e=>({id:e.id,
-    color:{color:conn.has(e.from)&&conn.has(e.to)?(e.color?.color||"#D1D5DB"):"#EDF2F7"}})));
-}
-
-function buildSidebar(){
-  const list=document.getElementById("sidebar-list");
-  list.innerHTML = "";
-  const all=document.createElement("button");
-  all.style.cssText="width:100%;display:flex;align-items:center;gap:8px;padding:8px 12px;border-radius:8px;border:none;cursor:pointer;font-size:11px;color:#4B5563;text-align:left;background:transparent";
-  all.innerHTML=`<span style="width:8px;height:8px;border-radius:50%;background:#CBD5E0;flex-shrink:0;display:inline-block"></span><span style="font-weight:500;color:#6B7280">Todos os temas</span>`;
-  all.onclick=()=>{selCat=null;destacar(null);fecharPainel();
-    list.querySelectorAll("button[data-c]").forEach(b=>{b.style.background="";b.style.fontWeight="400";});};
-  list.appendChild(all);
-  
-  D.cats_list.forEach(cat=>{
-    const cor=CAT_CORES[cat]||"#888";
-    const det=D.grafo_temas.detail["__cat__"+cat];
-    const uniqueEixos = [...new Set(det.eixos)];
-    const ens=uniqueEixos.map(e=>EIXO_CURTO[e]||e).join(", ");
-    const btn=document.createElement("button");
-    btn.style.cssText="width:100%;display:flex;align-items:start;gap:8px;padding:8px 12px;border-radius:8px;border:none;cursor:pointer;font-size:11px;color:#374151;text-align:left;background:transparent;transition:background .15s";
-    btn.dataset.c=cat;
-    btn.innerHTML=`<span style="width:8px;height:8px;border-radius:50%;background:${cor};flex-shrink:0;display:inline-block;margin-top:3px"></span>
-      <div><p style="margin:0;font-weight:500;line-height:1.4;color:#374151">${cat.length>48?cat.slice(0,46)+"…":cat}</p>
-      <p style="margin:3px 0 0;font-size:10px;color:#9CA3AF">${ens}</p></div>`;
-    btn.onmouseover=()=>{if(selCat!=="__cat__"+cat)btn.style.background="#F9FAFB";};
-    btn.onmouseout=()=>{if(selCat!=="__cat__"+cat)btn.style.background="";};
-    btn.onclick=()=>{
-      const nid="__cat__"+cat;
-      const det=D.grafo_temas.detail[nid];
-      if(det){painelTema(det,nid);destacar(nid);}
-    };
-    list.appendChild(btn);
-  });
-}
-</script>
-</body>
-</html>
+        info.axes.forEach(ex => D.grafo_temas.edges.
