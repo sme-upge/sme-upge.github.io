@@ -232,4 +232,93 @@ function renderNetwork() {
     const visNodes = new vis.DataSet(Array.from(nodeSet.values()));
     const visEdges = new vis.DataSet(Array.from(edgeSet).map(e => {
         const [from, to] = e.split('|');
-        return { fro
+        return { from, to, color: COLORS.link, width: 1.5 };
+    }));
+
+    const container = document.getElementById('net');
+    const options = {
+        nodes: { shape: 'dot', font: { face: 'Inter' } },
+        edges: { smooth: { type: 'cubicBezier', roundness: 0.5 } },
+        physics: {
+            forceAtlas2Based: { gravitationalConstant: -80, centralGravity: 0.01, springLength: 100, damping: 0.4 },
+            solver: 'forceAtlas2Based',
+            stabilization: { iterations: 150 }
+        }
+    };
+
+    network = new vis.Network(container, { nodes: visNodes, edges: visEdges }, options);
+
+    network.on("click", (params) => {
+        if (params.nodes.length > 0) {
+            const nodeId = params.nodes[0];
+            const nodeData = visNodes.get(nodeId);
+            if(nodeData.causas) abrirPainel(nodeData);
+        }
+    });
+}
+
+function abrirPainel(node) {
+    const painel = document.getElementById('painel');
+    const titulo = document.getElementById('p-titulo');
+    const meta = document.getElementById('p-meta');
+    const conteudo = document.getElementById('p-conteudo');
+    const tag = document.getElementById('p-tag');
+
+    titulo.innerText = node.label.replace('\n', ' ');
+    tag.style.backgroundColor = node.color;
+    
+    const eixosRelacionados = [...new Set(node.causas.map(c => c.eixo))];
+    meta.innerText = `${node.causas.length} causas · ${eixosRelacionados.join(', ')}`;
+
+    // Agrupar causas por eixo no painel
+    let html = '';
+    const agrupado = {};
+    node.causas.forEach(c => {
+        if(!agrupado[c.eixo]) agrupado[c.eixo] = [];
+        agrupado[c.eixo].push(c);
+    });
+
+    Object.entries(agrupado).forEach(([eixo, lista]) => {
+        html += `
+            <div class="space-y-4">
+                <h4 class="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">${eixo}</h4>
+                <div class="space-y-3">
+                    ${lista.map(c => `
+                        <div class="bg-slate-50 border border-slate-100 p-5 rounded-2xl relative overflow-hidden group">
+                            ${c.votos > 0 ? `
+                                <div class="flex items-center gap-1 mb-2">
+                                    <span class="text-amber-400 text-xs font-bold">⭐ ${c.votos} estrelas</span>
+                                </div>
+                            ` : ''}
+                            <p class="text-sm text-slate-600 leading-relaxed font-medium">${c.c1 || c.problema}</p>
+                            ${c.c2 ? `<p class="text-xs text-slate-400 mt-2 pl-4 border-l-2 border-slate-200">${c.c2}</p>` : ''}
+                        </div>
+                    `).join('')}
+                </div>
+            </div>
+        `;
+    });
+
+    conteudo.innerHTML = html;
+    painel.classList.remove('closed');
+}
+
+function fecharPainel() {
+    document.getElementById('painel').classList.add('closed');
+}
+
+function breakText(text, limit) {
+    if (text.length <= limit) return text;
+    const words = text.split(' ');
+    let res = '', line = '';
+    words.forEach(w => {
+        if ((line + w).length > limit) { res += line + '\n'; line = ''; }
+        line += w + ' ';
+    });
+    return res + line;
+}
+
+init();
+</script>
+</body>
+</html>
