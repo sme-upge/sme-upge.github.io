@@ -75,6 +75,9 @@ const EIXO_CORES = {
   "Eixo 4": "#EA580C", "Eixo 5": "#06B6D4", "Eixo 6": "#E11D48", "Eixo 7": "#14B8A6"
 };
 
+// Objeto para armazenar as descrições extensas extraídas dinamicamente do CSV
+const EIXO_NOMES_COMPLETOS = {};
+
 const CAT_CORES_MAP = {
   "Fragmentação": "#EF4444", "fragmentação": "#EF4444",
   "Comunicação": "#3B82F6", "comunicação": "#3B82F6",
@@ -129,7 +132,6 @@ function processarDados(rows) {
     const catMap = {};
     const eixosAtivos = {};
 
-    // Problema Macro Centralizado - ADICIONADO TOOLTIP (title)
     G.nodes.push({
         id: "ROOT", 
         label: "PROBLEMA\nMACRO", 
@@ -148,6 +150,8 @@ function processarDados(rows) {
         const cleanEixo = eixoCompleto.split(" - ")[0];
         if (!eixosAtivos[cleanEixo]) {
             eixosAtivos[cleanEixo] = { completo: eixoCompleto, problema: probCentral };
+            // Alimenta dinamicamente nosso mapa de nomes longos
+            EIXO_NOMES_COMPLETOS[cleanEixo] = eixoCompleto;
         }
 
         const mapearPar = (textoCausa, categoriaCausa) => {
@@ -174,7 +178,6 @@ function processarDados(rows) {
         const corSólida = EIXO_CORES[ex] || "#475569";
         const nomeCompleto = eixosAtivos[ex].completo;
         
-        // ADICIONADO TOOLTIP (title) NOS EIXOS TAMBÉM
         G.nodes.push({
             id: ex, 
             label: ex, 
@@ -307,9 +310,14 @@ function aoClicarNoNode(id) {
 
         let html = '<p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-4">Evidências Coletadas na Rede</p>';
         det.causas.forEach(c => {
-            const badges = c.eixos.map(ex => `<span style="background:${EIXO_CORES[ex] || "#475569"};color:white;padding:3.5px 7px;border-radius:8px;font-size:9px;font-weight:700;margin-right:5px">${ex}</span>`).join("");
+            // CORREÇÃO: Mapeia a sigla curta do eixo para a string descritiva completa dentro do badge lateral
+            const badges = c.eixos.map(ex => {
+                const nomeLongoDoEixo = EIXO_NOMES_COMPLETOS[ex] || ex;
+                return `<span style="background:${EIXO_CORES[ex] || "#475569"};color:white;padding:5px 9px;border-radius:8px;font-size:10px;font-weight:700;display:inline-block;margin-bottom:6px;margin-right:5px">${nomeLongoDoEixo}</span>`;
+            }).join("");
+            
             html += `<div style="padding:16px;border-radius:14px;border:1px solid #E2E8F0;background:#F8FAFC;margin-bottom:14px">
-                <div style="margin-bottom:10px">${badges}</div>
+                <div style="margin-bottom:6px; display:flex; flex-wrap:wrap;">${badges}</div>
                 <p style="font-size:12px;color:#334155;line-height:1.6;font-weight:500">${c.texto}</p>
                 ${c.votos > 0 ? `<div style="margin-top:10px;font-size:10px;font-weight:700;color:#D97706;background:#FEF3C7;padding:3px 10px;border-radius:8px;display:inline-block">⭐ ${c.votos} votos</div>` : ""}
             </div>`;
@@ -320,35 +328,24 @@ function aoClicarNoNode(id) {
     document.getElementById("painel").classList.add("open");
     document.getElementById("net").style.right = "480px";
 
-    // FILTRO LIMPO: Mostra apenas a conexão direta entre Temas e Eixos (Sem o Macro central poluindo)
     try {
         const conectados = net.getConnectedNodes(id);
         conectados.push(id);
-
-        // Se o nó selecionado não for o central, tiramos o "ROOT" (Macro) de foco para limpar a árvore
         const ocultarMacro = (id !== "ROOT");
 
         vN.update(vN.get().map(n => {
             let visivel = conectados.includes(n.id);
-            if (n.id === "ROOT" && ocultarMacro) visivel = false; // Desliga o macro no filtro para clareza visual
-            
-            return {
-                id: n.id,
-                opacity: visivel ? 1 : 0.05
-            };
+            if (n.id === "ROOT" && ocultarMacro) visivel = false;
+            return { id: n.id, opacity: visivel ? 1 : 0.05 };
         }));
 
         vE.update(vE.get().map(e => {
-            // A linha só acende se conectar diretamente o nó selecionado com seus pares imediatos
             const pertenceAoFluxoDireto = (e.from === id || e.to === id);
-            
-            // Oculta completamente linhas ligadas ao macro central durante o filtro de temas/eixos
             const envolveMacro = (e.from === "ROOT" || e.to === "ROOT");
             
             if (ocultarMacro && envolveMacro) {
                 return { id: e.id, color: { opacity: 0 }, width: 0 };
             }
-
             return {
                 id: e.id,
                 color: pertenceAoFluxoDireto ? { color: det.cor, opacity: 1 } : { opacity: 0.02 },
