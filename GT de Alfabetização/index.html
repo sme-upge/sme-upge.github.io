@@ -3,821 +3,586 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Painel de Evidências — GT de Alfabetização · SME-SP</title>
-<script src="https://cdn.tailwindcss.com"></script>
+<title>Ãrvore de Problemas â€” GT de AlfabetizaÃ§Ã£o Â· SME-SP</title>
 <script src="https://unpkg.com/vis-network/standalone/umd/vis-network.min.js"></script>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
-*{box-sizing:border-box}
-html,body{height:100%;margin:0;padding:0;overflow:hidden;font-family:"Inter",sans-serif;background:#FAFAFA}
-#net{position:absolute;top:0;left:290px;right:0;bottom:0;background:#FAFAFA;transition:right .25s cubic-bezier(0.4, 0, 0.2, 1)}
-#sidebar{position:fixed;top:0;left:0;width:290px;height:100vh;background:white;border-right:1px solid #EEF2F6;z-index:30;display:flex;flex-direction:column}
-#sidebar-list{flex:1;overflow-y:auto;padding:16px 12px}
-#painel{position:fixed;top:0;right:0;width:460px;height:100vh;background:white;border-left:1px solid #EEF2F6;z-index:40;display:flex;flex-direction:column;transform:translateX(100%);transition:transform .25s cubic-bezier(0.4, 0, 0.2, 1);box-shadow:-20px 0 40px rgba(15,23,42,0.03)}
-#painel.open{transform:translateX(0)}
-#painel-body{flex:1;overflow-y:auto;padding:24px 28px}
-::-webkit-scrollbar{width:4px}
-::-webkit-scrollbar-thumb{background:#E2E8F0;border-radius:4px}
-
-.switch {position:relative;display:inline-block;width:32px;height:18px}
-.switch input {opacity:0;width:0;height:0}
-.slider {position:absolute;cursor:pointer;inset:0;background-color:#E2E8F0;border-radius:20px;transition:.2s}
-.slider:before {position:absolute;content:"";height:12px;width:12px;left:3px;bottom:3px;background-color:white;border-radius:50%;transition:.2s}
-input:checked + .slider {background-color:#3B82F6}
-input:checked + .slider:before {transform:translateX(14px)}
-
-.btn-sidebar-item {
-    width: 100%;
-    text-align: left;
-    padding: 8px 12px;
-    border-radius: 8px;
-    font-size: 12px;
-    margin-bottom: 3px;
-    display: flex;
-    align-items: start;
-    gap: 8px;
-    transition: all 0.15s ease;
-    white-space: normal !important;
-    word-break: break-word !important;
-}
-.btn-sidebar-item:hover { background-color: #F8FAFC; }
-.btn-sidebar-text { flex: 1; min-width: 0; font-weight: 500; color: #475569; line-height: 1.4; }
-.btn-sidebar-item.active { background-color: #EFF6FF; }
-.btn-sidebar-item.active .btn-sidebar-text { color: #1E40AF; font-weight: 600; }
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;font-family:"Inter",sans-serif;background:#F7F8FA;overflow:hidden}
+#loading{position:fixed;inset:0;background:#F7F8FA;z-index:200;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px}
+#loading.hide{display:none}
+.spin{width:34px;height:34px;border:3px solid #E2E8F0;border-top-color:#4F46E5;border-radius:50%;animation:sp .8s linear infinite}
+@keyframes sp{to{transform:rotate(360deg)}}
+#net{position:fixed;top:0;left:240px;right:0;bottom:0;background:#F7F8FA;transition:right .25s ease}
+#sb{position:fixed;top:0;left:0;width:240px;height:100%;background:#fff;border-right:1px solid #E2E8F0;z-index:30;display:flex;flex-direction:column}
+#sb-list{flex:1;overflow-y:auto;padding:8px 10px}
+#sb-list::-webkit-scrollbar{width:3px}
+#sb-list::-webkit-scrollbar-thumb{background:#E2E8F0;border-radius:3px}
+#pan{position:fixed;top:0;right:0;width:400px;height:100%;background:#fff;border-left:1px solid #E2E8F0;z-index:40;display:flex;flex-direction:column;transform:translateX(100%);transition:transform .25s ease;box-shadow:-12px 0 24px rgba(0,0,0,.04)}
+#pan.open{transform:translateX(0)}
+#pan-body{flex:1;overflow-y:auto;padding:20px 24px}
+#pan-body::-webkit-scrollbar{width:3px}
+#pan-body::-webkit-scrollbar-thumb{background:#E2E8F0;border-radius:3px}
+#ctrl2{display:none;flex-direction:column;gap:10px;padding:14px 16px;border-bottom:1px solid #E2E8F0;background:#FAFAFA;flex-shrink:0}
+#ctrl2.show{display:flex}
+#legenda{padding:12px 16px;border-bottom:1px solid #E2E8F0;background:#FAFAFA;flex-shrink:0;display:none}
+#legenda.show{display:block}
+.tsw{position:relative;display:inline-block;width:32px;height:18px;flex-shrink:0}
+.tsw input{opacity:0;width:0;height:0}
+.tsl{position:absolute;cursor:pointer;inset:0;background:#E2E8F0;border-radius:18px;transition:.2s}
+.tsl:before{position:absolute;content:"";height:12px;width:12px;left:3px;bottom:3px;background:#fff;border-radius:50%;transition:.2s}
+input:checked+.tsl{background:#4F46E5}
+input:checked+.tsl:before{transform:translateX(14px)}
+.abtn{padding:6px 14px;border-radius:8px;font-size:12px;font-weight:600;border:none;cursor:pointer;transition:all .15s;font-family:"Inter",sans-serif;white-space:nowrap}
+.abtn.on{background:#fff;color:#1A202C;box-shadow:0 1px 4px rgba(0,0,0,.1)}
+.abtn.off{background:transparent;color:#94A3B8}
+.si{width:100%;display:flex;align-items:flex-start;gap:7px;padding:7px 8px;border-radius:8px;border:none;cursor:pointer;font-size:11px;text-align:left;background:transparent;transition:background .12s;font-family:"Inter",sans-serif}
+.si:hover{background:#F8FAFC}
+.si.active{background:#EFF6FF}
+.si.active .si-t{color:#1E40AF;font-weight:600}
+.si-t{flex:1;min-width:0;font-weight:500;line-height:1.4;color:#475569;white-space:normal;word-break:break-word}
+select{width:100%;padding:6px 10px;border:1px solid #E2E8F0;border-radius:8px;font-size:11px;font-family:"Inter",sans-serif;color:#374151;background:#fff;outline:none;cursor:pointer}
+.cbl{display:flex;align-items:flex-start;gap:7px;font-size:11px;color:#64748B;cursor:pointer;padding:3px 0;line-height:1.4}
+.cbl input{width:13px;height:13px;accent-color:#4F46E5;cursor:pointer;margin-top:2px;flex-shrink:0}
+/* tooltip customizado via DOM */
+#tip{position:fixed;z-index:300;background:#fff;color:#1A202C;border:1px solid #E2E8F0;border-radius:10px;padding:8px 12px;font-size:12px;font-family:"Inter",sans-serif;line-height:1.5;box-shadow:0 4px 16px rgba(0,0,0,.1);pointer-events:none;max-width:280px;display:none;white-space:normal;word-break:break-word}
 </style>
 </head>
 <body>
 
-<div id="sidebar">
-  <div class="px-6 pt-6 pb-4 border-b border-slate-50 flex-shrink-0">
-    <p class="text-[10px] font-bold uppercase tracking-widest text-blue-600">Matriz Diagnóstica</p>
-    <p class="text-[12px] text-slate-400 mt-0.5 font-medium">GT Alfabetização · SME-SP</p>
-  </div>
-  
-  <div id="controles-aba1" class="px-6 py-3 bg-slate-50/50 border-b border-slate-100 flex items-center justify-between flex-shrink-0">
-    <span class="text-[11px] font-medium text-slate-600">Exibir dores específicas</span>
-    <label class="switch">
-      <input type="checkbox" id="filtro-especificas" checked onchange="aplicarFiltroAba1()">
-      <span class="slider"></span>
-    </label>
-  </div>
-
-  <div id="controles-aba2" class="px-6 py-4 bg-slate-50/50 border-b border-slate-100 flex-col gap-3.5 flex-shrink-0 hidden">
-    <div class="flex flex-col gap-1 w-full border-b border-slate-100 pb-2.5">
-      <span class="text-[10px] font-bold text-amber-600 uppercase tracking-wider">Mínimo de Relevância</span>
-      <select id="select-votos-hierarquica" class="bg-white border border-slate-200 rounded-lg p-1.5 text-xs font-medium text-slate-700 focus:outline-none" onchange="renderizarEstruturaHierarquica()">
-        <option value="0">Todas as Evidências</option>
-        <option value="1">1+ Estrela (Sinalizadas)</option>
-        <option value="4">4+ Estrelas (Alta Relevância)</option>
-        <option value="6">6+ Estrelas (Gargalos Críticos)</option>
-      </select>
-    </div>
-
-    <div class="flex flex-col gap-1 w-full border-b border-slate-100 pb-2.5">
-      <div class="flex items-center justify-between">
-        <span class="text-[10px] font-bold text-blue-600 uppercase tracking-wider">Teia Transversal</span>
-        <label class="switch">
-          <input type="checkbox" id="switch-transversal-hierarquica" checked onchange="toggleVisibilidadeComboTema()">
-          <span class="slider"></span>
-        </label>
-      </div>
-      <select id="select-tema-transversal" class="bg-white border border-slate-200 rounded-lg p-1.5 text-xs font-medium text-slate-700 focus:outline-none mt-1" onchange="renderizarEstruturaHierarquica()">
-        <option value="__ALL__">Todos os Temas</option>
-      </select>
-    </div>
-
-    <div>
-      <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1 block">Filtrar por Eixos</span>
-      <div id="checkbox-eixos-container" class="flex flex-col gap-1.5 max-h-[140px] overflow-y-auto"></div>
-    </div>
-  </div>
-
-  <div id="legenda-container" class="px-6 py-3 border-t border-slate-100 bg-slate-50/30 text-[11px] text-slate-500 space-y-1.5 flex-shrink-0 hidden">
-    <p class="font-bold uppercase tracking-wider text-[9px] text-slate-400 mb-2">Legenda de Níveis</p>
-    <div class="flex items-center gap-2"><span class="w-2.5 h-2.5 rounded-full bg-[#EF4444]"></span><span>Problema Macro</span></div>
-    <div class="flex items-center gap-2"><span class="w-2.5 h-2.5 rounded-full bg-[#6366F1]"></span><span>Eixos Estruturantes</span></div>
-    <div class="flex items-center gap-2"><span class="w-2.5 h-2.5 rounded-full bg-[#38BDF8]"></span><span>Causa Primária</span></div>
-    <div class="flex items-center gap-2"><span class="w-2.5 h-2.5 rounded-full bg-[#34D399]"></span><span>Causa Secundária</span></div>
-    <div class="flex items-center gap-2"><span class="w-2.5 h-2.5 rounded-full bg-[#FBBF24]"></span><span>Causa Terciária</span></div>
-  </div>
-
-  <div id="sidebar-list"></div>
+<div id="loading">
+  <div class="spin"></div>
+  <p style="font-size:13px;font-weight:600;color:#374151">Carregando dados...</p>
+  <p style="font-size:11px;color:#94A3B8">GT de AlfabetizaÃ§Ã£o Â· SME-SP Â· 2026</p>
 </div>
 
+<!-- tooltip DOM -->
+<div id="tip"></div>
+
+<!-- sidebar -->
+<div id="sb">
+  <div style="padding:18px 16px 12px;border-bottom:1px solid #E2E8F0;flex-shrink:0">
+    <p style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:#4F46E5">GT AlfabetizaÃ§Ã£o Â· SME-SP</p>
+    <p style="font-size:12px;font-weight:600;color:#1A202C;margin-top:2px">Matriz DiagnÃ³stica</p>
+  </div>
+  <!-- ctrl aba1 -->
+  <div id="ctrl1" style="padding:12px 16px;border-bottom:1px solid #E2E8F0;background:#FAFAFA;flex-shrink:0;display:flex;align-items:center;justify-content:space-between">
+    <span style="font-size:11px;font-weight:500;color:#64748B">Causas especÃ­ficas</span>
+    <label class="tsw"><input type="checkbox" id="tog-esp" checked onchange="filtroEsp()"><span class="tsl"></span></label>
+  </div>
+  <!-- ctrl aba2 -->
+  <div id="ctrl2">
+    <div>
+      <p style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#F59E0B;margin-bottom:5px">MÃ­nimo de estrelas</p>
+      <select id="sel-v" onchange="renderH()">
+        <option value="0">Todas as causas</option>
+        <option value="1">1+ â­ Sinalizadas</option>
+        <option value="4">4+ â­ Alta relevÃ¢ncia</option>
+        <option value="6">6+ â­ Gargalos crÃ­ticos</option>
+      </select>
+    </div>
+    <div>
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:5px">
+        <p style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#4F46E5">ConexÃµes transversais</p>
+        <label class="tsw"><input type="checkbox" id="tog-tr" checked onchange="renderH()"><span class="tsl"></span></label>
+      </div>
+      <select id="sel-tema" onchange="renderH()"><option value="__ALL__">Todos os temas</option></select>
+    </div>
+    <div>
+      <p style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#94A3B8;margin-bottom:6px">Filtrar eixos</p>
+      <div id="cb-eixos" style="display:flex;flex-direction:column;gap:5px;max-height:160px;overflow-y:auto"></div>
+    </div>
+  </div>
+  <!-- legenda sÃ³ na aba2 -->
+  <div id="legenda">
+    <p style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#94A3B8;margin-bottom:8px">Hierarquia de cores</p>
+    <div style="display:flex;flex-direction:column;gap:5px;font-size:11px;color:#64748B">
+      <div style="display:flex;align-items:center;gap:7px"><span style="width:10px;height:10px;border-radius:50%;background:#E53E3E;flex-shrink:0"></span>Problema macro</div>
+      <div style="display:flex;align-items:center;gap:7px"><span style="width:9px;height:9px;border-radius:50%;background:#4F46E5;flex-shrink:0"></span>Eixo</div>
+      <div style="display:flex;align-items:center;gap:7px"><span style="width:7px;height:7px;border-radius:50%;background:#38BDF8;flex-shrink:0"></span>Causa primÃ¡ria</div>
+      <div style="display:flex;align-items:center;gap:7px"><span style="width:6px;height:6px;border-radius:50%;background:#34D399;flex-shrink:0"></span>Causa secundÃ¡ria</div>
+      <div style="display:flex;align-items:center;gap:7px"><span style="width:5px;height:5px;border-radius:50%;background:#FBBF24;flex-shrink:0"></span>Causa terciÃ¡ria</div>
+    </div>
+    <p style="font-size:10px;color:#CBD5E0;margin-top:8px;font-style:italic">Passe o cursor sobre os nÃ³s</p>
+  </div>
+  <div id="sb-list"></div>
+</div>
+
+<!-- rede -->
 <div id="net"></div>
 
-<div style="position:fixed;top:0;left:290px;right:0;z-index:20;pointer-events:none;background:linear-gradient(rgba(250,250,250,1) 60%,rgba(250,250,250,0))">
-  <div style="display:flex;flex-direction:column;align-items:center;padding:24px 0 40px">
-    <div style="text-align:center;pointer-events:auto;">
-      <h1 id="main-title" style="font-size:18px;font-weight:700;color:#0F172A;margin:0;letter-spacing:-0.02em">Árvore Diagnóstica de Problemas</h1>
-      <p id="main-subtitle" style="font-size:11px;color:#64748B;margin:4px 0 0;font-weight:500">Volumetria proporcional e conexões transversais unificadas</p>
-    </div>
-    
-    <div class="flex bg-slate-200/60 p-0.5 rounded-lg mt-3.5 pointer-events-auto border border-slate-200/40 shadow-sm backdrop-blur-md">
-      <button id="btn-aba1" onclick="mudarAba('radial')" class="px-4 py-1.5 rounded-md text-xs font-semibold transition-all bg-white text-slate-800 shadow-sm">
-        Matriz de Temas
-      </button>
-      <button id="btn-aba2" onclick="mudarAba('hierarquica')" class="px-4 py-1.5 rounded-md text-xs font-semibold transition-all text-slate-500 hover:text-slate-800">
-        Árvore Detalhada
-      </button>
+<!-- header -->
+<div style="position:fixed;top:0;left:240px;right:0;z-index:20;pointer-events:none;background:linear-gradient(rgba(247,248,250,1) 55%,rgba(247,248,250,0))">
+  <div style="display:flex;flex-direction:column;align-items:center;padding:20px 0 44px">
+    <h1 style="font-size:17px;font-weight:700;color:#0F172A;letter-spacing:-.02em">Ãrvore de Problemas</h1>
+    <p style="font-size:11px;color:#94A3B8;margin-top:3px;font-weight:500">GT de AlfabetizaÃ§Ã£o Â· SME-SP Â· 2026</p>
+    <div style="display:flex;background:#E2E8F0;padding:3px;border-radius:10px;margin-top:12px;pointer-events:auto;gap:2px">
+      <button class="abtn on" id="btn-a1" onclick="mudarAba('r')">ðŸ”— Matriz de Temas</button>
+      <button class="abtn off" id="btn-a2" onclick="mudarAba('h')">ðŸŒ³ Ãrvore Detalhada</button>
     </div>
   </div>
 </div>
 
-<div id="painel">
-  <div style="padding:24px;border-bottom:1px solid #F8FAFC;flex-shrink:0;display:flex;gap:16px;align-items:start">
+<!-- painel detalhe -->
+<div id="pan">
+  <div style="padding:20px 24px 16px;border-bottom:1px solid #E2E8F0;flex-shrink:0;display:flex;gap:12px;align-items:flex-start">
     <div style="flex:1;min-width:0">
       <div id="p-cor" style="width:10px;height:10px;border-radius:50%;margin-bottom:8px"></div>
-      <h2 id="p-titulo" style="font-size:13px;font-weight:700;color:#0F172A;margin:0;line-height:1.4"></h2>
-      <p id="p-sub" style="font-size:11px;color:#94A3B8;margin:2px 0 0;font-weight:500"></p>
+      <h2 id="p-tit" style="font-size:13px;font-weight:700;color:#0F172A;line-height:1.4"></h2>
+      <p id="p-sub" style="font-size:11px;color:#94A3B8;margin-top:4px;font-weight:500"></p>
     </div>
-    <button onclick="fecharPainel()" style="width:28px;height:28px;border-radius:6px;background:#F1F5F9;border:none;cursor:pointer;font-size:16px;color:#64748B;flex-shrink:0;display:flex;align-items:center;justify-content:center">×</button>
+    <button onclick="fecharPan()" style="width:26px;height:26px;border-radius:7px;background:#F1F5F9;border:none;cursor:pointer;font-size:15px;color:#64748B;flex-shrink:0;display:flex;align-items:center;justify-content:center">Ã—</button>
   </div>
-  <div id="painel-body"></div>
+  <div id="pan-body"></div>
 </div>
 
 <script>
-const EIXO_CORES = {
-  "Eixo 1": "#3B82F6", "Eixo 2": "#8B5CF6", "Eixo 3": "#10B981",
-  "Eixo 4": "#F97316", "Eixo 5": "#06B6D4", "Eixo 6": "#F43F5E", "Eixo 7": "#14B8A6"
-};
+const EC={"Eixo 1": "#2B6CB0", "Eixo 2": "#6B46C1", "Eixo 3": "#276749", "Eixo 4": "#9C4221", "Eixo 5": "#1A5276", "Eixo 6": "#9B2335", "Eixo 7": "#234E52"};
+const CC={"FragmentaÃ§Ã£o da concepÃ§Ã£o e prÃ¡tica de alfabetizaÃ§Ã£o, com entendimentos distintos entre intÃ¢ncias e atores da rede sobre instrumentos normativos": "#FC8181", "Fragilidade na comunicaÃ§Ã£o e planejamento integrado entre SME, DREs e UEs": "#63B3ED", "Alta rotatividade de professores": "#E9D8FD", "Fragilidades na consolidaÃ§Ã£o de identidades e sobrecarga de demandas do Trio Gestor (Diretores, ADs e CPs) e POA, impactando o planejamento integrado": "#76E4F7", "Fragilidade na identidade, formaÃ§Ã£o especializada e ausÃªncia de incentivos para permanÃªncia de professores alfabetizadores, o que dificulta a continuidade e consolidaÃ§Ã£o de prÃ¡ticas": "#F687B3", "Fragilidades na implementaÃ§Ã£o da polÃ­tica de EducaÃ§Ã£o em tempo integral nas EMEIs e ciclo de alfabetizaÃ§Ã£o": "#F687B3", "Fragilidade na articulaÃ§Ã£o curricular, planejamento integrado e continuidade pedagÃ³gica entre as etapas de ensino (Ed. Infantil e Ciclo de AlfabetizaÃ§Ã£o)": "#FEB2B2", "Dificuldade na articulaÃ§Ã£o com a rede de proteÃ§Ã£o na responsabilidade na garantia do direito de alfabetizaÃ§Ã£o": "#E9D8FD", "Fragilidade de projetos e fluxos cotidianos relacionados Ã  escuta e participaÃ§Ã£o das famÃ­lias e responsÃ¡veis": "#81E6D9", "PresenÃ§a significativa de docentes recÃ©m-formados em Pedagogia, muitas vezes em cursos EaD.": "#FEB2B2", "Baixa qualidade de cursos de Licenciatura oferecidos no paÃ­s, sobretudo na modalidade EaD": "#C6F6D5", "Ingresso de docentes na RME sem formaÃ§Ã£o especÃ­fica ou experiÃªncia prÃ©via no ciclo de alfabetizaÃ§Ã£o": "#FED7D7", "ParticipaÃ§Ã£o desigual de professores nas formaÃ§Ãµes (JEIF e Contratados)": "#81E6D9", "Fragilidade na formaÃ§Ã£o continuada de professores e trio gestor acerca da alfabetizaÃ§Ã£o": "#FBD38D", "Dificuldade de participaÃ§Ã£o e continuidade em processos formativos contÃ­nuos, no horÃ¡rio de trabalho, devido Ã  falta de profissionais para substituiÃ§Ã£o nas UEs.": "#ECC94B", "Fragilidade na integraÃ§Ã£o entre currÃ­culo, materiais didÃ¡ticos, prÃ¡ticas pedagÃ³gicas e avaliaÃ§Ãµes": "#81E6D9", "Desafios na integraÃ§Ã£o do cronograma formativo por ciclos e na conexÃ£o das temÃ¡ticas com a realidade cotidiana e as necessidades dos territÃ³rios": "#63B3ED", "Descompasso entre as competÃªncias especÃ­ficas exigidas e as desenvolvidas nos cursos de Pedagogia": "#4FD1C5", "AusÃªncia de critÃ©rios para retenÃ§Ã£o de professores alfabetizadores": "#E9D8FD", "Fragilidade no atendimento dos estudantes em suas individualidades (AEE e vulnerabilidades)": "#FEEBC8", "AusÃªncia de estrutura institucional que fomentem a troca de experiÃªncias entre as unidades a partir de suas prÃ¡ticas e desafios": "#D6BCFA", "AusÃªncia de polÃ­tica sistematizada de identificaÃ§Ã£o, registro e valorizaÃ§Ã£o de prÃ¡ticas bem-sucedidas de alfabetizaÃ§Ã£o na rede": "#F687B3", "AusÃªncia de feedback positivo aos profissionais â€” diÃ¡logo ocorre apenas diante dos problemas": "#81E6D9", "AusÃªncia de adicional financeiro para professores do ciclo de alfabetizaÃ§Ã£o": "#FC8181", "Alto nÃºmero de estudantes por turma": "#76E4F7", "Quadro de apoio em quantidade insuficiente": "#9AE6B4", "Sobrecarga de demandas e fragilidade no planejamento e o acompanhamento pedagÃ³gico dos estudantes e das prÃ¡ticas docentes.": "#F6AD55", "Lacunas na institucionalizaÃ§Ã£o e implementaÃ§Ã£o de instrumentos padronizados para o monitoramento contÃ­nuo do desenvolvimento das aprendizagens.": "#68D391", "Fragilidade na formaÃ§Ã£o para uso e anÃ¡lise de dados de avaliaÃ§Ã£o": "#F687B3", "Excesso e sobreposiÃ§Ã£o de avaliaÃ§Ãµes  no calendÃ¡rio escolar": "#68D391", "Desafios na transposiÃ§Ã£o da concepÃ§Ã£o de avaliaÃ§Ã£o para a prÃ¡tica pedagÃ³gica e rotinas de implementaÃ§Ã£o na rede.": "#81E6D9", "Dificuldade de uso dos instrumentos avaliativos para atendimento individualizado e aferiÃ§Ã£o de diferenÃ§as e desigualdades": "#FFA07A", "Professor e gestÃ£o entendem a avaliaÃ§Ã£o como â€œpressÃ£o por resultadosâ€ e como provas que induzem a treinamentos, gerando receio de medidas punitivas": "#ECC94B", "Fragilidade no planejamento do acompanhamento pedagÃ³gico dos estudantes e das prÃ¡ticas docentes": "#ECC94B", "Recursos pedagÃ³gicos sÃ£o insuficientes para todos os estudantes": "#F687B3", "DispersÃ£o de materiais de apoio (boletim, saberes, revista pedagÃ³gica, fascÃ­culo) dificulta o acompanhamento â€” pressÃ£o das unidades bimestrais a finalizar gera uso mecÃ¢nico sem intencionalidade pedagÃ³gica": "#F6AD55", "Recursos financeiros insuficientes para compra, manutenÃ§Ã£o e/ou reposiÃ§Ã£o dos materiais.": "#FED7D7", "AusÃªncia de espaÃ§os e mobiliÃ¡rios (prateleiras e expositores) adequados leva ao armazenamento de materiais diversos em locais inacessÃ­veis para as crianÃ§as": "#C6F6D5", "Acervo mal administrado e organizaÃ§Ã£o de sala inadequada, dificultando o acesso dos estudantes ao material": "#BEE3F8", "Compartilhamento de salas com outras turmas que nÃ£o reconhecem o valor pedagÃ³gico dos materiais": "#63B3ED", "Baixa intencionalidade pedagÃ³gica para produÃ§Ãµes que poderiam ser confeccionados por estudantes": "#76E4F7", "Infraestrutura fÃ­sica inadequada para implementaÃ§Ã£o do currÃ­culo e para garantia de uma educaÃ§Ã£o integral (parques, salas de leitura, LED, entre outros)": "#FFA07A"};
+const EN={"Eixo 1": "Responsabilidades na Garantia do Direito Ã  AlfabetizaÃ§Ã£o", "Eixo 2": "FormaÃ§Ã£o", "Eixo 3": "Infraestrutura FÃ­sica e PedagÃ³gica", "Eixo 4": "PolÃ­tica de Incentivos", "Eixo 5": "Acompanhamento e Monitoramento", "Eixo 6": "AvaliaÃ§Ã£o", "Eixo 7": "Materiais DidÃ¡ticos e PedagÃ³gicos"};
+const CSV="https://raw.githubusercontent.com/sme-upge/sme-upge.github.io/refs/heads/main/GT%20de%20Alfabetiza%C3%A7%C3%A3o/arvore.csv";
 
-const CAT_CORES_MAP = {
-  "Fragmentação": "#EF4444", "Comunicação": "#3B82F6", "Rotatividade": "#A855F7",
-  "Sobrecarga": "#06B6D4", "Participação": "#10B981", "Atendimento": "#F59E0B",
-  "Identidade": "#EC4899", "Articulação": "#F43F5E", "Recursos": "#D946EF",
-  "Excesso": "#22C55E", "Inadequação": "#F97316", "Qualificação": "#84CC16"
-};
+let aba="r",rows=[],net=null,vN=null,vE=null;
+let G={nodes:[],edges:[],det:{},orig:[]};
+let hDet={};
+let gRec={},gCat={},gEixo={},gVot={};
+let selCat=null;
+const tip=document.getElementById("tip");
 
-let currentTab = "radial"; 
-let rawRows = []; 
-let G_aba1 = { nodes: [], edges: [], details: [], originalEdges: [] }; 
-let hNodesDetails = {}; 
-let networkInstance = null;
-let nodesDataSet = new vis.DataSet([]);
-let edgesDataSet = new vis.DataSet([]);
-let selectedCategoryRadial = null;
+// â”€â”€ tooltip DOM (sem HTML no title) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+document.getElementById("net").addEventListener("mousemove",e=>{
+  if(tip.style.display==="block"){
+    tip.style.left=(e.clientX+14)+"px";
+    tip.style.top=(e.clientY-10)+"px";
+  }
+});
+function showTip(txt,e){
+  if(!txt){tip.style.display="none";return;}
+  tip.textContent=txt;
+  tip.style.display="block";
+  tip.style.left=(e.clientX+14)+"px";
+  tip.style.top=(e.clientY-10)+"px";
+}
+function hideTip(){tip.style.display="none";}
 
-let globalRecorrenciaTexto = {};
-let globalTextoParaCategorias = {};
-let globalTextoParaEixos = {};
-let globalTextoParaVotos = {}; 
+// â”€â”€ fetch CSV â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+fetch(CSV)
+  .then(r=>r.arrayBuffer())
+  .then(buf=>{
+    let t;
+    try{t=new TextDecoder("utf-8",{fatal:true}).decode(buf);}
+    catch(e){t=new TextDecoder("windows-1252").decode(buf);}
+    rows=parseCSV(t);
+    processar();
+    buildUI();
+    renderR();
+    document.getElementById("loading").classList.add("hide");
+  })
+  .catch(e=>{
+    document.getElementById("loading").innerHTML=
+      `<div style="text-align:center;max-width:400px;padding:20px">
+        <p style="color:#E53E3E;font-weight:700;font-size:14px;margin-bottom:8px">Erro ao carregar CSV</p>
+        <p style="color:#94A3B8;font-size:12px;margin-bottom:12px">${e.message}</p>
+        <p style="color:#64748B;font-size:11px;margin-bottom:8px">URL tentada:</p>
+        <code style="font-size:10px;color:#4F46E5;background:#EFF6FF;padding:6px 10px;border-radius:6px;display:block;word-break:break-all">${CSV}</code>
+        <p style="color:#94A3B8;font-size:11px;margin-top:12px">Se o arquivo estÃ¡ no GitHub Pages, abra o HTML pelo servidor (nÃ£o localmente).</p>
+       </div>`;
+  });
 
-const CSV_URL = "https://raw.githubusercontent.com/sme-upge/sme-upge.github.io/refs/heads/main/GT%20de%20Alfabetiza%C3%A7%C3%A3o/arvore.csv";
-
-async function inicializar() {
-    try {
-        const res = await fetch(CSV_URL);
-        const csv = new TextDecoder("utf-8").decode(await res.arrayBuffer());
-        rawRows = parseCSV(csv);
-        
-        const listaTemasUnicos = new Set();
-
-        rawRows.forEach(r => {
-            const [eixoCompleto, , cp, cat_p, cs, cat_s, votos, ct, cat_t] = r;
-            if(!eixoCompleto) return;
-            
-            const sigla = eixoCompleto.split(" - ")[0];
-            const vNum = parseInt(votos) || 0;
-
-            [[cp, cat_p], [cs, cat_s], [ct, cat_t]].forEach(([txt, cat]) => {
-                if(txt && txt.trim() !== "") {
-                    const cleanTxt = txt.trim();
-                    
-                    if (!globalTextoParaEixos[cleanTxt]) {
-                        globalTextoParaEixos[cleanTxt] = new Set();
-                        globalRecorrenciaTexto[cleanTxt] = 0;
-                        globalTextoParaVotos[cleanTxt] = 0;
-                    }
-                    if (!globalTextoParaEixos[cleanTxt].has(sigla)) {
-                        globalTextoParaEixos[cleanTxt].add(sigla);
-                        globalRecorrenciaTexto[cleanTxt]++;
-                    }
-                    if (vNum > globalTextoParaVotos[cleanTxt]) {
-                        globalTextoParaVotos[cleanTxt] = vNum;
-                    }
-                    if (cat && cat.trim() !== "") {
-                        globalTextoParaCategorias[cleanTxt] = cat.trim();
-                        listaTemasUnicos.add(cat.trim());
-                    }
-                }
-            });
-        });
-
-        const comboTema = document.getElementById("select-tema-transversal");
-        Array.from(listaTemasUnicos).sort().forEach(t => {
-            const opt = document.createElement("option");
-            opt.value = t; opt.textContent = t;
-            comboTema.appendChild(opt);
-        });
-
-        construirCheckboxEixos();
-        processarDadosAba1(); 
-        mudarAba("radial");
-
-    } catch (e) {
-        console.error(e);
+function parseCSV(t){
+  return t.split(/\r?\n/).slice(1).filter(l=>l.trim()).map(l=>{
+    const c=[];let q=false,s="";
+    for(const ch of l){
+      if(ch==='"'){q=!q;}else if(ch===';'&&!q){c.push(s.trim());s="";}else s+=ch;
     }
+    c.push(s.trim());
+    while(c.length<9)c.push("");
+    return c.slice(0,9).map(v=>(v===" "||v===";"||v==="â€“")?"":v);
+  });
 }
 
-function parseCSV(text) {
-    const lines = text.split(/\r?\n/).filter(l => l.trim() !== "");
-    return lines.slice(1).map(line => {
-        const cols = []; let q = false; let curr = "";
-        for (let i = 0; i < line.length; i++) {
-            const c = line[i];
-            if (c === '"') q = !q;
-            else if (c === ';' && !q) { cols.push(curr.trim()); curr = ""; }
-            else curr += c;
-        }
-        cols.push(curr.trim());
-        return cols;
+function processar(){
+  const temas=new Set();
+  rows.forEach(r=>{
+    const[eixo,,cp,cp_c,cs,cs_c,votos,ct,ct_c]=r;
+    if(!eixo)return;
+    const sig=eixo.slice(0,6),v=parseInt(votos)||0;
+    [[cp,cp_c],[cs,cs_c],[ct,ct_c]].forEach(([txt,cat])=>{
+      if(!txt||!txt.trim())return;
+      const t=txt.trim();
+      if(!gEixo[t]){gEixo[t]=new Set();gRec[t]=0;gVot[t]=0;}
+      if(!gEixo[t].has(sig)){gEixo[t].add(sig);gRec[t]++;}
+      if(v>gVot[t])gVot[t]=v;
+      if(cat&&cat.trim()){gCat[t]=cat.trim();temas.add(cat.trim());}
     });
+  });
+  const sel=document.getElementById("sel-tema");
+  [...temas].sort().forEach(t=>{
+    const o=document.createElement("option");o.value=t;o.textContent=t;sel.appendChild(o);
+  });
+  processarR();
 }
 
-function construirCheckboxEixos() {
-    const container = document.getElementById("checkbox-eixos-container");
-    container.innerHTML = "";
-    const eixosOrdenados = ["Eixo 1", "Eixo 2", "Eixo 3", "Eixo 4", "Eixo 5", "Eixo 6", "Eixo 7"];
-    
-    const contagemEixos = {};
-    eixosOrdenados.forEach(e => contagemEixos[e] = { causas: 0 });
-    
-    rawRows.forEach(r => {
-        const [eixoCompleto, , cp, , cs, , , ct, ] = r;
-        if (!eixoCompleto) return;
-        const sigla = eixoCompleto.split(" - ")[0];
-        if (contagemEixos[sigla]) {
-            if (cp && cp.trim() !== "") contagemEixos[sigla].causas++;
-            if (cs && cs.trim() !== "") contagemEixos[sigla].causas++;
-            if (ct && ct.trim() !== "") contagemEixos[sigla].causas++;
-        }
-    });
-
-    eixosOrdenados.forEach((sigla, idx) => {
-        const label = document.createElement("label");
-        label.className = "flex items-center gap-2 text-[11px] font-medium text-slate-600 cursor-pointer hover:text-slate-900";
-        const checked = idx < 3 ? "checked" : ""; 
-        label.innerHTML = `
-            <input type="checkbox" value="${sigla}" ${checked} class="axis-checkbox rounded border-gray-300 text-blue-600 focus:ring-blue-500 w-3.5 h-3.5" onchange="renderizarEstruturaHierarquica()">
-            <span class="truncate flex-1">${sigla}</span>
-            <span class="text-[9px] text-slate-400 font-bold bg-slate-100 px-1.5 py-0.5 rounded ml-auto">${contagemEixos[sigla].causas} causas</span>
-        `;
-        container.appendChild(label);
-    });
+function buildUI(){
+  const box=document.getElementById("cb-eixos");
+  Object.entries(EN).forEach(([e,nome],i)=>{
+    const lbl=document.createElement("label");lbl.className="cbl";
+    lbl.innerHTML=`<input type="checkbox" value="${e}" ${i<3?"checked":""} class="ecb" onchange="renderH()">
+      <span style="width:8px;height:8px;border-radius:50%;background:${EC[e]||"#888"};flex-shrink:0;margin-top:2px"></span>
+      <span>${e} â€” ${nome}</span>`;
+    box.appendChild(lbl);
+  });
 }
 
-function toggleVisibilidadeComboTema() {
-    const ativo = document.getElementById("switch-transversal-hierarquica").checked;
-    document.getElementById("select-tema-transversal").disabled = !ativo;
-    renderizarEstruturaHierarquica();
-}
-
-function processarDadosAba1() {
-    G_aba1 = { nodes: [], edges: [], details: {}, originalEdges: [] };
-    const catMap = {}; const eixosAtivos = {};
-
-    G_aba1.nodes.push({
-        id: "ROOT", label: "BAIXA ALFABETIZAÇÃO", shape: "dot", size: 28,
-        x: 0, y: 0, fixed: true,
-        color: { background: "#EF4444", border: "#DC2626" }, font: {size: 11, color: "#1E293B", bold: true, vadjust: -36}
-    });
-
-    rawRows.forEach(r => {
-        const [eixoCompleto, probCentral, cp, cat_p, cs, cat_s, votos, ct, cat_t] = r;
-        if (!eixoCompleto) return;
-        const cleanEixo = eixoCompleto.split(" - ")[0];
-        
-        if (!eixosAtivos[cleanEixo]) {
-            eixosAtivos[cleanEixo] = { completo: eixoCompleto, problema: probCentral };
-        }
-
-        const mapearPar = (textoCausa, categoriaCausa) => {
-            if (!textoCausa || !categoriaCausa || categoriaCausa.trim() === "" || textoCausa.trim() === "") return;
-            const cat = categoriaCausa.trim(); const txt = textoCausa.trim();
-            if (!catMap[cat]) catMap[cat] = { eixos: new Set(), causas: {} };
-            catMap[cat].eixos.add(cleanEixo);
-            if (!catMap[cat].causas[txt]) catMap[cat].causas[txt] = { texto: txt, eixos: new Set(), v: 0 };
-            catMap[cat].causas[txt].eixos.add(cleanEixo);
-            const vNum = parseInt(votos) || 0;
-            if (vNum > catMap[cat].causas[txt].v) catMap[cat].causas[txt].v = vNum;
-        };
-        mapearPar(cp, cat_p); mapearPar(cs, cat_s); mapearPar(ct, cat_t);
-    });
-
-    // Raio expandido para 340px para garantir total espaçamento e organização visual
-    const eixosOrdenados = ["Eixo 1", "Eixo 2", "Eixo 3", "Eixo 4", "Eixo 5", "Eixo 6", "Eixo 7"];
-    const totalEixos = eixosOrdenados.length;
-    const raioEixos = 340; 
-
-    eixosOrdenados.forEach((ex, i) => {
-        if (!eixosAtivos[ex]) return;
-        
-        const angulo = (i * 2 * Math.PI) / totalEixos;
-        const posX = raioEixos * Math.cos(angulo);
-        const posY = raioEixos * Math.sin(angulo);
-
-        // Retornando a legenda do nó fixo para os eixos centrais
-        G_aba1.nodes.push({
-            id: ex, label: ex, title: eixosAtivos[ex].completo, shape: "dot", size: 16,
-            x: posX, y: posY, fixed: true,
-            color: {background: "#6366F1", border: "#4F46E5"},
-            font: { size: 11, color: "#475569", bold: true, vadjust: 26 }
-        });
-        G_aba1.edges.push({ id: `edge_root_${ex}`, from: "ROOT", to: ex, color: { color: "#CBD5E0", opacity: 0.5 }, width: 1.5 });
-        G_aba1.details[ex] = { tipo: "eixo", titulo: eixosAtivos[ex].completo, cor: "#6366F1", subtitulo: "Problema Central do Eixo", conteudo: eixosAtivos[ex].problema };
-    });
-
-    Object.keys(catMap).forEach(catNome => {
-        const info = catMap[catNome];
-        const totalCausasDiferentes = Object.keys(info.causas).length;
-        let cor = "#64748B";
-        for (const chave in CAT_CORES_MAP) {
-            if (catNome.toLowerCase().includes(chave.toLowerCase())) { cor = CAT_CORES_MAP[chave]; break; }
-        }
-        
-        const tamanho = 8 + Math.min(totalCausasDiferentes * 1.2, 12);
-        const ehTransversal = globalRecorrenciaTexto[Object.keys(info.causas)[0]] > 1 || info.eixos.size > 1;
-
-        // Sem propriedade "label" para ocultar textos embaixo das bolas. O nome surge no hover (title)
-        G_aba1.nodes.push({
-            id: `__cat__${catNome}`, title: catNome, shape: "dot", size: tamanho,
-            color: {background: cor, border: cor}, _isSpecific: !ehTransversal
-        });
-
-        info.eixos.forEach(ex => {
-            G_aba1.edges.push({ id: `edge_${ex}_${catNome}`, from: ex, to: `__cat__${catNome}`, color: { color: "#E2E8F0", opacity: 0.5 }, width: 1 });
-        });
-
-        G_aba1.details[`__cat__${catNome}`] = {
-            tipo: "categoria", cat: catNome, cor: cor, volumeCausas: totalCausasDiferentes, ehTransversal: ehTransversal,
-            causas: Object.values(info.causas).map(c => ({ texto: c.texto, eixos: Array.from(c.eixos), votos: c.v }))
-        };
-    });
-
-    G_aba1.originalEdges = [...G_aba1.edges];
-}
-
-function renderizarEstruturaRadial() {
-    fecharPainel();
-    selectedCategoryRadial = null;
-    buildSidebarRadialAba1();
-
-    const opcoesRadial = {
-        edges: { width: 1, smooth: { enabled: true, type: "continuous", roundness: 0.4 } },
-        physics: { 
-            enabled: true, 
-            solver: "barnesHut", 
-            barnesHut: { gravitationalConstant: -4000, centralGravity: 0.05, springLength: 110, springConstant: 0.04 },
-            stabilization: { enabled: true, iterations: 120 }
-        },
-        interaction: { hover: true }
-    };
-
-    if (networkInstance) networkInstance.destroy();
-    networkInstance = new vis.Network(document.getElementById("net"), {nodes: nodesDataSet, edges: edgesDataSet}, opcoesRadial);
-    
-    networkInstance.on("stabilizationIterationsDone", function () {
-        networkInstance.setOptions({ physics: { enabled: false } });
-    });
-
-    networkInstance.on("click", p => {
-        if(p.nodes.length) {
-            const nodeClicado = p.nodes[0];
-            if(nodeClicado.startsWith("__cat__")) {
-                filtrarTeiaPorCategoria(nodeClicado.replace("__cat__", ""));
-            } else if(nodeClicado.startsWith("Eixo ")) {
-                filtrarTeiaPorEixo(nodeClicado);
-            } else {
-                aoClicarNoNodeRadial(nodeClicado);
-            }
-        } else {
-            resetarFiltroTeiaRadial();
-        }
-    });
-    
-    aplicarFiltroAba1();
-    
-    setTimeout(() => {
-        networkInstance.moveTo({ position: { x: 0, y: 0 }, scale: 3.5, animation: false });
-        setTimeout(() => {
-            networkInstance.moveTo({ position: { x: 50, y: 0 }, scale: 0.65, animation: { duration: 1200, easingFunction: "easeInOutCubic" } });
-        }, 150);
-    }, 50);
-}
-
-function aplicarFiltroAba1() {
-    const exibirEspecificas = document.getElementById("filtro-especificas").checked;
-    fecharPainel();
-    const nosFiltrados = G_aba1.nodes.filter(n => exibirEspecificas || !n._isSpecific);
-    
-    networkInstance.setOptions({ physics: { enabled: true } });
-    nodesDataSet.clear(); nodesDataSet.add(nosFiltrados);
-    const idsAtivos = nosFiltrados.map(n => n.id);
-    edgesDataSet.clear(); edgesDataSet.add(G_aba1.originalEdges.filter(e => idsAtivos.includes(e.from) && idsAtivos.includes(e.to)));
-    networkInstance.stabilize();
-}
-
-function filtrarTeiaPorCategoria(nomeCat) {
-    selectedCategoryRadial = nomeCat;
-    
-    document.querySelectorAll(".btn-sidebar-item").forEach(btn => {
-        const textNode = btn.querySelector(".btn-sidebar-text");
-        if(textNode && textNode.textContent === nomeCat) btn.classList.add("active");
-        else btn.classList.remove("active");
-    });
-
-    const catNodeId = `__cat__${nomeCat}`;
-    const eixosConectados = G_aba1.originalEdges.filter(e => e.to === catNodeId).map(e => e.from);
-    
-    // Isolamento radical: apaga do mapa qualquer outra categoria e eixos irrelevantes
-    const nosIsolados = G_aba1.nodes.filter(n => n.id === catNodeId || eixosConectados.includes(n.id) || n.id === "ROOT");
-    const arestasIsoladas = G_aba1.originalEdges.filter(e => 
-        (e.to === catNodeId) || 
-        (e.from === "ROOT" && eixosConectados.includes(e.to))
-    );
-
-    nosIsolados.forEach(n => { if(n.id !== "ROOT") n.fixed = false; });
-
-    networkInstance.setOptions({ physics: { enabled: true } });
-    nodesDataSet.clear(); nodesDataSet.add(nosIsolados);
-    edgesDataSet.clear(); edgesDataSet.add(arestasIsoladas);
-    networkInstance.stabilize();
-    
-    aoClicarNoNodeRadial(catNodeId);
-}
-
-function filtrarTeiaPorEixo(eixoId) {
-    const categoriasConectadas = G_aba1.originalEdges.filter(e => e.from === eixoId && e.to.startsWith("__cat__")).map(e => e.to);
-    
-    const nosIsolados = G_aba1.nodes.filter(n => n.id === eixoId || categoriasConectadas.includes(n.id) || n.id === "ROOT");
-    const arestasIsoladas = G_aba1.originalEdges.filter(e => 
-        (e.from === eixoId && categoriasConectadas.includes(e.to)) || 
-        (e.from === "ROOT" && e.to === eixoId)
-    );
-
-    nosIsolados.forEach(n => { if(n.id !== "ROOT") n.fixed = false; });
-
-    networkInstance.setOptions({ physics: { enabled: true } });
-    nodesDataSet.clear(); nodesDataSet.add(nosIsolados);
-    edgesDataSet.clear(); edgesDataSet.add(arestasIsoladas);
-    networkInstance.stabilize();
-    
-    aoClicarNoNodeRadial(eixoId);
-}
-
-function resetarFiltroTeiaRadial() {
-    selectedCategoryRadial = null;
-    document.querySelectorAll(".btn-sidebar-item").forEach(btn => btn.classList.remove("active"));
-    G_aba1.nodes.forEach(n => { if(n.id === "ROOT" || !n.id.startsWith("__cat__")) n.fixed = true; });
-    aplicarFiltroAba1();
-    fecharPainel();
-}
-
-function aoClicarNoNodeRadial(id) {
-    const det = G_aba1.details[id]; if (!det) return;
-    document.getElementById("p-cor").style.background = det.cor;
-    
-    if (det.tipo === "eixo") {
-        document.getElementById("p-titulo").textContent = det.titulo;
-        document.getElementById("p-sub").textContent = det.subtitulo;
-        document.getElementById("painel-body").innerHTML = `
-            <div class="mb-4">
-                <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-1">Problema Central do Eixo:</span>
-                <div class="p-4 border rounded-xl bg-slate-50/50 text-xs font-medium text-slate-700 leading-relaxed">${det.conteudo}</div>
-            </div>
-        `;
-    } else {
-        document.getElementById("p-titulo").textContent = det.cat;
-        document.getElementById("p-sub").textContent = `${det.volumeCausas} causas mapeadas sob este tema`;
-        let html = '';
-        det.causas.forEach(c => {
-            const badges = c.eixos.map(ex => `<span class="inline-block px-2 py-0.5 text-[9px] font-bold text-white rounded mr-1" style="background:${EIXO_CORES[ex]}">${ex}</span>`).join("");
-            html += `<div class="p-3 border border-slate-100 rounded-xl bg-slate-50/40 mb-2.5 text-xs">
-                <div class="mb-1.5">${badges}</div>
-                <p class="text-slate-600 font-medium leading-relaxed">${c.texto}</p>
-                ${c.votos > 0 ? `<span class="inline-block mt-2 text-[10px] font-bold text-amber-700 bg-amber-50 px-2 py-0.5 rounded border border-amber-200/40">⭐ Priorizada com ${c.votos} votos</span>` : ""}
-            </div>`;
-        });
-        document.getElementById("painel-body").innerHTML = html;
+// â”€â”€ RENDER GENÃ‰RICO â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+function criarNet(nodes,edges,fisica,layout){
+  if(net){net.destroy();net=null;}
+  hideTip();
+  vN=new vis.DataSet(nodes);
+  vE=new vis.DataSet(edges);
+  const opts={
+    nodes:{shape:"dot",scaling:{min:6,max:55,label:{enabled:false}},
+      font:{size:0},borderWidth:1.5,
+      shadow:{enabled:true,color:"rgba(0,0,0,.07)",size:5,x:0,y:2}},
+    edges:{width:.8,color:{color:"#D1D5DB"},smooth:{enabled:true,type:"continuous",roundness:.35}},
+    interaction:{hover:false,tooltipDelay:99999,dragNodes:true,hideEdgesOnDrag:true},
+    physics:{enabled:true,...fisica},
+  };
+  if(layout)opts.layout=layout;
+  net=new vis.Network(document.getElementById("net"),{nodes:vN,edges:vE},opts);
+  // tooltip manual via mousemove
+  net.on("hoverNode",p=>{
+    const n=vN.get(p.node);
+    if(n&&n._tip){
+      const pos=net.canvasToDOM(net.getPosition(p.node));
+      showTip(n._tip,{clientX:pos.x+240,clientY:pos.y});
     }
-    document.getElementById("painel").classList.add("open");
-    document.getElementById("net").style.right = "460px";
+  });
+  net.on("blurNode",()=>hideTip());
+  net.on("click",p=>{if(p.nodes.length)onClick(p.nodes[0]);else fecharPan();});
+  setTimeout(()=>{
+    if(!net)return;
+    net.setOptions({physics:{enabled:false}});
+    net.fit({animation:{duration:700,easingFunction:"easeInOutQuad"}});
+  },fisica._tempo||2000);
 }
 
-function buildSidebarRadialAba1() {
-    const list = document.getElementById("sidebar-list"); list.innerHTML = "";
-    const sortedCats = Object.keys(G_aba1.details).map(id => G_aba1.details[id]).filter(item => item.tipo === "categoria").sort((a,b)=>b.volumeCausas - a.volumeCausas);
-    
-    const renderGrupo = (titulo, classeCor, lista) => {
-        if (!lista.length) return;
-        const h = document.createElement("p"); h.className = `text-[10px] font-bold uppercase tracking-widest mt-4 mb-2 px-2 ${classeCor}`; h.textContent = titulo; list.appendChild(h);
-        
-        lista.forEach(item => {
-            const b = document.createElement("button"); 
-            b.className = "btn-sidebar-item";
-            b.innerHTML = `
-                <span class="w-2 h-2 rounded-full mt-1.5 flex-shrink-0" style="background:${item.cor}"></span>
-                <span class="btn-sidebar-text">${item.cat}</span>
-                <span class="text-[10px] font-bold text-slate-400 mt-0.5 flex-shrink-0 whitespace-nowrap">${item.volumeCausas} causas</span>
-            `;
-            b.onclick = (e) => {
-                e.stopPropagation();
-                filtrarTeiaPorCategoria(item.cat);
-            };
-            list.appendChild(b);
-        });
-    };
-    renderGrupo("🔗 Temas Transversais", "text-blue-600", sortedCats.filter(c=>c.ehTransversal));
-    renderGrupo("📌 Dores Específicas", "text-slate-400", sortedCats.filter(c=>!c.ehTransversal));
+// â”€â”€ ABA 1: RADIAL â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+function processarR(){
+  G={nodes:[],edges:[],det:{},orig:[]};
+  const cM={},eAt={};
+  G.nodes.push({id:"ROOT",_tip:"Baixa aprendizagem na alfabetizaÃ§Ã£o",
+    shape:"dot",size:28,x:0,y:0,fixed:true,
+    color:{background:"#E53E3E",border:"#C53030"},font:{size:0}});
+
+  rows.forEach(r=>{
+    const[eixo,prob,cp,cp_c,cs,cs_c,votos,ct,ct_c]=r;
+    if(!eixo)return;
+    const sig=eixo.slice(0,6),v=parseInt(votos)||0;
+    if(!eAt[sig])eAt[sig]={completo:eixo,prob};
+    [[cp,cp_c],[cs,cs_c],[ct,ct_c]].forEach(([txt,cat])=>{
+      if(!txt||!txt.trim()||!cat||!cat.trim())return;
+      const t=txt.trim(),c=cat.trim();
+      if(!cM[c])cM[c]={eixos:new Set(),causas:{}};
+      cM[c].eixos.add(sig);
+      if(!cM[c].causas[t])cM[c].causas[t]={texto:t,eixos:new Set(),v:0};
+      cM[c].causas[t].eixos.add(sig);
+      if(v>cM[c].causas[t].v)cM[c].causas[t].v=v;
+    });
+  });
+
+  const EX=Object.keys(EN);
+  EX.forEach((ex,i)=>{
+    if(!eAt[ex])return;
+    const a=(i*2*Math.PI)/EX.length,cor=EC[ex]||"#4F46E5";
+    G.nodes.push({id:ex,_tip:`${ex} â€” ${EN[ex]}`,
+      shape:"dot",size:16,x:145*Math.cos(a),y:145*Math.sin(a),fixed:true,
+      color:{background:cor,border:cor},font:{size:0}});
+    G.edges.push({from:"ROOT",to:ex,color:{color:cor+"55"},width:2});
+    G.det[ex]={tipo:"eixo",titulo:EN[ex]||ex,cor,prob:eAt[ex].prob};
+  });
+
+  Object.keys(cM).forEach(cat=>{
+    const info=cM[cat],n=Object.keys(info.causas).length;
+    const cor=CC[cat]||"#94A3B8",trans=info.eixos.size>1;
+    const eixosStr=[...info.eixos].join(", ");
+    G.nodes.push({id:`__c__${cat}`,
+      _tip:`${cat}
+${eixosStr} Â· ${n} causa${n>1?"s":""}`,
+      shape:"dot",size:7+Math.min(n*1.5,14),
+      color:{background:cor+"99",border:cor},font:{size:0},_spec:!trans});
+    info.eixos.forEach(ex=>G.edges.push({from:ex,to:`__c__${cat}`,color:{color:cor+"55"},width:1.2}));
+    G.det[`__c__${cat}`]={tipo:"cat",cat,cor,trans,n,
+      causas:Object.values(info.causas).map(c=>({texto:c.texto,eixos:[...c.eixos],votos:c.v})).sort((a,b)=>b.votos-a.votos)};
+  });
+  G.orig=[...G.edges];
 }
 
-function renderizarEstruturaHierarquica() {
-    if (currentTab !== "hierarquica") return;
-    fecharPainel();
-    
-    const eixosSelecionados = Array.from(document.querySelectorAll(".axis-checkbox:checked")).map(cb => cb.value);
-    const destacarTransversais = document.getElementById("switch-transversal-hierarquica").checked;
-    const filtroTemaEscolhido = document.getElementById("select-tema-transversal").value;
-    const notaCorteVotos = parseInt(document.getElementById("select-votos-hierarquica").value) || 0;
+function renderR(){
+  fecharPan();selCat=null;buildSbR();
+  const show=document.getElementById("tog-esp").checked;
+  const nos=G.nodes.filter(n=>show||!n._spec);
+  const ids=new Set(nos.map(n=>n.id));
+  criarNet(nos,G.orig.filter(e=>ids.has(e.from)&&ids.has(e.to)),
+    {barnesHut:{gravitationalConstant:-3200,centralGravity:.15,springLength:100,springConstant:.035,damping:.1,avoidOverlap:.9},
+     stabilization:{enabled:true,iterations:150,fit:true},_tempo:1800});
+  // efeito elÃ¡stico
+  setTimeout(()=>{
+    if(!net)return;
+    net.moveTo({position:{x:0,y:0},scale:2.5,animation:false});
+    setTimeout(()=>net.moveTo({position:{x:0,y:0},scale:.78,animation:{duration:900,easingFunction:"easeInOutCubic"}}),80);
+  },300);
+}
 
-    const hNodes = []; const hEdges = []; const nosCriadosUnicos = new Set();
-    const arestasCriadasUnicas = new Set();
-    hNodesDetails = {}; 
+function filtroEsp(){if(aba==="r")renderR();}
 
-    const macroId = "H2_MACRO_ROOT";
-    hNodes.push({
-        id: macroId, label: "BAIXA ALFABETIZAÇÃO", shape: "dot", size: 12,
-        color: { background: "#EF4444", border: "#DC2626" }, font: { bold: true, size: 8, color: "#475569", vadjust: -18 }
+function filtrarCat(cat){
+  selCat=cat;
+  document.querySelectorAll(".si").forEach(b=>b.classList.toggle("active",b.dataset.c===cat));
+  const nid=`__c__${cat}`;
+  const ec=G.orig.filter(e=>e.to===nid).map(e=>e.from);
+  const nos=[G.nodes.find(n=>n.id==="ROOT"),...ec.map(ex=>G.nodes.find(n=>n.id===ex)),G.nodes.find(n=>n.id===nid)].filter(Boolean);
+  const ids=new Set(nos.map(n=>n.id));
+  vN.clear();vN.add(nos);
+  vE.clear();vE.add(G.orig.filter(e=>ids.has(e.from)&&ids.has(e.to)));
+  setTimeout(()=>{if(net)net.fit({animation:{duration:500,easingFunction:"easeOutCubic"}});},80);
+  abrirDetR(nid);
+}
+
+function resetR(){
+  selCat=null;
+  document.querySelectorAll(".si").forEach(b=>b.classList.remove("active"));
+  renderR();fecharPan();
+}
+
+function abrirDetR(id){
+  const d=G.det[id];if(!d)return;
+  document.getElementById("p-cor").style.background=d.cor;
+  if(d.tipo==="eixo"){
+    document.getElementById("p-tit").textContent=d.titulo;
+    document.getElementById("p-sub").textContent="Problema central do eixo";
+    document.getElementById("pan-body").innerHTML=
+      `<div style="padding:12px 14px;border:1px solid #E2E8F0;border-radius:12px;background:#F9FAFB;font-size:12px;color:#475569;line-height:1.6">${d.prob}</div>`;
+  }else{
+    document.getElementById("p-tit").textContent=d.cat;
+    document.getElementById("p-sub").textContent=`${d.n} causa${d.n>1?"s":""} Â· ${d.trans?"Tema transversal":"EspecÃ­fico do eixo"}`;
+    let html=`<p style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#94A3B8;margin-bottom:12px">Causas que originaram este tema</p>`;
+    const pe={};
+    d.causas.forEach(c=>c.eixos.forEach(ex=>{if(!pe[ex])pe[ex]=[];pe[ex].push(c);}));
+    Object.entries(pe).forEach(([ex,cs])=>{
+      const cor=EC[ex]||"#888",nome=EN[ex]||ex;
+      html+=`<div style="display:flex;align-items:center;gap:8px;margin:14px 0 8px">
+        <span style="padding:2px 10px;border-radius:20px;background:${cor};color:#fff;font-size:10px;font-weight:700">${ex}</span>
+        <span style="font-size:10px;color:#94A3B8">${nome}</span></div>`;
+      cs.forEach(c=>{
+        const s=c.votos>0?`<span style="display:block;font-size:10px;font-weight:600;color:#D97706;margin-bottom:4px">â­ ${c.votos} estrelinha${c.votos>1?"s":""}</span>`:"";
+        html+=`<div style="padding:10px 12px;border:1px solid #E5E7EB;border-radius:10px;background:#F9FAFB;font-size:12px;color:#374151;line-height:1.5;margin-bottom:8px">${s}${c.texto}</div>`;
+      });
     });
+    document.getElementById("pan-body").innerHTML=html;
+  }
+  document.getElementById("pan").classList.add("open");
+  document.getElementById("net").style.right="400px";
+}
 
-    const mapaNodesParaTeia = {};
-    const metricasEixos = {};
-    eixosSelecionados.forEach(ex => { 
-        metricasEixos[ex] = { totalP: 0, totalS: 0, totalT: 0, estrelas: 0, probCentral: "" }; 
+function buildSbR(){
+  const list=document.getElementById("sb-list");list.innerHTML="";
+  const cats=Object.values(G.det).filter(d=>d.tipo==="cat").sort((a,b)=>b.n-a.n);
+  const grp=(tit,cor,items)=>{
+    if(!items.length)return;
+    const h=document.createElement("p");
+    h.style.cssText=`font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:${cor};margin:14px 0 5px 8px`;
+    h.textContent=tit;list.appendChild(h);
+    items.forEach(d=>{
+      const b=document.createElement("button");b.className="si";b.dataset.c=d.cat;
+      b.innerHTML=`<span style="width:7px;height:7px;border-radius:50%;background:${d.cor};flex-shrink:0;margin-top:4px"></span>
+        <span class="si-t">${d.cat}</span>
+        <span style="font-size:10px;font-weight:700;color:#CBD5E0;flex-shrink:0">${d.n}</span>`;
+      b.onclick=e=>{e.stopPropagation();filtrarCat(d.cat);};
+      list.appendChild(b);
     });
+  };
+  grp("ðŸ”— Temas transversais","#4F46E5",cats.filter(c=>c.trans));
+  grp("ðŸ“Œ EspecÃ­ficos do eixo","#94A3B8",cats.filter(c=>!c.trans));
+}
 
-    rawRows.forEach(r => {
-        const [eixoCompleto, probCentral, cp, , cs, , votos, ct, ] = r; if (!eixoCompleto) return;
-        const sigla = eixoCompleto.split(" - ")[0]; if (!eixosSelecionados.includes(sigla)) return;
-        
-        metricasEixos[sigla].probCentral = probCentral;
-        const vNum = parseInt(votos) || 0;
-        
-        if (cp && cp.trim() !== "") {
-            metricasEixos[sigla].totalP++;
-            if(vNum >= 1) metricasEixos[sigla].estrelas += vNum;
-        }
-        if (cs && cs.trim() !== "") metricasEixos[sigla].totalS++;
-        if (ct && ct.trim() !== "") metricasEixos[sigla].totalT++;
-    });
+// â”€â”€ ABA 2: HIERÃRQUICA COM LAYOUT FIXO â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+function renderH(){
+  if(aba!=="h")return;
+  fecharPan();
+  const eixosSel=[...document.querySelectorAll(".ecb:checked")].map(c=>c.value);
+  const transOn=document.getElementById("tog-tr").checked;
+  const temaFiltro=document.getElementById("sel-tema").value;
+  const vCorte=parseInt(document.getElementById("sel-v").value)||0;
 
-    rawRows.forEach((r) => {
-        const [eixoCompleto, , cp, cat_p, cs, cat_s, votos, ct, cat_t] = r;
-        const siglaEixo = eixoCompleto.split(" - ")[0];
-        if (!eixosSelecionados.includes(siglaEixo)) return;
+  const hN=[],hE=[],nosF=new Set(),arsF=new Set();
+  hDet={};
 
-        // Filtro estrutural e absoluto por temas na Aba 2
-        if (filtroTemaEscolhido !== "__ALL__") {
-            const mP = cp && cat_p && cat_p.trim() === filtroTemaEscolhido;
-            const mS = cs && cat_s && cat_s.trim() === filtroTemaEscolhido;
-            const mT = ct && cat_t && cat_t.trim() === filtroTemaEscolhido;
-            if (!mP && !mS && !mT) return; 
-        }
+  // â”€â”€ Macro no centro (level 0) â”€â”€
+  const macId="H_ROOT";
+  hN.push({id:macId,_tip:"Baixa aprendizagem na alfabetizaÃ§Ã£o",
+    shape:"dot",size:14,level:0,
+    color:{background:"#E53E3E",border:"#C53030"},font:{size:0}});
+  hDet[macId]={tipo:"macro"};
 
-        const vNumCp = cp ? (globalTextoParaVotos[cp.trim()] || 0) : 0;
-        const vNumCs = cs ? (globalTextoParaVotos[cs.trim()] || 0) : 0;
-        const vNumCt = ct ? (globalTextoParaVotos[ct.trim()] || 0) : 0;
+  // â”€â”€ Coleta mÃ©tricas por eixo â”€â”€
+  const met={};
+  eixosSel.forEach(ex=>{met[ex]={totalP:0,totalS:0,totalT:0,estrelas:0,prob:""};});
+  rows.forEach(r=>{
+    const[eixo,prob,cp,,cs,,votos,ct,]=r;if(!eixo)return;
+    const sig=eixo.slice(0,6);if(!eixosSel.includes(sig))return;
+    met[sig].prob=prob;const v=parseInt(votos)||0;
+    if(cp&&cp.trim()){met[sig].totalP++;if(v>=1)met[sig].estrelas++;}
+    if(cs&&cs.trim())met[sig].totalS++;
+    if(ct&&ct.trim())met[sig].totalT++;
+  });
 
-        const eixoId = `H2_${siglaEixo}`;
-        
-        if (!nosCriadosUnicos.has(eixoId)) {
-            hNodes.push({ 
-                id: eixoId, label: siglaEixo, shape: "dot", size: 8, 
-                color: { background: "#6366F1", border: "#4F46E5" }, 
-                font: { bold: true, size: 10, color: "#475569" } 
-            });
-            hEdges.push({ from: macroId, to: eixoId, color: { color: "#CBD5E0", opacity: 0.6 }, width: 1 });
-            nosCriadosUnicos.add(eixoId);
-            hNodesDetails[eixoId] = { tipo: "eixo", titulo: eixoCompleto, sigla: siglaEixo, cor: "#6366F1", dados: metricasEixos[siglaEixo] };
-        }
+  const mapaTeia={};
 
-        const registrarNoUnico = (texto, categoria, paiId, camadaLabel, tamanho, corNivel, vMaxFiltro) => {
-            if (!texto || texto.trim() === "") return null;
-            if (vMaxFiltro < notaCorteVotos) return null;
-
-            const txt = texto.trim();
-            const hashTexto = btoa(unescape(encodeURIComponent(txt))).replace(/=/g, "").slice(0, 24);
-            const noId = `H2_N_C${camadaLabel}_${hashTexto}`;
-            const temaReal = categoria ? categoria.trim() : (globalTextoParaCategorias[txt] || "Sem Categoria");
-            const ehTransversal = globalRecorrenciaTexto[txt] > 1;
-
-            if (!nosCriadosUnicos.has(noId)) {
-                let tSize = tamanho; let bW = 0.5; let bColor = "#CBD5E0";
-
-                if (destacarTransversais && ehTransversal && (filtroTemaEscolhido === "__ALL__" || filtroTemaEscolhido === temaReal)) {
-                    tSize = tamanho + 1.5; bW = 2; bColor = "#F59E0B";
-                    if (!mapaNodesParaTeia[temaReal]) mapaNodesParaTeia[temaReal] = [];
-                    mapaNodesParaTeia[temaReal].push(noId);
-                }
-
-                const labelCurto = txt.length > 14 ? txt.slice(0, 12) + "..." : txt;
-                const prefixoEstrela = vMaxFiltro > 0 ? '⭐ ' : '';
-
-                hNodes.push({
-                    id: noId, label: `${prefixoEstrela}${labelCurto}`, shape: "dot", size: tSize, borderWidth: bW, 
-                    color: { background: corNivel, border: bColor }, font: { size: 8, color: "#475569" }
-                });
-
-                hNodesDetails[noId] = {
-                    tipo: "causa", camada: camadaLabel === "1" ? "Primária" : camadaLabel === "2" ? "Secundária" : "Terciária",
-                    texto: txt, tema: temaReal, votos: vMaxFiltro, eixoOrigem: eixoCompleto,
-                    eixos: Array.from(globalTextoParaEixos[txt] || [siglaEixo]), ehTransversal: ehTransversal
-                };
-                nosCriadosUnicos.add(noId);
-            }
-
-            const arestaKey = `${paiId}->${noId}`;
-            if (!arestasCriadasUnicas.has(arestaKey)) {
-                hEdges.push({ from: paiId, to: noId, color: { color: "#E2E8F0", opacity: 0.5 }, width: 0.8 });
-                arestasCriadasUnicas.add(arestaKey);
-            }
-            return noId;
-        };
-
-        const idP = registrarNoUnico(cp, cat_p, eixoId, "1", 6.5, "#38BDF8", vNumCp); 
-        const idS = idP ? registrarNoUnico(cs, cat_s, idP, "2", 5, "#34D399", vNumCs) : null;  
-        if (idS) registrarNoUnico(ct, cat_t, idS, "3", 3.5, "#FBBF24", vNumCt);              
-    });
-
-    if (destacarTransversais) {
-        Object.keys(mapaNodesParaTeia).forEach(tema => {
-            if (filtroTemaEscolhido !== "__ALL__" && filtroTemaEscolhido !== tema) return;
-            const nos = [...new Set(mapaNodesParaTeia[tema])];
-            for (let i = 0; i < nos.length; i++) {
-                for (let j = i + 1; j < nos.length; j++) {
-                    hEdges.push({ from: nos[i], to: nos[j], color: { color: "#F59E0B", opacity: 0.35 }, width: 0.8, dashes: [2, 3] });
-                }
-            }
-        });
+  rows.forEach(r=>{
+    const[eixo,,cp,cp_c,cs,cs_c,votos,ct,ct_c]=r;
+    if(!eixo)return;
+    const sig=eixo.slice(0,6);if(!eixosSel.includes(sig))return;
+    const cor=EC[sig]||"#4F46E5";
+    const exId=`H_${sig}`;
+    if(!nosF.has(exId)){
+      hN.push({id:exId,_tip:`${sig} â€” ${EN[sig]||""}`,
+        shape:"dot",size:11,level:1,
+        color:{background:cor,border:cor},font:{size:0}});
+      hE.push({from:macId,to:exId,color:{color:cor+"66"},width:1.5});
+      nosF.add(exId);
+      hDet[exId]={tipo:"eixo",titulo:eixo,sig,cor,dados:met[sig]};
     }
 
-    // Alinhando barra lateral esquerda da Aba 2 com os temas interativos
-    buildSidebarHierarquicaAba2();
-
-    nodesDataSet.clear(); nodesDataSet.add(hNodes);
-    edgesDataSet.clear(); edgesDataSet.add(hEdges);
-
-    const opcoesHierarquica = {
-        physics: { 
-            enabled: true, 
-            solver: "barnesHut", 
-            barnesHut: { gravitationalConstant: -2500, centralGravity: 0.04, springLength: 60, springConstant: 0.04 },
-            stabilization: { enabled: true, iterations: 180 }
+    function addN(txt,cat,paiId,nivel,vMax){
+      if(!txt||!txt.trim()||vMax<vCorte)return null;
+      const t=txt.trim();
+      // hash estÃ¡vel para ID Ãºnico
+      let h=0;for(const c of t){h=(h*31+c.charCodeAt(0))&0x7fffffff;}
+      const nid=`H_${nivel}_${h}`;
+      const tema=cat?cat.trim():(gCat[t]||"");
+      const trans=gRec[t]>1;
+      if(!nosF.has(nid)){
+        let sz={1:7,2:5.5,3:4}[nivel]||5,bw=.8,bc="#CBD5E0";
+        if(transOn&&trans&&(temaFiltro==="__ALL__"||temaFiltro===tema)){
+          sz+=2;bw=2.5;bc="#F59E0B";
+          if(!mapaTeia[tema])mapaTeia[tema]=[];
+          mapaTeia[tema].push(nid);
         }
-    };
-
-    if (networkInstance) networkInstance.destroy();
-    networkInstance = new vis.Network(document.getElementById("net"), {nodes: nodesDataSet, edges: edgesDataSet}, opcoesHierarquica);
-    
-    networkInstance.on("stabilizationIterationsDone", function () {
-        networkInstance.setOptions({ physics: { enabled: false } });
-    });
-
-    networkInstance.off("click"); 
-    networkInstance.on("click", p => {
-        if(!p.nodes.length) { fecharPainel(); return; }
-        const id = p.nodes[0];
-        
-        if(id === "H2_MACRO_ROOT") {
-            document.getElementById("p-cor").style.background = "#EF4444";
-            document.getElementById("p-titulo").textContent = "Baixa Alfabetização";
-            document.getElementById("p-sub").textContent = "Problema Macro Central";
-            document.getElementById("painel-body").innerHTML = `<p class="text-xs text-slate-500 font-medium leading-relaxed">Nó Central Diagnóstico.</p>`;
-            document.getElementById("painel").classList.add("open"); document.getElementById("net").style.right = "460px";
-            return;
-        }
-
-        const det = hNodesDetails[id]; if (!det) return;
-        document.getElementById("p-cor").style.background = det.cor || "#64748B";
-
-        if(det.tipo === "eixo") {
-            document.getElementById("p-titulo").textContent = det.titulo;
-            document.getElementById("p-sub").textContent = "Métricas Consolidadas do Eixo";
-            document.getElementById("painel-body").innerHTML = `
-                <div class="mb-4">
-                    <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-1">Problema Central do Eixo:</span>
-                    <div class="p-3 bg-slate-50 border border-slate-100 rounded-xl text-xs font-medium text-slate-700 leading-relaxed">${det.dados.probCentral}</div>
-                </div>
-                <div class="grid grid-cols-2 gap-2 text-xs">
-                    <div class="p-3 bg-white border border-slate-100 rounded-xl shadow-sm"><span class="text-slate-400 block text-[10px]">Causas Primárias</span><span class="text-sm font-bold text-slate-700">${det.dados.totalP} causas</span></div>
-                    <div class="p-3 bg-white border border-slate-100 rounded-xl shadow-sm"><span class="text-slate-400 block text-[10px]">Causas Secundárias</span><span class="text-sm font-bold text-slate-700">${det.dados.totalS} causas</span></div>
-                    <div class="p-3 bg-white border border-slate-100 rounded-xl shadow-sm"><span class="text-slate-400 block text-[10px]">Causas Terciárias</span><span class="text-sm font-bold text-slate-700">${det.dados.totalT} causas</span></div>
-                    <div class="p-3 bg-amber-50/60 border border-amber-100 rounded-xl"><span class="text-amber-700 font-semibold block text-[10px]">Total de Estrelas</span><span class="text-sm font-bold text-amber-800">${det.dados.estrelas} estrelas</span></div>
-                </div>`;
-        } else {
-            document.getElementById("p-titulo").textContent = `Causa ${det.camada}`;
-            document.getElementById("p-sub").textContent = "Evidência Qualitativa Mapeada";
-            let cCat = CAT_CORES_MAP[Object.keys(CAT_CORES_MAP).find(k=>det.tema.toLowerCase().includes(k.toLowerCase()))] || "#64748B";
-            const badges = det.eixos.map(ex => `<span class="inline-block px-2 py-0.5 text-[9px] font-bold text-white rounded mr-1" style="background:${EIXO_CORES[ex]}">${ex}</span>`).join("");
-            
-            document.getElementById("painel-body").innerHTML = `
-                <div class="mb-3">
-                    <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-1">Eixo mapeado:</span>
-                    <p class="text-xs font-semibold text-slate-800">${det.eixoOrigem}</p>
-                </div>
-                <div class="p-3.5 bg-slate-50 border border-slate-100 rounded-xl text-xs font-medium text-slate-600 leading-relaxed mb-4">${det.texto}</div>
-                <div class="flex items-center gap-2 p-2.5 border border-slate-100 rounded-xl bg-white text-xs mb-3 font-medium text-slate-600">
-                    <span class="w-2.5 h-2.5 rounded-full" style="background:${cCat}"></span><span>Tema: ${det.tema}</span>
-                    ${det.ehTransversal ? `<span class="ml-auto text-[9px] bg-amber-100 text-amber-800 px-1.5 py-0.5 rounded font-bold uppercase tracking-wide">Transversal</span>` : `<span class="ml-auto text-[9px] bg-slate-100 text-slate-600 px-1.5 py-0.5 rounded font-bold uppercase tracking-wide">Específica</span>`}
-                </div>
-                <div class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1.5">Eixos Compartilhados</div>
-                <div class="mb-4">${badges}</div>
-                ${det.votos > 0 ? `<div class="p-2 bg-amber-50/80 border border-amber-100 rounded-lg text-xs font-semibold text-amber-800 text-center">⭐ Priorizada com ${det.votos} Votos</div>`:''}`;
-        }
-        document.getElementById("painel").classList.add("open"); document.getElementById("net").style.right = "460px";
-    });
-}
-
-function buildSidebarHierarquicaAba2() {
-    const list = document.getElementById("sidebar-list"); 
-    list.innerHTML = "";
-    
-    const listTemas = {};
-    rawRows.forEach(r => {
-        const [eixoCompleto, , cp, cat_p, cs, cat_s, , ct, cat_t] = r;
-        if(!eixoCompleto) return;
-        [[cp, cat_p], [cs, cat_s], [ct, cat_t]].forEach(([txt, cat]) => {
-            if(txt && cat && cat.trim() !== "") {
-                const c = cat.trim();
-                if(!listTemas[c]) listTemas[c] = 0;
-                listTemas[c]++;
-            }
-        });
-    });
-
-    const sorted = Object.keys(listTemas).sort((a,b) => listTemas[b] - listTemas[a]);
-    
-    const h = document.createElement("p"); 
-    h.className = "text-[10px] font-bold uppercase tracking-widest mt-2 mb-2 px-2 text-amber-600"; 
-    h.textContent = "⚡ Filtrar por Tema"; 
-    list.appendChild(h);
-
-    sorted.forEach(tema => {
-        const b = document.createElement("button");
-        b.className = "btn-sidebar-item";
-        const cor = CAT_CORES_MAP[Object.keys(CAT_CORES_MAP).find(k => tema.toLowerCase().includes(k.toLowerCase()))] || "#64748B";
-        const atualSelecionado = document.getElementById("select-tema-transversal").value;
-        if (atualSelecionado === tema) b.classList.add("active");
-        
-        b.innerHTML = `
-            <span class="w-2 h-2 rounded-full mt-1.5 flex-shrink-0" style="background:${cor}"></span>
-            <span class="btn-sidebar-text">${tema}</span>
-            <span class="text-[10px] font-bold text-slate-400 mt-0.5 flex-shrink-0 whitespace-nowrap">${listTemas[tema]} causas</span>
-        `;
-        b.onclick = (e) => {
-            e.stopPropagation();
-            const combo = document.getElementById("select-tema-transversal");
-            combo.value = combo.value === tema ? "__ALL__" : tema;
-            renderizarEstruturaHierarquica();
-        };
-        list.appendChild(b);
-    });
-}
-
-function mudarAba(aba) {
-    currentTab = aba; fecharPainel();
-    const btn1 = document.getElementById("btn-aba1"); const btn2 = document.getElementById("btn-aba2");
-    const ctrl1 = document.getElementById("controles-aba1"); const ctrl2 = document.getElementById("controles-aba2");
-    const legenda = document.getElementById("legenda-container");
-    
-    if (aba === "radial") {
-        btn1.className = "px-4 py-1.5 rounded-md text-xs font-semibold transition-all bg-white text-slate-800 shadow-sm";
-        btn2.className = "px-4 py-1.5 rounded-md text-xs font-semibold transition-all text-slate-500 hover:text-slate-800";
-        ctrl1.classList.remove("hidden"); ctrl2.classList.add("hidden");
-        legenda.classList.add("hidden"); 
-        document.getElementById("main-title").textContent = "Árvore Diagnóstica de Problemas";
-        document.getElementById("main-subtitle").textContent = "Volumetria proporcional e conexões transversais unificadas";
-        renderizarEstruturaRadial();
-    } else {
-        btn2.className = "px-4 py-1.5 rounded-md text-xs font-semibold transition-all bg-white text-slate-800 shadow-sm";
-        btn1.className = "px-4 py-1.5 rounded-md text-xs font-semibold transition-all text-slate-500 hover:text-slate-800";
-        ctrl2.classList.remove("hidden"); ctrl2.classList.add("flex"); ctrl1.classList.add("hidden");
-        legenda.classList.remove("hidden"); 
-        document.getElementById("main-title").textContent = "Constelação Detalhada de Evidências";
-        document.getElementById("main-subtitle").textContent = "Desdobramento radial unificado (Eixo → Causa 1ª → 2ª → 3ª)";
-        renderizarEstruturaHierarquica();
+        const corBg={1:"#38BDF8",2:"#34D399",3:"#FBBF24"}[nivel]||"#94A3B8";
+        const nivelLabel={1:"Causa primÃ¡ria",2:"Causa secundÃ¡ria",3:"Causa terciÃ¡ria"}[nivel];
+        const starPfx=vMax>0?`â­ ${vMax} estrela${vMax>1?"s":""} â€” `:"";
+        hN.push({id:nid,
+          _tip:`${starPfx}${nivelLabel}
+${t}${tema?"
+â†³ "+tema:""}`,
+          shape:"dot",size:sz,level:nivel+1,borderWidth:bw,
+          color:{background:corBg,border:bc},font:{size:0}});
+        hDet[nid]={tipo:"causa",nivel,txt:t,tema,votos:vMax,eixo,eixos:[...gEixo[t]||[sig]],trans,cor:corBg};
+        nosF.add(nid);
+      }
+      const ak=`${paiId}->${nid}`;
+      if(!arsF.has(ak)){
+        hE.push({from:paiId,to:nid,color:{color:"#E2E8F0"},width:.7});
+        arsF.add(ak);
+      }
+      return nid;
     }
+
+    const vCp=cp?gVot[cp.trim()]||0:0;
+    const vCs=cs?gVot[cs.trim()]||0:0;
+    const vCt=ct?gVot[ct.trim()]||0:0;
+    const idP=addN(cp,cp_c,exId,1,vCp);
+    const idS=idP?addN(cs,cs_c,idP,2,vCs):null;
+    if(idS)addN(ct,ct_c,idS,3,vCt);
+  });
+
+  // conexÃµes transversais
+  if(transOn){
+    Object.keys(mapaTeia).forEach(tema=>{
+      if(temaFiltro!=="__ALL__"&&temaFiltro!==tema)return;
+      const ns=[...new Set(mapaTeia[tema])];
+      for(let i=0;i<ns.length;i++)for(let j=i+1;j<ns.length;j++)
+        hE.push({from:ns[i],to:ns[j],color:{color:"#F59E0B",opacity:.3},width:.6,dashes:[2,3]});
+    });
+  }
+
+  document.getElementById("sb-list").innerHTML=
+    `<div style="padding:14px;margin:8px;border:1px solid #E2E8F0;border-radius:10px;background:#F9FAFB;font-size:11px;color:#64748B;line-height:1.6">
+      Passe o cursor sobre os nÃ³s para ver o texto completo.<br>
+      <span style="color:#F59E0B;font-weight:600">Bordas douradas</span> = causas transversais.
+    </div>`;
+
+  // Layout hierÃ¡rquico radial do vis â€” macro centro, eixos Ã³rbita 1, causas em cascata
+  criarNet(hN,hE,{
+    barnesHut:{gravitationalConstant:-2500,centralGravity:.05,
+      springLength:70,springConstant:.03,damping:.1,avoidOverlap:.8},
+    stabilization:{enabled:true,iterations:400,fit:true},_tempo:4000,
+  });
 }
 
-function fecharPainel() {
-    document.getElementById("painel").classList.remove("open"); document.getElementById("net").style.right = "0";
-    if(currentTab === "radial" && selectedCategoryRadial) {
-        resetarFiltroTeiaRadial();
+// â”€â”€ CLICK â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+function onClick(id){
+  if(aba==="r"){
+    if(id==="ROOT"){resetR();return;}
+    if(id.startsWith("__c__"))filtrarCat(id.replace("__c__",""));
+    else abrirDetR(id);
+  }else{
+    const d=hDet[id];if(!d||d.tipo==="macro")return;
+    const cor=d.tipo==="eixo"?(EC[d.sig]||"#4F46E5"):d.cor||"#94A3B8";
+    document.getElementById("p-cor").style.background=cor;
+    if(d.tipo==="eixo"){
+      document.getElementById("p-tit").textContent=EN[d.sig]||d.titulo;
+      document.getElementById("p-sub").textContent="MÃ©tricas do eixo";
+      document.getElementById("pan-body").innerHTML=`
+        <div style="margin-bottom:14px">
+          <p style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#94A3B8;margin-bottom:6px">Problema central</p>
+          <div style="padding:12px;border:1px solid #E2E8F0;border-radius:10px;background:#F9FAFB;font-size:12px;color:#475569;line-height:1.6">${d.dados.prob}</div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;font-size:11px">
+          <div style="padding:10px;border:1px solid #E2E8F0;border-radius:10px"><span style="color:#94A3B8;display:block;font-size:10px">Causas primÃ¡rias</span><b style="font-size:16px;color:#374151">${d.dados.totalP}</b></div>
+          <div style="padding:10px;border:1px solid #E2E8F0;border-radius:10px"><span style="color:#94A3B8;display:block;font-size:10px">Causas secundÃ¡rias</span><b style="font-size:16px;color:#374151">${d.dados.totalS}</b></div>
+          <div style="padding:10px;border:1px solid #E2E8F0;border-radius:10px"><span style="color:#94A3B8;display:block;font-size:10px">Causas terciÃ¡rias</span><b style="font-size:16px;color:#374151">${d.dados.totalT}</b></div>
+          <div style="padding:10px;border:1px solid #FDE68A;border-radius:10px;background:#FFFBEB"><span style="color:#D97706;display:block;font-size:10px;font-weight:600">Com estrelas</span><b style="font-size:16px;color:#92400E">${d.dados.estrelas}</b></div>
+        </div>`;
+    }else{
+      const nl={"1":"Causa primÃ¡ria","2":"Causa secundÃ¡ria","3":"Causa terciÃ¡ria"}[d.nivel]||"Causa";
+      document.getElementById("p-tit").textContent=nl;
+      document.getElementById("p-sub").textContent="EvidÃªncia mapeada";
+      const cCor=CC[d.tema]||"#94A3B8";
+      const badges=d.eixos.map(ex=>`<span style="display:inline-block;padding:2px 9px;font-size:10px;font-weight:700;color:#fff;border-radius:20px;margin:2px 2px 0;background:${EC[ex]||"#888"}">${ex}</span>`).join("");
+      document.getElementById("pan-body").innerHTML=`
+        <p style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#94A3B8;margin-bottom:8px">O que o grupo disse</p>
+        <div style="padding:12px 14px;border:1px solid #E2E8F0;border-radius:12px;background:#F9FAFB;font-size:12px;color:#374151;line-height:1.6;margin-bottom:14px">${d.txt}</div>
+        <div style="display:flex;align-items:center;gap:8px;padding:8px 12px;border:1px solid #E2E8F0;border-radius:10px;background:#fff;font-size:11px;color:#64748B;margin-bottom:10px">
+          <span style="width:8px;height:8px;border-radius:50%;background:${cCor};flex-shrink:0"></span>
+          <span style="flex:1">${d.tema||"Sem categoria"}</span>
+          <span style="font-size:10px;font-weight:700;padding:2px 7px;border-radius:20px;background:${d.trans?"#EFF6FF":"#F1F5F9"};color:${d.trans?"#1E40AF":"#64748B"}">${d.trans?"ðŸ”— Transversal":"EspecÃ­fica"}</span>
+        </div>
+        <p style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#94A3B8;margin-bottom:6px">Eixos</p>
+        <div style="margin-bottom:12px">${badges}</div>
+        <p style="font-size:10px;color:#94A3B8;font-style:italic">Instrumento analÃ­tico â€” nÃ£o Ã© uma fala do grupo.</p>
+        ${d.votos>0?`<div style="margin-top:10px;padding:8px 12px;border:1px solid #FDE68A;border-radius:10px;background:#FFFBEB;font-size:12px;font-weight:600;color:#92400E;text-align:center">â­ ${d.votos} estrelinha${d.votos>1?"s":""} na priorizaÃ§Ã£o</div>`:""}`;
     }
+    document.getElementById("pan").classList.add("open");
+    document.getElementById("net").style.right="400px";
+  }
 }
 
-window.onload = inicializar;
+function fecharPan(){
+  document.getElementById("pan").classList.remove("open");
+  document.getElementById("net").style.right="0";
+}
+
+function mudarAba(a){
+  aba=a;fecharPan();
+  document.getElementById("btn-a1").className="abtn "+(a==="r"?"on":"off");
+  document.getElementById("btn-a2").className="abtn "+(a==="h"?"on":"off");
+  document.getElementById("ctrl1").style.display=a==="r"?"flex":"none";
+  document.getElementById("ctrl2").classList.toggle("show",a==="h");
+  document.getElementById("legenda").classList.toggle("show",a==="h");
+  if(a==="r")renderR();else renderH();
+}
 </script>
 </body>
 </html>
