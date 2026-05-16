@@ -640,8 +640,6 @@ function renderizarEstruturaHierarquica() {
         const sCat = (cat_s && cat_s.trim() !== "") ? cat_s.trim() : (globalTextoParaCategorias[sTxt] || "");
         const tCat = (cat_t && cat_t.trim() !== "") ? cat_t.trim() : (globalTextoParaCategorias[tTxt] || "");
 
-        // Se houver um filtro de tema transversal ativo, a regra é estrita:
-        // Apenas permitimos renderizar o nó ou caminho que CORRESPONDE diretamente à sua respectiva categoria
         const pPassaTema = (filtroTemaEscolhido === "__ALL__") || (pTxt !== "" && pCat === filtroTemaEscolhido);
         const sPassaTema = (filtroTemaEscolhido === "__ALL__") || (sTxt !== "" && sCat === filtroTemaEscolhido);
         const tPassaTema = (filtroTemaEscolhido === "__ALL__") || (tTxt !== "" && tCat === filtroTemaEscolhido);
@@ -653,10 +651,7 @@ function renderizarEstruturaHierarquica() {
         const eixoId = `H2_${siglaEixo}`;
         const nomeEixoOficial = MAPA_EIXOS_COMPLETO[siglaEixo] || eixoCompleto;
         
-        // Verifica se qualquer parte desta linha atende aos filtros de tema e estrelas antes de prosseguir
         const sPassaVoto = (vNumCs >= notaCorteVotos);
-        
-        // Critério mestre de exibição: a linha precisa ter alguma causa ativa que atenda o tema
         const temCausaAtivaNaLinha = (pTxt !== "" && pPassaTema) || (sTxt !== "" && sPassaTema && sPassaVoto) || (tTxt !== "" && tPassaTema && sPassaVoto);
         if (!temCausaAtivaNaLinha) return;
 
@@ -675,14 +670,9 @@ function renderizarEstruturaHierarquica() {
             if (!texto || texto.trim() === "") return null;
             if (camadaLabel === "2" && !sPassaVoto) return null;
             
-            // Regra estrita do filtro transversal solicitada: se há um filtro de tema ativo, 
-            // só permitimos desenhar ramificações abaixo se elas mesmas tiverem a categoria, ou se forem pais válidos.
             if (filtroTemaEscolhido !== "__ALL__" && !atendeTemaDireto) {
-                // Se for nível terciário e não atende, ignora
                 if (camadaLabel === "3") return null;
-                // Se for secundário e não atende o tema direto, mas a terciária filha atende, deixamos passar (continua a ramificação)
                 if (camadaLabel === "2" && !(tTxt !== "" && tCat === filtroTemaEscolhido)) return null;
-                // Se for primário e não atende o tema direto, mas alguma filha (secundária ou terciária) atende, deixamos passar
                 if (camadaLabel === "1" && !((sTxt !== "" && sCat === filtroTemaEscolhido) || (tTxt !== "" && tCat === filtroTemaEscolhido))) return null;
             }
 
@@ -708,10 +698,14 @@ function renderizarEstruturaHierarquica() {
                     color: { background: corNivel, border: bColor }, font: { size: 10, color: "#334155" }
                 });
 
+                // INTELIGÊNCIA CORRIGIDA: Coleta TODOS os eixos reais onde este texto exato aparece no CSV
+                const eixosReaisDaCausa = Array.from(globalTextoParaEixos[txt] || [siglaEixo]);
+
                 hNodesDetails[noId] = {
                     tipo: "causa", camada: camadaLabel === "1" ? "Primária" : camadaLabel === "2" ? "Secundária" : "Terciária",
                     texto: txt, tema: categoriaReal || "Sem Categoria", votos: vMaxFiltro, eixoOrigem: nomeEixoOficial,
-                    eixos: Array.from(globalTextoParaEixos[txt] || [siglaEixo]), ehTransversal: ehTransversal
+                    siglaOrigem: siglaEixo,
+                    eixos: eixosReaisDaCausa, ehTransversal: eixosReaisDaCausa.length > 1
                 };
                 nosCriadosUnicos.add(noId);
             }
@@ -746,13 +740,12 @@ function renderizarEstruturaHierarquica() {
     nodesDataSet.clear(); nodesDataSet.add(hNodes);
     edgesDataSet.clear(); edgesDataSet.add(hEdges);
 
-    // Efeito Big Bang na Aba 2: Configuração com alta repulsão inicial e mola macia
     const opcoesHierarquica = {
         physics: { 
             enabled: true, 
             solver: "barnesHut", 
             barnesHut: { 
-                gravitationalConstant: -7500, // Força extra de dispersão de dentro para fora
+                gravitationalConstant: -7500, 
                 centralGravity: 0.01, 
                 springLength: 95, 
                 springConstant: 0.05 
@@ -803,21 +796,39 @@ function renderizarEstruturaHierarquica() {
             document.getElementById("p-titulo").textContent = `Causa ${det.camada}`;
             document.getElementById("p-sub").textContent = "Evidência Qualitativa Mapeada";
             let cCat = CAT_CORES_MAP[Object.keys(CAT_CORES_MAP).find(k=>det.tema.toLowerCase().includes(k.toLowerCase()))] || "#64748B";
-            const badges = det.eixos.map(ex => `<span class="inline-block px-2 py-0.5 text-[9px] font-bold text-white rounded mr-1" style="background:${EIXO_CORES[ex]}">${MAPA_EIXOS_COMPLETO[ex] || ex}</span>`).join("");
             
+            // INTELIGÊNCIA DE EXIBIÇÃO CORRIGIDA: 
+            // O selo agora reflete a transversalidade real baseada no cruzamento de dados de todos os eixos.
+            const seloTipo = det.ehTransversal 
+                ? `<span class="ml-auto text-[9px] bg-amber-100 text-amber-800 px-1.5 py-0.5 rounded font-bold uppercase tracking-wide">Transversal</span>`
+                : `<span class="ml-auto text-[9px] bg-slate-100 text-slate-600 px-1.5 py-0.5 rounded font-bold uppercase tracking-wide">Específica</span>`;
+
+            // Filtramos os outros eixos para exibir apenas os de fato COMPARTILHADOS (excluindo o atual de visualização)
+            const outrosEixosCompartilhados = det.eixos.filter(ex => ex !== det.siglaOrigem);
+            const badgesCompartilhados = outrosEixosCompartilhados.map(ex => 
+                `<span class="inline-block px-2 py-0.5 text-[9px] font-bold text-white rounded mr-1" style="background:${EIXO_CORES[ex]}">${MAPA_EIXOS_COMPLETO[ex] || ex}</span>`
+            ).join("");
+
+            let secaoCompartilhadosHTML = "";
+            if (det.ehTransversal && outrosEixosCompartilhados.length > 0) {
+                secaoCompartilhadosHTML = `
+                    <div class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1.5 mt-3">Também afeta os seguintes eixos:</div>
+                    <div class="mb-4 flex flex-col gap-1">${badgesCompartilhados}</div>
+                `;
+            }
+
             document.getElementById("painel-body").innerHTML = `
                 <div class="mb-3">
-                    <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-1">Eixo mapeado:</span>
+                    <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-1">Eixo atual de navegação:</span>
                     <p class="text-xs font-semibold text-slate-800">${det.eixoOrigem}</p>
                 </div>
                 <div class="p-3.5 bg-slate-50 border border-slate-100 rounded-xl text-xs font-medium text-slate-600 leading-relaxed mb-4">${det.texto}</div>
                 <div class="flex items-center gap-2 p-2.5 border border-slate-100 rounded-xl bg-white text-xs mb-3 font-medium text-slate-600">
                     <span class="w-2.5 h-2.5 rounded-full" style="background:${cCat}"></span><span>Tema: ${det.tema}</span>
-                    ${det.ehTransversal ? `<span class="ml-auto text-[9px] bg-amber-100 text-amber-800 px-1.5 py-0.5 rounded font-bold uppercase tracking-wide">Transversal</span>` : `<span class="ml-auto text-[9px] bg-slate-100 text-slate-600 px-1.5 py-0.5 rounded font-bold uppercase tracking-wide">Específica</span>`}
+                    ${seloTipo}
                 </div>
-                <div class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1.5">Eixos Compartilhados</div>
-                <div class="mb-4 flex flex-col gap-1">${badges}</div>
-                ${(det.camada === "Secundária" && det.votos > 0) ? `<div class="p-2 bg-amber-50/80 border border-amber-100 rounded-lg text-xs font-semibold text-amber-800 text-center">⭐ Priorizada com ${det.votos} Estrelas</div>`:''}`;
+                ${secaoCompartilhadosHTML}
+                ${(det.camada === "Secundária" && det.votos > 0) ? `<div class="p-2 bg-amber-50/80 border border-amber-100 rounded-lg text-xs font-semibold text-amber-800 text-center mt-3">⭐ Priorizada com ${det.votos} Estrelas</div>`:''}`;
         }
         document.getElementById("painel").classList.add("open"); document.getElementById("net").style.right = "460px";
     });
