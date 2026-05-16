@@ -6,7 +6,7 @@
 <title>Árvore de Problemas — GT de Alfabetização · SME-SP</title>
 <script src="https://cdn.tailwindcss.com"></script>
 <script src="https://unpkg.com/vis-network/standalone/umd/vis-network.min.js"></script>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
     * { box-sizing: border-box; }
     html, body { height: 100%; margin: 0; padding: 0; overflow: hidden; font-family: "Inter", sans-serif; background: #F7F8FA; }
@@ -17,78 +17,62 @@
     #sidebar.hide { transform: translateX(-100%); }
     #sidebar-list { flex: 1; overflow-y: auto; padding: 12px; }
 
-    #painel { position: fixed; top: 0; right: 0; width: 400px; height: 100vh; background: white; 
+    #painel { position: fixed; top: 0; right: 0; width: 420px; height: 100vh; background: white; 
               border-left: 1px solid #E2E8F0; z-index: 50; transform: translateX(100%); transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-              box-shadow: -10px 0 15px -3px rgba(0,0,0,0.05); display: flex; flex-direction: column; }
+              box-shadow: -15px 0 30px -5px rgba(0,0,0,0.08); display: flex; flex-direction: column; }
     #painel.open { transform: translateX(0); }
     #painel-body { flex: 1; overflow-y: auto; padding: 24px; }
 
-    .mbtn { padding: 10px 18px; border-radius: 12px; font-size: 12px; font-weight: 700; transition: 0.2s; white-space: nowrap; border: 1px solid transparent; }
-    .mbtn.on { background: #4F46E5; color: white; box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3); }
+    .mbtn { padding: 10px 20px; border-radius: 14px; font-size: 12px; font-weight: 800; transition: 0.2s; white-space: nowrap; border: 1px solid transparent; }
+    .mbtn.on { background: #4F46E5; color: white; box-shadow: 0 4px 15px rgba(79, 70, 229, 0.4); }
     .mbtn.off { background: #F8FAFC; color: #64748B; border-color: #E2E8F0; }
     .mbtn.off:hover { background: #F1F5F9; }
 
-    #toggles { position: fixed; top: 100px; right: 20px; z-index: 30; background: white; border-radius: 16px; padding: 16px; 
-               border: 1px solid #E2E8F0; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); display: none; min-width: 200px; }
-
-    .vis-tooltip { background: #1F2937 !important; color: white !important; border-radius: 8px !important; padding: 12px !important; font-size: 11px !important; border: none !important; max-width: 200px; }
+    .vis-tooltip { background: #1F2937 !important; color: white !important; border-radius: 10px !important; padding: 12px !important; font-size: 11px !important; border: none !important; max-width: 220px; box-shadow: 0 10px 15px rgba(0,0,0,0.2); }
     
-    /* Estilo para itens da sidebar */
-    .cat-btn { width: 100%; text-align: left; padding: 12px; margin-bottom: 4px; border-radius: 10px; font-size: 11px; line-height: 1.4; transition: 0.2s; display: flex; align-items: start; gap: 10px; border: 1px solid transparent; }
-    .cat-btn:hover { background: #F1F5F9; border-color: #E2E8F0; }
-    .cat-btn.active { background: #EEF2FF; border-color: #C7D2FE; color: #4F46E5; font-weight: 600; }
+    .cat-btn { width: 100%; text-align: left; padding: 14px; margin-bottom: 6px; border-radius: 12px; font-size: 11px; line-height: 1.4; transition: 0.2s; display: flex; align-items: start; gap: 12px; border: 1px solid transparent; cursor: pointer; }
+    .cat-btn:hover { background: #F1F5F9; }
+    .cat-btn.active { background: #EEF2FF; border-color: #C7D2FE; color: #4F46E5; font-weight: 700; }
 </style>
 </head>
 <body>
 
+<!-- Sidebar de Temas (Só aparece no modo 1) -->
 <div id="sidebar">
     <div class="p-6 border-b bg-gray-50/50">
-        <p class="text-[10px] font-black uppercase tracking-[0.15em] text-indigo-600">Filtros Temáticos</p>
-        <p class="text-[11px] text-gray-400 mt-1">Clique para isolar conexões</p>
+        <p class="text-[10px] font-black uppercase tracking-[0.2em] text-indigo-600">Perspectiva Temática</p>
+        <p class="text-[11px] text-gray-400 mt-1">Selecione para ver as causas reais</p>
     </div>
     <div id="sidebar-list"></div>
 </div>
 
 <div id="net"></div>
 
-<!-- Header -->
+<!-- Header Dinâmico -->
 <div class="fixed top-0 left-0 right-0 z-20 pointer-events-none">
     <div class="flex justify-center py-6">
-        <div class="text-center bg-white/90 backdrop-blur-md px-10 py-4 rounded-3xl border border-white/50 shadow-2xl pointer-events-auto">
-            <h1 id="main-title" class="text-lg font-black text-gray-900 tracking-tight">Conexões por Temas Transversais</h1>
-            <p class="text-[10px] text-indigo-600 font-bold uppercase tracking-[0.2em] mt-1">SME-SP · GRUPO DE TRABALHO</p>
+        <div class="text-center bg-white/90 backdrop-blur-md px-12 py-4 rounded-3xl border border-white/50 shadow-2xl pointer-events-auto">
+            <h1 id="main-title" class="text-lg font-black text-gray-900 tracking-tight">Causas Padronizadas por Temas</h1>
+            <p id="main-subtitle" class="text-[10px] text-indigo-600 font-bold uppercase tracking-[0.2em] mt-1">GT DE ALFABETIZAÇÃO · SME-SP</p>
         </div>
     </div>
 </div>
 
-<!-- Navigation -->
+<!-- Navegação de Modos -->
 <div class="fixed bottom-10 left-1/2 -translate-x-1/2 z-40 flex gap-3 bg-white/80 backdrop-blur-xl p-2 rounded-2xl border border-gray-200 shadow-2xl">
-    <button class="mbtn on" data-m="temas">🔗 Temas Transversais</button>
-    <button class="mbtn off" data-m="completo">🌳 Árvore Completa</button>
-    <button class="mbtn off" data-m="minuto">⚡ Resumo 1 Minuto</button>
+    <button class="mbtn on" data-m="temas">🔗 Temas Padronizados</button>
+    <button class="mbtn off" data-m="completo">🌳 Visão Técnica</button>
+    <button class="mbtn off" data-m="minuto">⚡ Resumo Executivo</button>
 </div>
 
-<!-- Floating Controls (Mode Completo) -->
-<div id="toggles">
-    <p class="text-[10px] font-bold text-gray-400 uppercase mb-4 tracking-widest">Exibição de Dados</p>
-    <label class="flex items-center justify-between gap-4 text-xs font-semibold text-gray-600 cursor-pointer mb-3">
-        <span>Causas Transversais</span>
-        <input type="checkbox" id="t-trans" checked class="w-4 h-4 rounded border-gray-300 text-indigo-600">
-    </label>
-    <label class="flex items-center justify-between gap-4 text-xs font-semibold text-gray-600 cursor-pointer">
-        <span>Causas Isoladas</span>
-        <input type="checkbox" id="t-sem" checked class="w-4 h-4 rounded border-gray-300 text-indigo-600">
-    </label>
-</div>
-
-<!-- Details Panel -->
+<!-- Painel de Detalhes -->
 <div id="painel">
     <div class="p-8 border-b bg-gray-50/50">
         <div class="flex justify-between items-start mb-4">
-            <div id="p-cor" class="w-12 h-2 rounded-full"></div>
-            <button onclick="fecharPainel()" class="text-gray-400 hover:text-gray-600 text-3xl leading-none">&times;</button>
+            <div id="p-cor" class="w-14 h-2 rounded-full"></div>
+            <button onclick="fecharPainel()" class="text-gray-400 hover:text-gray-600 text-3xl leading-none transition-transform hover:scale-110">&times;</button>
         </div>
-        <h2 id="p-titulo" class="text-base font-extrabold text-gray-900 leading-tight"></h2>
+        <h2 id="p-titulo" class="text-base font-black text-gray-900 leading-tight"></h2>
         <p id="p-sub" class="text-[10px] text-indigo-500 font-bold uppercase tracking-widest mt-4"></p>
     </div>
     <div id="painel-body"></div>
@@ -108,12 +92,12 @@ const EIXO_NAMES = {
 };
 
 const COLORS = {
-    cat: '#A78BFA',
-    levels: ['#E53E3E', '#2B6CB0', '#D69E2E', '#38A169', '#3182CE', '#805AD5']
+    cat: '#818CF8',
+    levels: ['#EF4444', '#3B82F6', '#F59E0B', '#10B981', '#6366F1', '#8B5CF6']
 };
 
 let network, vNodes, vEdges, fullData = null;
-let currentModo = 'temas', selectedCat = null;
+let currentModo = 'temas';
 
 window.addEventListener("load", async () => {
     await carregarDados();
@@ -124,8 +108,6 @@ window.addEventListener("load", async () => {
             setModo(btn.dataset.m);
         };
     });
-    document.getElementById('t-trans').onchange = updateFilters;
-    document.getElementById('t-sem').onchange = updateFilters;
 });
 
 async function carregarDados() {
@@ -135,9 +117,9 @@ async function carregarDados() {
         const text = new TextDecoder('utf-8').decode(buffer);
         const rows = parseCSV(text);
         fullData = processarDados(rows);
-        buildSidebar(fullData.catsInfo);
+        buildSidebar(fullData.temasPadronizados);
         setModo('temas');
-    } catch (e) { console.error(e); alert("Erro ao carregar CSV."); }
+    } catch (e) { console.error(e); alert("Erro ao carregar dados."); }
 }
 
 function parseCSV(text) {
@@ -154,44 +136,27 @@ function parseCSV(text) {
 }
 
 function processarDados(rows) {
-    const nodesMap = new Map();
-    const edges = [];
-    const catsCount = {};
-    const childrenMap = {};
-
-    nodesMap.set('macro', { id: 'macro', label: 'BAIXA APRENDIZAGEM\nNA ALFABETIZAÇÃO', level: 0, color: COLORS.levels[0], value: 60, font: {size: 16, color: '#fff', bold: true} });
+    const rawNodes = [];
+    const temas = {}; // Para agrupar causas reais por tema padronizado
 
     rows.forEach(row => {
-        const [eixo, prob, c1, c2, c3, votos, cat] = row;
+        const [eixo, prob, c1, c2, c3, votos, categoria] = row;
         if (!eixo) return;
 
-        if (!nodesMap.has(eixo)) {
-            nodesMap.set(eixo, { id: eixo, label: breakText(EIXO_NAMES[eixo] || eixo, 18), title: EIXO_NAMES[eixo] || eixo, level: 1, color: '#2B6CB0', value: 40, font: {color: '#fff', size: 10} });
-            edges.push({ from: 'macro', to: eixo });
-        }
+        const tema = categoria || c2 || c1; // Se não tem categoria, usa a causa real como tema
+        if (!temas[tema]) temas[tema] = { nome: tema, causas: [], eixos: new Set(), totalVotos: 0 };
+        
+        temas[tema].causas.push({ texto: c2 || c1, eixo, votos: parseInt(votos) || 0 });
+        temas[tema].eixos.add(eixo);
+        temas[tema].totalVotos += (parseInt(votos) || 0);
 
-        if (prob && !nodesMap.has(prob)) {
-            nodesMap.set(prob, { id: prob, label: breakText(prob), title: prob, level: 2, color: COLORS.levels[2], value: 30 });
-            edges.push({ from: eixo, to: prob });
-        }
-
-        let path = [prob, c1, c2, c3];
-        path.forEach((txt, i) => {
-            if (txt && i > 0) {
-                const prev = path[i-1];
-                if (!nodesMap.has(txt)) {
-                    nodesMap.set(txt, { id: txt, label: breakText(txt), title: txt, level: i+2, cat, votos: parseInt(votos)||0, color: COLORS.levels[i+2] });
-                    edges.push({ from: prev, to: txt });
-                }
-                if(!childrenMap[prev]) childrenMap[prev] = [];
-                if(!childrenMap[prev].includes(txt)) childrenMap[prev].push(txt);
-            }
-        });
-
-        if (cat) catsCount[cat] = (catsCount[cat] || 0) + 1;
+        rawNodes.push({ eixo, prob, c1, c2, c3, votos: parseInt(votos) || 0, categoria: tema });
     });
 
-    return { nodes: Array.from(nodesMap.values()), edges, catsInfo: Object.entries(catsCount).map(([name, count]) => ({name, count})), childrenMap };
+    return { 
+        raw: rawNodes, 
+        temasPadronizados: Object.values(temas).sort((a,b) => b.causas.length - a.causas.length)
+    };
 }
 
 function setModo(m) {
@@ -199,125 +164,154 @@ function setModo(m) {
     fecharPainel();
     document.getElementById('sidebar').classList.toggle('hide', m !== 'temas');
     document.getElementById('net').style.left = m === 'temas' ? '280px' : '0';
-    document.getElementById('toggles').style.display = m === 'completo' ? 'block' : 'none';
-    document.getElementById('main-title').innerText = m === 'temas' ? 'Conexões por Temas Transversais' : (m === 'completo' ? 'Árvore Completa' : 'Resumo 1 Minuto');
-
-    let n = JSON.parse(JSON.stringify(fullData.nodes));
-    let e = JSON.parse(JSON.stringify(fullData.edges));
+    
+    const title = document.getElementById('main-title');
+    const nodes = [];
+    const edges = [];
 
     if (m === 'temas') {
-        fullData.catsInfo.forEach(c => {
-            n.push({ id: 'cat_'+c.name, label: breakText(c.name, 15), title: `Tema: ${c.name}`, shape: 'diamond', color: COLORS.cat, value: 25 + (c.count * 4), group: 'cat', font: {size: 11, bold: true} });
+        title.innerText = "Causas Padronizadas por Temas";
+        // Bolinha central
+        nodes.push({ id: 'macro', label: 'BAIXA APRENDIZAGEM', level: 0, color: COLORS.levels[0], value: 40 });
+        
+        fullData.temasPadronizados.forEach(t => {
+            nodes.push({ 
+                id: 'tema_'+t.nome, 
+                label: breakText(t.nome, 20), 
+                title: `Tema: ${t.nome}\n(${t.causas.length} causas reais)`,
+                shape: 'dot', 
+                color: COLORS.cat, 
+                value: 15 + (t.causas.length * 2),
+                font: { size: 11, bold: true },
+                temaInfo: t
+            });
+            edges.push({ from: 'macro', to: 'tema_'+t.nome, color: '#E2E8F0' });
         });
-        n.forEach(node => { if (node.cat) e.push({ from: node.id, to: 'cat_'+node.cat, dashes: true, color: '#A78BFA', width: 1.5 }); });
-    } else if (m === 'minuto') {
-        n = n.filter(node => node.level <= 3);
-        const ids = new Set(n.map(node => node.id));
-        e = e.filter(edge => ids.has(edge.from) && ids.has(edge.to));
+    } else if (m === 'completo') {
+        title.innerText = "Visão Técnica Completa";
+        nodes.push({ id: 'macro', label: 'BAIXA APRENDIZAGEM', level: 0, color: COLORS.levels[0], value: 40 });
+        
+        const added = new Set();
+        fullData.raw.forEach(r => {
+            // Eixos
+            if (!added.has(r.eixo)) {
+                nodes.push({ id: r.eixo, label: breakText(EIXO_NAMES[r.eixo] || r.eixo, 15), level: 1, color: COLORS.levels[1], value: 30, font: {color: '#fff'} });
+                edges.push({ from: 'macro', to: r.eixo });
+                added.add(r.eixo);
+            }
+            // Problemas e Causas
+            [r.prob, r.c1, r.c2].forEach((txt, i) => {
+                if (txt && !added.has(txt)) {
+                    nodes.push({ id: txt, label: breakText(txt, 25), level: i+2, color: COLORS.levels[i+2], value: 20 - (i*2), cat: r.categoria });
+                    edges.push({ from: i === 0 ? r.eixo : [r.prob, r.c1][i-1], to: txt });
+                    added.add(txt);
+                }
+            });
+        });
+    } else {
+        title.innerText = "Resumo Executivo (1 Minuto)";
+        nodes.push({ id: 'macro', label: 'BAIXA APRENDIZAGEM', level: 0, color: COLORS.levels[0], value: 40 });
+        const added = new Set();
+        fullData.raw.forEach(r => {
+            if (!added.has(r.eixo)) {
+                nodes.push({ id: r.eixo, label: breakText(EIXO_NAMES[r.eixo] || r.eixo, 20), level: 1, color: COLORS.levels[1], value: 35, font: {color: '#fff'} });
+                edges.push({ from: 'macro', to: r.eixo });
+                added.add(r.eixo);
+            }
+            if (r.prob && !added.has(r.prob)) {
+                nodes.push({ id: r.prob, label: breakText(r.prob, 30), level: 2, color: COLORS.levels[2], value: 25 });
+                edges.push({ from: r.eixo, to: r.prob });
+                added.add(r.prob);
+            }
+        });
     }
-    render(n, e);
+
+    render(nodes, edges);
 }
 
 function render(nodes, edges) {
     vNodes = new vis.DataSet(nodes);
     vEdges = new vis.DataSet(edges);
     network = new vis.Network(document.getElementById("net"), { nodes: vNodes, edges: vEdges }, {
-        nodes: { shape: 'dot', font: { face: 'Inter', size: 12, multi: true }, borderWidth: 2, shadow: true },
+        nodes: { shape: 'dot', font: { face: 'Inter', multi: true }, borderWidth: 2, shadow: true },
         edges: { smooth: { type: 'cubicBezier', roundness: 0.4 }, color: '#D1D5DB' },
-        physics: { stabilization: true, barnesHut: { gravitationalConstant: -3000 } },
+        physics: { stabilization: true, barnesHut: { gravitationalConstant: -2000 } },
         interaction: { hover: true, tooltipDelay: 200 }
     });
     network.on("click", p => p.nodes.length ? abrirPainel(vNodes.get(p.nodes[0])) : fecharPainel());
 }
 
 function abrirPainel(node) {
-    if (node.level === 0) return;
-    const isCat = node.id.toString().startsWith('cat_');
-    const catName = isCat ? node.id.replace('cat_', '') : node.cat;
-    
-    document.getElementById('p-titulo').innerText = isCat ? catName : node.title;
-    document.getElementById('p-sub').innerText = isCat ? 'Tema Transversal' : (node.cat ? `Vinculada a: ${node.cat}` : 'Causa Isolada');
-    document.getElementById('p-cor').style.background = isCat ? COLORS.cat : (node.color.background || node.color);
+    const p = document.getElementById('painel');
+    const titulo = document.getElementById('p-titulo');
+    const sub = document.getElementById('p-sub');
+    const body = document.getElementById('painel-body');
+    const cor = document.getElementById('p-cor');
+
+    cor.style.background = node.color.background || node.color;
+    titulo.innerText = node.id.replace('tema_', '');
     
     let html = `<div class="mt-6 space-y-6">`;
 
-    // Se clicar no diamante (tema), listar todas as causas desse tema
-    if (isCat) {
-        const causasDoTema = fullData.nodes.filter(n => n.cat === catName);
-        html += `<div><p class="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-3">Causas associadas a este tema:</p><ul class="space-y-2">`;
-        causasDoTema.forEach(c => {
-            html += `<li class="p-3 bg-white border border-gray-100 rounded-xl text-xs text-gray-700 shadow-sm flex items-center gap-2">
-                <span class="w-2 h-2 rounded-full" style="background:${c.color.background || c.color}"></span>
-                ${c.votos > 0 ? `<span class="text-amber-500 font-bold">⭐ ${c.votos}</span> ` : ''}
-                ${c.id}</li>`;
+    if (currentModo === 'temas' && node.temaInfo) {
+        sub.innerText = "Agrupamento por Tema Padronizado";
+        const causasPorEixo = {};
+        node.temaInfo.causas.forEach(c => {
+            if (!causasPorEixo[c.eixo]) causasPorEixo[c.eixo] = [];
+            causasPorEixo[c.eixo].push(c);
         });
-        html += `</ul></div>`;
-    } else {
-        if (node.votos > 0) {
-            html += `<div class="bg-amber-50 border border-amber-200 p-4 rounded-2xl flex items-center gap-4">
-                <span class="text-2xl">⭐</span>
-                <div><p class="text-amber-900 font-black text-base">${node.votos} Votos</p><p class="text-amber-600 text-[10px] uppercase font-bold tracking-widest">Prioridade do Grupo</p></div>
-            </div>`;
-        }
-        if (currentModo === 'minuto' && node.level === 3) {
-            const secundarias = fullData.childrenMap[node.id] || [];
-            html += `<div><p class="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-3">Causas Secundárias Relacionadas:</p><ul class="space-y-2">`;
-            secundarias.forEach(s => {
-                const sData = fullData.nodes.find(fn => fn.id === s);
-                html += `<li class="p-3 bg-white border border-gray-100 rounded-xl text-xs text-gray-700 shadow-sm">
-                    ${sData.cat ? `<span class="inline-block px-2 py-0.5 bg-purple-100 text-purple-600 rounded text-[9px] font-bold mb-1 mr-1 uppercase">🔗 ${sData.cat}</span>` : ''}
-                    ${sData.votos > 0 ? `<span class="text-amber-500 font-bold">⭐ ${sData.votos}</span> ` : ''}
-                    ${s}</li>`;
+
+        Object.keys(causasPorEixo).forEach(eixo => {
+            html += `<div>
+                <p class="text-[10px] font-black text-indigo-500 uppercase tracking-widest mb-3">${EIXO_NAMES[eixo] || eixo}</p>
+                <div class="space-y-2">`;
+            causasPorEixo[eixo].forEach(c => {
+                html += `<div class="p-4 bg-white border border-gray-100 rounded-2xl shadow-sm text-xs text-gray-700 leading-relaxed">
+                    ${c.votos > 0 ? `<span class="inline-block px-2 py-0.5 bg-amber-100 text-amber-700 rounded-full font-bold mr-2">⭐ ${c.votos}</span>` : ''}
+                    ${c.texto}
+                </div>`;
             });
-            html += `</ul></div>`;
-        }
+            html += `</div></div>`;
+        });
+    } else {
+        sub.innerText = "Detalhe da Causa Técnica";
+        html += `<p class="text-gray-600 text-sm leading-relaxed">${node.id}</p>`;
+        if (node.cat) html += `<div class="mt-4 pt-4 border-t"><p class="text-[9px] font-bold text-gray-400 uppercase">Tema Relacionado</p><p class="text-xs text-indigo-600 font-bold">${node.cat}</p></div>`;
     }
 
-    html += `</div>`;
-    document.getElementById('painel-body').innerHTML = html;
-    document.getElementById('painel').classList.add("open");
+    body.innerHTML = html + `</div>`;
+    p.classList.add('open');
 }
 
-function buildSidebar(cats) {
+function buildSidebar(temas) {
     const list = document.getElementById('sidebar-list');
-    list.innerHTML = `<button onclick="destacarCategoria(null)" class="cat-btn font-black text-gray-400 uppercase tracking-widest">Exibir Tudo</button>`;
-    cats.sort((a,b) => b.count - a.count).forEach(c => {
-        const btn = document.createElement('button');
+    list.innerHTML = "";
+    temas.forEach(t => {
+        const btn = document.createElement('div');
         btn.className = "cat-btn group";
         btn.innerHTML = `
             <span class="w-2 h-2 rounded-full mt-1.5 shrink-0 bg-indigo-200 group-hover:bg-indigo-500"></span>
             <div class="flex-1">
-                <p class="font-semibold text-gray-700 group-hover:text-indigo-600">${c.name}</p>
-                <p class="text-[9px] text-gray-400 mt-0.5">${c.count} ocorrências</p>
+                <p class="font-bold text-gray-700 group-hover:text-indigo-600">${t.nome}</p>
+                <p class="text-[9px] text-gray-400 mt-0.5">${t.causas.length} causas reais · ${t.totalVotos} votos</p>
             </div>`;
         btn.onclick = () => {
-            document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active'));
-            btn.classList.add('active');
-            destacarCategoria(c.name);
+            const nodeId = 'tema_' + t.nome;
+            network.selectNodes([nodeId]);
+            abrirPainel(vNodes.get(nodeId));
         };
         list.appendChild(btn);
     });
-}
-
-function destacarCategoria(cat) {
-    const updates = vNodes.get().map(n => {
-        const match = !cat || n.cat === cat || n.id === 'cat_'+cat || n.level < 2;
-        return { id: n.id, opacity: match ? 1 : 0.05, font: { color: match ? '#374151' : 'rgba(0,0,0,0)' } };
-    });
-    vNodes.update(updates);
-}
-
-function updateFilters() {
-    const showTrans = document.getElementById('t-trans').checked;
-    const showSem = document.getElementById('t-sem').checked;
-    vNodes.update(vNodes.get().map(n => ({ id: n.id, hidden: n.level >= 3 && ((n.cat && !showTrans) || (!n.cat && !showSem)) })));
 }
 
 function breakText(text, limit = 25) {
     if (text.length <= limit) return text;
     const words = text.split(' ');
     let line = "", res = "";
-    words.forEach(w => { if ((line + w).length > limit) { res += line + "\n"; line = w + " "; } else line += w + " "; });
+    words.forEach(w => {
+        if ((line + w).length > limit) { res += line + "\n"; line = w + " "; }
+        else line += w + " ";
+    });
     return res + line;
 }
 
