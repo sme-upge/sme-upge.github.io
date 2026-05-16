@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
@@ -139,13 +138,13 @@ input:checked + .slider:before {transform:translateX(14px)}
 
 <script>
 const MAPA_EIXOS_COMPLETO = {
-  "Eixo 1": "Eixo 1 - Práticas Pedagógicas e Materiais Didáticos para a Alfabetização",
-  "Eixo 2": "Eixo 2 - Formação Inicial, Continuada e Desenvolvimento dos Profissionais da Educação",
-  "Eixo 3": "Eixo 3 - Avaliação do Desempenho Escolar, Monitoramento e Indicadores Educacionais",
-  "Eixo 4": "Eixo 4 - Gestão Escolar, Governança da Rede e Liderança de Equipes",
-  "Eixo 5": "Eixo 5 - Infraestrutura Física, Recursos Tecnológicos e Equipamentos das Unidades",
-  "Eixo 6": "Eixo 6 - Articulação Comunitária, Engajamento Familiar e Rede de Proteção Social",
-  "Eixo 7": "Eixo 7 - Inclusão Escolar, Atendimento Especializado e Diversidade na Alfabetização"
+  "Eixo 1": "Eixo 1 - Responsabilidades na Garantia do Direito a Alfabetização",
+  "Eixo 2": "Eixo 2 - Formação",
+  "Eixo 3": "Eixo 3 - Infraestrutura Física e Pedagógica",
+  "Eixo 4": "Eixo 4 - Política de Incentivos",
+  "Eixo 5": "Eixo 5 - Acompanhamento e Monitoramento",
+  "Eixo 6": "Eixo 6 - Avaliação",
+  "Eixo 7": "Eixo 7 - Materiais Didáticos e Pedagógicos"
 };
 
 const EIXO_CORES = {
@@ -217,7 +216,6 @@ async function inicializar() {
             });
         });
 
-        // Ordenação do Maior para o Menor Tema na Lista Suspensa
         const comboTema = document.getElementById("select-tema-transversal");
         Object.keys(listTemasContagem).sort((a,b) => listTemasContagem[b] - listTemasContagem[a]).forEach(t => {
             const opt = document.createElement("option");
@@ -275,7 +273,7 @@ function construirCheckboxEixos() {
         const nomeCompletoEixo = MAPA_EIXOS_COMPLETO[sigla] || sigla;
         label.innerHTML = `
             <input type="checkbox" value="${sigla}" ${checked} class="axis-checkbox rounded border-gray-300 text-blue-600 focus:ring-blue-500 w-3.5 h-3.5" onchange="renderizarEstruturaHierarquica()">
-            <span class="truncate flex-1" title="${nomeCompletoEixo}">${sigla}</span>
+            <span class="truncate flex-1" title="${nomeCompletoEixo}">${nomeCompletoEixo}</span>
             <span class="text-[9px] text-slate-400 font-bold bg-slate-100 px-1.5 py-0.5 rounded ml-auto">${contagemEixos[sigla].causas}</span>
         `;
         container.appendChild(label);
@@ -330,15 +328,16 @@ function processarDadosAba1() {
         const angulo = (i * 2 * Math.PI) / totalEixos;
         const posX = raioEixos * Math.cos(angulo);
         const posY = raioEixos * Math.sin(angulo);
+        const nomeEixoExibicao = eixosAtivos[ex].completo;
 
         G_aba1.nodes.push({
-            id: ex, label: ex, title: eixosAtivos[ex].completo, shape: "dot", size: 16,
+            id: ex, label: ex, title: nomeEixoExibicao, shape: "dot", size: 16,
             x: posX, y: posY, fixed: true,
             color: {background: "#6366F1", border: "#4F46E5"},
             font: { size: 11, color: "#475569", bold: true, vadjust: 26 }
         });
         G_aba1.edges.push({ id: `edge_root_${ex}`, from: "ROOT", to: ex, color: { color: "#CBD5E0", opacity: 0.5 }, width: 1.5 });
-        G_aba1.details[ex] = { tipo: "eixo", titulo: eixosAtivos[ex].completo, cor: "#6366F1", subtitulo: "Problema Central do Eixo", conteudo: eixosAtivos[ex].problema };
+        G_aba1.details[ex] = { tipo: "eixo", titulo: nomeEixoExibicao, cor: "#6366F1", subtitulo: "Problema Central do Eixo", conteudo: eixosAtivos[ex].problema };
     });
 
     Object.keys(catMap).forEach(catNome => {
@@ -459,7 +458,7 @@ function filtrarTeiaPorCategoria(nomeCat) {
 }
 
 function filtrarTeiaPorEixo(eixoId) {
-    const categoriasConectadas = G_aba1.originalEdges.filter(e => e.from === eixoId && e.to.startsWith("__cat__")).map(e => e.to);
+    const categoriasConectadas = G_aba1.originalEdges.filter(e => e.from ===微axoId && e.to.startsWith("__cat__")).map(e => e.to);
     
     const nosIsolados = G_aba1.nodes.filter(n => n.id === eixoId || categoriasConectadas.includes(n.id) || n.id === "ROOT");
     const arestasIsoladas = G_aba1.originalEdges.filter(e => 
@@ -503,7 +502,7 @@ function aoClicarNoNodeRadial(id) {
         document.getElementById("p-sub").textContent = `${det.volumeCausas} causas mapeadas sob este tema`;
         let html = '';
         det.causas.forEach(c => {
-            const badges = c.eixos.map(ex => `<span class="inline-block px-2 py-0.5 text-[9px] font-bold text-white rounded mr-1" style="background:${EIXO_CORES[ex]}">${ex}</span>`).join("");
+            const badges = c.eixos.map(ex => `<span class="inline-block px-2 py-0.5 text-[9px] font-bold text-white rounded mr-1" style="background:${EIXO_CORES[ex]}">${MAPA_EIXOS_COMPLETO[ex] || ex}</span>`).join("");
             html += `<div class="p-3 border border-slate-100 rounded-xl bg-slate-50/40 mb-2.5 text-xs">
                 <div class="mb-1.5">${badges}</div>
                 <p class="text-slate-600 font-medium leading-relaxed">${c.texto}</p>
@@ -518,11 +517,32 @@ function aoClicarNoNodeRadial(id) {
 
 function buildSidebarRadialAba1() {
     const list = document.getElementById("sidebar-list"); list.innerHTML = "";
+    
+    const hEixos = document.createElement("p");
+    hEixos.className = "text-[10px] font-bold uppercase tracking-widest mt-1 mb-2 px-2 text-indigo-600";
+    hEixos.textContent = "📋 Eixos do Diagnóstico";
+    list.appendChild(hEixos);
+
+    ["Eixo 1", "Eixo 2", "Eixo 3", "Eixo 4", "Eixo 5", "Eixo 6", "Eixo 7"].forEach(ex => {
+        const nomeCompleto = MAPA_EIXOS_COMPLETO[ex];
+        const b = document.createElement("button");
+        b.className = "btn-sidebar-item";
+        b.innerHTML = `
+            <span class="w-2 h-2 rounded-full mt-1.5 flex-shrink-0" style="background:${EIXO_CORES[ex]}"></span>
+            <span class="btn-sidebar-text text-slate-700 font-semibold">${nomeCompleto}</span>
+        `;
+        b.onclick = (e) => {
+            e.stopPropagation();
+            filtrarTeiaPorEixo(ex);
+        };
+        list.appendChild(b);
+    });
+
     const sortedCats = Object.keys(G_aba1.details).map(id => G_aba1.details[id]).filter(item => item.tipo === "categoria").sort((a,b)=>b.volumeCausas - a.volumeCausas);
     
     const renderGrupo = (titulo, classeCor, lista) => {
         if (!lista.length) return;
-        const h = document.createElement("p"); h.className = `text-[10px] font-bold uppercase tracking-widest mt-4 mb-2 px-2 ${classeCor}`; h.textContent = titulo; list.appendChild(h);
+        const h = document.createElement("p"); h.className = `text-[10px] font-bold uppercase tracking-widest mt-5 mb-2 px-2 ${classeCor}`; h.textContent = titulo; list.appendChild(h);
         
         lista.forEach(item => {
             const b = document.createElement("button"); 
@@ -569,7 +589,6 @@ function renderizarEstruturaHierarquica() {
         metricasEixos[ex] = { totalP: 0, totalS: 0, totalT: 0, causasEstreladasCount: 0, probCentral: "" }; 
     });
 
-    // Processamento limpo sem duplicações de contagem
     const chavesContadasUnicas = new Set();
 
     rawRows.forEach(r => {
@@ -623,16 +642,17 @@ function renderizarEstruturaHierarquica() {
         const vNumCt = ct ? (globalTextoParaVotos[ct.trim()] || 0) : 0;
 
         const eixoId = `H2_${siglaEixo}`;
+        const nomeEixoOficial = MAPA_EIXOS_COMPLETO[siglaEixo] || eixoCompleto;
         
         if (!nosCriadosUnicos.has(eixoId)) {
             hNodes.push({ 
-                id: eixoId, label: siglaEixo, shape: "dot", size: 10, 
+                id: eixoId, label: siglaEixo, title: nomeEixoOficial, shape: "dot", size: 10, 
                 color: { background: "#6366F1", border: "#4F46E5" }, 
                 font: { bold: true, size: 11, color: "#475569" } 
             });
             hEdges.push({ from: macroId, to: eixoId, color: { color: "#CBD5E0", opacity: 0.6 }, width: 1.2 });
             nosCriadosUnicos.add(eixoId);
-            hNodesDetails[eixoId] = { tipo: "eixo", titulo: MAPA_EIXOS_COMPLETO[siglaEixo] || eixoCompleto, sigla: siglaEixo, cor: "#6366F1", dados: metricasEixos[siglaEixo] };
+            hNodesDetails[eixoId] = { tipo: "eixo", titulo: nomeEixoOficial, sigla: siglaEixo, cor: "#6366F1", dados: metricasEixos[siglaEixo] };
         }
 
         const registrarNoUnico = (texto, categoria, paiId, camadaLabel, tamanho, corNivel, vMaxFiltro) => {
@@ -664,7 +684,7 @@ function renderizarEstruturaHierarquica() {
 
                 hNodesDetails[noId] = {
                     tipo: "causa", camada: camadaLabel === "1" ? "Primária" : camadaLabel === "2" ? "Secundária" : "Terciária",
-                    texto: txt, tema: temaReal, votos: vMaxFiltro, eixoOrigem: MAPA_EIXOS_COMPLETO[siglaEixo] || eixoCompleto,
+                    texto: txt, tema: temaReal, votos: vMaxFiltro, eixoOrigem: nomeEixoOficial,
                     eixos: Array.from(globalTextoParaEixos[txt] || [siglaEixo]), ehTransversal: ehTransversal
                 };
                 nosCriadosUnicos.add(noId);
@@ -678,7 +698,6 @@ function renderizarEstruturaHierarquica() {
             return noId;
         };
 
-        // AUMENTO DAS BOLAS: Ajustado proporcionalmente de 6.5/5/3.5 para 13/10/7.5
         const idP = registrarNoUnico(cp, cat_p, eixoId, "1", 13.0, "#38BDF8", vNumCp); 
         const idS = idP ? registrarNoUnico(cs, cat_s, idP, "2", 10.0, "#34D399", vNumCs) : null;  
         if (idS) registrarNoUnico(ct, cat_t, idS, "3", 7.5, "#FBBF24", vNumCt);              
