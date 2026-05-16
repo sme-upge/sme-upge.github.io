@@ -70,19 +70,16 @@ input:checked + .slider:before {transform:translateX(14px)}
 </div>
 
 <script>
-// Cores sólidas originais para os contornos (Borda viva)
 const EIXO_CORES = {
   "Eixo 1": "#2563EB", "Eixo 2": "#7C3AED", "Eixo 3": "#059669",
   "Eixo 4": "#EA580C", "Eixo 5": "#06B6D4", "Eixo 6": "#E11D48", "Eixo 7": "#14B8A6"
 };
 
-// Versões em RGBA (Fundo transparente com opacidade a 20%)
 const EIXO_CORES_RGBA = {
-  "Eixo 1": "rgba(37, 99, 235, 0.2)", "Eixo 2": "rgba(124, 58, 237, 0.2)", "Eixo 3": "rgba(5, 150, 105, 0.2)",
-  "Eixo 4": "rgba(234, 88, 12, 0.2)",  "Eixo 5": "rgba(6, 182, 212, 0.2)",  "Eixo 6": "rgba(225, 29, 72, 0.2)", "Eixo 7": "rgba(20, 184, 166, 0.2)"
+  "Eixo 1": "rgba(37, 99, 235, 0.15)", "Eixo 2": "rgba(124, 58, 237, 0.15)", "Eixo 3": "rgba(5, 150, 105, 0.15)",
+  "Eixo 4": "rgba(234, 88, 12, 0.15)",  "Eixo 5": "rgba(6, 182, 212, 0.15)",  "Eixo 6": "rgba(225, 29, 72, 0.15)", "Eixo 7": "rgba(20, 184, 166, 0.15)"
 };
 
-// Mapeamento de categorias sólidas
 const CAT_CORES_MAP = {
   "Fragmentação": "#EF4444", "fragmentação": "#EF4444",
   "Comunicação": "#3B82F6", "comunicação": "#3B82F6",
@@ -98,14 +95,13 @@ const CAT_CORES_MAP = {
   "Qualificação": "#84CC16", "qualificação": "#84CC16"
 };
 
-// Mapeamento de categorias em formato RGBA transparente (Estética glassmorfismo das fotos)
 const CAT_CORES_RGBA = {
-  "Fragmentação": "rgba(239, 68, 68, 0.18)",   "Comunicação": "rgba(59, 130, 246, 0.18)",
-  "Rotatividade": "rgba(168, 85, 247, 0.18)",   "Sobrecarga": "rgba(6, 182, 212, 0.18)",
-  "Participação": "rgba(16, 185, 129, 0.18)",   "Atendimento": "rgba(245, 158, 11, 0.18)",
-  "Identidade": "rgba(236, 72, 153, 0.18)",     "Articulação": "rgba(244, 63, 94, 0.18)",
-  "Recursos": "rgba(217, 70, 239, 0.18)",       "Excesso": "rgba(34, 197, 94, 0.18)",
-  "Inadequação": "rgba(249, 115, 22, 0.18)",    "Qualificação": "rgba(132, 204, 22, 0.18)"
+  "Fragmentação": "rgba(239, 68, 68, 0.15)",   "Comunicação": "rgba(59, 130, 246, 0.15)",
+  "Rotatividade": "rgba(168, 85, 247, 0.15)",   "Sobrecarga": "rgba(6, 182, 212, 0.15)",
+  "Participação": "rgba(16, 185, 129, 0.15)",   "Atendimento": "rgba(245, 158, 11, 0.15)",
+  "Identidade": "rgba(236, 72, 153, 0.15)",     "Articulação": "rgba(244, 63, 94, 0.15)",
+  "Recursos": "rgba(217, 70, 239, 0.15)",       "Excesso": "rgba(34, 197, 94, 0.15)",
+  "Inadequação": "rgba(249, 115, 22, 0.15)",    "Qualificação": "rgba(132, 204, 22, 0.15)"
 };
 
 let G = { nodes: [], edges: [], details: {}, edgesOriginal: [] };
@@ -147,13 +143,12 @@ function processarDados(rows) {
     const catMap = {};
     const eixosAtivos = {};
 
-    // PROBLEMA MACRO: Fundo semi-transparente vermelho com borda amarela marcante
     G.nodes.push({
         id: "ROOT", label: "PROBLEMA\nMACRO", shape: "dot", size: 36,
         color: {
-            background: "rgba(225, 29, 72, 0.25)", 
+            background: "rgba(225, 29, 72, 0.2)", 
             border: "#FBBF24", 
-            highlight: {background: "rgba(225, 29, 72, 0.4)", border: "#FBBF24"}
+            highlight: {background: "rgba(225, 29, 72, 0.35)", border: "#FBBF24"}
         }, 
         borderWidth: 2,
         font: {size: 10, color: "#1E293B", bold: true}
@@ -188,10 +183,9 @@ function processarDados(rows) {
         mapearPar(ct, cat_t);
     });
 
-    // Nós dos Eixos: Preenchimento sutil, borda forte com cor viva
     Object.keys(eixosAtivos).forEach(ex => {
         const corBorda = EIXO_CORES[ex] || "#475569";
-        const corFundo = EIXO_CORES_RGBA[ex] || "rgba(71, 85, 105, 0.2)";
+        const corFundo = EIXO_CORES_RGBA[ex] || "rgba(71, 85, 105, 0.15)";
         const nomeCompleto = eixosAtivos[ex].completo;
         
         G.nodes.push({
@@ -205,8 +199,14 @@ function processarDados(rows) {
             _isEixo: true
         });
         
-        // Linha principal do centro para o eixo: sutil e elegante
-        G.edges.push({ from: "ROOT", to: ex, color: "#CBD5E0", width: 2 });
+        // Linhas principais do centro retas, finas e limpas
+        G.edges.push({ 
+            from: "ROOT", 
+            to: ex, 
+            color: {color: "#CBD5E0", opacity: 0.5}, 
+            width: 1.5,
+            arrows: { to: { enabled: true, scaleFactor: 0.5 } } 
+        });
 
         G.details[ex] = {
             tipo: "eixo",
@@ -217,13 +217,12 @@ function processarDados(rows) {
         };
     });
 
-    // Temas/Categorias: Efeito transparente (Glassmorphism) com contorno neon
     Object.keys(catMap).forEach(catNome => {
         const info = catMap[catNome];
         const totalCausasDiferentes = Object.keys(info.causas).length;
         
         let corBorda = "#FF6B6B";
-        let corFundo = "rgba(255, 107, 107, 0.18)";
+        let corFundo = "rgba(255, 107, 107, 0.15)";
         
         for (const chave in CAT_CORES_MAP) {
             if (catNome.toLowerCase().includes(chave.toLowerCase())) {
@@ -265,26 +264,22 @@ let net = null, vN = null, vE = null;
 function renderTree() {
     vN = new vis.DataSet(G.nodes); vE = new vis.DataSet(G.edges);
     net = new vis.Network(document.getElementById("net"), {nodes: vN, edges: vE}, {
-        // Estilização global das linhas para remover a bagunça visual
+        // CORREÇÃO CRUCIAL: Linhas retas e ultrafinas para remover a bagunça visual
         edges: {
             width: 1,
             color: { color: "#E2E8F0", highlight: "#94A3B8" },
-            smooth: {
-                enabled: true,
-                type: "cubicBezier",        // Suaviza as linhas criando curvas harmônicas nas conexões
-                forceDirection: "horizontal",
-                roundness: 0.6
-            }
+            smooth: { enabled: false }, // Desativa o modo curvo que criava os nós emaranhados
+            arrows: { to: { enabled: true, scaleFactor: 0.4 } } // Setas guia ultra discretas
         },
         physics: {
             enabled: true,
             solver: "barnesHut",
             barnesHut: { 
-                gravitationalConstant: -18000, // Força a expansão máxima para as pontas limparem a tela
+                gravitationalConstant: -18000, 
                 centralGravity: 0.08,           
-                springLength: 230,             // Estica as cordas para as bolinhas não trombarem
+                springLength: 240,             
                 springConstant: 0.04,          
-                damping: 0.14                  // Efeito elástico ao puxar preservado
+                damping: 0.14                  
             },
             stabilization: false
         },
