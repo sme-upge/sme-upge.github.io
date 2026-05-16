@@ -458,7 +458,7 @@ function filtrarTeiaPorCategoria(nomeCat) {
 }
 
 function filtrarTeiaPorEixo(eixoId) {
-    const categoriasConectadas = G_aba1.originalEdges.filter(e => e.from ===微axoId && e.to.startsWith("__cat__")).map(e => e.to);
+    const categoriasConectadas = G_aba1.originalEdges.filter(e => e.from === eixoId && e.to.startsWith("__cat__")).map(e => e.to);
     
     const nosIsolados = G_aba1.nodes.filter(n => n.id === eixoId || categoriasConectadas.includes(n.id) || n.id === "ROOT");
     const arestasIsoladas = G_aba1.originalEdges.filter(e => 
@@ -518,31 +518,11 @@ function aoClicarNoNodeRadial(id) {
 function buildSidebarRadialAba1() {
     const list = document.getElementById("sidebar-list"); list.innerHTML = "";
     
-    const hEixos = document.createElement("p");
-    hEixos.className = "text-[10px] font-bold uppercase tracking-widest mt-1 mb-2 px-2 text-indigo-600";
-    hEixos.textContent = "📋 Eixos do Diagnóstico";
-    list.appendChild(hEixos);
-
-    ["Eixo 1", "Eixo 2", "Eixo 3", "Eixo 4", "Eixo 5", "Eixo 6", "Eixo 7"].forEach(ex => {
-        const nomeCompleto = MAPA_EIXOS_COMPLETO[ex];
-        const b = document.createElement("button");
-        b.className = "btn-sidebar-item";
-        b.innerHTML = `
-            <span class="w-2 h-2 rounded-full mt-1.5 flex-shrink-0" style="background:${EIXO_CORES[ex]}"></span>
-            <span class="btn-sidebar-text text-slate-700 font-semibold">${nomeCompleto}</span>
-        `;
-        b.onclick = (e) => {
-            e.stopPropagation();
-            filtrarTeiaPorEixo(ex);
-        };
-        list.appendChild(b);
-    });
-
     const sortedCats = Object.keys(G_aba1.details).map(id => G_aba1.details[id]).filter(item => item.tipo === "categoria").sort((a,b)=>b.volumeCausas - a.volumeCausas);
     
     const renderGrupo = (titulo, classeCor, lista) => {
         if (!lista.length) return;
-        const h = document.createElement("p"); h.className = `text-[10px] font-bold uppercase tracking-widest mt-5 mb-2 px-2 ${classeCor}`; h.textContent = titulo; list.appendChild(h);
+        const h = document.createElement("p"); h.className = `text-[10px] font-bold uppercase tracking-widest mt-1 mb-2 px-2 ${classeCor}`; h.textContent = titulo; list.appendChild(h);
         
         lista.forEach(item => {
             const b = document.createElement("button"); 
@@ -590,9 +570,11 @@ function renderizarEstruturaHierarquica() {
     });
 
     const chavesContadasUnicas = new Set();
+    const causasEstreladasPorEixo = {};
+    eixosSelecionados.forEach(ex => { causasEstreladasPorEixo[ex] = new Set(); });
 
     rawRows.forEach(r => {
-        const [eixoCompleto, probCentral, cp, cat_p, cs, cat_s, votos, ct, cat_t] = r; if (!eixoCompleto) return;
+        const [eixoCompleto, probCentral, cp, , cs, , votos, ct, ] = r; if (!eixoCompleto) return;
         const sigla = eixoCompleto.split(" - ")[0]; if (!eixosSelecionados.includes(sigla)) return;
         
         metricasEixos[sigla].probCentral = probCentral;
@@ -603,18 +585,16 @@ function renderizarEstruturaHierarquica() {
             if(!chavesContadasUnicas.has(hashP)) {
                 metricasEixos[sigla].totalP++;
                 chavesContadasUnicas.add(hashP);
-                if(vNum > 0) metricasEixos[sigla].causasEstreladasCount++;
             }
+            if (vNum > 0) causasEstreladasPorEixo[sigla].add(cp.trim());
         }
         if (cs && cs.trim() !== "") {
             const hashS = `${sigla}_S_${cs.trim()}`;
             if(!chavesContadasUnicas.has(hashS)) {
                 metricasEixos[sigla].totalS++;
                 chavesContadasUnicas.add(hashS);
-                if(vNum > 0 && !(cp && cp.trim() !== "" && vNum > 0)) {
-                    metricasEixos[sigla].causasEstreladasCount++;
-                }
             }
+            if (vNum > 0) causasEstreladasPorEixo[sigla].add(cs.trim());
         }
         if (ct && ct.trim() !== "") {
             const hashT = `${sigla}_T_${ct.trim()}`;
@@ -622,7 +602,12 @@ function renderizarEstruturaHierarquica() {
                 metricasEixos[sigla].totalT++;
                 chavesContadasUnicas.add(hashT);
             }
+            if (vNum > 0) causasEstreladasPorEixo[sigla].add(ct.trim());
         }
+    });
+
+    eixosSelecionados.forEach(ex => {
+        metricasEixos[ex].causasEstreladasCount = causasEstreladasPorEixo[ex].size;
     });
 
     rawRows.forEach((r) => {
