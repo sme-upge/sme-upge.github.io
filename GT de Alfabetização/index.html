@@ -24,7 +24,7 @@ html,body{height:100%;margin:0;padding:0;overflow:hidden;font-family:"Inter",san
   border:1px solid #E2E8F0;border-radius:12px;padding:12px 16px;display:none;box-shadow:0 4px 12px rgba(0,0,0,0.03)}
 .mbtn{padding:8px 16px;border-radius:10px;font-size:12px;font-weight:600;
   border:none;cursor:pointer;transition:all .15s;white-space:nowrap}
-.mbtn.on{background:#4F46E5;color:white;box-shadow:0 2px 6px rgba(79,70,229,0.2)}
+.mbtn.on{background:#4F46E5;color:white;box-shadow:0 2px 6px rgba(79,70,229,0.15)}
 .mbtn.off{background:#F1F5F9;color:#64748B}
 .tog{position:relative;display:inline-block;width:32px;height:18px}
 .tog input{opacity:0;width:0;height:0}
@@ -37,7 +37,7 @@ input:checked+.tog-sl:before{transform:translateX(14px)}
 ::-webkit-scrollbar-thumb{background:#E2E8F0;border-radius:4px}
 .vis-tooltip{background:rgba(15,23,42,.95)!important;color:#F8FAFC!important;
   border:none!important;border-radius:8px!important;font-size:11px!important;
-  padding:8px 12px!important;max-width:280px!important;line-height:1.5!important;box-shadow:0 4px 12px rgba(0,0,0,0.1)!important}
+  padding:8px 12px!important;max-width:280px!important;line-height:1.5!important}
 </style>
 </head>
 <body>
@@ -63,7 +63,7 @@ input:checked+.tog-sl:before{transform:translateX(14px)}
 </div>
 
 <div style="position:fixed;bottom:24px;left:50%;transform:translateX(-50%);z-index:20;
-  display:flex;gap:8px;background:rgba(255,255,255,.9);backdrop-filter:blur(8px);border:1px solid #E2E8F0;
+  display:flex;gap:8px;background:rgba(255,255,255,.95);backdrop-filter:blur(8px);border:1px solid #E2E8F0;
   border-radius:20px;padding:8px 12px;box-shadow:0 8px 32px rgba(15,23,42,.06)">
   <button class="mbtn on" data-m="temas">🔗 Visão por Temas</button>
   <button class="mbtn off" data-m="completo">🌳 Visão Expandida</button>
@@ -81,14 +81,13 @@ input:checked+.tog-sl:before{transform:translateX(14px)}
 <div id="painel">
   <div style="padding:24px;border-bottom:1px solid #F1F5F9;flex-shrink:0;display:flex;gap:16px;align-items:start">
     <div style="flex:1;min-width:0">
-      <div id="p-cor" style="width:14px;height:14px;border-radius:50%;margin-bottom:10px;box-shadow:inset 0 0 0 1px rgba(0,0,0,0.05)"></div>
-      <h2 id="p-titulo" style="font-size:14px;font-weight:700;color:#0F172A;margin:0;line-height:1.4;letter-spacing:-0.01em"></h2>
+      <div id="p-cor" style="width:14px;height:14px;border-radius:50%;margin-bottom:10px"></div>
+      <h2 id="p-titulo" style="font-size:14px;font-weight:700;color:#0F172A;margin:0;line-height:1.4"></h2>
       <p id="p-sub" style="font-size:11px;color:#64748B;margin:4px 0 0;font-weight:500"></p>
     </div>
     <button onclick="fecharPainel()" style="width:32px;height:32px;border-radius:10px;
       background:#F1F5F9;border:none;cursor:pointer;font-size:18px;color:#64748B;
-      flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:background .15s"
-      onmouseover="this.style.background='#E2E8F0'" onmouseout="this.style.background='#F1F5F9'">×</button>
+      flex-shrink:0;display:flex;align-items:center;justify-content:center">×</button>
   </div>
   <div id="painel-body"></div>
 </div>
@@ -151,10 +150,10 @@ function buildStructure(rows) {
     const catMap = {};
     const eixosAtivos = new Set();
 
-    // LEVEZA: Nó macro reduzido e mais sutil
+    // FIXO E COMPACTO: O nó central não interfere no tamanho dos demais
     D.grafo_temas.nodes.push({
-        id: "__macro__", label: "Problema Central\nRede Municipal", group: "macro", value: 24,
-        color: {background: "#EF4444", border: "#DC2626"}, font: {size: 11, color: "#fff", bold: true}, shape: "dot"
+        id: "__macro__", label: "Problema Central\nRede Municipal", group: "macro", size: 18,
+        color: {background: "#EF4444", border: "#DC2626"}, font: {size: 11, color: "#475569", bold: true}, shape: "dot"
     });
 
     rows.forEach(r => {
@@ -189,14 +188,13 @@ function buildStructure(rows) {
         processarPar(ct, cat_t);
     });
 
-    // LEVEZA: Reduzido o tamanho (value) dos nós de eixos
     eixosAtivos.forEach(ex => {
         D.grafo_temas.nodes.push({
-            id: `__e__${ex}`, label: ex, title: ex, group: "eixo", value: 16,
+            id: `__e__${ex}`, label: ex, title: ex, group: "eixo", size: 14,
             color: {background: EIXO_CORES[ex] || "#64748B", border: EIXO_CORES[ex] || "#64748B"}, 
-            font: {size: 9, color: "#1E293B", bold: true}, shape: "dot"
+            font: {size: 10, color: "#1E293B", bold: true}, shape: "dot"
         });
-        D.grafo_temas.edges.push({from: "__macro__", to: `__e__${ex}`, color: {color: "#E2E8F0"}, width: 1});
+        D.grafo_temas.edges.push({from: "__macro__", to: `__e__${ex}`, color: {color: "#E2E8F0"}, width: 1.5});
     });
 
     Object.keys(catMap).forEach(name => {
@@ -205,20 +203,19 @@ function buildStructure(rows) {
         const chaveCor = Object.keys(CAT_CORES_MAP).find(k => name.includes(k));
         const corBase = CAT_CORES_MAP[chaveCor] || "#CBD5E0";
 
-        // SUTIL: Rótulo curto no grafo para evitar poluição visual. O texto real completo fica guardado para o painel lateral.
-        const labelCurto = name.length > 25 ? name.slice(0,25) + "..." : name;
+        const labelCurto = name.length > 22 ? name.slice(0,22) + "..." : name;
 
+        // TAMANHO FIXO (size: 10): Remove o bug da bola gigante. Fica pequeno e harmônico.
         D.grafo_temas.nodes.push({
-            id: id, label: labelCurto, title: name, group: "cat",
-            value: 12 + (info.axes.size * 2), // Bolinhas bem menores e elegantes
+            id: id, label: labelCurto, title: name, group: "cat", size: 10, 
             color: {background: corBase, border: corBase},
-            font: {size: 9, color: "#475569"}, shape: "dot"
+            font: {size: 9, color: "#64748B"}, shape: "dot"
         });
 
         info.axes.forEach(ex => {
             D.grafo_temas.edges.push({
                 from: `__e__${ex}`, to: id, 
-                color: {color: "#E2E8F0", hover: corBase, inherit: false}, 
+                color: {color: "#E2E8F0"}, 
                 width: 1
             });
         });
@@ -240,18 +237,18 @@ function render(nodes, edges, opts) {
     
     net = new vis.Network(document.getElementById("net"), {nodes: vN, edges: vE}, {
         nodes: {
-            shape: "dot", 
-            scaling: {min: 6, max: 20}, // Escala sutil e compacta para os nós
-            font: {size: 10, face: "Inter", color: "#334155"}
+            shape: "dot",
+            font: {face: "Inter"}
         },
-        edges: {width: 1, color: "#E2E8F0", smooth: {type: "forceAtlas2Based"}},
+        edges: {width: 1, color: "#E2E8F0", smooth: {type: "continuous"}},
         physics: {
-            solver: "forceAtlas2Based",
-            forceAtlas2Based: {
-                gravitationalConstant: opts.grav, 
-                centralGravity: 0.4, 
-                springLength: opts.sl, 
-                springConstant: 0.05
+            solver: "barnesHut",
+            barnesHut: {
+                gravitationalConstant: opts.grav,
+                centralGravity: 0.3,
+                springLength: opts.sl,
+                springConstant: 0.04,
+                damping: 0.09
             },
             stabilization: {iterations: 150}
         },
@@ -277,7 +274,7 @@ function setModo(m) {
     document.getElementById("net").style.left = m === "temas" ? "280px" : "0";
     
     if (m === "temas") {
-        render(D.grafo_temas.nodes, D.grafo_temas.edges, {grav: -35, sl: 140}); // Maior distanciamento inicial
+        render(D.grafo_temas.nodes, D.grafo_temas.edges, {grav: -4000, sl: 140});
     } else {
         filtrarGrafoCompleto(document.getElementById("t-trans").checked);
     }
@@ -299,7 +296,7 @@ function filtrarGrafoCompleto(manterTransversais) {
             return true;
         });
     }
-    render(D.grafo_temas.nodes, finalEdges, {grav: -25, sl: 180});
+    render(D.grafo_temas.nodes, finalEdges, {grav: -6000, sl: 180});
 }
 
 function onClick(id) {
@@ -308,13 +305,13 @@ function onClick(id) {
     
     document.getElementById("p-cor").style.background = det.cor;
     document.getElementById("p-titulo").textContent = det.cat;
-    document.getElementById("p-sub").textContent = `${det.causas.length} evidências da rede unificadas`;
+    document.getElementById("p-sub").textContent = `${det.causas.length} evidências estruturadas`;
     
-    let html = '<p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-4">Relatos e Diagnósticos Reais</p>';
+    let html = '<p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-4">Relatos Reais Capturados</p>';
     
     det.causas.forEach(c => {
-        const badges = c.eixos_origem.map(ex => `<span style="background:${EIXO_CORES[ex] || "#64748B"};color:white;padding:3px 6px;border-radius:6px;font-size:9px;font-weight:700;margin-right:4px;box-shadow: 0 1px 2px rgba(0,0,0,0.05)">${EIXO_CURTO[ex] || ex}</span>`).join("");
-        html += `<div style="padding:14px;border-radius:12px;border:1px solid #E2E8F0;background:#F8FAFC;margin-bottom:12px;box-shadow: 0 1px 3px rgba(0,0,0,0.01)">
+        const badges = c.eixos_origem.map(ex => `<span style="background:${EIXO_CORES[ex] || "#64748B"};color:white;padding:3px 6px;border-radius:6px;font-size:9px;font-weight:700;margin-right:4px">${EIXO_CURTO[ex] || ex}</span>`).join("");
+        html += `<div style="padding:14px;border-radius:12px;border:1px solid #E2E8F0;background:#F8FAFC;margin-bottom:12px">
             <div style="margin-bottom:8px">${badges}</div>
             <p style="font-size:12px;color:#334155;line-height:1.6;font-weight:500">${c.causa}</p>
             ${c.votos > 0 ? `<div style="margin-top:8px;font-size:10px;font-weight:700;color:#D97706;display:inline-flex;align-items:center;background:#FEF3C7;padding:2px 8px;border-radius:6px">⭐ ${c.votos} votos</div>` : ""}
@@ -332,7 +329,7 @@ function buildSidebar() {
     
     const reset = document.createElement("button");
     reset.className = "w-full text-left p-2.5 rounded-lg text-xs font-bold text-slate-400 hover:bg-slate-50 uppercase mb-4 transition flex items-center gap-1.5";
-    reset.textContent = "⊙ Limpar Seleção Atual";
+    reset.textContent = "⊙ Limpar Seleção";
     reset.onclick = () => { destacar(null); fecharPainel(); };
     list.appendChild(reset);
 
@@ -353,7 +350,7 @@ function buildSidebar() {
             const b = document.createElement("button");
             b.className = "cat-btn w-full text-left p-2.5 rounded-xl text-[11px] mb-1 flex items-start gap-2.5 border border-transparent hover:bg-slate-50 transition";
             b.dataset.c = item.id;
-            b.innerHTML = `<span style="width:8px;height:8px;border-radius:50%;background:${item.cor};margin-top:4px;flex-shrink:0;box-shadow:inset 0 0 0 1px rgba(0,0,0,0.05)"></span><span class="text-slate-600 font-medium leading-normal">${item.cat}</span>`;
+            b.innerHTML = `<span style="width:8px;height:8px;border-radius:50%;background:${item.cor};margin-top:4px;flex-shrink:0"></span><span class="text-slate-600 font-medium leading-normal">${item.cat}</span>`;
             b.onclick = () => {
                 onClick(item.id);
                 document.querySelectorAll(".cat-btn").forEach(btn => btn.classList.remove("bg-indigo-50", "border-indigo-100"));
@@ -379,7 +376,7 @@ function destacar(id) {
     }
     if (!vN) return;
     const nodes = net.getConnectedNodes(id); nodes.push(id);
-    vN.update(vN.get().map(n => ({id: n.id, opacity: nodes.includes(n.id) ? 1 : 0.08}))); // Mais contraste ao destacar
+    vN.update(vN.get().map(n => ({id: n.id, opacity: nodes.includes(n.id) ? 1 : 0.08})));
 }
 
 function fecharPainel() { 
