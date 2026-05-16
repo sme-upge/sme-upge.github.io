@@ -3,319 +3,233 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Árvore de Problemas — GT de Alfabetização · SME-SP</title>
+<title>Árvore de Problemas — GT de Alfabetização</title>
 <script src="https://cdn.tailwindcss.com"></script>
 <script src="https://unpkg.com/vis-network/standalone/umd/vis-network.min.js"></script>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
-    * { box-sizing: border-box; }
-    html, body { height: 100%; margin: 0; padding: 0; overflow: hidden; font-family: "Inter", sans-serif; background: #F7F8FA; }
-    #net { position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: #F7F8FA; transition: left 0.3s ease; }
+    body { font-family: 'Inter', sans-serif; background-color: #f8fafc; }
+    #net { width: 100%; height: 100vh; outline: none; }
     
-    #sidebar { position: fixed; top: 0; left: 0; width: 280px; height: 100vh; background: white; 
-               border-right: 1px solid #E2E8F0; z-index: 30; display: flex; flex-direction: column; transition: 0.3s; }
-    #sidebar.hide { transform: translateX(-100%); }
-    #sidebar-list { flex: 1; overflow-y: auto; padding: 12px; }
+    /* Custom Scrollbar */
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
 
-    #painel { position: fixed; top: 0; right: 0; width: 420px; height: 100vh; background: white; 
-              border-left: 1px solid #E2E8F0; z-index: 50; transform: translateX(100%); transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-              box-shadow: -15px 0 30px -5px rgba(0,0,0,0.08); display: flex; flex-direction: column; }
-    #painel.open { transform: translateX(0); }
-    #painel-body { flex: 1; overflow-y: auto; padding: 24px; }
+    /* Estilo do Painel Lateral */
+    #painel {
+        transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        box-shadow: -10px 0 30px rgba(0,0,0,0.05);
+    }
+    #painel.closed { transform: translateX(100%); }
 
-    .mbtn { padding: 10px 20px; border-radius: 14px; font-size: 12px; font-weight: 800; transition: 0.2s; white-space: nowrap; border: 1px solid transparent; }
-    .mbtn.on { background: #4F46E5; color: white; box-shadow: 0 4px 15px rgba(79, 70, 229, 0.4); }
-    .mbtn.off { background: #F8FAFC; color: #64748B; border-color: #E2E8F0; }
-    .mbtn.off:hover { background: #F1F5F9; }
-
-    .vis-tooltip { background: #1F2937 !important; color: white !important; border-radius: 10px !important; padding: 12px !important; font-size: 11px !important; border: none !important; max-width: 220px; box-shadow: 0 10px 15px rgba(0,0,0,0.2); }
-    
-    .cat-btn { width: 100%; text-align: left; padding: 14px; margin-bottom: 6px; border-radius: 12px; font-size: 11px; line-height: 1.4; transition: 0.2s; display: flex; align-items: start; gap: 12px; border: 1px solid transparent; cursor: pointer; }
-    .cat-btn:hover { background: #F1F5F9; }
-    .cat-btn.active { background: #EEF2FF; border-color: #C7D2FE; color: #4F46E5; font-weight: 700; }
+    /* Tooltip Customizado */
+    .vis-tooltip {
+        position: absolute; visibility: hidden; padding: 8px;
+        background-color: #1e293b; color: #fff; border-radius: 6px;
+        font-size: 11px; z-index: 100; pointer-events: none;
+    }
 </style>
 </head>
-<body>
+<body class="overflow-hidden">
 
-<!-- Sidebar de Temas (Só aparece no modo 1) -->
-<div id="sidebar">
-    <div class="p-6 border-b bg-gray-50/50">
-        <p class="text-[10px] font-black uppercase tracking-[0.2em] text-indigo-600">Perspectiva Temática</p>
-        <p class="text-[11px] text-gray-400 mt-1">Selecione para ver as causas reais</p>
-    </div>
-    <div id="sidebar-list"></div>
+<!-- Header -->
+<div class="fixed top-8 left-0 right-0 z-10 flex flex-col items-center pointer-events-none">
+    <h1 class="text-3xl font-bold text-slate-800 tracking-tight">Árvore de Problemas</h1>
+    <p class="text-slate-500 font-medium">GT de Alfabetização · SME-SP · 2026</p>
 </div>
 
+<!-- Legenda -->
+<div class="fixed bottom-32 left-8 z-10 bg-white/80 backdrop-blur-md p-6 rounded-3xl border border-slate-100 shadow-xl max-w-xs">
+    <h3 class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-4">Legenda</h3>
+    <div class="space-y-3">
+        <div class="flex items-center gap-3">
+            <span class="w-4 h-4 rounded-full bg-[#ef4444]"></span>
+            <span class="text-sm font-semibold text-slate-700">Problema macro</span>
+        </div>
+        <div class="flex items-center gap-3">
+            <span class="w-4 h-4 rounded-full bg-[#f97316]"></span>
+            <span class="text-sm font-semibold text-slate-700">Eixo temático</span>
+        </div>
+        <div class="flex items-center gap-3">
+            <span class="w-4 h-4 rounded-full bg-[#10b981]"></span>
+            <span class="text-sm font-semibold text-slate-700">Tema transversal</span>
+        </div>
+        <div class="flex items-center gap-3">
+            <span class="w-4 h-4 rounded-full bg-[#cbd5e1]"></span>
+            <span class="text-sm font-semibold text-slate-700">Causas sem tema</span>
+        </div>
+    </div>
+    <p class="mt-4 text-[11px] italic text-slate-400">Clique num tema para ver as causas</p>
+</div>
+
+<!-- Container da Rede -->
 <div id="net"></div>
 
-<!-- Header Dinâmico -->
-<div class="fixed top-0 left-0 right-0 z-20 pointer-events-none">
-    <div class="flex justify-center py-6">
-        <div class="text-center bg-white/90 backdrop-blur-md px-12 py-4 rounded-3xl border border-white/50 shadow-2xl pointer-events-auto">
-            <h1 id="main-title" class="text-lg font-black text-gray-900 tracking-tight">Causas Padronizadas por Temas</h1>
-            <p id="main-subtitle" class="text-[10px] text-indigo-600 font-bold uppercase tracking-[0.2em] mt-1">GT DE ALFABETIZAÇÃO · SME-SP</p>
-        </div>
+<!-- Menu Inferior -->
+<div class="fixed bottom-10 left-1/2 -translate-x-1/2 z-20">
+    <div class="bg-white/90 backdrop-blur-md p-2 rounded-2xl shadow-2xl border border-slate-100 flex gap-2">
+        <button onclick="setModo('temas')" id="btn-temas" class="px-6 py-3 rounded-xl font-bold text-sm transition-all flex items-center gap-2">
+            <span>📂</span> Por temas
+        </button>
+        <button onclick="setModo('completo')" id="btn-completo" class="px-6 py-3 rounded-xl font-bold text-sm transition-all flex items-center gap-2">
+            <span>🌳</span> Completo
+        </button>
+        <button onclick="setModo('minuto')" id="btn-minuto" class="px-6 py-3 rounded-xl font-bold text-sm transition-all flex items-center gap-2">
+            <span>⚡</span> 1 minuto
+        </button>
     </div>
 </div>
 
-<!-- Navegação de Modos -->
-<div class="fixed bottom-10 left-1/2 -translate-x-1/2 z-40 flex gap-3 bg-white/80 backdrop-blur-xl p-2 rounded-2xl border border-gray-200 shadow-2xl">
-    <button class="mbtn on" data-m="temas">🔗 Temas Padronizados</button>
-    <button class="mbtn off" data-m="completo">🌳 Visão Técnica</button>
-    <button class="mbtn off" data-m="minuto">⚡ Resumo Executivo</button>
-</div>
-
-<!-- Painel de Detalhes -->
-<div id="painel">
-    <div class="p-8 border-b bg-gray-50/50">
-        <div class="flex justify-between items-start mb-4">
-            <div id="p-cor" class="w-14 h-2 rounded-full"></div>
-            <button onclick="fecharPainel()" class="text-gray-400 hover:text-gray-600 text-3xl leading-none transition-transform hover:scale-110">&times;</button>
+<!-- Painel Lateral -->
+<div id="painel" class="fixed top-0 right-0 w-full md:w-[450px] h-full bg-white z-50 closed flex flex-col">
+    <div class="p-8 border-b border-slate-50 flex justify-between items-start">
+        <div class="flex-1">
+            <div id="p-tag" class="w-3 h-3 rounded-full mb-3"></div>
+            <h2 id="p-titulo" class="text-xl font-bold text-slate-800 leading-tight">Título do Tema</h2>
+            <p id="p-meta" class="text-sm text-slate-400 mt-2 font-medium"></p>
         </div>
-        <h2 id="p-titulo" class="text-base font-black text-gray-900 leading-tight"></h2>
-        <p id="p-sub" class="text-[10px] text-indigo-500 font-bold uppercase tracking-widest mt-4"></p>
+        <button onclick="fecharPainel()" class="p-2 hover:bg-slate-100 rounded-full transition-colors">
+            <svg class="w-6 h-6 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+        </button>
     </div>
-    <div id="painel-body"></div>
+    
+    <div id="p-conteudo" class="flex-1 overflow-y-auto p-8 space-y-8">
+        <!-- Conteúdo dinâmico aqui -->
+    </div>
 </div>
 
 <script>
+// URL do CSV (mantendo a sua)
 const CSV_URL = 'https://raw.githubusercontent.com/sme-upge/sme-upge.github.io/main/GT%20de%20Alfabetiza%C3%A7%C3%A3o/arvore.csv';
 
-const EIXO_NAMES = {
-    'Eixo 1': 'Eixo 1 - Responsabilidades na Garantia do Direito a Alfabetização',
-    'Eixo 2': 'Eixo 2 - Formação',
-    'Eixo 3': 'Eixo 3 - Infraestrutura Física e Pedagógica',
-    'Eixo 4': 'Eixo 4 - Política de Incentivos',
-    'Eixo 5': 'Eixo 5 - Acompanhamento e Monitoramento',
-    'Eixo 6': 'Eixo 6 - Avaliação',
-    'Eixo 7': 'Eixo 7 - Materiais Didáticos e Pedagógicos'
-};
-
 const COLORS = {
-    cat: '#818CF8',
-    levels: ['#EF4444', '#3B82F6', '#F59E0B', '#10B981', '#6366F1', '#8B5CF6']
+    macro: '#ef4444',
+    eixo: '#f97316',
+    tema: '#10b981',
+    outros: '#cbd5e1',
+    link: '#e2e8f0'
 };
 
-let network, vNodes, vEdges, fullData = null;
+let network, nodes, edges, rawData;
 let currentModo = 'temas';
 
-window.addEventListener("load", async () => {
-    await carregarDados();
-    document.querySelectorAll(".mbtn").forEach(btn => {
-        btn.onclick = () => {
-            document.querySelectorAll(".mbtn").forEach(b => b.classList.replace('on','off'));
-            btn.classList.replace('off','on');
-            setModo(btn.dataset.m);
-        };
-    });
-});
-
-async function carregarDados() {
+// Carregar Dados
+async function init() {
     try {
         const response = await fetch(CSV_URL);
-        const buffer = await response.arrayBuffer();
-        const text = new TextDecoder('utf-8').decode(buffer);
-        const rows = parseCSV(text);
-        fullData = processarDados(rows);
-        buildSidebar(fullData.temasPadronizados);
+        const text = await response.text();
+        rawData = parseCSV(text);
         setModo('temas');
-    } catch (e) { console.error(e); alert("Erro ao carregar dados."); }
+    } catch (e) {
+        console.error("Erro ao carregar CSV", e);
+    }
 }
 
 function parseCSV(text) {
-    return text.split(/\r?\n/).slice(1).filter(l => l.trim()).map(line => {
-        let fields = [], cur = "", inQ = false;
-        for (let c of line) {
-            if (c === '"') inQ = !inQ;
-            else if (c === ';' && !inQ) { fields.push(cur.trim()); cur = ""; }
-            else cur += c;
-        }
-        fields.push(cur.trim());
-        return fields;
-    });
-}
-
-function processarDados(rows) {
-    const rawNodes = [];
-    const temas = {}; // Para agrupar causas reais por tema padronizado
-
-    rows.forEach(row => {
-        const [eixo, prob, c1, c2, c3, votos, categoria] = row;
-        if (!eixo) return;
-
-        const tema = categoria || c2 || c1; // Se não tem categoria, usa a causa real como tema
-        if (!temas[tema]) temas[tema] = { nome: tema, causas: [], eixos: new Set(), totalVotos: 0 };
-        
-        temas[tema].causas.push({ texto: c2 || c1, eixo, votos: parseInt(votos) || 0 });
-        temas[tema].eixos.add(eixo);
-        temas[tema].totalVotos += (parseInt(votos) || 0);
-
-        rawNodes.push({ eixo, prob, c1, c2, c3, votos: parseInt(votos) || 0, categoria: tema });
-    });
-
-    return { 
-        raw: rawNodes, 
-        temasPadronizados: Object.values(temas).sort((a,b) => b.causas.length - a.causas.length)
-    };
-}
-
-function setModo(m) {
-    currentModo = m;
-    fecharPainel();
-    document.getElementById('sidebar').classList.toggle('hide', m !== 'temas');
-    document.getElementById('net').style.left = m === 'temas' ? '280px' : '0';
-    
-    const title = document.getElementById('main-title');
-    const nodes = [];
-    const edges = [];
-
-    if (m === 'temas') {
-        title.innerText = "Causas Padronizadas por Temas";
-        // Bolinha central
-        nodes.push({ id: 'macro', label: 'BAIXA APRENDIZAGEM', level: 0, color: COLORS.levels[0], value: 40 });
-        
-        fullData.temasPadronizados.forEach(t => {
-            nodes.push({ 
-                id: 'tema_'+t.nome, 
-                label: breakText(t.nome, 20), 
-                title: `Tema: ${t.nome}\n(${t.causas.length} causas reais)`,
-                shape: 'dot', 
-                color: COLORS.cat, 
-                value: 15 + (t.causas.length * 2),
-                font: { size: 11, bold: true },
-                temaInfo: t
-            });
-            edges.push({ from: 'macro', to: 'tema_'+t.nome, color: '#E2E8F0' });
-        });
-    } else if (m === 'completo') {
-        title.innerText = "Visão Técnica Completa";
-        nodes.push({ id: 'macro', label: 'BAIXA APRENDIZAGEM', level: 0, color: COLORS.levels[0], value: 40 });
-        
-        const added = new Set();
-        fullData.raw.forEach(r => {
-            // Eixos
-            if (!added.has(r.eixo)) {
-                nodes.push({ id: r.eixo, label: breakText(EIXO_NAMES[r.eixo] || r.eixo, 15), level: 1, color: COLORS.levels[1], value: 30, font: {color: '#fff'} });
-                edges.push({ from: 'macro', to: r.eixo });
-                added.add(r.eixo);
-            }
-            // Problemas e Causas
-            [r.prob, r.c1, r.c2].forEach((txt, i) => {
-                if (txt && !added.has(txt)) {
-                    nodes.push({ id: txt, label: breakText(txt, 25), level: i+2, color: COLORS.levels[i+2], value: 20 - (i*2), cat: r.categoria });
-                    edges.push({ from: i === 0 ? r.eixo : [r.prob, r.c1][i-1], to: txt });
-                    added.add(txt);
-                }
-            });
-        });
-    } else {
-        title.innerText = "Resumo Executivo (1 Minuto)";
-        nodes.push({ id: 'macro', label: 'BAIXA APRENDIZAGEM', level: 0, color: COLORS.levels[0], value: 40 });
-        const added = new Set();
-        fullData.raw.forEach(r => {
-            if (!added.has(r.eixo)) {
-                nodes.push({ id: r.eixo, label: breakText(EIXO_NAMES[r.eixo] || r.eixo, 20), level: 1, color: COLORS.levels[1], value: 35, font: {color: '#fff'} });
-                edges.push({ from: 'macro', to: r.eixo });
-                added.add(r.eixo);
-            }
-            if (r.prob && !added.has(r.prob)) {
-                nodes.push({ id: r.prob, label: breakText(r.prob, 30), level: 2, color: COLORS.levels[2], value: 25 });
-                edges.push({ from: r.eixo, to: r.prob });
-                added.add(r.prob);
-            }
-        });
-    }
-
-    render(nodes, edges);
-}
-
-function render(nodes, edges) {
-    vNodes = new vis.DataSet(nodes);
-    vEdges = new vis.DataSet(edges);
-    network = new vis.Network(document.getElementById("net"), { nodes: vNodes, edges: vEdges }, {
-        nodes: { shape: 'dot', font: { face: 'Inter', multi: true }, borderWidth: 2, shadow: true },
-        edges: { smooth: { type: 'cubicBezier', roundness: 0.4 }, color: '#D1D5DB' },
-        physics: { stabilization: true, barnesHut: { gravitationalConstant: -2000 } },
-        interaction: { hover: true, tooltipDelay: 200 }
-    });
-    network.on("click", p => p.nodes.length ? abrirPainel(vNodes.get(p.nodes[0])) : fecharPainel());
-}
-
-function abrirPainel(node) {
-    const p = document.getElementById('painel');
-    const titulo = document.getElementById('p-titulo');
-    const sub = document.getElementById('p-sub');
-    const body = document.getElementById('painel-body');
-    const cor = document.getElementById('p-cor');
-
-    cor.style.background = node.color.background || node.color;
-    titulo.innerText = node.id.replace('tema_', '');
-    
-    let html = `<div class="mt-6 space-y-6">`;
-
-    if (currentModo === 'temas' && node.temaInfo) {
-        sub.innerText = "Agrupamento por Tema Padronizado";
-        const causasPorEixo = {};
-        node.temaInfo.causas.forEach(c => {
-            if (!causasPorEixo[c.eixo]) causasPorEixo[c.eixo] = [];
-            causasPorEixo[c.eixo].push(c);
-        });
-
-        Object.keys(causasPorEixo).forEach(eixo => {
-            html += `<div>
-                <p class="text-[10px] font-black text-indigo-500 uppercase tracking-widest mb-3">${EIXO_NAMES[eixo] || eixo}</p>
-                <div class="space-y-2">`;
-            causasPorEixo[eixo].forEach(c => {
-                html += `<div class="p-4 bg-white border border-gray-100 rounded-2xl shadow-sm text-xs text-gray-700 leading-relaxed">
-                    ${c.votos > 0 ? `<span class="inline-block px-2 py-0.5 bg-amber-100 text-amber-700 rounded-full font-bold mr-2">⭐ ${c.votos}</span>` : ''}
-                    ${c.texto}
-                </div>`;
-            });
-            html += `</div></div>`;
-        });
-    } else {
-        sub.innerText = "Detalhe da Causa Técnica";
-        html += `<p class="text-gray-600 text-sm leading-relaxed">${node.id}</p>`;
-        if (node.cat) html += `<div class="mt-4 pt-4 border-t"><p class="text-[9px] font-bold text-gray-400 uppercase">Tema Relacionado</p><p class="text-xs text-indigo-600 font-bold">${node.cat}</p></div>`;
-    }
-
-    body.innerHTML = html + `</div>`;
-    p.classList.add('open');
-}
-
-function buildSidebar(temas) {
-    const list = document.getElementById('sidebar-list');
-    list.innerHTML = "";
-    temas.forEach(t => {
-        const btn = document.createElement('div');
-        btn.className = "cat-btn group";
-        btn.innerHTML = `
-            <span class="w-2 h-2 rounded-full mt-1.5 shrink-0 bg-indigo-200 group-hover:bg-indigo-500"></span>
-            <div class="flex-1">
-                <p class="font-bold text-gray-700 group-hover:text-indigo-600">${t.nome}</p>
-                <p class="text-[9px] text-gray-400 mt-0.5">${t.causas.length} causas reais · ${t.totalVotos} votos</p>
-            </div>`;
-        btn.onclick = () => {
-            const nodeId = 'tema_' + t.nome;
-            network.selectNodes([nodeId]);
-            abrirPainel(vNodes.get(nodeId));
+    const lines = text.split('\n').filter(l => l.trim());
+    const headers = lines[0].split(';');
+    return lines.slice(1).map(line => {
+        const values = line.split(';');
+        return {
+            eixo: values[0],
+            problema: values[1],
+            c1: values[2],
+            c2: values[3],
+            c3: values[4],
+            votos: parseInt(values[5]) || 0,
+            categoria: values[6]?.trim() || ""
         };
-        list.appendChild(btn);
     });
 }
 
-function breakText(text, limit = 25) {
-    if (text.length <= limit) return text;
-    const words = text.split(' ');
-    let line = "", res = "";
-    words.forEach(w => {
-        if ((line + w).length > limit) { res += line + "\n"; line = w + " "; }
-        else line += w + " ";
+function setModo(modo) {
+    currentModo = modo;
+    fecharPainel();
+    
+    // Atualizar botões
+    ['temas', 'completo', 'minuto'].forEach(m => {
+        const btn = document.getElementById(`btn-${m}`);
+        if(m === modo) {
+            btn.className = "px-6 py-3 rounded-xl font-bold text-sm transition-all flex items-center gap-2 bg-indigo-600 text-white shadow-lg shadow-indigo-200";
+        } else {
+            btn.className = "px-6 py-3 rounded-xl font-bold text-sm transition-all flex items-center gap-2 bg-slate-50 text-slate-500 hover:bg-slate-100";
+        }
     });
-    return res + line;
+
+    renderNetwork();
 }
 
-function fecharPainel() { document.getElementById('painel').classList.remove('open'); }
-</script>
-</body>
-</html>
+function renderNetwork() {
+    const nodeSet = new Map();
+    const edgeSet = new Set();
+
+    // Nó Macro
+    nodeSet.set('MACRO', { 
+        id: 'MACRO', label: 'Baixa\naprendizagem', 
+        color: COLORS.macro, font: { color: '#fff', size: 16, bold: true },
+        size: 35, shape: 'dot' 
+    });
+
+    if (currentModo === 'temas') {
+        const categorias = {};
+        const semCategoria = {};
+
+        rawData.forEach(row => {
+            // Eixos
+            if(!nodeSet.has(row.eixo)) {
+                nodeSet.set(row.eixo, { id: row.eixo, label: row.eixo, color: COLORS.eixo, size: 25, font: {size: 12, bold: true} });
+                edgeSet.add(`MACRO|${row.eixo}`);
+            }
+
+            if (row.categoria) {
+                if(!categorias[row.categoria]) categorias[row.categoria] = { eixos: new Set(), causas: [] };
+                categorias[row.categoria].eixos.add(row.eixo);
+                categorias[row.categoria].causas.push(row);
+            } else {
+                if(!semCategoria[row.eixo]) semCategoria[row.eixo] = [];
+                semCategoria[row.eixo].push(row);
+            }
+        });
+
+        // Adicionar Temas Transversais
+        Object.entries(categorias).forEach(([nome, info]) => {
+            const count = info.causas.length;
+            nodeSet.set(nome, { 
+                id: nome, label: breakText(nome, 20), 
+                color: COLORS.tema, 
+                size: 20 + (count * 2), // Cresce com o número de causas
+                font: { size: 11 },
+                group: 'tema',
+                causas: info.causas
+            });
+            info.eixos.forEach(eixo => edgeSet.add(`${eixo}|${nome}`));
+        });
+
+        // Adicionar bolinhas cinzas (outros) por eixo
+        Object.entries(semCategoria).forEach(([eixo, causas]) => {
+            const id = `outros_${eixo}`;
+            nodeSet.set(id, { 
+                id, label: `Outras causas\n(${causas.length})`, 
+                color: COLORS.outros, size: 15, 
+                font: { size: 10, color: '#64748b' },
+                causas: causas
+            });
+            edgeSet.add(`${eixo}|${id}`);
+        });
+
+    } else {
+        // Logica para modo completo e minuto (simplificada para o exemplo)
+        rawData.forEach(row => {
+            if(!nodeSet.has(row.eixo)) nodeSet.set(row.eixo, { id: row.eixo, label: row.eixo, color: COLORS.eixo });
+            edgeSet.add(`MACRO|${row.eixo}`);
+            if(row.problema && !nodeSet.has(row.problema)) {
+                nodeSet.set(row.problema, { id: row.problema, label: breakText(row.problema, 20), size: 15 });
+                edgeSet.add(`${row.eixo}|${row.problema}`);
+            }
+        });
+    }
+
+    const visNodes = new vis.DataSet(Array.from(nodeSet.values()));
+    const visEdges = new vis.DataSet(Array.from(edgeSet).map(e => {
+        const [from, to] = e.split('|');
+        return { fro
