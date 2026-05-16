@@ -129,9 +129,13 @@ function processarDados(rows) {
     const catMap = {};
     const eixosAtivos = {};
 
-    // Problema Macro Centralizado
+    // Problema Macro Centralizado - ADICIONADO TOOLTIP (title)
     G.nodes.push({
-        id: "ROOT", label: "PROBLEMA\nMACRO", shape: "dot", size: 34,
+        id: "ROOT", 
+        label: "PROBLEMA\nMACRO", 
+        title: "Problema Central da Rede Municipal: Baixa aprendizagem na alfabetização",
+        shape: "dot", 
+        size: 34,
         color: { background: "#E11D48", border: "#BE123C", highlight: {background: "#E11D48", border: "#BE123C"} }, 
         borderWidth: 1.5,
         font: {size: 10, color: "#FFFFFF", bold: true}
@@ -170,31 +174,32 @@ function processarDados(rows) {
         const corSólida = EIXO_CORES[ex] || "#475569";
         const nomeCompleto = eixosAtivos[ex].completo;
         
+        // ADICIONADO TOOLTIP (title) NOS EIXOS TAMBÉM
         G.nodes.push({
             id: ex, 
-            label: nomeCompleto.replace(" - ", "\n"), 
+            label: ex, 
+            title: nomeCompleto,
             shape: "dot", 
-            size: 22,
+            size: 24,
             borderWidth: 1.5,
             color: {background: corSólida, border: corSólida, highlight: {background: corSólida, border: corSólida}},
-            font: {size: 10, color: "#1E293B", bold: true},
+            font: {size: 11, color: "#1E293B", bold: true},
             _isEixo: true
         });
         
-        // Conexão direta e suave do centro para os eixos
         G.edges.push({ 
             id: `edge_root_${ex}`,
             from: "ROOT", 
             to: ex, 
-            color: { color: "#CBD5E0", opacity: 0.6 }, 
-            width: 2
+            color: { color: "#CBD5E0", opacity: 0.5 }, 
+            width: 1.5
         });
 
         G.details[ex] = {
             tipo: "eixo",
             titulo: nomeCompleto,
             cor: corSólida,
-            subtitulo: "Problema Central Identificado",
+            subtitulo: "Problema Central Mapeado no Eixo",
             conteudo: eixosAtivos[ex].problema
         };
     });
@@ -212,7 +217,7 @@ function processarDados(rows) {
         }
 
         const tamanhoCalculado = 14 + Math.min(totalCausasDiferentes * 4, 32);
-        const labelCurto = catNome.length > 22 ? catNome.slice(0,22) + "..." : catNome;
+        const labelCurto = catNome.length > 20 ? catNome.slice(0,20) + "..." : catNome;
         const eixosUnicos = Array.from(info.eixos);
         const ehTransversal = eixosUnicos.length > 1;
 
@@ -220,7 +225,7 @@ function processarDados(rows) {
             id: `__cat__${catNome}`, label: labelCurto, title: catNome, shape: "dot", size: tamanhoCalculado,
             borderWidth: 1,
             color: {background: corSólida, border: corSólida, highlight: {background: corSólida, border: corSólida}},
-            font: {size: 9, color: "#475569", bold: true},
+            font: {size: 10, color: "#475569", bold: true},
             _isSpecific: !ehTransversal
         });
 
@@ -250,7 +255,6 @@ function renderTree() {
     net = new vis.Network(document.getElementById("net"), {nodes: vN, edges: vE}, {
         edges: {
             width: 1.5,
-            // AJUSTE CRUCIAL: Ativa curvas contínuas e elegantes sem quebrar ou amassar
             smooth: {
                 enabled: true,
                 type: "continuous",
@@ -261,15 +265,15 @@ function renderTree() {
             enabled: true,
             solver: "barnesHut",
             barnesHut: { 
-                gravitationalConstant: -12000, 
-                centralGravity: 0.05,           
-                springLength: 200,             
-                springConstant: 0.03,          
-                damping: 0.12                  
+                gravitationalConstant: -14000, 
+                centralGravity: 0.04,           
+                springLength: 220,             
+                springConstant: 0.02,          
+                damping: 0.15                  
             },
-            stabilization: { iterations: 100, updateInterval: 25 }
+            stabilization: { iterations: 120, updateInterval: 25 }
         },
-        interaction: { hover: true, dragNodes: true, tooltipDelay: 100 }
+        interaction: { hover: true, dragNodes: true, tooltipDelay: 150 }
     });
     net.on("click", p => p.nodes.length ? aoClicarNoNode(p.nodes[0]) : fecharPainel());
 }
@@ -316,25 +320,39 @@ function aoClicarNoNode(id) {
     document.getElementById("painel").classList.add("open");
     document.getElementById("net").style.right = "480px";
 
-    // COMPORTAMENTO CORRIGIDO: Mantém as linhas conectadas ativas e coloridas, em vez de sumir com elas
+    // FILTRO LIMPO: Mostra apenas a conexão direta entre Temas e Eixos (Sem o Macro central poluindo)
     try {
         const conectados = net.getConnectedNodes(id);
         conectados.push(id);
-        if (!conectados.includes("ROOT")) conectados.push("ROOT");
 
-        // Atenua opacidade dos nós não selecionados
-        vN.update(vN.get().map(n => ({
-            id: n.id,
-            opacity: conectados.includes(n.id) ? 1 : 0.15
-        })));
+        // Se o nó selecionado não for o central, tiramos o "ROOT" (Macro) de foco para limpar a árvore
+        const ocultarMacro = (id !== "ROOT");
 
-        // Trata as linhas: acende as que pertencem ao fluxo e apaga as outras
+        vN.update(vN.get().map(n => {
+            let visivel = conectados.includes(n.id);
+            if (n.id === "ROOT" && ocultarMacro) visivel = false; // Desliga o macro no filtro para clareza visual
+            
+            return {
+                id: n.id,
+                opacity: visivel ? 1 : 0.05
+            };
+        }));
+
         vE.update(vE.get().map(e => {
-            const pertenceAoFluxo = (e.from === id || e.to === id) || (id !== "ROOT" && conectados.includes(e.from) && e.to === "ROOT") || (id !== "ROOT" && e.from === "ROOT" && conectados.includes(e.to));
+            // A linha só acende se conectar diretamente o nó selecionado com seus pares imediatos
+            const pertenceAoFluxoDireto = (e.from === id || e.to === id);
+            
+            // Oculta completamente linhas ligadas ao macro central durante o filtro de temas/eixos
+            const envolveMacro = (e.from === "ROOT" || e.to === "ROOT");
+            
+            if (ocultarMacro && envolveMacro) {
+                return { id: e.id, color: { opacity: 0 }, width: 0 };
+            }
+
             return {
                 id: e.id,
-                color: pertenceAoFluxo ? { color: det.cor, opacity: 1 } : { color: "#E2E8F0", opacity: 0.04 },
-                width: pertenceAoFluxo ? 2.5 : 1
+                color: pertenceAoFluxoDireto ? { color: det.cor, opacity: 1 } : { opacity: 0.02 },
+                width: pertenceAoFluxoDireto ? 2.5 : 1
             };
         }));
     } catch(err){}
@@ -393,7 +411,7 @@ function fecharPainel() {
     document.querySelectorAll(".cat-btn").forEach(btn => btn.classList.remove("bg-indigo-50", "border-indigo-100"));
     try {
         if (vN) vN.update(vN.get().map(n => ({ id: n.id, opacity: 1 })));
-        if (vE) vE.update(vE.get().map(e => ({ id: e.id, color: { color: "#E2E8F0", opacity: 0.7 }, width: 1.5 })));
+        if (vE) vE.update(vE.get().map(e => ({ id: e.id, color: { color: "#E2E8F0", opacity: 0.6 }, width: 1.5 })));
     } catch(err){}
 }
 
