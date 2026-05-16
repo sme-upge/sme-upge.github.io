@@ -47,7 +47,7 @@ input:checked + .slider:before {transform:translateX(14px)}
     
     <div class="flex flex-col gap-1 w-full border-b border-slate-200 pb-2">
       <span class="text-[10px] font-bold text-amber-600 uppercase tracking-wider">Mínimo de Relevância (⭐)</span>
-      <select id="select-votos-hierarquica" class="bg-white border border-slate-200 rounded-lg p-1.5 text-xs font-medium text-slate-700 focus:outline-none focus:ring-1 focus:ring-amber-500" onchange="renderizarEstruturaHierarquica()">
+      <select id="select-votos-hierarquica" class="bg-white border border-slate-200 rounded-lg p-1.5 text-xs font-medium text-slate-700 focus:outline-none" onchange="renderizarEstruturaHierarquica()">
         <option value="0">Mostrar Todas as Evidências</option>
         <option value="1">1+ Estrela (Sinalizadas)</option>
         <option value="4">4+ Estrelas (Alta Relevância)</option>
@@ -55,21 +55,21 @@ input:checked + .slider:before {transform:translateX(14px)}
       </select>
     </div>
 
-    <div class="flex flex-col gap-1 w-full border-b border-slate-200外 pb-2">
+    <div class="flex flex-col gap-1 w-full border-b border-slate-200 pb-2">
       <div class="flex items-center justify-between">
-        <span class="text-[10px] font-bold text-indigo-600 uppercase tracking-wider">Conexões Transversais</span>
+        <span class="text-[10px] font-bold text-indigo-600 uppercase tracking-wider">Teia Transversal</span>
         <label class="switch">
           <input type="checkbox" id="switch-transversal-hierarquica" checked onchange="toggleVisibilidadeComboTema()">
           <span class="slider"></span>
         </label>
       </div>
-      <select id="select-tema-transversal" class="bg-white border border-slate-200 rounded-lg p-1.5 text-xs font-medium text-slate-700 focus:outline-none focus:ring-1 focus:ring-indigo-500 mt-1" onchange="renderizarEstruturaHierarquica()">
-        <option value="__ALL__">Destacar Todos os Temas</option>
+      <select id="select-tema-transversal" class="bg-white border border-slate-200 rounded-lg p-1.5 text-xs font-medium text-slate-700 focus:outline-none mt-1" onchange="renderizarEstruturaHierarquica()">
+        <option value="__ALL__">Ver Todos os Temas</option>
       </select>
     </div>
 
     <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-0.5 block">Filtrar por Eixos</span>
-    <div id="checkbox-eixos-container" class="flex flex-col gap-1.5 max-height-[140px] overflow-y-auto"></div>
+    <div id="checkbox-eixos-container" class="flex flex-col gap-1.5 max-h-[140px] overflow-y-auto"></div>
   </div>
 
   <div id="sidebar-list"></div>
@@ -115,23 +115,16 @@ const EIXO_CORES = {
 
 const EIXO_NOMES_COMPLETOS = {};
 const CAT_CORES_MAP = {
-  "Fragmentação": "#EF4444", "fragmentação": "#EF4444",
-  "Comunicação": "#3B82F6", "comunicação": "#3B82F6",
-  "Rotatividade": "#A855F7", "rotatividade": "#A855F7",
-  "Sobrecarga": "#06B6D4", "sobrecarga": "#06B6D4",
-  "Participação": "#10B981", "participação": "#10B981",
-  "Atendimento": "#F59E0B", "atendimento": "#F59E0B",
-  "Identidade": "#EC4899", "identidade": "#EC4899",
-  "Articulação": "#F43F5E", "articulação": "#F43F5E",
-  "Recursos": "#D946EF", "recursos": "#D946EF",
-  "Excesso": "#22C55E", "excesso": "#22C55E",
-  "Inadequação": "#F97316", "inadequação": "#F97316",
-  "Qualificação": "#84CC16", "qualificação": "#84CC16"
+  "Fragmentação": "#EF4444", "Comunicação": "#3B82F6", "Rotatividade": "#A855F7",
+  "Sobrecarga": "#06B6D4", "Participação": "#10B981", "Atendimento": "#F59E0B",
+  "Identidade": "#EC4899", "Articulação": "#F43F5E", "Recursos": "#D946EF",
+  "Excesso": "#22C55E", "Inadequação": "#F97316", "Qualificação": "#84CC16"
 };
 
 let currentTab = "radial"; 
 let rawRows = []; 
 let G = { nodes: [], edges: [], details: {}, edgesOriginal: [] };
+let hNodesDetails = {}; 
 let net = null, vN = null, vE = null;
 
 const CSV_URL = "https://raw.githubusercontent.com/sme-upge/sme-upge.github.io/refs/heads/main/GT%20de%20Alfabetiza%C3%A7%C3%A3o/arvore.csv";
@@ -145,7 +138,7 @@ async function inicializar() {
         const listaTemasUnicos = new Set();
 
         rawRows.forEach(r => {
-            const [eixoCompleto,, , cp_cat,, cs_cat,, exterior, ct_cat] = r;
+            const [eixoCompleto,, , cp_cat,, cs_cat,, , ct_cat] = r;
             if(eixoCompleto && eixoCompleto.includes(" - ")) {
                 const sigla = eixoCompleto.split(" - ")[0];
                 EIXO_NOMES_COMPLETOS[sigla] = eixoCompleto;
@@ -155,21 +148,16 @@ async function inicializar() {
             });
         });
 
-        // Preenche o combo de temas transversais da aba 2 dinamicamente
+        // Preencher combo box da aba 2
         const comboTema = document.getElementById("select-tema-transversal");
         Array.from(listaTemasUnicos).sort().forEach(t => {
             const opt = document.createElement("option");
-            opt.value = t;
-            opt.textContent = t;
+            opt.value = t; opt.textContent = t;
             comboTema.appendChild(opt);
         });
 
         construirCheckboxEixos();
-        renderizarEstruturaRadial();
-
-        document.getElementById("filtro-especificas").addEventListener("change", (e) => {
-            if(currentTab === "radial") aplicarFiltroGrafoRadial(e.target.checked);
-        });
+        renderizarEstruturaRadial(); // Inicia na Aba 1
 
     } catch (e) {
         console.error(e);
@@ -212,7 +200,9 @@ function toggleVisibilidadeComboTema() {
     renderizarEstruturaHierarquica();
 }
 
-// --- CONSTRUÇÃO DA ABA 1: GRAFO RADIAL DE TEMAS ---
+// ==========================================
+// --- LÓGICA PURA DA ABA 1: MATRIZ DE TEMAS
+// ==========================================
 function renderizarEstruturaRadial() {
     G = { nodes: [], edges: [], details: {}, edgesOriginal: [] };
     const catMap = {};
@@ -220,8 +210,7 @@ function renderizarEstruturaRadial() {
 
     G.nodes.push({
         id: "ROOT", label: "BAIXA\nALFABETIZAÇÃO", shape: "dot", size: 36,
-        color: { background: "#E11D48", border: "#BE123C", highlight: {background: "#E11D48", border: "#BE123C"} }, 
-        borderWidth: 1.5, font: {size: 9, color: "#FFFFFF", bold: true}
+        color: { background: "#E11D48", border: "#BE123C" }, font: {size: 9, color: "#FFFFFF", bold: true}
     });
 
     rawRows.forEach(r => {
@@ -235,9 +224,7 @@ function renderizarEstruturaRadial() {
 
         const mapearPar = (textoCausa, categoriaCausa) => {
             if (!textoCausa || !categoriaCausa || categoriaCausa.trim() === "" || textoCausa.trim() === "") return;
-            const cat = categoriaCausa.trim();
-            const txt = textoCausa.trim();
-
+            const cat = categoriaCausa.trim(); const txt = textoCausa.trim();
             if (!catMap[cat]) catMap[cat] = { eixos: new Set(), causas: {} };
             catMap[cat].eixos.add(cleanEixo);
             if (!catMap[cat].causas[txt]) catMap[cat].causas[txt] = { texto: txt, eixos: new Set(), v: 0 };
@@ -245,37 +232,33 @@ function renderizarEstruturaRadial() {
             const vNum = parseInt(votos) || 0;
             if (vNum > catMap[cat].causas[txt].v) catMap[cat].causas[txt].v = vNum;
         };
-
         mapearPar(cp, cat_p); mapearPar(cs, cat_s); mapearPar(ct, cat_t);
     });
 
     Object.keys(eixosAtivos).forEach(ex => {
-        const corSólida = EIXO_CORES[ex] || "#475569";
+        const cor = EIXO_CORES[ex] || "#475569";
         G.nodes.push({
-            id: ex, label: ex, title: eixosAtivos[ex].completo, shape: "dot", size: 24, borderWidth: 1.5,
-            color: {background: corSólida, border: corSólida, highlight: {background: corSólida, border: corSólida}},
-            font: {size: 11, color: "#1E293B", bold: true}, _isEixo: true
+            id: ex, label: ex, title: eixosAtivos[ex].completo, shape: "dot", size: 24,
+            color: {background: cor, border: cor}, font: {size: 11, color: "#1E293B", bold: true}
         });
         G.edges.push({ id: `edge_root_${ex}`, from: "ROOT", to: ex, color: { color: "#CBD5E0", opacity: 0.5 }, width: 1.5 });
-        G.details[ex] = { tipo: "eixo", titulo: eixosAtivos[ex].completo, cor: corSólida, subtitulo: "Problema Central Mapeado no Eixo", conteudo: eixosAtivos[ex].problema };
+        G.details[ex] = { tipo: "eixo", titulo: eixosAtivos[ex].completo, cor: cor, subtitulo: "Problema Central do Eixo", conteudo: eixosAtivos[ex].problema };
     });
 
     Object.keys(catMap).forEach(catNome => {
         const info = catMap[catNome];
         const totalCausasDiferentes = Object.keys(info.causas).length;
-        let corSólida = "#FF6B6B";
+        let cor = "#FF6B6B";
         for (const chave in CAT_CORES_MAP) {
-            if (catNome.toLowerCase().includes(chave.toLowerCase())) { corSólida = CAT_CORES_MAP[chave]; break; }
+            if (catNome.toLowerCase().includes(chave.toLowerCase())) { cor = CAT_CORES_MAP[chave]; break; }
         }
-        const tamanhoCalculado = 14 + Math.min(totalCausasDiferentes * 4, 32);
+        const tamanho = 14 + Math.min(totalCausasDiferentes * 4, 32);
         const labelCurto = catNome.length > 20 ? catNome.slice(0,20) + "..." : catNome;
-        const eixosUnicos = Array.from(info.eixos);
-        const ehTransversal = eixosUnicos.length > 1;
+        const ehTransversal = info.eixos.size > 1;
 
         G.nodes.push({
-            id: `__cat__${catNome}`, label: labelCurto, title: catNome, shape: "dot", size: tamanhoCalculado, borderWidth: 1,
-            color: {background: corSólida, border: corSólida, highlight: {background: corSólida, border: corSólida}},
-            font: {size: 10, color: "#475569", bold: true}, _isSpecific: !ehTransversal
+            id: `__cat__${catNome}`, label: labelCurto, title: catNome, shape: "dot", size: tamanho,
+            color: {background: cor, border: cor}, font: {size: 10, color: "#475569", bold: true}, _isSpecific: !ehTransversal
         });
 
         info.eixos.forEach(ex => {
@@ -283,13 +266,13 @@ function renderizarEstruturaRadial() {
         });
 
         G.details[`__cat__${catNome}`] = {
-            tipo: "categoria", id: `__cat__${catNome}`, cat: catNome, cor: corSólida, volumeCausas: totalCausasDiferentes, ehTransversal: ehTransversal,
+            tipo: "categoria", cat: catNome, cor: cor, volumeCausas: totalCausasDiferentes, ehTransversal: ehTransversal,
             causas: Object.values(info.causas).map(c => ({ texto: c.texto, eixos: Array.from(c.eixos), votos: c.v }))
         };
     });
 
     G.edgesOriginal = [...G.edges];
-    buildSidebarHierarquicaRadial();
+    buildSidebarRadialAba1();
     renderVisNetworkRadial();
 }
 
@@ -297,12 +280,8 @@ function renderVisNetworkRadial() {
     vN = new vis.DataSet(G.nodes); vE = new vis.DataSet(G.edges);
     net = new vis.Network(document.getElementById("net"), {nodes: vN, edges: vE}, {
         edges: { width: 1.5, smooth: { enabled: true, type: "continuous", roundness: 0.4 } },
-        physics: {
-            enabled: true, solver: "barnesHut",
-            barnesHut: { gravitationalConstant: -14000, centralGravity: 0.04, springLength: 220, springConstant: 0.02, damping: 0.15 },
-            stabilization: { iterations: 120, updateInterval: 25 }
-        },
-        interaction: { hover: true, dragNodes: true, tooltipDelay: 150 }
+        physics: { enabled: true, solver: "barnesHut", barnesHut: { gravitationalConstant: -12000, centralGravity: 0.04, springLength: 200 } },
+        interaction: { hover: true, tooltipDelay: 150 }
     });
     net.on("click", p => p.nodes.length ? aoClicarNoNodeRadial(p.nodes[0]) : fecharPainel());
     aplicarFiltroGrafoRadial(document.getElementById("filtro-especificas").checked);
@@ -313,104 +292,57 @@ function aplicarFiltroGrafoRadial(exibirEspecificas) {
     const nosFiltrados = G.nodes.filter(n => exibirEspecificas || !n._isSpecific);
     vN.clear(); vN.add(nosFiltrados);
     const idsAtivos = nosFiltrados.map(n => n.id);
-    const arestasFiltradas = G.edgesOriginal.filter(e => idsAtivos.includes(e.from) && idsAtivos.includes(e.to));
-    vE.clear(); vE.add(arestasFiltradas);
+    vE.clear(); vE.add(G.edgesOriginal.filter(e => idsAtivos.includes(e.from) && idsAtivos.includes(e.to)));
 }
 
 function aoClicarNoNodeRadial(id) {
-    const det = G.details[id];
-    if (!det) return;
+    const det = G.details[id]; if (!det) return;
     document.getElementById("p-cor").style.background = det.cor;
     
     if (det.tipo === "eixo") {
         document.getElementById("p-titulo").textContent = det.titulo;
         document.getElementById("p-sub").textContent = det.subtitulo;
-        document.getElementById("painel-body").innerHTML = `
-            <div style="padding:20px;border-radius:14px;border:1px solid #E2E8F0;background:#F8FAFC;margin-top:10px">
-                <p style="font-size:13px;color:#1E293B;line-height:1.7;font-weight:500">${det.conteudo}</p>
-            </div>`;
+        document.getElementById("painel-body").innerHTML = `<div class="p-4 border rounded-xl bg-slate-50 text-xs font-medium text-slate-700 leading-relaxed">${det.conteudo}</div>`;
     } else {
         document.getElementById("p-titulo").textContent = det.cat;
-        document.getElementById("p-sub").textContent = `${det.volumeCausas} evidências mapeadas sob este tema`;
-
-        let html = '<p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-4">Evidências Coletadas na Rede</p>';
+        document.getElementById("p-sub").textContent = `${det.volumeCausas} evidências sob este tema`;
+        let html = '';
         det.causas.forEach(c => {
-            const badges = c.eixos.map(ex => {
-                return `<span style="background:${EIXO_CORES[ex] || "#475569"};color:white;padding:5px 9px;border-radius:8px;font-size:10px;font-weight:700;display:inline-block;margin-bottom:6px;margin-right:5px">${EIXO_NOMES_COMPLETOS[ex] || ex}</span>`;
-            }).join("");
-            html += `<div style="padding:16px;border-radius:14px;border:1px solid #E2E8F0;background:#F8FAFC;margin-bottom:14px">
-                <div style="margin-bottom:6px; display:flex; flex-wrap:wrap;">${badges}</div>
-                <p style="font-size:12px;color:#334155;line-height:1.6;font-weight:500">${c.texto}</p>
-                ${c.votos > 0 ? `<div style="margin-top:10px;font-size:10px;font-weight:700;color:#D97706;background:#FEF3C7;padding:3px 10px;border-radius:8px;display:inline-block">⭐ ${c.votos}  votos</div>` : ""}
+            const badges = c.eixos.map(ex => `<span class="inline-block px-2 py-0.5 text-[9px] font-bold text-white bg-slate-500 rounded mr-1" style="background:${EIXO_CORES[ex]}">${ex}</span>`).join("");
+            html += `<div class="p-3 border rounded-xl bg-slate-50 mb-3 text-xs">
+                <div class="mb-1.5">${badges}</div>
+                <p class="text-slate-700 font-medium leading-relaxed">${c.texto}</p>
+                ${c.votos > 0 ? `<span class="inline-block mt-2 text-[10px] font-bold text-amber-700 bg-amber-100 px-2 py-0.5 rounded">⭐ ${c.votos} votos</span>` : ""}
             </div>`;
         });
         document.getElementById("painel-body").innerHTML = html;
     }
-
     document.getElementById("painel").classList.add("open");
     document.getElementById("net").style.right = "480px";
-
-    try {
-        const conectados = net.getConnectedNodes(id); conectados.push(id);
-        const ocultarMacro = (id !== "ROOT");
-        vN.update(vN.get().map(n => {
-            let visivel = conectados.includes(n.id);
-            if (n.id === "ROOT" && ocultarMacro) visivel = false;
-            return { id: n.id, opacity: visivel ? 1 : 0.05 };
-        }));
-        vE.update(vE.get().map(e => {
-            const pertenceAoFluxoDireto = (e.from === id || e.to === id);
-            const envolveMacro = (e.from === "ROOT" || e.to === "ROOT");
-            if (ocultarMacro &&外vMacro) return { id: e.id, color: { opacity: 0 }, width: 0 };
-            return { id: e.id, color: pertenceAoFluxoDireto ? { color: det.cor, opacity: 1 } : { opacity: 0.02 }, width: pertenceAoFluxoDireto ? 2.5 : 1 };
-        }));
-    } catch(err){}
 }
 
-function buildSidebarHierarquicaRadial() {
+function buildSidebarRadialAba1() {
     const list = document.getElementById("sidebar-list"); list.innerHTML = "";
-    const reset = document.createElement("button");
-    reset.className = "w-full text-left p-2.5 rounded-lg text-xs font-bold text-slate-400 hover:bg-slate-50 uppercase mb-3 transition flex items-center gap-1.5";
-    reset.textContent = "⊙ Ver Cenário Completo";
-    reset.onclick = () => { fecharPainel(); };
-    list.appendChild(reset);
-
-    const sortedCats = Object.keys(G.details).map(id => G.details[id]).filter(item => item.tipo === "categoria");
-    sortedCats.sort((a, b) => b.volumeCausas - a.volumeCausas);
-    const transversais = sortedCats.filter(c => c.ehTransversal);
-    const especificas = sortedCats.filter(c => !c.ehTransversal);
-
-    const renderGrupoHierarquico = (titulo, classeCor, lista) => {
+    const sortedCats = Object.keys(G.details).map(id => G.details[id]).filter(item => item.tipo === "categoria").sort((a,b)=>b.volumeCausas - a.volumeCausas);
+    
+    const renderGrupo = (titulo, classeCor, lista) => {
         if (!lista.length) return;
-        const h = document.createElement("p");
-        h.className = `text-[10px] font-bold uppercase tracking-widest mt-5 mb-3 px-2.5 ${classeCor}`;
-        h.textContent = titulo;
-        list.appendChild(h);
-
+        const h = document.createElement("p"); h.className = `text-[10px] font-bold uppercase tracking-widest mt-4 mb-2 px-2 ${classeCor}`; h.textContent = titulo; list.appendChild(h);
         lista.forEach(item => {
-            const b = document.createElement("button");
-            b.className = "cat-btn w-full text-left p-2.5 rounded-xl text-[11px] mb-1 flex items-start gap-3 border border-transparent hover:bg-slate-50 transition";
-            b.innerHTML = `<span style="width:10px;height:10px;border-radius:50%;background:${item.cor};margin-top:4px;flex-shrink:0;box-shadow:0 0 4px rgba(0,0,0,0.1)"></span>
-                <div class="flex-1">
-                    <span class="text-slate-700 font-semibold leading-normal">${item.cat}</span>
-                    <span class="text-indigo-600 font-bold text-[10px] block mt-0.5">${item.volumeCausas} causas</span>
-                </div>`;
-            b.onclick = () => {
-                aoClicarNoNodeRadial(item.id);
-                document.querySelectorAll(".cat-btn").forEach(btn => btn.classList.remove("bg-indigo-50", "border-indigo-100"));
-                b.classList.add("bg-indigo-50", "border-indigo-100");
-            };
+            const b = document.createElement("button"); b.className = "w-full text-left p-2 rounded-xl text-xs mb-1 flex items-center gap-2 hover:bg-slate-50";
+            b.innerHTML = `<span class="w-2.5 h-2.5 rounded-full" style="background:${item.cor}"></span><span class="flex-1 truncate font-semibold text-slate-700">${item.cat}</span><span class="text-[10px] font-bold text-slate-400">${item.volumeCausas}</span>`;
+            b.onclick = () => aoClicarNoNodeRadial(`__cat__${item.cat}`);
             list.appendChild(b);
         });
     };
-    renderGrupoHierarquico("🔗 Temas Transversais", "text-indigo-600", transversais);
-    renderGrupoHierarquico("📌 Dores Específicas", "text-slate-500", especificas);
+    renderGrupo("🔗 Temas Transversais", "text-indigo-600", sortedCats.filter(c=>c.ehTransversal));
+    renderGrupo("📌 Dores Específicas", "text-slate-500", sortedCats.filter(c=>!c.ehTransversal));
 }
 
 
-// --- CONSTRUÇÃO DA ABA 2: CONSTELAÇÃO DELICADA + MAPA DE CONEXÕES EM TEIA ---
-let hNodesDetails = {}; 
-
+// ==========================================
+// --- LÓGICA PURA DA ABA 2: ÁRVORE DETALHADA / CONSTELAÇÃO
+// ==========================================
 function renderizarEstruturaHierarquica() {
     fecharPainel();
     
@@ -419,351 +351,192 @@ function renderizarEstruturaHierarquica() {
     const filtroTemaEscolhido = document.getElementById("select-tema-transversal").value;
     const notaCorteVotos = parseInt(document.getElementById("select-votos-hierarquica").value) || 0;
 
-    const hNodes = [];
-    const hEdges = [];
-    const nosCriadosUnicos = new Set();
+    const hNodes = []; const hEdges = []; const nosCriadosUnicos = new Set();
     hNodesDetails = {}; 
 
-    // Nó de Problema Macro Principal (Âncora Vermelha)
+    // Nó Macro Raiz Central
     const macroId = "H2_MACRO_ROOT";
     hNodes.push({
         id: macroId, label: "BAIXA\nALFABETIZAÇÃO", shape: "dot", size: 30,
-        color: { background: "#E11D48", border: "#BE123C" },
-        font: { bold: true, size: 10, color: "#FFFFFF" }
+        color: { background: "#E11D48", border: "#BE123C" }, font: { bold: true, size: 10, color: "#FFFFFF" }
     });
 
-    const linhasFiltradas = rawRows.filter(r => {
-        if (!r[0]) return false;
-        const siglaEixo = r[0].split(" - ")[0];
-        return eixosSelecionados.includes(siglaEixo);
-    });
+    const mapaRecorrenciaTexto = {}; const mapaTextoParaEixos = {}; const mapaTextoParaCategorias = {};
+    const mapaNodesParaTeia = {};
 
-    // Mapeamentos analíticos globais para as relações cruzadas
-    const mapaRecorrenciaTexto = {};
-    const mapaTextoParaEixos = {};
-    const mapaTextoParaCategorias = {};
-    const mapaNodesPorTemaParaTeia = {}; // Agrupador físico para gerar as linhas tracejadas
-
+    // Mapeamento de concorrência global no CSV
     rawRows.forEach(r => {
-        const [eixo, , cp, cat_p, cs, cat_s, , ct, cat_t] = r;
-        if(!eixo) return;
+        const [eixo, , cp, cat_p, cs, cat_s, , ct, cat_t] = r; if(!eixo) return;
         const sigla = eixo.split(" - ")[0];
-
         [[cp, cat_p], [cs, cat_s], [ct, cat_t]].forEach(([txt, cat]) => {
             if (txt && txt.trim() !== "") {
                 const cleanTxt = txt.trim();
                 mapaRecorrenciaTexto[cleanTxt] = (mapaRecorrenciaTexto[cleanTxt] || 0) + 1;
-                
                 if (!mapaTextoParaEixos[cleanTxt]) mapaTextoParaEixos[cleanTxt] = new Set();
                 mapaTextoParaEixos[cleanTxt].add(sigla);
-
                 if (cat && cat.trim() !== "") mapaTextoParaCategorias[cleanTxt] = cat.trim();
             }
         });
     });
 
-    // Contador consolidado de métricas por eixo
+    // Métricas por Eixo
     const metricasEixos = {};
-    eixosSelecionados.forEach(ex => {
-        metricasEixos[ex] = { totalP: 0, totalS: 0, totalT: 0, transversais: 0, estrelas: 0, probCentral: "" };
-    });
+    eixosSelecionados.forEach(ex => { metricasEixos[ex] = { totalP: 0, totalS: 0, totalT: 0, transversais: 0, estrelas: 0, probCentral: "" }; });
 
     rawRows.forEach(r => {
-        const [eixoCompleto, probCentral, cp, , cs, , votos, ct] = r;
-        if (!eixoCompleto) return;
-        const sigla = eixoCompleto.split(" - ")[0];
-        if (!eixosSelecionados.includes(sigla)) return;
-
+        const [eixoCompleto, probCentral, cp, , cs, , votos, ct] = r; if (!eixoCompleto) return;
+        const sigla = eixoCompleto.split(" - ")[0]; if (!eixosSelecionados.includes(sigla)) return;
         metricasEixos[sigla].probCentral = probCentral;
         const vNum = parseInt(votos) || 0;
-
-        if (cp && cp.trim() !== "") {
-            metricasEixos[sigla].totalP++;
-            if(mapaRecorrenciaTexto[cp.trim()] > 1) metricasEixos[sigla].transversais++;
-            if(vNum > 0) metricasEixos[sigla].estrelas++;
-        }
-        if (cs && cs.trim() !== "") {
-            metricasEixos[sigla].totalS++;
-            if(mapaRecorrenciaTexto[cs.trim()] > 1) metricasEixos[sigla].transversais++;
-            if(vNum > 0) metricasEixos[sigla].estrelas++;
-        }
-        if (ct && ct.trim() !== "") {
-            metricasEixos[sigla].totalT++;
-            if(mapaRecorrenciaTexto[ct.trim()] > 1) metricasEixos[sigla].transversais++;
-            if(vNum > 0) metricasEixos[sigla].estrelas++;
-        }
+        if (cp && cp.trim() !== "") { metricasEixos[sigla].totalP++; if(mapaRecorrenciaTexto[cp.trim()] > 1) metricasEixos[sigla].transversais++; if(vNum >= 1) metricasEixos[sigla].estrelas++; }
+        if (cs && cs.trim() !== "") { metricasEixos[sigla].totalS++; if(mapaRecorrenciaTexto[cs.trim()] > 1) metricasEixos[sigla].transversais++; if(vNum >= 1) metricasEixos[sigla].estrelas++; }
+        if (ct && ct.trim() !== "") { metricasEixos[sigla].totalT++; if(mapaRecorrenciaTexto[ct.trim()] > 1) metricasEixos[sigla].transversais++; if(vNum >= 1) metricasEixos[sigla].estrelas++; }
     });
 
-    // Laço de montagem do ecossistema de constelações
+    // Filtra e reconstrói a árvore detalhada
+    const linhasFiltradas = rawRows.filter(r => r[0] && eixosSelecionados.includes(r[0].split(" - ")[0]));
+
     linhasFiltradas.forEach((r, idx) => {
         const [eixoCompleto, , cp, cat_p, cs, cat_s, votos, ct, cat_t] = r;
         const siglaEixo = eixoCompleto.split(" - ")[0];
         const corEixo = EIXO_CORES[siglaEixo] || "#475569";
         const vNum = parseInt(votos) || 0;
 
-        // Regra do corte de estrelas progressivo (1+, 4+, 6+)
-        if (vNum <外notaCorteVotos && notaCorteVotos > 0) return;
+        if (vNum < notaCorteVotos) return;
 
-        // Criar e conectar Eixos
         const eixoId = `H2_${siglaEixo}`;
         if (!nosCriadosUnicos.has(eixoId)) {
-            hNodes.push({
-                id: eixoId, label: siglaEixo, shape: "dot", size: 23,
-                color: { background: corEixo, border: corEixo },
-                font: { bold: true, size: 11, color: "#1E293B" }
-            });
+            hNodes.push({ id: eixoId, label: siglaEixo, shape: "dot", size: 22, color: { background: corEixo, border: corEixo }, font: { bold: true, size: 11 } });
             hEdges.push({ from: macroId, to: eixoId, color: { color: "#CBD5E0", opacity: 0.5 }, width: 2 });
             nosCriadosUnicos.add(eixoId);
             hNodesDetails[eixoId] = { tipo: "eixo", titulo: eixoCompleto, cor: corEixo, dados: metricasEixos[siglaEixo] };
         }
 
-        // Função de montagem orbital com identificadores claros das camadas de causas [1ª], [2ª] e [3ª]
-        const montarNoOrbital = (texto, categoria, paiId, camadaLabel, tamanhoBase, corPadrao) => {
+        const montarNo = (texto, categoria, paiId, camadaLabel, tamanho, corPadrao) => {
             if (!texto || texto.trim() === "") return null;
             const txt = texto.trim();
             const noId = `H2_N_${siglaEixo}_${camadaLabel}_${txt.slice(0,10)}_${idx}`;
-            
             if (nosCriadosUnicos.has(noId)) return noId;
 
             const temaReal = categoria || mapaTextoParaCategorias[txt] || "Sem Categoria";
             const ehTransversal = mapaRecorrenciaTexto[txt] > 1;
             
-            let corFinal = corPadrao;
-            let tamanhoFinal = tamanhoBase;
-            let bordaW = 0.5;
-            let corBorda = "#94A3B8";
+            let cor = corPadrao; let tSize = tamanho; let bW = 0.5; let bColor = "#94A3B8";
 
-            // Se pertencer ao grupo transversal selecionado ou se destacar geral estiver ativo
-            const atendeFiltroTema = (filtroTemaEscolhido === "__ALL__" || filtroTemaEscolhido === temaReal);
-            if (destacarTransversais && ehTransversal && atendeFiltroTema) {
-                corFinal = "#FEF3C7"; 
-                tamanhoFinal = tamanhoBase + 3;
-                bordaW = 2;
-                corBorda = "#F59E0B";
-
-                // Registra o nó para cruzar as linhas tracejadas depois
-                if (!mapaNodesPorTemaParaTeia[temaReal]) mapaNodesPorTemaParaTeia[temaReal] = [];
-                mapaNodesPorTemaParaTeia[temaReal].push(noId);
+            if (destakarTransversais && ehTransversal && (filtroTemaEscolhido === "__ALL__" || filtroTemaEscolhido === temaReal)) {
+                cor = "#FEF3C7"; tSize = tamanho + 3; bW = 2; bColor = "#F59E0B";
+                if (!mapaNodesParaTeia[temaReal]) mapaNodesParaTeia[temaReal] = [];
+                mapaNodesParaTeia[temaReal].push(noId);
             }
 
             const labelCurto = txt.length > 15 ? txt.slice(0, 13) + "..." : txt;
-            const labelCompleto = `[${camadaLabel}ª] ${vNum > 0 ? '⭐ ' : ''}${labelCurto}`;
-
             hNodes.push({
-                id: noId, label: labelCompleto,
-                shape: "dot", size: tamanhoFinal, borderWidth: bordaW,
-                color: { background: corFinal, border: corBorda },
-                font: { size: 9, color: "#475569" }
+                id: noId, label: `[${camadaLabel}ª] ${vNum > 0 ? '⭐ ' : ''}${labelCurto}`,
+                shape: "dot", size: tSize, borderWidth: bW, color: { background: cor, border: bColor }, font: { size: 9, color: "#475569" }
             });
-
-            // Conecta a causa à sua respectiva árvore genealógica interna
-            hEdges.push({
-                from: paiId, to: noId,
-                color: { color: "#CBD5E0", opacity: 0.4 },
-                width: 1
-            });
+            hEdges.push({ from: paiId, to: noId, color: { color: "#CBD5E0", opacity: 0.4 }, width: 1 });
 
             hNodesDetails[noId] = {
-                tipo: "causa",
-                camadaLiteral: camadaLabel === "1" ? "Primária" : camadaLabel === "2" ? "Secundária" : "Terciária",
-                textoCompleto: txt,
-                categoriaEstipulada: temaReal,
-                votos: vNum,
-                eixosCompartilhados: Array.from(mapaTextoParaEixos[txt] || [siglaEixo]),
-                ehTransversal: ehTransversal
+                tipo: "causa", camada: camadaLabel === "1" ? "Primária" : camadaLabel === "2" ? "Secundária" : "Terciária",
+                texto: txt, tema: temaReal, votos: vNum, eixos: Array.from(mapaTextoParaEixos[txt] || [siglaEixo]), ehTransversal: ehTransversal
             };
-
-            nosCriadosUnicos.add(noId);
-            return noId;
+            nosCriadosUnicos.add(noId); return noId;
         };
 
-        // Escalonamento visual nítido de tamanhos: Primária (14px) -> Secundária (10px) -> Terciária (7px)
-        const idP = montarNoOrbital(cp, cat_p, eixoId, "1", 14, "#E2E8F0");
-        const idS = idP ? montarNoOrbital(cs, cat_s, idP, "2", 10, "#F1F5F9") : null;
-        if (idS) montarNoOrbital(ct, cat_t, idS, "3", 7, "#F8FAFC");
+        const idP = montarNo(cp, cat_p, eixoId, "1", 14, "#E2E8F0");
+        const idS = idP ? montarNo(cs, cat_s, idP, "2", 10, "#F1F5F9") : null;
+        if (idS) montarNo(ct, cat_t, idS, "3", 7, "#F8FAFC");
     });
 
-    // --- CONSTRUÇÃO DOS TRAÇOS DE CONEXÃO DA TEIA TRANSVERSAL EM TRIÂNGULO/REDES ---
+    // Desenha as teias e linhas tracejadas dos temas selecionados
     if (destacarTransversais) {
-        Object.keys(mapaNodesPorTemaParaTeia).forEach(tema => {
+        Object.keys(mapaNodesParaTeia).forEach(tema => {
             if (filtroTemaEscolhido !== "__ALL__" && filtroTemaEscolhido !== tema) return;
-            
-            const nosDoGrupo = mapaNodesPorTemaParaTeia[tema];
-            // Liga em cadeia (Nó 0 -> Nó 1 -> Nó 2... e fecha o ciclo criando o polígono/triângulo inter-eixos)
-            for (let i = 0; i < nosDoGrupo.length; i++) {
-                for (let j = i + 1; j < nosDoGrupo.length; j++) {
-                    // Evita ligar causas que estão dentro do mesmo eixo para não poluir
-                    const eixoA = nosDoGrupo[i].split("_")[2];
-                    const eixoB = nosDoGrupo[j].split("_")[2];
-                    if (eixoA !== eixoB) {
-                        hEdges.push({
-                            from: nosDoGrupo[i],
-                            to: nosDoGrupo[j],
-                            color: { color: "#D97706", opacity: 0.45 },
-                            width: 1.2,
-                            dashes: [3, 4] // Tracejado pequeno e delicado
-                        });
+            const nos = mapaNodesParaTeia[tema];
+            for (let i = 0; i < nos.length; i++) {
+                for (let j = i + 1; j < nos.length; j++) {
+                    if (nos[i].split("_")[2] !== nos[j].split("_")[2]) {
+                        hEdges.push({ from: nos[i], to: nos[j], color: { color: "#D97706", opacity: 0.4 }, width: 1.2, dashes: [2, 3] });
                     }
                 }
             }
         });
     }
 
-    const list = document.getElementById("sidebar-list");
-    list.innerHTML = `
-        <div class="p-4 bg-indigo-50/60 rounded-xl border border-indigo-100/70 text-slate-600 text-[11px] leading-relaxed">
-            <p class="font-bold text-indigo-900 mb-1 flex items-center gap-1">✨ Auditoria de Relações</p>
-            As bolinhas indicam na etiqueta se são de <span class="font-bold text-slate-800">1ª, 2ª ou 3ª</span> ordem. Ative o seletor de Temas Transversais acima para desenhar os <span class="font-bold text-amber-700">laços e teias tracejadas</span> de ligação mútua.
-        </div>
-    `;
+    document.getElementById("sidebar-list").innerHTML = `<div class="p-4 bg-indigo-50/60 border rounded-xl text-[11px] text-slate-600 leading-relaxed"><p class="font-bold text-indigo-900 mb-1">✨ Constelação Ativa</p>Filtros e teias tracejadas totalmente operacionais. Clique nos nós para auditar volumes e causas.</div>`;
 
-    // Renderizador Vis.js com física estável de repulsão orgânica
+    // Renderizar rede da Aba 2
     vN = new vis.DataSet(hNodes); vE = new vis.DataSet(hEdges);
     net = new vis.Network(document.getElementById("net"), {nodes: vN, edges: vE}, {
-        nodes: { font: { face: "Inter" } },
-        edges: { smooth: { enabled: true, type: "continuous", roundness: 0.3 }, arrows: { to: { enabled: false } } },
-        physics: {
-            enabled: true,
-            solver: "forceAtlas2Based",
-            forceAtlas2Based: {
-                gravitationalConstant: -75,
-                centralGravity: 0.02,
-                springLength: 50,
-                springConstant: 0.03,
-                damping: 0.4,
-                avoidOverlap: 1
-            },
-            stabilization: { iterations: 130, updateInterval: 25 }
-        },
-        interaction: { hover: true, tooltipDelay: 100, dragNodes: true }
+        edges: { smooth: { enabled: true, type: "continuous", roundness: 0.3 } },
+        physics: { enabled: true, solver: "forceAtlas2Based", forceAtlas2Based: { gravitationalConstant: -70, centralGravity: 0.02, springLength: 50, avoidOverlap: 1 } },
+        interaction: { hover: true }
     });
 
     net.on("click", p => {
-        if(p.nodes.length) {
-            const idClicado = p.nodes[0];
-            
-            if (idClicado === "H2_MACRO_ROOT") {
-                document.getElementById("p-cor").style.background = "#E11D48";
-                document.getElementById("p-titulo").textContent = "Problema Macro Central";
-                document.getElementById("p-sub").textContent = "Alvo Geral de Atuação da SME-SP";
-                document.getElementById("painel-body").innerHTML = `
-                    <div class="p-5 rounded-xl border border-rose-100 bg-rose-50/30">
-                        <p class="text-xs外 font-bold text-rose-800 uppercase tracking-wider mb-1">Baixa Alfabetização</p>
-                        <p class="text-[12px] text-slate-700 font-medium leading-relaxed">O guarda-chuva que conecta todas as frentes diagnosticadas pelo Grupo de Trabalho. Toda evidência mapeada concorre direta ou indiretamente para este quadro de vulnerabilidade.</p>
-                    </div>`;
-                document.getElementById("painel").classList.add("open");
-                document.getElementById("net").style.right = "480px";
-                return;
-            }
-
-            const det = hNodesDetails[idClicado];
-            if (!det) return;
-
-            document.getElementById("p-cor").style.background = det.cor || "#64748B";
-
-            if (det.tipo === "eixo") {
-                document.getElementById("p-titulo").textContent = det.titulo;
-                document.getElementById("p-sub").textContent = "Auditoria de Evidências Internas";
-
-                document.getElementById("painel-body").innerHTML = `
-                    <div class="p-4 rounded-xl bg-slate-50 border border-slate-200/60 mb-4">
-                        <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Problema do Eixo</p>
-                        <p class="text-xs font-semibold text-slate-700 leading-relaxed">${det.dados.probCentral}</p>
-                    </div>
-                    <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-3">Volumetria Estruturada</p>
-                    <div class="grid grid-cols-2 gap-3">
-                        <div class="p-3 bg-white border border-slate-100 shadow-sm rounded-xl">
-                            <span class="text-[10px] font-medium text-slate-400 block">Causas Primárias</span>
-                            <span class="text-lg font-extrabold text-slate-700">${det.dados.totalP}</span>
-                        </div>
-                        <div class="p-3 bg-white border border-slate-100 shadow-sm rounded-xl">
-                            <span class="text-[10px] font-medium text-slate-400 block">Causas Secundárias/Terciárias</span>
-                            <span class="text-lg font-extrabold text-slate-700">${det.dados.totalS + det.dados.totalT}</span>
-                        </div>
-                        <div class="p-3 bg-indigo-50/50 border border-indigo-100 shadow-sm rounded-xl">
-                            <span class="text-[10px] font-bold text-indigo-700 block">🔗 Temas Transversais</span>
-                            <span class="text-lg font-extrabold text-indigo-800">${det.dados.transversais}</span>
-                        </div>
-                        <div class="p-3 bg-amber-50/50 border border-amber-100 shadow-sm rounded-xl">
-                            <span class="text-[10px] font-bold text-amber-700 block">⭐ Com Estrelas</span>
-                            <span class="text-lg font-extrabold text-amber-800">${det.dados.estrelas}</span>
-                        </div>
-                    </div>
-                `;
-            } else if (det.tipo === "causa") {
-                document.getElementById("p-titulo").textContent = `Causa ${det.camadaLiteral}`;
-                document.getElementById("p-sub").textContent = "Nível de Desdobramento Diagnóstico";
-
-                let外corCat = "#64748B";
-                for (const k in CAT_CORES_MAP) {
-                    if (det.categoriaEstipulada.toLowerCase().includes(k.toLowerCase())) { corCat = CAT_CORES_MAP[k]; break; }
-                }
-
-                const eixosBadges = det.eixosCompartilhados.map(ex => {
-                    return `<span class="inline-block px-2.5 py-1 text-[10px] font-bold rounded-lg text-white mr-1.5 mb-1.5" style="background:${EIXO_CORES[ex] || "#475569"}">${EIXO_NOMES_COMPLETOS[ex] || ex}</span>`;
-                }).join("");
-
-                document.getElementById("painel-body").innerHTML = `
-                    <div class="p-4 rounded-xl bg-slate-50 border border-slate-200/60 mb-4">
-                        <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Descrição Detalhada</p>
-                        <p class="text-xs font-medium text-slate-700 leading-relaxed">${det.textoCompleto}</p>
-                    </div>
-
-                    <div class="mb-4">
-                        <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Tema de Amarração</p>
-                        <div class="flex items-center gap-2 px-3 py-2 border border-slate-100 rounded-xl bg-white shadow-sm">
-                            <span class="w-3 h-3 rounded-full flex-shrink-0" style="background:${corCat}"></span>
-                            <span class="text-xs font-bold text-slate-700">${det.categoriaEstipulada}</span>
-                            ${det.ehTransversal ? `<span class="ml-auto text-[9px] font-bold bg-amber-100 text-amber-800 px-2 py-0.5 rounded-md uppercase tracking-wider">Transversal</span>` : ""}
-                        </div>
-                    </div>
-
-                    <div>
-                        <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Compartilhada nos Eixes Estratégicos</p>
-                        <div class="flex flex-wrap">${eixosBadges}</div>
-                    </div>
-
-                    ${det.votos > 0 ? `
-                    <div class="mt-4 p-3 bg-amber-50 rounded-xl border border-amber-100 flex items-center justify-between">
-                        <span class="text-xs font-bold text-amber-800">Votação Coletiva GT</span>
-                        <span class="text-xs font-extrabold text-amber-700">⭐ ${det.votos} Votos</span>
-                    </div>` : ""}
-                `;
-            }
-
-            document.getElementById("painel").classList.add("open");
-            document.getElementById("net").style.right = "480px";
-        } else {
-            fecharPainel();
+        if(!p.nodes.length) { fecharPainel(); return; }
+        const id = p.nodes[0];
+        
+        if(id === "H2_MACRO_ROOT") {
+            document.getElementById("p-cor").style.background = "#E11D48";
+            document.getElementById("p-titulo").textContent = "Baixa Alfabetização";
+            document.getElementById("p-sub").textContent = "Problema Macro Central";
+            document.getElementById("painel-body").innerHTML = `<p class="text-xs text-slate-600 font-medium leading-relaxed">Este é o ponto de ancoragem de toda a rede. Todos os eixos selecionados se desdobram obrigatoriamente a partir deste indicador macro de vulnerabilidade.</p>`;
+            document.getElementById("painel").classList.add("open"); document.getElementById("net").style.right = "480px";
+            return;
         }
+
+        const det = hNodesDetails[id]; if (!det) return;
+        document.getElementById("p-cor").style.background = det.cor || "#64748B";
+
+        if(det.tipo === "eixo") {
+            document.getElementById("p-titulo").textContent = det.titulo;
+            document.getElementById("p-sub").textContent = "Métricas do Eixo Selecionado";
+            document.getElementById("painel-body").innerHTML = `
+                <div class="p-3 bg-slate-50 border rounded-xl text-xs font-semibold mb-3 text-slate-700">${det.dados.probCentral}</div>
+                <div class="grid grid-cols-2 gap-2 text-xs">
+                    <div class="p-3 bg-white border rounded-xl shadow-sm"><span class="text-slate-400 block text-[10px]">Causas 1ª</span><span class="text-base font-bold text-slate-700">${det.dados.totalP}</span></div>
+                    <div class="p-3 bg-white border rounded-xl shadow-sm"><span class="text-slate-400 block text-[10px]">Causas 2ª/3ª</span><span class="text-base font-bold text-slate-700">${det.dados.totalS + det.dados.totalT}</span></div>
+                    <div class="p-3 bg-indigo-50 border border-indigo-100 rounded-xl"><span class="text-indigo-700 font-bold block text-[10px]">Transversais</span><span class="text-base font-bold text-indigo-800">${det.dados.transversais}</span></div>
+                    <div class="p-3 bg-amber-50 border border-amber-100 rounded-xl"><span class="text-amber-700 font-bold block text-[10px]">Com Estrelas</span><span class="text-base font-bold text-amber-800">${det.dados.estrelas}</span></div>
+                </div>`;
+        } else {
+            document.getElementById("p-titulo").textContent = `Causa ${det.camada}`;
+            document.getElementById("p-sub").textContent = "Evidência Qualitativa Mapeada";
+            let cCat = CAT_CORES_MAP[Object.keys(CAT_CORES_MAP).find(k=>det.tema.toLowerCase().includes(k.toLowerCase()))] || "#64748B";
+            const badges = det.eixos.map(ex => `<span class="inline-block px-2 py-0.5 text-[9px] font-bold text-white rounded mr-1" style="background:${EIXO_CORES[ex]}">${ex}</span>`).join("");
+            
+            document.getElementById("painel-body").innerHTML = `
+                <div class="p-4 bg-slate-50 border rounded-xl text-xs font-medium text-slate-700 leading-relaxed mb-4">${det.texto}</div>
+                <div class="flex items-center gap-2 p-2 border rounded-xl bg-white text-xs mb-3 font-semibold text-slate-700">
+                    <span class="w-2.5 h-2.5 rounded-full" style="background:${cCat}"></span><span>${det.tema}</span>
+                    ${det.ehTransversal ? `<span class="ml-auto text-[9px] bg-amber-100 text-amber-800 px-1.5 py-0.5 rounded font-bold uppercase">Transversal</span>`:''}
+                </div>
+                <div class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1.5">Eixos Compartilhados</div>
+                <div class="mb-4">${badges}</div>
+                ${det.votos > 0 ? `<div class="p-2 bg-amber-50 border border-amber-100 rounded-xl text-xs font-bold text-amber-800 text-center">⭐ Priorizada com ${det.votos} Votos</div>`:''}`;
+        }
+        document.getElementById("painel").classList.add("open"); document.getElementById("net").style.right = "480px";
     });
 }
 
-
 // --- CONTROLE DE ALTERNÂNCIA DE ABAS ---
 function mudarAba(aba) {
-    currentTab = aba;
-    fecharPainel();
-    
-    const btn1 = document.getElementById("btn-aba1");
-    const btn2 = document.getElementById("btn-aba2");
-    const ctrl1 = document.getElementById("controles-aba1");
-    const ctrl2 = document.getElementById("controles-aba2");
+    currentTab = aba; fecharPainel();
+    const btn1 = document.getElementById("btn-aba1"); const btn2 = document.getElementById("btn-aba2");
+    const ctrl1 = document.getElementById("controles-aba1"); const ctrl2 = document.getElementById("controles-aba2");
     
     if (aba === "radial") {
         btn1.className = "px-4 py-1.5 rounded-lg text-xs font-bold transition-all bg-white text-slate-800 shadow-sm";
         btn2.className = "px-4 py-1.5 rounded-lg text-xs font-bold transition-all text-slate-500 hover:text-slate-800";
-        ctrl1.classList.remove("hidden");
-        ctrl2.classList.add("hidden");
+        ctrl1.classList.remove("hidden"); ctrl2.classList.add("hidden");
         document.getElementById("main-title").textContent = "Árvore Diagnóstica de Problemas";
         document.getElementById("main-subtitle").textContent = "Volumetria proporcional e conexões transversais unificadas";
         renderizarEstruturaRadial();
     } else {
         btn2.className = "px-4 py-1.5 rounded-lg text-xs font-bold transition-all bg-white text-slate-800 shadow-sm";
         btn1.className = "px-4 py-1.5 rounded-lg text-xs font-bold transition-all text-slate-500 hover:text-slate-800";
-        ctrl2.classList.remove("hidden");
-        ctrl2.classList.add("flex");
-        ctrl1.classList.add("hidden");
+        ctrl2.classList.remove("hidden"); ctrl2.classList.add("flex"); ctrl1.classList.add("hidden");
         document.getElementById("main-title").textContent = "Constelação Detalhada de Evidências";
         document.getElementById("main-subtitle").textContent = "Desdobramento radial completo (Eixo → Causa 1ª → 2ª → 3ª)";
         renderizarEstruturaHierarquica();
@@ -771,16 +544,7 @@ function mudarAba(aba) {
 }
 
 function fecharPainel() {
-    document.getElementById("painel").classList.remove("open");
-    document.getElementById("net").style.right = "0";
-    document.querySelectorAll(".cat-btn").forEach(btn => btn.classList.remove("bg-indigo-50", "border-indigo-100"));
-    
-    if(currentTab === "radial") {
-        try {
-            if (vN) vN.update(vN.get().map(n => ({ id: n.id, opacity: 1 })));
-            if (vE) vE.update(vE.get().map(e => ({ id: e.id, color: { color: "#E2E8F0", opacity: 0.6 }, width: 1.5 })));
-        } catch(err){}
-    }
+    document.getElementById("painel").classList.remove("open"); document.getElementById("net").style.right = "0";
 }
 
 window.onload = inicializar;
