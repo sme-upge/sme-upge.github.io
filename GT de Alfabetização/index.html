@@ -185,4 +185,117 @@ function buildStructure(rows) {
             font: {size: 10, color: "#1A202C"}, shape: "dot"
         });
 
-        info.axes.forEach(ex => D.grafo_temas.edges.
+        info.axes.forEach(ex => D.grafo_temas.edges.push({from: `__e__${ex}`, to: id, color: {color: corBase}, width: 2}));
+
+        D.grafo_temas.detail[id] = {
+            cat: name, cor: corBase, eixos: Array.from(info.axes),
+            causas: Object.values(info.rawCauses).map(c => ({
+                causa: c.text, eixos_origem: Array.from(c.axes), votos: c.v
+            }))
+        };
+    });
+}
+
+// --- VIS.JS ENGINE ---
+let net = null, vN = null, vE = null, modo = "temas", selCat = null;
+
+function render(nodes, edges, opts) {
+    if (net) net.destroy();
+    vN = new vis.DataSet(nodes); vE = new vis.DataSet(edges);
+    net = new vis.Network(document.getElementById("net"), {nodes: vN, edges: vE}, {
+        nodes: {shape: "dot", scaling: {min: 8, max: opts.mn}, font: {size: 11, face: "Inter", color: "#374151"}},
+        edges: {width: 0.8, color: "#D1D5DB", smooth: {type: "continuous"}},
+        physics: {barnesHut: {gravitationalConstant: opts.grav, centralGravity: 0.25, springLength: opts.sl}, stabilization: {iterations: 200}},
+        interaction: {hover: true, tooltipDelay: 300}
+    });
+    setTimeout(() => { if(net) { net.setOptions({physics: false}); net.fit(); } }, 2000);
+    net.on("click", p => p.nodes.length && onClick(p.nodes[0]));
+}
+
+function setModo(m) {
+    modo = m; fecharPainel();
+    document.querySelectorAll(".mbtn").forEach(b => {
+        b.classList.toggle("on", b.dataset.m === m);
+        b.classList.toggle("off", b.dataset.m !== m);
+    });
+    document.getElementById("sidebar").classList.toggle("hide", m !== "temas");
+    document.getElementById("net").style.left = m === "temas" ? "240px" : "0";
+    if (m === "temas") render(D.grafo_temas.nodes, D.grafo_temas.edges, {mn: 75, grav: -16000, sl: 130});
+    else render(D.grafo_temas.nodes, D.grafo_temas.edges, {mn: 50, grav: -32000, sl: 170});
+}
+
+function onClick(id) {
+    const det = D.grafo_temas.detail[id];
+    if (!det) return;
+    document.getElementById("p-cor").style.background = det.cor;
+    document.getElementById("p-titulo").textContent = det.cat;
+    document.getElementById("p-sub").textContent = `${det.causas.length} causas consolidadas`;
+    
+    let html = '<p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-4">Evidências Mapeadas</p>';
+    det.causas.forEach(c => {
+        const badges = c.eixos_origem.map(ex => `<span style="background:${EIXO_CORES[ex]};color:white;padding:2px 6px;border-radius:4px;font-size:9px;font-weight:700;margin-right:4px">${EIXO_CURTO[ex] || ex}</span>`).join("");
+        html += `<div style="padding:12px;border-radius:10px;border:1px solid #E2E8F0;background:#F9FAFB;margin-bottom:12px">
+            <div style="margin-bottom:8px">${badges}</div>
+            <p style="font-size:12px;color:#374151;line-height:1.5">${c.causa}</p>
+            ${c.votos > 0 ? `<div style="margin-top:6px;font-size:10px;font-weight:700;color:#D97706">⭐ ${c.votos} votos</div>` : ""}
+        </div>`;
+    });
+    document.getElementById("painel-body").innerHTML = html;
+    document.getElementById("painel").classList.add("open");
+    destacar(id);
+}
+
+function buildSidebar() {
+    const list = document.getElementById("sidebar-list");
+    list.innerHTML = "";
+    
+    const reset = document.createElement("button");
+    reset.className = "w-full text-left p-2 rounded text-xs font-bold text-gray-400 hover:bg-gray-100 uppercase mb-4";
+    reset.textContent = "⊙ Ver Grafo Completo";
+    reset.onclick = () => { destacar(null); fecharPainel(); };
+    list.appendChild(reset);
+
+    const t = [], i = [];
+    Object.keys(D.grafo_temas.detail).forEach(id => {
+        const item = D.grafo_temas.detail[id];
+        if (item.eixos.length > 1) t.push({id, ...item}); else i.push({id, ...item});
+    });
+
+    const renderGrupo = (titulo, cor, lista) => {
+        const h = document.createElement("p");
+        h.className = `text-[10px] font-bold uppercase tracking-widest mt-4 mb-2 ${cor}`;
+        h.textContent = titulo;
+        list.appendChild(h);
+        lista.forEach(item => {
+            const b = document.createElement("button");
+            b.className = "cat-btn w-full text-left p-2 rounded-lg text-[11px] mb-1 flex items-start gap-2 border border-transparent hover:bg-gray-50";
+            b.dataset.c = item.id;
+            b.innerHTML = `<span style="width:8px;height:8px;border-radius:50%;background:${item.cor};margin-top:3px;flex-shrink:0"></span><span>${item.cat}</span>`;
+            b.onclick = () => onClick(item.id);
+            list.appendChild(b);
+        });
+        list.appendChild(document.createElement("hr"));
+    };
+
+    renderGrupo("🔗 Causas Transversais", "text-indigo-600", t);
+    renderGrupo("📌 Causas Específicas", "text-slate-500", i);
+}
+
+function destacar(id) {
+    selCat = id;
+    document.querySelectorAll(".cat-btn").forEach(b => {
+        const act = b.dataset.c === id;
+        b.style.background = act ? "#EEF2FF" : "transparent";
+        b.style.borderColor = act ? "#C7D2FE" : "transparent";
+    });
+    if (!vN) return;
+    if (!id) { vN.update(vN.get().map(n => ({id: n.id, opacity: 1}))); return; }
+    const nodes = net.getConnectedNodes(id); nodes.push(id);
+    vN.update(vN.get().map(n => ({id: n.id, opacity: nodes.includes(n.id) ? 1 : 0.1})));
+}
+
+function fecharPainel() { document.getElementById("painel").classList.remove("open"); }
+window.onload = inicializarAplicacao;
+</script>
+</body>
+</html>
