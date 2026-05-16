@@ -43,17 +43,23 @@ input:checked + .slider:before {transform:translateX(14px)}
     </label>
   </div>
 
-  <div id="controles-aba2" class="px-5 py-3 bg-slate-50 border-b border-slate-100 flex-col gap-2 flex-shrink-0 hidden">
-    <div class="flex items-center justify-between w-full mb-2 border-b border-slate-200 pb-2">
-      <span class="text-[11px] font-bold text-amber-600 uppercase tracking-wider">Acender Transversais</span>
+  <div id="controles-aba2" class="px-5 py-3 bg-slate-50 border-b border-slate-100 flex-col gap-3 flex-shrink-0 hidden">
+    <div class="flex items-center justify-between w-full border-b border-slate-200 pb-2">
+      <span class="text-[11px] font-bold text-amber-600 uppercase tracking-wider">Destacar Transversais</span>
       <label class="switch">
-        <input type="checkbox" id="switch-transversal-hierarquica">
+        <input type="checkbox" id="switch-transversal-hierarquica" checked>
         <span class="slider"></span>
       </label>
     </div>
-    <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1 block">Filtrar por Eixos</span>
-    <div id="checkbox-eixos-container" class="flex flex-col gap-1.5 max-height-[200px] overflow-y-auto">
-      </div>
+    <div class="flex items-center justify-between w-full border-b border-slate-200 pb-2">
+      <span class="text-[11px] font-bold text-amber-500 uppercase tracking-wider">Apenas mais votadas (⭐)</span>
+      <label class="switch">
+        <input type="checkbox" id="switch-votos-hierarquica">
+        <span class="slider"></span>
+      </label>
+    </div>
+    <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-0.5 block">Filtrar por Eixos</span>
+    <div id="checkbox-eixos-container" class="flex flex-col gap-1.5 max-height-[180px] overflow-y-auto"></div>
   </div>
 
   <div id="sidebar-list"></div>
@@ -113,7 +119,7 @@ const CAT_CORES_MAP = {
   "Qualificação": "#84CC16", "qualificação": "#84CC16"
 };
 
-let currentTab = "radial"; // "radial" ou "hierarquica"
+let currentTab = "radial"; 
 let rawRows = []; 
 let G = { nodes: [], edges: [], details: {}, edgesOriginal: [] };
 let net = null, vN = null, vE = null;
@@ -144,6 +150,9 @@ async function inicializar() {
         document.getElementById("switch-transversal-hierarquica").addEventListener("change", () => {
             if(currentTab === "hierarquica") renderizarEstruturaHierarquica();
         });
+        document.getElementById("switch-votos-hierarquica").addEventListener("change", () => {
+            if(currentTab === "hierarquica") renderizarEstruturaHierarquica();
+        });
 
     } catch (e) {
         console.error(e);
@@ -171,8 +180,7 @@ function construirCheckboxEixos() {
     Object.keys(EIXO_NOMES_COMPLETOS).sort().forEach((sigla, idx) => {
         const label = document.createElement("label");
         label.className = "flex items-center gap-2 text-[11px] font-medium text-slate-600 cursor-pointer hover:text-slate-900";
-        // Mantém os 2 primeiros eixos checados no início
-        const checked = idx < 2 ? "checked" : "";
+        const checked = idx < 3 ? "checked" : ""; // Inicia 3 ativos para ficar limpo
         label.innerHTML = `
             <input type="checkbox" value="${sigla}" ${checked} class="axis-checkbox rounded border-gray-300 text-blue-600 focus:ring-blue-500 w-3.5 h-3.5" onchange="renderizarEstruturaHierarquica()">
             <span class="truncate" title="${EIXO_NOMES_COMPLETOS[sigla]}">${sigla} - ${EIXO_NOMES_COMPLETOS[sigla].split(" - ")[1]}</span>
@@ -377,131 +385,148 @@ function buildSidebarHierarquicaRadial() {
 }
 
 
-// --- CONSTRUÇÃO DA ABA 2: ÁRVORE HIERÁRQUICA DE CAUSAS (USANDO O MESMO CSV) ---
+// --- CONSTRUÇÃO DA ABA 2: NOVO LAYOUT DE CONSTELAÇÃO RADIAL DELICADA ---
 function renderizarEstruturaHierarquica() {
     fecharPainel();
     
     const eixosSelecionados = Array.from(document.querySelectorAll(".axis-checkbox:checked")).map(cb => cb.value);
-    const acenderTransversais = document.getElementById("switch-transversal-hierarquica").checked;
+    const destacarTransversais = document.getElementById("switch-transversal-hierarquica").checked;
+    const apenasVotadas = document.getElementById("switch-votos-hierarquica").checked;
 
     const hNodes = [];
     const hEdges = [];
-    const nósInseridos = new Set();
-    const mapaOcorrenciasTexto = {}; 
+    const nosCriadosUnicos = new Set();
+    const mapaRepeticaoTexto = {};
 
+    // Filtra dados pelos eixos marcados
     const linhasFiltradas = rawRows.filter(r => {
         if (!r[0]) return false;
         const siglaEixo = r[0].split(" - ")[0];
         return eixosSelecionados.includes(siglaEixo);
     });
 
+    // Mapeamento prévio de termos para identificar os transversais reais
     linhasFiltradas.forEach(r => {
-        const [,, cp,, cs,, , ct] = r;
-        [cp, cs, ct].forEach(texto => {
-            if (texto && texto.trim() !== "") {
-                const t = texto.trim();
-                mapaOcorrenciasTexto[t] = (mapaOcorrenciasTexto[t] || 0) + 1;
+        const [,, cp, , cs, , , ct] = r;
+        [cp, cs, ct].forEach(txt => {
+            if (txt && txt.trim() !== "") {
+                const t = txt.trim();
+                mapaRepeticaoTexto[t] = (mapaRepeticaoTexto[t] || 0) + 1;
             }
         });
     });
 
-    // Adiciona Nó Raiz (Problema Macro)
-    hNodes.push({
-        id: "H_ROOT", label: "PROBLEMA\nMACRO", level: 0, shape: "dot", size: 30,
-        color: { background: "#E11D48", border: "#BE123C" }, font: { color: "#FFF", bold: true, size: 10 }
-    });
-
+    // Processamento de Nós e Arestas
     linhasFiltradas.forEach((r, idx) => {
         const [eixoCompleto, probCentral, cp, cat_p, cs, cat_s, votos, ct, cat_t] = r;
         const siglaEixo = eixoCompleto.split(" - ")[0];
         const corEixo = EIXO_CORES[siglaEixo] || "#475569";
+        const vNum = parseInt(votos) || 0;
 
-        const eixoId = `H_${siglaEixo}`;
-        if (!nósInseridos.has(eixoId)) {
+        // Se o filtro de estrelas estiver ligado, pula linhas que não possuem votos registrados
+        if (apenasVotadas && vNum === 0) return;
+
+        // 1. Centro da Constelação: O Eixo / Problema do Eixo
+        const eixoId = `H2_${siglaEixo}`;
+        if (!nosCriadosUnicos.has(eixoId)) {
             hNodes.push({
-                id: eixoId, label: siglaEixo, title: eixoCompleto, level: 1, shape: "dot", size: 22,
-                color: corEixo, font: { bold: true, size: 11, color: "#1E293B" }
+                id: eixoId, label: siglaEixo, title: `<b>${eixoCompleto}</b><br><br>${probCentral}`, shape: "dot", size: 26,
+                color: { background: corEixo, border: corEixo },
+                font: { bold: true, size: 12, color: "#0F172A" }
             });
-            hEdges.push({ from: "H_ROOT", to: eixoId, color: { color: "#CBD5E0", opacity: 0.5 }, width: 1.5 });
-            nósInseridos.add(eixoId);
+            nosCriadosUnicos.add(eixoId);
         }
 
-        let paiId = eixoId;
-        const processarNivelCausa = (textoCausa, categoriaCausa, levelNum, sufixoNivel) => {
-            if (!textoCausa || textoCausa.trim() === "") return;
-            const txt = textoCausa.trim();
-            const nóId = `H_N_${siglaEixo}_${sufixoNivel}_${idx}`;
+        // Função interna para criar órbitas ao redor do centro do eixo de forma leve e flutuante
+        const montarNoOrbital = (texto, categoria, paiId, tipoSufixo, tamanhoBase, corPadrao) => {
+            if (!texto || texto.trim() === "") return null;
+            const txt = texto.trim();
+            const noId = `H2_N_${siglaEixo}_${tipoSufixo}_${txt.slice(0,10)}_${idx}`;
             
-            const ehTransversalBruta = mapaOcorrenciasTexto[txt] > 1;
-            let corNo = "#475569"; 
-            let tamanhoNo = 12;
-            let bordaLargura = 1;
+            if (nosCriadosUnicos.has(noId)) return noId;
 
-            if (acenderTransversais && ehTransversalBruta) {
-                corNo = "#F59E0B"; 
-                tamanhoNo = 18;
-                bordaLargura = 2;
+            const ehTransversal = mapaRepeticaoTexto[txt] > 1;
+            let corFinal = corPadrao;
+            let tamanhoFinal = tamanhoBase;
+            let bordaW = 0.5;
+            let corBorda = "#94A3B8";
+
+            // Se for transversal e o switch estiver ativo, ganha destaque dourado/neon igual o layout delicado
+            if (destacarTransversais && ehTransversal) {
+                corFinal = "#F59E0B";
+                tamanhoFinal = tamanhoBase + 5;
+                bordaW = 2;
+                corBorda = "#D97706";
             }
 
-            const labelQuebrado = txt.length > 28 ? txt.slice(0, 26) + "..." : txt;
+            // Exibe indicador de estrelas no rótulo se houver votos
+            const labelCurto = txt.length > 22 ? txt.slice(0, 20) + "..." : txt;
+            const labelComVotos = vNum > 0 ? `⭐ ${labelCurto}` : labelCurto;
 
             hNodes.push({
-                id: nóId, label: labelQuebrado, title: `[${categoriaCausa || 'Sem Categoria'}] ${txt}`, level: levelNum, shape: "dot", size: tamanhoNo,
-                borderWidth: bordaLargura, color: { background: corNo, border: ehTransversalBruta ? "#D97706" : "#334155" },
-                font: { size: 10, color: ehTransversalBruta ? "#B45309" : "#64748B" }
+                id: noId, label: labelComVotos, title: `<b>[${categoria || 'Sem Categoria'}]</b><br>${txt}${vNum > 0 ? `<br><br><span style="color:#D97706"><b>⭐ ${vNum} votos</b></span>` : ''}`,
+                shape: "dot", size: tamanhoFinal, borderWidth: bordaW,
+                color: { background: corFinal, border: corBorda },
+                font: { size: 9, color: ehTransversal && destacarTransversais ? "#B45309" : "#64748B" }
             });
 
             hEdges.push({
-                from: paiId, to: nóId,
-                color: acenderTransversais && ehTransversalBruta ? { color: "#F59E0B", opacity: 0.9 } : { color: "#E2E8F0", opacity: 0.6 },
-                width: acenderTransversais && ehTransversalBruta ? 2.5 : 1.2,
-                arrows: "to"
+                from: paiId, to: noId,
+                color: destacarTransversais && ehTransversal ? { color: "#F59E0B", opacity: 0.8 } : { color: "#CBD5E0", opacity: 0.4 },
+                width: destacarTransversais && ehTransversal ? 2 : 1
             });
 
-            paiId = nóId; 
+            nosCriadosUnicos.add(noId);
+            return noId;
         };
 
-        processarNivelCausa(cp, cat_p, 2, "P"); 
-        processarNivelCausa(cs, cat_s, 3, "S"); 
-        processarNivelCausa(ct, cat_t, 4, "T"); 
+        // Montagem das órbitas sequenciais (Eixo -> Primária -> Secundária -> Terciária)
+        const idP = montarNoOrbital(cp, cat_p, eixoId, "P", 14, "#E2E8F0");
+        const idS = idP ? montarNoOrbital(cs, cat_s, idP, "S", 10, "#F1F5F9") : null;
+        if (idS) montarNoOrbital(ct, cat_t, idS, "T", 7, "#F8FAFC");
     });
 
     const list = document.getElementById("sidebar-list");
     list.innerHTML = `
-        <div class="p-3 bg-blue-50/50 rounded-xl border border-blue-100/60 text-slate-600 text-[11px] leading-relaxed">
-            <p class="font-bold text-blue-800 mb-1">💡 Modo de Fluxo Contínuo</p>
-            Nesta aba, selecione múltiplos eixos acima para cruzar dados. Ative a chave de transversais para identificar coincidências de escrita entre os grupos.
+        <div class="p-4 bg-amber-50/60 rounded-xl border border-amber-100/70 text-slate-600 text-[11px] leading-relaxed">
+            <p class="font-bold text-amber-800 mb-1 flex items-center gap-1">✨ Layout Constelação Flutuante</p>
+            Cada eixo funciona como um núcleo centralizado. Os desdobramentos orbitam ao redor em camadas delicadas. Use os interruptores acima para isolar dores votadas ou iluminar caminhos transversais.
         </div>
     `;
 
+    // Renderiza a rede vis.js usando o algoritmo de forças padrão (orgânico livre igual a imagem informada)
     vN = new vis.DataSet(hNodes); vE = new vis.DataSet(hEdges);
     net = new vis.Network(document.getElementById("net"), {nodes: vN, edges: vE}, {
-        layout: {
-            hierarchical: {
-                direction: "LR",
-                sortMethod: "directed",
-                nodeSpacing: 45,
-                levelSpacing: 180,
-                treeSpacing: 80
-            }
-        },
         nodes: { font: { face: "Inter" } },
-        edges: { smooth: { enabled: true, type: "cubicBezier", forceDirection: "horizontal", roundness: 0.6 } },
-        physics: false, 
-        interaction: { hover: true, tooltipDelay: 100 }
+        edges: { smooth: { enabled: true, type: "continuous", roundness: 0.5 }, arrows: { to: { enabled: false } } },
+        physics: {
+            enabled: true,
+            solver: "forceAtlas2Based",
+            forceAtlas2Based: {
+                gravitationalConstant: -70,
+                centralGravity: 0.015,
+                springLength: 45,
+                springConstant: 0.04,
+                damping: 0.4,
+                avoidOverlap: 1
+            },
+            stabilization: { iterations: 150, updateInterval: 25 }
+        },
+        interaction: { hover: true, tooltipDelay: 100, dragNodes: true }
     });
 
+    // Evento para abrir detalhes no painel lateral ao clicar nas bolinhas
     net.on("click", p => {
         if(p.nodes.length) {
             const idClicado = p.nodes[0];
             const noInfo = vN.get(idClicado);
             if(noInfo && noInfo.title) {
                 document.getElementById("p-cor").style.background = noInfo.color.background || noInfo.color;
-                document.getElementById("p-titulo").textContent = noInfo.level === 1 ? "Eixo Estratégico Mapeado" : "Desdobramento da Causa";
-                document.getElementById("p-sub").textContent = noInfo.level === 1 ? "Identificação Curta" : "Evidência de Causalidade";
+                document.getElementById("p-titulo").textContent = idClicado.startsWith("H2_") && !idClicado.includes("_N_") ? "Problema do Eixo Estratégico" : "Evidência Mapeada";
+                document.getElementById("p-sub").textContent = "Detalhes e Categoria Complementar";
                 document.getElementById("painel-body").innerHTML = `
                     <div style="padding:20px;border-radius:14px;border:1px solid #E2E8F0;background:#F8FAFC;margin-top:10px">
-                        <p style="font-size:13px;color:#1E293B;line-height:1.7;font-weight:500">${noInfo.title}</p>
+                        <p style="font-size:12px;color:#1E293B;line-height:1.7;font-weight:500">${noInfo.title}</p>
                     </div>`;
                 document.getElementById("painel").classList.add("open");
                 document.getElementById("net").style.right = "480px";
@@ -537,8 +562,8 @@ function mudarAba(aba) {
         ctrl2.classList.remove("hidden");
         ctrl2.classList.add("flex");
         ctrl1.classList.add("hidden");
-        document.getElementById("main-title").textContent = "Desdobramento Contínuo de Causas";
-        document.getElementById("main-subtitle").textContent = "Análise direcional sequencial (Causas 1ª → 2ª → 3ª)";
+        document.getElementById("main-title").textContent = "Constelação Detalhada de Evidências";
+        document.getElementById("main-subtitle").textContent = "Desdobramento radial completo (Eixo → Causa 1ª → 2ª → 3ª)";
         renderizarEstruturaHierarquica();
     }
 }
