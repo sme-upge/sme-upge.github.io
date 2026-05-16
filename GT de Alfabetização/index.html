@@ -114,7 +114,7 @@ const CAT_CORES_MAP = {
 };
 
 let currentTab = "radial"; // "radial" ou "hierarquica"
-let rawRows = []; // Armazena as linhas lidas do CSV para o reprocessamento da árvore
+let rawRows = []; 
 let G = { nodes: [], edges: [], details: {}, edgesOriginal: [] };
 let net = null, vN = null, vE = null;
 
@@ -126,7 +126,6 @@ async function inicializar() {
         const csv = new TextDecoder("utf-8").decode(await res.arrayBuffer());
         rawRows = parseCSV(csv);
         
-        // Coleta inicial de eixos do CSV para montar os nomes e as caixas de seleção
         rawRows.forEach(r => {
             const [eixoCompleto] = r;
             if(eixoCompleto && eixoCompleto.includes(" - ")) {
@@ -156,7 +155,7 @@ function parseCSV(text) {
     return lines.slice(1).map(line => {
         const cols = []; let q = false; let curr = "";
         for (let i = 0; i < line.length; i++) {
-            const c = line[line[i] === '"' ? i : i];
+            const c = line[i];
             if (c === '"') q = !q;
             else if (c === ';' && !q) { cols.push(curr.trim()); curr = ""; }
             else curr += c;
@@ -172,7 +171,7 @@ function construirCheckboxEixos() {
     Object.keys(EIXO_NOMES_COMPLETOS).sort().forEach((sigla, idx) => {
         const label = document.createElement("label");
         label.className = "flex items-center gap-2 text-[11px] font-medium text-slate-600 cursor-pointer hover:text-slate-900";
-        // Deixa apenas os dois primeiros ativos por padrão para evitar colapso visual inicial
+        // Mantém os 2 primeiros eixos checados no início
         const checked = idx < 2 ? "checked" : "";
         label.innerHTML = `
             <input type="checkbox" value="${sigla}" ${checked} class="axis-checkbox rounded border-gray-300 text-blue-600 focus:ring-blue-500 w-3.5 h-3.5" onchange="renderizarEstruturaHierarquica()">
@@ -378,22 +377,18 @@ function buildSidebarHierarquicaRadial() {
 }
 
 
-// --- CONSTRUÇÃO DA ABA 2: ÁRVORE HIERÁRQUICA DE CAUSAS DESDOBRADAS ---
+// --- CONSTRUÇÃO DA ABA 2: ÁRVORE HIERÁRQUICA DE CAUSAS (USANDO O MESMO CSV) ---
 function renderizarEstruturaHierarquica() {
     fecharPainel();
     
-    // Captura quais checkboxes de eixos estão selecionados
     const eixosSelecionados = Array.from(document.querySelectorAll(".axis-checkbox:checked")).map(cb => cb.value);
     const acenderTransversais = document.getElementById("switch-transversal-hierarquica").checked;
 
     const hNodes = [];
     const hEdges = [];
-    
-    // Conjuntos para não duplicar elementos textuais na renderização por colunas
     const nósInseridos = new Set();
-    const mapaOcorrenciasTexto = {}; // Conta quantas vezes uma descrição de causa se repete entre os dados lidos
+    const mapaOcorrenciasTexto = {}; 
 
-    // Primeiro passo: Filtrar linhas e mapear repetição textual para identificar transversais brutas
     const linhasFiltradas = rawRows.filter(r => {
         if (!r[0]) return false;
         const siglaEixo = r[0].split(" - ")[0];
@@ -410,46 +405,40 @@ function renderizarEstruturaHierarquica() {
         });
     });
 
-    // Adiciona o Nó Raiz Único (Esquerda da Tela)
+    // Adiciona Nó Raiz (Problema Macro)
     hNodes.push({
         id: "H_ROOT", label: "PROBLEMA\nMACRO", level: 0, shape: "dot", size: 30,
         color: { background: "#E11D48", border: "#BE123C" }, font: { color: "#FFF", bold: true, size: 10 }
     });
 
-    // Processa linhas filtradas montando a hierarquia pura: Macro -> Eixo -> Primária -> Secundária -> Terciária
     linhasFiltradas.forEach((r, idx) => {
         const [eixoCompleto, probCentral, cp, cat_p, cs, cat_s, votos, ct, cat_t] = r;
         const siglaEixo = eixoCompleto.split(" - ")[0];
         const corEixo = EIXO_CORES[siglaEixo] || "#475569";
 
-        // 1. Nó do Eixo
         const eixoId = `H_${siglaEixo}`;
         if (!nósInseridos.has(eixoId)) {
             hNodes.push({
-                id: eId = eixoId, label: siglaEixo, title: eixoCompleto, level: 1, shape: "dot", size: 22,
+                id: eixoId, label: siglaEixo, title: eixoCompleto, level: 1, shape: "dot", size: 22,
                 color: corEixo, font: { bold: true, size: 11, color: "#1E293B" }
             });
             hEdges.push({ from: "H_ROOT", to: eixoId, color: { color: "#CBD5E0", opacity: 0.5 }, width: 1.5 });
             nósInseridos.add(eixoId);
         }
 
-        // Função auxiliar para encadear os níveis textuais mantendo caminhos individuais estáveis
         let paiId = eixoId;
         const processarNivelCausa = (textoCausa, categoriaCausa, levelNum, sufixoNivel) => {
             if (!textoCausa || textoCausa.trim() === "") return;
             const txt = textoCausa.trim();
-            
-            // Geramos uma chave única de nó baseada no caminho completo para evitar colisões no layout de árvore lateral, 
-            // já que textos idênticos podem desdobrar caminhos diferentes.
             const nóId = `H_N_${siglaEixo}_${sufixoNivel}_${idx}`;
             
             const ehTransversalBruta = mapaOcorrenciasTexto[txt] > 1;
-            let corNo = "#475569"; // Cor padrão de causa (Slate)
+            let corNo = "#475569"; 
             let tamanhoNo = 12;
             let bordaLargura = 1;
 
             if (acenderTransversais && ehTransversalBruta) {
-                corNo = "#F59E0B"; // Acende com Amarelo/Laranja Neon vibrante
+                corNo = "#F59E0B"; 
                 tamanhoNo = 18;
                 bordaLargura = 2;
             }
@@ -469,15 +458,14 @@ function renderizarEstruturaHierarquica() {
                 arrows: "to"
             });
 
-            paiId = nóId; // Passa o ID para o próximo subnível se conectar a ele
+            paiId = nóId; 
         };
 
-        processarNivelCausa(cp, cat_p, 2, "P"); // Primária
-        processarNivelCausa(cs, cat_s, 3, "S"); // Secundária
-        processarNivelCausa(ct, cat_t, 4, "T"); // Terciária
+        processarNivelCausa(cp, cat_p, 2, "P"); 
+        processarNivelCausa(cs, cat_s, 3, "S"); 
+        processarNivelCausa(ct, cat_t, 4, "T"); 
     });
 
-    // Limpa a lista lateral na segunda aba já que os filtros sobem para a área superior de checkboxes
     const list = document.getElementById("sidebar-list");
     list.innerHTML = `
         <div class="p-3 bg-blue-50/50 rounded-xl border border-blue-100/60 text-slate-600 text-[11px] leading-relaxed">
@@ -486,7 +474,6 @@ function renderizarEstruturaHierarquica() {
         </div>
     `;
 
-    // Renderiza a rede vis.js no formato Hierárquico Direcional (Left-to-Right)
     vN = new vis.DataSet(hNodes); vE = new vis.DataSet(hEdges);
     net = new vis.Network(document.getElementById("net"), {nodes: vN, edges: vE}, {
         layout: {
@@ -500,11 +487,10 @@ function renderizarEstruturaHierarquica() {
         },
         nodes: { font: { face: "Inter" } },
         edges: { smooth: { enabled: true, type: "cubicBezier", forceDirection: "horizontal", roundness: 0.6 } },
-        physics: false, // Desliga física para manter alinhamento rígido em colunas
+        physics: false, 
         interaction: { hover: true, tooltipDelay: 100 }
     });
 
-    // Evento de clique para inspecionar e abrir textos longos na barra direita
     net.on("click", p => {
         if(p.nodes.length) {
             const idClicado = p.nodes[0];
@@ -527,7 +513,7 @@ function renderizarEstruturaHierarquica() {
 }
 
 
-// --- LÓGICA DE TRANSIÇÃO ENTRE ABAS ---
+// --- CONTROLE DE ALTERNÂNCIA DE ABAS ---
 function mudarAba(aba) {
     currentTab = aba;
     fecharPainel();
