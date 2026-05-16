@@ -558,8 +558,8 @@ function renderizarEstruturaHierarquica() {
 
     const macroId = "H2_MACRO_ROOT";
     hNodes.push({
-        id: macroId, label: "BAIXA ALFABETIZAÇÃO", shape: "dot", size: 14,
-        color: { background: "#EF4444", border: "#DC2626" }, font: { bold: true, size: 9, color: "#475569", vadjust: -20 }
+        id: macroId, label: "BAIXA ALFABETIZAÇÃO", shape: "dot", size: 32,
+        color: { background: "#EF4444", border: "#DC2626" }, font: { bold: true, size: 13, color: "#1E293B", vadjust: -32 }
     });
 
     const mapaNodesParaTeia = {};
@@ -631,7 +631,7 @@ function renderizarEstruturaHierarquica() {
         
         if (!nosCriadosUnicos.has(eixoId)) {
             hNodes.push({ 
-                id: eixoId, label: siglaEixo, title: nomeEixoOficial, shape: "dot", size: 10, 
+                id: eixoId, label: siglaEixo, title: nomeEixoOficial, shape: "dot", size: 18, 
                 color: { background: "#6366F1", border: "#4F46E5" }, 
                 font: { bold: true, size: 11, color: "#475569" } 
             });
@@ -683,9 +683,9 @@ function renderizarEstruturaHierarquica() {
             return noId;
         };
 
-        const idP = registrarNoUnico(cp, cat_p, eixoId, "1", 13.0, "#38BDF8", vNumCp); 
-        const idS = idP ? registrarNoUnico(cs, cat_s, idP, "2", 10.0, "#34D399", vNumCs) : null;  
-        if (idS) registrarNoUnico(ct, cat_t, idS, "3", 7.5, "#FBBF24", vNumCt);              
+        const idP = registrarNoUnico(cp, cat_p, eixoId, "1", 15.0, "#38BDF8", vNumCp); 
+        const idS = idP ? registrarNoUnico(cs, cat_s, idP, "2", 12.0, "#34D399", vNumCs) : null;  
+        if (idS) registrarNoUnico(ct, cat_t, idS, "3", 9.5, "#FBBF24", vNumCt);              
     });
 
     if (destacarTransversais) {
