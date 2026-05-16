@@ -6,7 +6,7 @@
 <title>Painel de Evidências — GT de Alfabetização · SME-SP</title>
 <script src="https://cdn.tailwindcss.com"></script>
 <script src="https://unpkg.com/vis-network/standalone/umd/vis-network.min.js"></script>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
 *{box-sizing:border-box}
 html,body{height:100%;margin:0;padding:0;overflow:hidden;font-family:"Inter",sans-serif;background:#F1F5F9}
@@ -18,6 +18,14 @@ html,body{height:100%;margin:0;padding:0;overflow:hidden;font-family:"Inter",san
 #painel-body{flex:1;overflow-y:auto;padding:24px 28px}
 ::-webkit-scrollbar{width:5px}
 ::-webkit-scrollbar-thumb{background:#CBD5E0;border-radius:5px}
+
+/* Toggle Switch Styling */
+.switch {position:relative;display:inline-block;width:34px;height:20px}
+.switch input {opacity:0;width:0;height:0}
+.slider {position:absolute;cursor:pointer;inset:0;background-color:#CBD5E0;border-radius:20px;transition:.2s}
+.slider:before {position:absolute;content:"";height:14px;width:14px;left:3px;bottom:3px;background-color:white;border-radius:50%;transition:.2s}
+input:checked + .slider {background-color:#2563EB}
+input:checked + .slider:before {transform:translateX(14px)}
 </style>
 </head>
 <body>
@@ -27,6 +35,15 @@ html,body{height:100%;margin:0;padding:0;overflow:hidden;font-family:"Inter",san
     <p class="text-[10px] font-bold uppercase tracking-widest text-indigo-700">Matriz de Vulnerabilidades</p>
     <p class="text-[11px] text-gray-400 mt-1 font-medium">GT Alfabetização · SME-SP</p>
   </div>
+  
+  <div class="px-5 py-3 bg-slate-50 border-b border-slate-100 flex items-center justify-between flex-shrink-0">
+    <span class="text-[11px] font-semibold text-slate-700">Exibir dores específicas</span>
+    <label class="switch">
+      <input type="checkbox" id="filtro-especificas" checked>
+      <span class="slider"></span>
+    </label>
+  </div>
+
   <div id="sidebar-list"></div>
 </div>
 
@@ -54,15 +71,9 @@ html,body{height:100%;margin:0;padding:0;overflow:hidden;font-family:"Inter",san
 </div>
 
 <script>
-// --- PALETA DE CORES MAIS "SAL" E CORPORATIVA ---
 const EIXO_CORES = {
-  "Eixo 1": "#1D4ED8", // Blue
-  "Eixo 2": "#7C3AED", // Purple
-  "Eixo 3": "#059669", // Emerald
-  "Eixo 4": "#EA580C", // Orange
-  "Eixo 5": "#0891B2", // Cyan
-  "Eixo 6": "#DC2626", // Red
-  "Eixo 7": "#0F766E"  // Teal
+  "Eixo 1": "#1D4ED8", "Eixo 2": "#7C3AED", "Eixo 3": "#059669",
+  "Eixo 4": "#EA580C", "Eixo 5": "#0891B2", "Eixo 6": "#DC2626", "Eixo 7": "#0F766E"
 };
 
 const EIXO_CURTO = {
@@ -70,31 +81,31 @@ const EIXO_CURTO = {
   "Eixo 4": "Incentivos", "Eixo 5": "Monitoramento", "Eixo 6": "Avaliação", "Eixo 7": "Materiais"
 };
 
-// Cores mais saturadas e distintas para os temas transversais
 const CAT_CORES_MAP = {
-  "Fragmentação da concepção": "#EF4444", // Red vivid
-  "Fragilidade na comunicação": "#2563EB", // Blue vivid
-  "Alta rotatividade": "#A855F7",           // Purple vivid
-  "Sobrecarga de demandas": "#06B6D4",      // Cyan
-  "Participação desigual": "#10B981",        // Green vivid
-  "Fragilidade no atendimento": "#F59E0B",   // Amber vivid
-  "Fragilidade na identidade": "#F472B6",    // Pink
-  "Fragilidade na articulação": "#FB7185",   // Rose
-  "Recursos pedagógicos": "#F472B6",        // Pink
-  "Excesso e sobreposição": "#4ADE80"        // Lime vivid
+  "Fragmentação da concepção": "#EF4444", "Fragilidade na comunicação": "#2563EB",
+  "Alta rotatividade": "#A855F7", "Sobrecarga de demandas": "#06B6D4",
+  "Participação desigual": "#10B981", "Fragilidade no atendimento": "#F59E0B",
+  "Fragilidade na identidade": "#F472B6", "Fragilidade na articulação": "#FB7185",
+  "Recursos pedagógicos": "#F472B6", "Excesso e sobreposição": "#4ADE80"
 };
 
+let RawRows = [];
 let G = { nodes: [], edges: [], details: {} };
-const CSV_URL = "https://raw.githubusercontent.com/sme-upge/sme-upge.github.io/refs/heads/main/GT%20de%20Alfabetiza%C3%A7%C3%A3o/arvore.csv";
+let net = null, vN = null, vE = null;
 
 async function inicializar() {
     try {
-        const res = await fetch(CSV_URL);
+        const res = await fetch("https://raw.githubusercontent.com/sme-upge/sme-upge.github.io/refs/heads/main/GT%20de%20Alfabetiza%C3%A7%C3%A3o/arvore.csv");
         const csv = new TextDecoder("utf-8").decode(await res.arrayBuffer());
-        const rows = parseCSV(csv);
-        buildStructure(rows);
+        RawRows = parseCSV(csv);
+        processarDados(RawRows);
         buildSidebarHierarquica();
         renderTree();
+
+        // Event listener do Filtro Inteligente
+        document.getElementById("filtro-especificas").addEventListener("change", (e) => {
+            aplicarFiltroGrafo(e.target.checked);
+        });
     } catch (e) {
         console.error(e);
     }
@@ -115,13 +126,15 @@ function parseCSV(text) {
     });
 }
 
-function buildStructure(rows) {
+function processarDados(rows) {
     const catMap = {};
     const eixosAtivos = new Set();
 
+    // 1. NÓ MACRO GRANDE E IMPONENTE (size: 32)
     G.nodes.push({
-        id: "ROOT", label: "Gargalo Central\nEducação Municipal", shape: "dot", size: 16,
-        color: {background: "#EF4444", border: "#DC2626"}, font: {size: 11, color: "#1E293B", bold: true}
+        id: "ROOT", label: "Gargalo Central\nEducação Municipal", shape: "dot", size: 32,
+        color: {background: "#DC2626", border: "#991B1B"}, font: {size: 13, color: "#0F172A", bold: true},
+        _isMacro: true
     });
 
     rows.forEach(r => {
@@ -153,11 +166,12 @@ function buildStructure(rows) {
 
     eixosAtivos.forEach(ex => {
         G.nodes.push({
-            id: ex, label: ex, shape: "dot", size: 12,
+            id: ex, label: ex, shape: "dot", size: 16,
             color: {background: EIXO_CORES[ex]||"#64748B", border: EIXO_CORES[ex]||"#64748B"},
-            font: {size: 10, color: "#334155", bold: true}
+            font: {size: 11, color: "#1E293B", bold: true},
+            _isEixo: true
         });
-        G.edges.push({ from: "ROOT", to: ex, color: "#E2E8F0", width: 2.5 });
+        G.edges.push({ id: `edge_root_${ex}`, from: "ROOT", to: ex, color: "#CBD5E0", width: 3 });
     });
 
     Object.keys(catMap).forEach(catNome => {
@@ -166,42 +180,63 @@ function buildStructure(rows) {
         const chaveCor = Object.keys(CAT_CORES_MAP).find(k => catNome.includes(k));
         const corBase = CAT_CORES_MAP[chaveCor] || "#CBD5E0";
 
-        // UNIÃO INTELIGENTE E VIBRANTE: Volumetria de causas real e sensível!
-        // Aumentado a base e o multiplicador para bolas visivelmente maiores conforme volume
-        const tamanhoCalculado = 10 + Math.min(totalCausasDiferentes * 2, 20); 
+        // 2. VOLUMETRIA AVANÇADA E SENSÍVEL (Base maior e multiplicador ampliado para destaque)
+        const tamanhoCalculado = 12 + Math.min(totalCausasDiferentes * 3, 28); 
         const labelCurto = catNome.length > 25 ? catNome.slice(0,25) + "..." : catNome;
+        const eixosUnicos = Array.from(info.eixos);
+        const ehTransversal = eixosUnicos.length > 1;
 
         G.nodes.push({
             id: `__cat__${catNome}`, label: labelCurto, title: catNome, shape: "dot", size: tamanhoCalculado,
-            color: {background: corBase, border: corBase}, font: {size: 9, color: "#475569", bold: true}
+            color: {background: corBase, border: corBase}, font: {size: 10, color: "#334155", bold: true},
+            _isSpecific: !ehTransversal
         });
 
         info.eixos.forEach(ex => {
-            G.edges.push({ from: ex, to: `__cat__${catNome}`, color: "#CBD5E0", width: 1 });
+            G.edges.push({ id: `edge_${ex}_${catNome}`, from: ex, to: `__cat__${catNome}`, color: "#E2E8F0", width: 1.5 });
         });
 
-        // Coleciona o volume de causas para ordenar no menu lateral
         G.details[`__cat__${catNome}`] = {
-            cat: catNome, cor: corBase, volumeCausas: totalCausasDiferentes,
+            id: `__cat__${catNome}`, cat: catNome, cor: corBase, volumeCausas: totalCausasDiferentes, ehTransversal: ehTransversal,
             causas: Object.values(info.causas).map(c => ({ texto: c.texto, eixos: Array.from(c.eixos), votos: c.v }))
         };
     });
 }
 
-let net = null, vN = null, vE = null;
-
 function renderTree() {
-    vN = new vis.DataSet(G.nodes); vE = new vis.DataSet(G.edges);
+    vN = new vis.DataSet(G.nodes); G.edgesData = [...G.edges];
+    vE = new vis.DataSet(G.edges);
+
     net = new vis.Network(document.getElementById("net"), {nodes: vN, edges: vE}, {
         physics: {
             solver: "barnesHut",
-            barnesHut: { gravitationalConstant: -4000, centralGravity: 0.3, springLength: 140, springConstant: 0.04, damping: 0.09 },
+            barnesHut: { gravitationalConstant: -4500, centralGravity: 0.25, springLength: 150, springConstant: 0.04, damping: 0.1 },
             stabilization: { iterations: 150 }
         },
         interaction: { hover: true, tooltipDelay: 150 }
     });
     net.on("stabilizationIterationsDone", () => net.setOptions({ physics: false }));
     net.on("click", p => p.nodes.length && aoClicarNoNode(p.nodes[0]));
+}
+
+function aplicarFiltroGrafo(exibirEspecificas) {
+    fecharPainel();
+    
+    // Filtra os nós
+    const nosFiltrados = G.nodes.filter(n => {
+        if (!exibirEspecificas && n._isSpecific) return false;
+        return true;
+    });
+    vN.clear(); vN.add(nosFiltrados);
+
+    // Filtra as arestas baseadas nos nós ativos
+    const idsAtivos = nosFiltrados.map(n => n.id);
+    const arestasFiltradas = G.edgesData.filter(e => idsAtivos.includes(e.from) && idsAtivos.includes(e.to));
+    vE.clear(); vE.add(arestasFiltradas);
+
+    // Re-estabiliza o layout caso queira ajustar distâncias após ocultar
+    net.setOptions({ physics: true });
+    setTimeout(() => net.setOptions({ physics: false }), 800);
 }
 
 function aoClicarNoNode(id) {
@@ -226,9 +261,11 @@ function aoClicarNoNode(id) {
     document.getElementById("painel").classList.add("open");
     document.getElementById("net").style.right = "480px";
 
-    // COMPORTAMENTO DE ACENDER CONEXÕES: Ilumina apenas o nó clicado, a raiz e os eixos diretamente interligados!
-    const conectados = net.getConnectedNodes(id); conectados.push(id); conectados.push("ROOT");
-    vN.update(G.nodes.map(n => ({ id: n.id, opacity: conectados.includes(n.id) ? 1 : 0.05 })));
+    // Destaca conexões ativas e esmaece o restante
+    try {
+        const conectados = net.getConnectedNodes(id); conectados.push(id); conectados.push("ROOT");
+        vN.update(vN.get().map(n => ({ id: n.id, opacity: conectados.includes(n.id) ? 1 : 0.05 })));
+    } catch(err){}
 }
 
 function buildSidebarHierarquica() {
@@ -236,61 +273,63 @@ function buildSidebarHierarquica() {
     list.innerHTML = "";
 
     const reset = document.createElement("button");
-    reset.className = "w-full text-left p-2.5 rounded-lg text-xs font-bold text-slate-400 hover:bg-slate-50 uppercase mb-5 transition flex items-center gap-1.5";
+    reset.className = "w-full text-left p-2.5 rounded-lg text-xs font-bold text-slate-400 hover:bg-slate-50 uppercase mb-3 transition flex items-center gap-1.5";
     reset.textContent = "⊙ Ver Cenário Completo";
     reset.onclick = () => { fecharPainel(); };
     list.appendChild(reset);
 
-    const sortedCats = Object.keys(G.details).map(id => ({ id, ...G.details[id] }));
+    const sortedCats = Object.keys(G.details).map(id => G.details[id]);
     
-    // ORDENAÇÃO HIERÁRQUICA: Decrescente pela quantidade (volume) de causas
+    // 3. ORDENAÇÃO DE NÍVEL HIERÁRQUICO POR VOLUME DE CAUSAS DESDE O TOPO
     sortedCats.sort((a, b) => b.volumeCausas - a.volumeCausas);
 
-    const transversais = []; const especificas = [];
+    const transversais = sortedCats.filter(c => c.ehTransversal);
+    const especificas = sortedCats.filter(c => !c.ehTransversal);
 
-    sortedCats.forEach(c => {
-        const eixosUnicos = new Set();
-        c.causas.forEach(causa => causa.eixos.forEach(ex => eixosUnicos.add(ex)));
-        if (eixosUnicos.size > 1) transversais.push(c); else especificas.push(c);
-    });
-
-    const renderGrupoHierarquico = (titulo, classeCor, lista) => {
+    const renderGrupoHierarquico = (titulo, classeCor, lista, containerId) => {
         if (!lista.length) return;
-        const h = document.createElement("p");
-        h.className = `text-[10px] font-bold uppercase tracking-widest mt-6 mb-3 px-2.5 ${classeCor}`;
-        h.textContent = titulo;
-        list.appendChild(h);
+        const gWrapper = document.createElement("div");
+        gWrapper.id = containerId;
 
-        lista.forEach((item, idx) => {
+        const h = document.createElement("p");
+        h.className = `text-[10px] font-bold uppercase tracking-widest mt-5 mb-3 px-2.5 ${classeCor}`;
+        h.textContent = titulo;
+        gWrapper.appendChild(h);
+
+        lista.forEach(item => {
             const b = document.createElement("button");
-            // Estilo mais sutil, sem negrito pesado no nome, com volume de causas ao lado
             b.className = "cat-btn w-full text-left p-2.5 rounded-xl text-[11px] mb-1 flex items-start gap-3 border border-transparent hover:bg-slate-50 transition";
+            b.dataset.id = item.id;
             b.innerHTML = `<span style="width:10px;height:10px;border-radius:50%;background:${item.cor};margin-top:4px;flex-shrink:0;box-shadow:inset 0 0 0 1px rgba(0,0,0,0.05)"></span>
                 <div class="flex-1">
                     <span class="text-slate-700 font-medium leading-normal">${item.cat}</span>
-                    <span class="text-slate-400 font-medium text-[9px] block">(${item.volumeCausas} causas)</span>
+                    <span class="text-indigo-600 font-bold text-[10px] block mt-0.5">${item.volumeCausas} causas encontradas</span>
                 </div>`;
             b.onclick = () => {
                 aoClicarNoNode(item.id);
                 document.querySelectorAll(".cat-btn").forEach(btn => btn.classList.remove("bg-indigo-50", "border-indigo-100"));
                 b.classList.add("bg-indigo-50", "border-indigo-100");
             };
-            list.appendChild(b);
+            gWrapper.appendChild(b);
         });
+        
         const divider = document.createElement("hr");
-        divider.className = "my-5 border-slate-100";
-        list.appendChild(divider);
+        divider.className = "my-4 border-slate-100";
+        gWrapper.appendChild(divider);
+        list.appendChild(gWrapper);
     };
 
-    renderGrupoHierarquico("🔗 Temas Transversais (Ordenado por Volume)", "text-indigo-600", transversais);
-    renderGrupoHierarquico("📌 Dores Específicas (Ordenado por Volume)", "text-slate-500", especificas);
+    renderGrupoHierarquico("🔗 Temas Transversais (Por Relevância)", "text-indigo-600", transversais, "group-transversais");
+    renderGrupoHierarquico("📌 Dores Específicas (Por Relevância)", "text-slate-500", especificas, "group-especificas");
 }
 
 function fecharPainel() {
     document.getElementById("painel").classList.remove("open");
     document.getElementById("net").style.right = "0";
     document.querySelectorAll(".cat-btn").forEach(btn => btn.classList.remove("bg-indigo-50", "border-indigo-100"));
-    if (vN) vN.update(G.nodes.map(n => ({ id: n.id, opacity: 1 })));
+    try {
+        if (vN) vN.update(vN.get().map(n => ({ id: n.id, opacity: 1 })));
+    } catch(err){}
 }
 
 window.onload = inicializar;
