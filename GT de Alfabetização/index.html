@@ -3,41 +3,21 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Árvore de Problemas — GT de Alfabetização · SME-SP</title>
+<title>Painel de Evidências — GT de Alfabetização · SME-SP</title>
 <script src="https://cdn.tailwindcss.com"></script>
 <script src="https://unpkg.com/vis-network/standalone/umd/vis-network.min.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
 *{box-sizing:border-box}
 html,body{height:100%;margin:0;padding:0;overflow:hidden;font-family:"Inter",sans-serif;background:#F8FAFC}
-#net{position:absolute;top:0;left:0;right:0;bottom:0;background:#F8FAFC}
-#sidebar{position:fixed;top:0;left:0;width:280px;height:100vh;background:white;
-  border-right:1px solid #E2E8F0;z-index:30;display:flex;flex-direction:column}
+#net{position:absolute;top:0;left:280px;right:0;bottom:0;background:#F8FAFC;transition:right .25s ease}
+#sidebar{position:fixed;top:0;left:0;width:280px;height:100vh;background:white;border-right:1px solid #E2E8F0;z-index:30;display:flex;flex-direction:column}
 #sidebar-list{flex:1;overflow-y:auto;padding:12px 8px}
-#sidebar.hide{display:none}
-#painel{position:fixed;top:0;right:0;width:440px;height:100vh;background:white;
-  border-left:1px solid #E2E8F0;z-index:40;display:flex;flex-direction:column;
-  transform:translateX(100%);transition:transform .25s ease;box-shadow:-10px 0 25px rgba(0,0,0,0.03)}
+#painel{position:fixed;top:0;right:0;width:440px;height:100vh;background:white;border-left:1px solid #E2E8F0;z-index:40;display:flex;flex-direction:column;transform:translateX(100%);transition:transform .25s ease;box-shadow:-10px 0 25px rgba(0,0,0,0.02)}
 #painel.open{transform:translateX(0)}
 #painel-body{flex:1;overflow-y:auto;padding:20px 24px}
-#toggles{position:fixed;top:80px;right:16px;z-index:30;background:white;
-  border:1px solid #E2E8F0;border-radius:12px;padding:12px 16px;display:none;box-shadow:0 4px 12px rgba(0,0,0,0.03)}
-.mbtn{padding:8px 16px;border-radius:10px;font-size:12px;font-weight:600;
-  border:none;cursor:pointer;transition:all .15s;white-space:nowrap}
-.mbtn.on{background:#4F46E5;color:white;box-shadow:0 2px 6px rgba(79,70,229,0.15)}
-.mbtn.off{background:#F1F5F9;color:#64748B}
-.tog{position:relative;display:inline-block;width:32px;height:18px}
-.tog input{opacity:0;width:0;height:0}
-.tog-sl{position:absolute;cursor:pointer;inset:0;background:#CBD5E0;border-radius:18px;transition:.2s}
-.tog-sl:before{position:absolute;content:"";height:12px;width:12px;left:3px;bottom:3px;
-  background:white;border-radius:50%;transition:.2s}
-input:checked+.tog-sl{background:#4F46E5}
-input:checked+.tog-sl:before{transform:translateX(14px)}
 ::-webkit-scrollbar{width:4px}
 ::-webkit-scrollbar-thumb{background:#E2E8F0;border-radius:4px}
-.vis-tooltip{background:rgba(15,23,42,.95)!important;color:#F8FAFC!important;
-  border:none!important;border-radius:8px!important;font-size:11px!important;
-  padding:8px 12px!important;max-width:280px!important;line-height:1.5!important}
 </style>
 </head>
 <body>
@@ -52,29 +32,12 @@ input:checked+.tog-sl:before{transform:translateX(14px)}
 
 <div id="net"></div>
 
-<div style="position:fixed;top:0;left:0;right:0;z-index:20;pointer-events:none;
-  background:linear-gradient(rgba(248,250,252,1) 40%,rgba(248,250,252,0))">
+<div style="position:fixed;top:0;left:280px;right:0;z-index:20;pointer-events:none;background:linear-gradient(rgba(248,250,252,1) 40%,rgba(248,250,252,0))">
   <div style="display:flex;justify-content:center;padding:24px 0 48px">
     <div style="text-align:center">
-      <h1 style="font-size:18px;font-weight:700;color:#0F172A;margin:0;letter-spacing:-0.02em">Árvore Diagnóstica de Problemas</h1>
-      <p style="font-size:11px;color:#64748B;margin:4px 0 0;font-weight:500">GT de Alfabetização · Secretaria Municipal de Educação · 2026</p>
+      <h1 style="font-size:18px;font-weight:700;color:#0F172A;margin:0;letter-spacing:-0.02em">Matriz Diagnóstica de Vulnerabilidades</h1>
+      <p style="font-size:11px;color:#64748B;margin:4px 0 0;font-weight:500">Volumetria de gargalos e conexões transversais unificadas</p>
     </div>
-  </div>
-</div>
-
-<div style="position:fixed;bottom:24px;left:50%;transform:translateX(-50%);z-index:20;
-  display:flex;gap:8px;background:rgba(255,255,255,.95);backdrop-filter:blur(8px);border:1px solid #E2E8F0;
-  border-radius:20px;padding:8px 12px;box-shadow:0 8px 32px rgba(15,23,42,.06)">
-  <button class="mbtn on" data-m="temas">🔗 Visão por Temas</button>
-  <button class="mbtn off" data-m="completo">🌳 Visão Expandida</button>
-</div>
-
-<div id="toggles">
-  <p style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;
-    color:#94A3B8;margin:0 0 10px">Filtros Avançados</p>
-  <div style="display:flex;align-items:center;gap:8px">
-    <label class="tog"><input type="checkbox" id="t-trans" checked><span class="tog-sl"></span></label>
-    <span style="font-size:12px;color:#334155;font-weight:500">Exibir interações transversais</span>
   </div>
 </div>
 
@@ -85,9 +48,7 @@ input:checked+.tog-sl:before{transform:translateX(14px)}
       <h2 id="p-titulo" style="font-size:14px;font-weight:700;color:#0F172A;margin:0;line-height:1.4"></h2>
       <p id="p-sub" style="font-size:11px;color:#64748B;margin:4px 0 0;font-weight:500"></p>
     </div>
-    <button onclick="fecharPainel()" style="width:32px;height:32px;border-radius:10px;
-      background:#F1F5F9;border:none;cursor:pointer;font-size:18px;color:#64748B;
-      flex-shrink:0;display:flex;align-items:center;justify-content:center">×</button>
+    <button onclick="fecharPainel()" style="width:32px;height:32px;border-radius:10px;background:#F1F5F9;border:none;cursor:pointer;font-size:18px;color:#64748B;flex-shrink:0;display:flex;align-items:center;justify-content:center">×</button>
   </div>
   <div id="painel-body"></div>
 </div>
@@ -111,23 +72,19 @@ const CAT_CORES_MAP = {
   "Recursos pedagógicos": "#F472B6", "Excesso e sobreposição": "#4ADE80"
 };
 
-let D = { grafo_temas: { nodes: [], edges: [], detail: {} } };
+let G = { nodes: [], edges: [], details: {} };
 const CSV_URL = "https://raw.githubusercontent.com/sme-upge/sme-upge.github.io/refs/heads/main/GT%20de%20Alfabetiza%C3%A7%C3%A3o/arvore.csv";
 
-async function inicializarAplicacao() {
+async function inicializar() {
     try {
         const res = await fetch(CSV_URL);
         const csv = new TextDecoder("utf-8").decode(await res.arrayBuffer());
         const rows = parseCSV(csv);
         buildStructure(rows);
         buildSidebar();
-        setModo("temas");
-        
-        document.getElementById("t-trans").addEventListener("change", (e) => {
-            if (modo === "completo") filtrarGrafoCompleto(e.target.checked);
-        });
+        renderTree();
     } catch (e) {
-        console.error("Falha no carregamento:", e);
+        console.error(e);
     }
 }
 
@@ -150,10 +107,9 @@ function buildStructure(rows) {
     const catMap = {};
     const eixosAtivos = new Set();
 
-    // FIXO E COMPACTO: O nó central não interfere no tamanho dos demais
-    D.grafo_temas.nodes.push({
-        id: "__macro__", label: "Problema Central\nRede Municipal", group: "macro", size: 18,
-        color: {background: "#EF4444", border: "#DC2626"}, font: {size: 11, color: "#475569", bold: true}, shape: "dot"
+    G.nodes.push({
+        id: "ROOT", label: "Problema Central\nAlfabetização", shape: "dot", size: 15,
+        color: {background: "#EF4444", border: "#DC2626"}, font: {size: 11, color: "#1E293B", bold: true}
     });
 
     rows.forEach(r => {
@@ -163,227 +119,155 @@ function buildStructure(rows) {
         const cleanEixo = eixo.split(" - ")[0];
         eixosAtivos.add(cleanEixo);
 
-        const processarPar = (textoCausa, categoriaCausa) => {
+        const mapearPar = (textoCausa, categoriaCausa) => {
             if (!textoCausa || !categoriaCausa || categoriaCausa.trim() === "" || textoCausa.trim() === "") return;
+            const cat = categoriaCausa.trim();
+            const txt = textoCausa.trim();
+
+            if (!catMap[cat]) catMap[cat] = { eixos: new Set(), causas: {} };
+            catMap[cat].eixos.add(cleanEixo);
             
-            const catNome = categoriaCausa.trim();
-            const txtCausa = textoCausa.trim();
-            
-            if (!catMap[catNome]) catMap[catNome] = { axes: new Set(), rawCauses: {} };
-            catMap[catNome].axes.add(cleanEixo);
-            
-            if (!catMap[catNome].rawCauses[txtCausa]) {
-                catMap[catNome].rawCauses[txtCausa] = { text: txtCausa, axes: new Set(), v: 0 };
-            }
-            catMap[catNome].rawCauses[txtCausa].axes.add(cleanEixo);
+            if (!catMap[cat].causas[txt]) catMap[cat].causas[txt] = { texto: txt, eixos: new Set(), v: 0 };
+            catMap[cat].causas[txt].eixos.add(cleanEixo);
             
             const vNum = parseInt(votos) || 0;
-            if (vNum > catMap[catNome].rawCauses[txtCausa].v) {
-                catMap[catNome].rawCauses[txtCausa].v = vNum;
-            }
+            if (vNum > catMap[cat].causas[txt].v) catMap[cat].causas[txt].v = vNum;
         };
 
-        processarPar(cp, cat_p);
-        processarPar(cs, cat_s);
-        processarPar(ct, cat_t);
+        mapearPar(cp, cat_p);
+        mapearPar(cs, cat_s);
+        mapearPar(ct, cat_t);
     });
 
     eixosAtivos.forEach(ex => {
-        D.grafo_temas.nodes.push({
-            id: `__e__${ex}`, label: ex, title: ex, group: "eixo", size: 14,
-            color: {background: EIXO_CORES[ex] || "#64748B", border: EIXO_CORES[ex] || "#64748B"}, 
-            font: {size: 10, color: "#1E293B", bold: true}, shape: "dot"
+        G.nodes.push({
+            id: ex, label: ex, shape: "dot", size: 11,
+            color: {background: EIXO_CORES[ex]||"#64748B", border: EIXO_CORES[ex]||"#64748B"},
+            font: {size: 10, color: "#334155", bold: true}
         });
-        D.grafo_temas.edges.push({from: "__macro__", to: `__e__${ex}`, color: {color: "#E2E8F0"}, width: 1.5});
+        G.edges.push({ from: "ROOT", to: ex, color: "#E2E8F0", width: 2 });
     });
 
-    Object.keys(catMap).forEach(name => {
-        const id = `__cat__${name}`;
-        const info = catMap[name];
-        const chaveCor = Object.keys(CAT_CORES_MAP).find(k => name.includes(k));
+    Object.keys(catMap).forEach(catNome => {
+        const info = catMap[catNome];
+        const totalCausasDiferentes = Object.keys(info.causas).length;
+        const chaveCor = Object.keys(CAT_CORES_MAP).find(k => catNome.includes(k));
         const corBase = CAT_CORES_MAP[chaveCor] || "#CBD5E0";
 
-        const labelCurto = name.length > 22 ? name.slice(0,22) + "..." : name;
+        // UNIÃO INTELIGENTE: Tamanho calculado dinamicamente baseado na volumetria real de causas!
+        const tamanhoCalculado = 8 + Math.min(totalCausasDiferentes * 1.5, 12);
+        const labelCurto = catNome.length > 22 ? catNome.slice(0,22) + "..." : catNome;
 
-        // TAMANHO FIXO (size: 10): Remove o bug da bola gigante. Fica pequeno e harmônico.
-        D.grafo_temas.nodes.push({
-            id: id, label: labelCurto, title: name, group: "cat", size: 10, 
-            color: {background: corBase, border: corBase},
-            font: {size: 9, color: "#64748B"}, shape: "dot"
+        G.nodes.push({
+            id: `__cat__${catNome}`, label: labelCurto, title: catNome, shape: "dot", size: tamanhoCalculado,
+            color: {background: corBase, border: corBase}, font: {size: 9, color: "#64748B"}
         });
 
-        info.axes.forEach(ex => {
-            D.grafo_temas.edges.push({
-                from: `__e__${ex}`, to: id, 
-                color: {color: "#E2E8F0"}, 
-                width: 1
-            });
+        info.eixos.forEach(ex => {
+            G.edges.push({ from: ex, to: `__cat__${catNome}`, color: "#CBD5E0", width: 1 });
         });
 
-        D.grafo_temas.detail[id] = {
-            cat: name, cor: corBase, eixos: Array.from(info.axes),
-            causas: Object.values(info.rawCauses).map(c => ({
-                causa: c.text, eixos_origem: Array.from(c.axes), votos: c.v
-            }))
+        G.details[`__cat__${catNome}`] = {
+            cat: catNome, cor: corBase,
+            causas: Object.values(info.causas).map(c => ({ texto: c.texto, eixos: Array.from(c.eixos), votos: c.v }))
         };
     });
 }
 
-let net = null, vN = null, vE = null, modo = "temas", selCat = null;
+let net = null, vN = null, vE = null;
 
-function render(nodes, edges, opts) {
-    if (net) net.destroy();
-    vN = new vis.DataSet(nodes); vE = new vis.DataSet(edges);
-    
+function renderTree() {
+    vN = new vis.DataSet(G.nodes); vE = new vis.DataSet(G.edges);
     net = new vis.Network(document.getElementById("net"), {nodes: vN, edges: vE}, {
-        nodes: {
-            shape: "dot",
-            font: {face: "Inter"}
-        },
-        edges: {width: 1, color: "#E2E8F0", smooth: {type: "continuous"}},
         physics: {
             solver: "barnesHut",
-            barnesHut: {
-                gravitationalConstant: opts.grav,
-                centralGravity: 0.3,
-                springLength: opts.sl,
-                springConstant: 0.04,
-                damping: 0.09
-            },
-            stabilization: {iterations: 150}
+            barnesHut: { gravitationalConstant: -3500, centralGravity: 0.3, springLength: 120, springConstant: 0.04, damping: 0.09 },
+            stabilization: { iterations: 150 }
         },
-        interaction: {hover: true, tooltipDelay: 150}
+        interaction: { hover: true }
     });
-
-    net.on("stabilizationIterationsDone", () => {
-        net.setOptions({ physics: false });
-    });
-
-    net.on("click", p => p.nodes.length && onClick(p.nodes[0]));
+    net.on("stabilizationIterationsDone", () => net.setOptions({ physics: false }));
+    net.on("click", p => p.nodes.length && aoClicarNoNode(p.nodes[0]));
 }
 
-function setModo(m) {
-    modo = m; fecharPainel();
-    document.querySelectorAll(".mbtn").forEach(b => {
-        b.classList.toggle("on", b.dataset.m === m);
-        b.classList.toggle("off", b.dataset.m !== m);
-    });
-    
-    document.getElementById("sidebar").classList.toggle("hide", m !== "temas");
-    document.getElementById("toggles").style.display = m === "completo" ? "block" : "none";
-    document.getElementById("net").style.left = m === "temas" ? "280px" : "0";
-    
-    if (m === "temas") {
-        render(D.grafo_temas.nodes, D.grafo_temas.edges, {grav: -4000, sl: 140});
-    } else {
-        filtrarGrafoCompleto(document.getElementById("t-trans").checked);
-    }
-}
-
-function filtrarGrafoCompleto(manterTransversais) {
-    let finalEdges = [...D.grafo_temas.edges];
-    if (!manterTransversais) {
-        const catMapCount = {};
-        D.grafo_temas.edges.forEach(e => {
-            if(e.to.startsWith("__cat__")) {
-                catMapCount[e.to] = (catMapCount[e.to] || 0) + 1;
-            }
-        });
-        finalEdges = D.grafo_temas.edges.filter(e => {
-            if (e.to.startsWith("__cat__") && catMapCount[e.to] > 1 && !e.from.startsWith("__macro__")) {
-                return false;
-            }
-            return true;
-        });
-    }
-    render(D.grafo_temas.nodes, finalEdges, {grav: -6000, sl: 180});
-}
-
-function onClick(id) {
-    const det = D.grafo_temas.detail[id];
+function aoClicarNoNode(id) {
+    const det = G.details[id];
     if (!det) return;
-    
+
     document.getElementById("p-cor").style.background = det.cor;
     document.getElementById("p-titulo").textContent = det.cat;
-    document.getElementById("p-sub").textContent = `${det.causas.length} evidências estruturadas`;
-    
-    let html = '<p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-4">Relatos Reais Capturados</p>';
-    
+    document.getElementById("p-sub").textContent = `${det.causas.length} vulnerabilidades mapeadas sob este tema`;
+
+    let html = '<p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-4">Evidências Coletadas na Rede</p>';
     det.causas.forEach(c => {
-        const badges = c.eixos_origem.map(ex => `<span style="background:${EIXO_CORES[ex] || "#64748B"};color:white;padding:3px 6px;border-radius:6px;font-size:9px;font-weight:700;margin-right:4px">${EIXO_CURTO[ex] || ex}</span>`).join("");
+        const badges = c.eixos.map(ex => `<span style="background:${EIXO_CORES[ex] || "#64748B"};color:white;padding:3px 6px;border-radius:6px;font-size:9px;font-weight:700;margin-right:4px">${EIXO_CURTO[ex] || ex}</span>`).join("");
         html += `<div style="padding:14px;border-radius:12px;border:1px solid #E2E8F0;background:#F8FAFC;margin-bottom:12px">
             <div style="margin-bottom:8px">${badges}</div>
-            <p style="font-size:12px;color:#334155;line-height:1.6;font-weight:500">${c.causa}</p>
-            ${c.votos > 0 ? `<div style="margin-top:8px;font-size:10px;font-weight:700;color:#D97706;display:inline-flex;align-items:center;background:#FEF3C7;padding:2px 8px;border-radius:6px">⭐ ${c.votos} votos</div>` : ""}
+            <p style="font-size:12px;color:#334155;line-height:1.6;font-weight:500">${c.texto}</p>
+            ${c.votos > 0 ? `<div style="margin-top:8px;font-size:10px;font-weight:700;color:#D97706;background:#FEF3C7;padding:2px 8px;border-radius:6px;display:inline-block">⭐ ${c.votos} votos</div>` : ""}
         </div>`;
     });
-    
+
     document.getElementById("painel-body").innerHTML = html;
     document.getElementById("painel").classList.add("open");
-    destacar(id);
+    document.getElementById("net").style.right = "440px";
+
+    // COMPORTAMENTO DE ACENDER CONEXÕES: Ilumina apenas o nó clicado, a raiz e os eixos diretamente interligados!
+    const conectados = net.getConnectedNodes(id); conectados.push(id); conectados.push("ROOT");
+    vN.update(G.nodes.map(n => ({ id: n.id, opacity: conectados.includes(n.id) ? 1 : 0.06 })));
 }
 
 function buildSidebar() {
     const list = document.getElementById("sidebar-list");
     list.innerHTML = "";
-    
+
     const reset = document.createElement("button");
-    reset.className = "w-full text-left p-2.5 rounded-lg text-xs font-bold text-slate-400 hover:bg-slate-50 uppercase mb-4 transition flex items-center gap-1.5";
-    reset.textContent = "⊙ Limpar Seleção";
-    reset.onclick = () => { destacar(null); fecharPainel(); };
+    reset.className = "w-full text-left p-2.5 rounded-lg text-xs font-bold text-slate-400 hover:bg-slate-50 uppercase mb-4 transition";
+    reset.textContent = "⊙ Ver Cenário Completo";
+    reset.onclick = () => { fecharPainel(); };
     list.appendChild(reset);
 
-    const t = [], i = [];
-    Object.keys(D.grafo_temas.detail).forEach(id => {
-        const item = D.grafo_temas.detail[id];
-        if (item.eixos.length > 1) t.push({id, ...item}); else i.push({id, ...item});
+    const sortedCats = Object.keys(G.details).map(id => ({ id, ...G.details[id] }));
+    const transversais = []; const especificas = [];
+
+    sortedCats.forEach(c => {
+        const eixosUnicos = new Set();
+        c.causas.forEach(causa => causa.eixos.forEach(ex => eixosUnicos.add(ex)));
+        if (eixosUnicos.size > 1) transversais.push(c); else especificas.push(c);
     });
 
-    const renderGrupo = (titulo, corClasse, lista) => {
-        if(lista.length === 0) return;
+    const renderGrupo = (titulo, classeCor, lista) => {
+        if (!lista.length) return;
         const h = document.createElement("p");
-        h.className = `text-[10px] font-bold uppercase tracking-widest mt-5 mb-2 px-2.5 ${corClasse}`;
+        h.className = `text-[10px] font-bold uppercase tracking-widest mt-5 mb-2 px-2.5 ${classeCor}`;
         h.textContent = titulo;
         list.appendChild(h);
-        
+
         lista.forEach(item => {
             const b = document.createElement("button");
             b.className = "cat-btn w-full text-left p-2.5 rounded-xl text-[11px] mb-1 flex items-start gap-2.5 border border-transparent hover:bg-slate-50 transition";
-            b.dataset.c = item.id;
             b.innerHTML = `<span style="width:8px;height:8px;border-radius:50%;background:${item.cor};margin-top:4px;flex-shrink:0"></span><span class="text-slate-600 font-medium leading-normal">${item.cat}</span>`;
             b.onclick = () => {
-                onClick(item.id);
+                aoClicarNoNode(item.id);
                 document.querySelectorAll(".cat-btn").forEach(btn => btn.classList.remove("bg-indigo-50", "border-indigo-100"));
                 b.classList.add("bg-indigo-50", "border-indigo-100");
             };
             list.appendChild(b);
         });
-        const divider = document.createElement("hr");
-        divider.className = "my-4 border-slate-100";
-        list.appendChild(divider);
     };
 
-    renderGrupo("🔗 Temas Transversais", "text-indigo-600", t);
-    renderGrupo("📌 Dores Específicas", "text-slate-500", i);
+    renderGrupo("🔗 Temas Transversais", "text-indigo-600", transversais);
+    renderGrupo("📌 Dores Específicas", "text-slate-500", especificas);
 }
 
-function destacar(id) {
-    selCat = id;
-    if (!id) {
-        document.querySelectorAll(".cat-btn").forEach(btn => btn.classList.remove("bg-indigo-50", "border-indigo-100"));
-        if(vN) vN.update(vN.get().map(n => ({id: n.id, opacity: 1}))); 
-        return; 
-    }
-    if (!vN) return;
-    const nodes = net.getConnectedNodes(id); nodes.push(id);
-    vN.update(vN.get().map(n => ({id: n.id, opacity: nodes.includes(n.id) ? 1 : 0.08})));
+function fecharPainel() {
+    document.getElementById("painel").classList.remove("open");
+    document.getElementById("net").style.right = "0";
+    document.querySelectorAll(".cat-btn").forEach(btn => btn.classList.remove("bg-indigo-50", "border-indigo-100"));
+    if (vN) vN.update(G.nodes.map(n => ({ id: n.id, opacity: 1 })));
 }
 
-function fecharPainel() { 
-    document.getElementById("painel").classList.remove("open"); 
-    destacar(null);
-}
-window.onload = inicializarAplicacao;
+window.onload = inicializar;
 </script>
 </body>
 </html>
