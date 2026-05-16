@@ -38,7 +38,7 @@ input:checked + .slider:before {transform:translateX(14px)}
   <div id="controles-aba1" class="px-5 py-3 bg-slate-50 border-b border-slate-100 flex items-center justify-between flex-shrink-0">
     <span class="text-[11px] font-semibold text-slate-700">Exibir dores específicas</span>
     <label class="switch">
-      <input type="checkbox" id="filtro-especificas" checked>
+      <input type="checkbox" id="filtro-especificas" checked onchange="aplicarFiltroAba1()">
       <span class="slider"></span>
     </label>
   </div>
@@ -123,9 +123,11 @@ const CAT_CORES_MAP = {
 
 let currentTab = "radial"; 
 let rawRows = []; 
-let G = { nodes: [], edges: [], details: {}, edgesOriginal: [] };
+let G_aba1 = { nodes: [], edges: [], details: [], originalEdges: [] }; 
 let hNodesDetails = {}; 
-let net = null, vN = null, vE = null;
+let networkInstance = null;
+let nodesDataSet = null;
+let edgesDataSet = null;
 
 const CSV_URL = "https://raw.githubusercontent.com/sme-upge/sme-upge.github.io/refs/heads/main/GT%20de%20Alfabetiza%C3%A7%C3%A3o/arvore.csv";
 
@@ -148,7 +150,7 @@ async function inicializar() {
             });
         });
 
-        // Preencher combo box da aba 2
+        // Alimenta o combo de Temas Transversais da Aba 2
         const comboTema = document.getElementById("select-tema-transversal");
         Array.from(listaTemasUnicos).sort().forEach(t => {
             const opt = document.createElement("option");
@@ -157,7 +159,8 @@ async function inicializar() {
         });
 
         construirCheckboxEixos();
-        renderizarEstruturaRadial(); // Inicia na Aba 1
+        processarDadosAba1(); 
+        renderizarEstruturaRadial(); // Renderiza aba 1 por padrão
 
     } catch (e) {
         console.error(e);
@@ -201,14 +204,13 @@ function toggleVisibilidadeComboTema() {
 }
 
 // ==========================================
-// --- LÓGICA PURA DA ABA 1: MATRIZ DE TEMAS
+// --- RECUPERAÇÃO DA LÓGICA ORIGINAL DA ABA 1
 // ==========================================
-function renderizarEstruturaRadial() {
-    G = { nodes: [], edges: [], details: {}, edgesOriginal: [] };
-    const catMap = {};
-    const eixosAtivos = {};
+function processarDadosAba1() {
+    G_aba1 = { nodes: [], edges: [], details: {}, originalEdges: [] };
+    const catMap = {}; const eixosAtivos = {};
 
-    G.nodes.push({
+    G_aba1.nodes.push({
         id: "ROOT", label: "BAIXA\nALFABETIZAÇÃO", shape: "dot", size: 36,
         color: { background: "#E11D48", border: "#BE123C" }, font: {size: 9, color: "#FFFFFF", bold: true}
     });
@@ -237,12 +239,12 @@ function renderizarEstruturaRadial() {
 
     Object.keys(eixosAtivos).forEach(ex => {
         const cor = EIXO_CORES[ex] || "#475569";
-        G.nodes.push({
+        G_aba1.nodes.push({
             id: ex, label: ex, title: eixosAtivos[ex].completo, shape: "dot", size: 24,
             color: {background: cor, border: cor}, font: {size: 11, color: "#1E293B", bold: true}
         });
-        G.edges.push({ id: `edge_root_${ex}`, from: "ROOT", to: ex, color: { color: "#CBD5E0", opacity: 0.5 }, width: 1.5 });
-        G.details[ex] = { tipo: "eixo", titulo: eixosAtivos[ex].completo, cor: cor, subtitulo: "Problema Central do Eixo", conteudo: eixosAtivos[ex].problema };
+        G_aba1.edges.push({ id: `edge_root_${ex}`, from: "ROOT", to: ex, color: { color: "#CBD5E0", opacity: 0.5 }, width: 1.5 });
+        G_aba1.details[ex] = { tipo: "eixo", titulo: eixosAtivos[ex].completo, cor: cor, subtitulo: "Problema Central do Eixo", conteudo: eixosAtivos[ex].problema };
     });
 
     Object.keys(catMap).forEach(catNome => {
@@ -256,47 +258,52 @@ function renderizarEstruturaRadial() {
         const labelCurto = catNome.length > 20 ? catNome.slice(0,20) + "..." : catNome;
         const ehTransversal = info.eixos.size > 1;
 
-        G.nodes.push({
+        G_aba1.nodes.push({
             id: `__cat__${catNome}`, label: labelCurto, title: catNome, shape: "dot", size: tamanho,
             color: {background: cor, border: cor}, font: {size: 10, color: "#475569", bold: true}, _isSpecific: !ehTransversal
         });
 
         info.eixos.forEach(ex => {
-            G.edges.push({ id: `edge_${ex}_${catNome}`, from: ex, to: `__cat__${catNome}`, color: { color: "#E2E8F0", opacity: 0.7 } });
+            G_aba1.edges.push({ id: `edge_${ex}_${catNome}`, from: ex, to: `__cat__${catNome}`, color: { color: "#E2E8F0", opacity: 0.7 } });
         });
 
-        G.details[`__cat__${catNome}`] = {
+        G_aba1.details[`__cat__${catNome}`] = {
             tipo: "categoria", cat: catNome, cor: cor, volumeCausas: totalCausasDiferentes, ehTransversal: ehTransversal,
             causas: Object.values(info.causas).map(c => ({ texto: c.texto, eixos: Array.from(c.eixos), votos: c.v }))
         };
     });
 
-    G.edgesOriginal = [...G.edges];
-    buildSidebarRadialAba1();
-    renderVisNetworkRadial();
+    G_aba1.originalEdges = [...G_aba1.edges];
 }
 
-function renderVisNetworkRadial() {
-    vN = new vis.DataSet(G.nodes); vE = new vis.DataSet(G.edges);
-    net = new vis.Network(document.getElementById("net"), {nodes: vN, edges: vE}, {
+function renderizarEstruturaRadial() {
+    fecharPainel();
+    buildSidebarRadialAba1();
+
+    nodesDataSet = new vis.DataSet(G_aba1.nodes);
+    edgesDataSet = new vis.DataSet(G_aba1.edges);
+
+    networkInstance = new vis.Network(document.getElementById("net"), {nodes: nodesDataSet, edges: edgesDataSet}, {
         edges: { width: 1.5, smooth: { enabled: true, type: "continuous", roundness: 0.4 } },
         physics: { enabled: true, solver: "barnesHut", barnesHut: { gravitationalConstant: -12000, centralGravity: 0.04, springLength: 200 } },
         interaction: { hover: true, tooltipDelay: 150 }
     });
-    net.on("click", p => p.nodes.length ? aoClicarNoNodeRadial(p.nodes[0]) : fecharPainel());
-    aplicarFiltroGrafoRadial(document.getElementById("filtro-especificas").checked);
+
+    networkInstance.on("click", p => p.nodes.length ? aoClicarNoNodeRadial(p.nodes[0]) : fecharPainel());
+    aplicarFiltroAba1();
 }
 
-function aplicarFiltroGrafoRadial(exibirEspecificas) {
+function aplicarFiltroAba1() {
+    const exibirEspecificas = document.getElementById("filtro-especificas").checked;
     fecharPainel();
-    const nosFiltrados = G.nodes.filter(n => exibirEspecificas || !n._isSpecific);
-    vN.clear(); vN.add(nosFiltrados);
+    const nosFiltrados = G_aba1.nodes.filter(n => exibirEspecificas || !n._isSpecific);
+    nodesDataSet.clear(); nodesDataSet.add(nosFiltrados);
     const idsAtivos = nosFiltrados.map(n => n.id);
-    vE.clear(); vE.add(G.edgesOriginal.filter(e => idsAtivos.includes(e.from) && idsAtivos.includes(e.to)));
+    edgesDataSet.clear(); edgesDataSet.add(G_aba1.originalEdges.filter(e => idsAtivos.includes(e.from) && idsAtivos.includes(e.to)));
 }
 
 function aoClicarNoNodeRadial(id) {
-    const det = G.details[id]; if (!det) return;
+    const det = G_aba1.details[id]; if (!det) return;
     document.getElementById("p-cor").style.background = det.cor;
     
     if (det.tipo === "eixo") {
@@ -323,7 +330,7 @@ function aoClicarNoNodeRadial(id) {
 
 function buildSidebarRadialAba1() {
     const list = document.getElementById("sidebar-list"); list.innerHTML = "";
-    const sortedCats = Object.keys(G.details).map(id => G.details[id]).filter(item => item.tipo === "categoria").sort((a,b)=>b.volumeCausas - a.volumeCausas);
+    const sortedCats = Object.keys(G_aba1.details).map(id => G_aba1.details[id]).filter(item => item.tipo === "categoria").sort((a,b)=>b.volumeCausas - a.volumeCausas);
     
     const renderGrupo = (titulo, classeCor, lista) => {
         if (!lista.length) return;
@@ -341,9 +348,10 @@ function buildSidebarRadialAba1() {
 
 
 // ==========================================
-// --- LÓGICA PURA DA ABA 2: ÁRVORE DETALHADA / CONSTELAÇÃO
+// --- LÓGICA PURA DA ABA 2 (CORRIGIDA E RESPONSIVA)
 // ==========================================
 function renderizarEstruturaHierarquica() {
+    if (currentTab !== "hierarquica") return;
     fecharPainel();
     
     const eixosSelecionados = Array.from(document.querySelectorAll(".axis-checkbox:checked")).map(cb => cb.value);
@@ -354,7 +362,7 @@ function renderizarEstruturaHierarquica() {
     const hNodes = []; const hEdges = []; const nosCriadosUnicos = new Set();
     hNodesDetails = {}; 
 
-    // Nó Macro Raiz Central
+    // Nó Raiz Central Macro
     const macroId = "H2_MACRO_ROOT";
     hNodes.push({
         id: macroId, label: "BAIXA\nALFABETIZAÇÃO", shape: "dot", size: 30,
@@ -364,7 +372,6 @@ function renderizarEstruturaHierarquica() {
     const mapaRecorrenciaTexto = {}; const mapaTextoParaEixos = {}; const mapaTextoParaCategorias = {};
     const mapaNodesParaTeia = {};
 
-    // Mapeamento de concorrência global no CSV
     rawRows.forEach(r => {
         const [eixo, , cp, cat_p, cs, cat_s, , ct, cat_t] = r; if(!eixo) return;
         const sigla = eixo.split(" - ")[0];
@@ -379,7 +386,6 @@ function renderizarEstruturaHierarquica() {
         });
     });
 
-    // Métricas por Eixo
     const metricasEixos = {};
     eixosSelecionados.forEach(ex => { metricasEixos[ex] = { totalP: 0, totalS: 0, totalT: 0, transversais: 0, estrelas: 0, probCentral: "" }; });
 
@@ -393,7 +399,6 @@ function renderizarEstruturaHierarquica() {
         if (ct && ct.trim() !== "") { metricasEixos[sigla].totalT++; if(mapaRecorrenciaTexto[ct.trim()] > 1) metricasEixos[sigla].transversais++; if(vNum >= 1) metricasEixos[sigla].estrelas++; }
     });
 
-    // Filtra e reconstrói a árvore detalhada
     const linhasFiltradas = rawRows.filter(r => r[0] && eixosSelecionados.includes(r[0].split(" - ")[0]));
 
     linhasFiltradas.forEach((r, idx) => {
@@ -423,7 +428,7 @@ function renderizarEstruturaHierarquica() {
             
             let cor = corPadrao; let tSize = tamanho; let bW = 0.5; let bColor = "#94A3B8";
 
-            if (destakarTransversais && ehTransversal && (filtroTemaEscolhido === "__ALL__" || filtroTemaEscolhido === temaReal)) {
+            if (destacarTransversais && ehTransversal && (filtroTemaEscolhido === "__ALL__" || filtroTemaEscolhido === temaReal)) {
                 cor = "#FEF3C7"; tSize = tamanho + 3; bW = 2; bColor = "#F59E0B";
                 if (!mapaNodesParaTeia[temaReal]) mapaNodesParaTeia[temaReal] = [];
                 mapaNodesParaTeia[temaReal].push(noId);
@@ -448,7 +453,6 @@ function renderizarEstruturaHierarquica() {
         if (idS) montarNo(ct, cat_t, idS, "3", 7, "#F8FAFC");
     });
 
-    // Desenha as teias e linhas tracejadas dos temas selecionados
     if (destacarTransversais) {
         Object.keys(mapaNodesParaTeia).forEach(tema => {
             if (filtroTemaEscolhido !== "__ALL__" && filtroTemaEscolhido !== tema) return;
@@ -463,17 +467,17 @@ function renderizarEstruturaHierarquica() {
         });
     }
 
-    document.getElementById("sidebar-list").innerHTML = `<div class="p-4 bg-indigo-50/60 border rounded-xl text-[11px] text-slate-600 leading-relaxed"><p class="font-bold text-indigo-900 mb-1">✨ Constelação Ativa</p>Filtros e teias tracejadas totalmente operacionais. Clique nos nós para auditar volumes e causas.</div>`;
+    document.getElementById("sidebar-list").innerHTML = `<div class="p-4 bg-indigo-50/60 border rounded-xl text-[11px] text-slate-600 leading-relaxed"><p class="font-bold text-indigo-900 mb-1">✨ Constelação Ativa</p>Filtros de órbita ([1ª], [2ª], [3ª]) e teias tracejadas em tempo real. Clique nos nós para auditar.</div>`;
 
-    // Renderizar rede da Aba 2
-    vN = new vis.DataSet(hNodes); vE = new vis.DataSet(hEdges);
-    net = new vis.Network(document.getElementById("net"), {nodes: vN, edges: vE}, {
-        edges: { smooth: { enabled: true, type: "continuous", roundness: 0.3 } },
-        physics: { enabled: true, solver: "forceAtlas2Based", forceAtlas2Based: { gravitationalConstant: -70, centralGravity: 0.02, springLength: 50, avoidOverlap: 1 } },
-        interaction: { hover: true }
+    nodesDataSet.clear(); nodesDataSet.add(hNodes);
+    edgesDataSet.clear(); edgesDataSet.add(hEdges);
+
+    networkInstance.setOptions({
+        physics: { enabled: true, solver: "forceAtlas2Based", forceAtlas2Based: { gravitationalConstant: -70, centralGravity: 0.02, springLength: 50, avoidOverlap: 1 } }
     });
 
-    net.on("click", p => {
+    networkInstance.off("click"); 
+    networkInstance.on("click", p => {
         if(!p.nodes.length) { fecharPainel(); return; }
         const id = p.nodes[0];
         
@@ -481,7 +485,7 @@ function renderizarEstruturaHierarquica() {
             document.getElementById("p-cor").style.background = "#E11D48";
             document.getElementById("p-titulo").textContent = "Baixa Alfabetização";
             document.getElementById("p-sub").textContent = "Problema Macro Central";
-            document.getElementById("painel-body").innerHTML = `<p class="text-xs text-slate-600 font-medium leading-relaxed">Este é o ponto de ancoragem de toda a rede. Todos os eixos selecionados se desdobram obrigatoriamente a partir deste indicador macro de vulnerabilidade.</p>`;
+            document.getElementById("painel-body").innerHTML = `<p class="text-xs text-slate-600 font-medium leading-relaxed">Ponto de amarração central da Árvore. Todos os eixos e frentes se ramificam obrigatoriamente a partir desta vulnerabilidade.</p>`;
             document.getElementById("painel").classList.add("open"); document.getElementById("net").style.right = "480px";
             return;
         }
@@ -539,6 +543,10 @@ function mudarAba(aba) {
         ctrl2.classList.remove("hidden"); ctrl2.classList.add("flex"); ctrl1.classList.add("hidden");
         document.getElementById("main-title").textContent = "Constelação Detalhada de Evidências";
         document.getElementById("main-subtitle").textContent = "Desdobramento radial completo (Eixo → Causa 1ª → 2ª → 3ª)";
+        // Inicia o dataset zerado para a árvore detalhada rodar limpa
+        nodesDataSet = new vis.DataSet([]);
+        edgesDataSet = new vis.DataSet([]);
+        networkInstance = new vis.Network(document.getElementById("net"), {nodes: nodesDataSet, edges: edgesDataSet}, {});
         renderizarEstruturaHierarquica();
     }
 }
