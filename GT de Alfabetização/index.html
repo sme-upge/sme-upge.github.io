@@ -258,16 +258,17 @@ function toggleVisibilidadeComboTema() {
 }
 
 // ==========================================
-// --- ABA 1: ESTRUTURA CONCÊNTRICA E FILTRO ISOLADO
+// --- ABA 1: MODELAGEM MATEMÁTICA CONCÊNTRICA E FIXA
 // ==========================================
 function processarDadosAba1() {
     G_aba1 = { nodes: [], edges: [], details: {}, originalEdges: [] };
     const catMap = {}; const eixosAtivos = {};
 
-    // Nó central destacado (Problema Macro)
+    // Centro Absoluto Imutável (0, 0)
     G_aba1.nodes.push({
-        id: "ROOT", label: "BAIXA ALFABETIZAÇÃO", shape: "dot", size: 22,
-        color: { background: "#EF4444", border: "#DC2626" }, font: {size: 11, color: "#1E293B", bold: true, vadjust: -30}
+        id: "ROOT", label: "BAIXA ALFABETIZAÇÃO", shape: "dot", size: 28,
+        x: 0, y: 0, fixed: true,
+        color: { background: "#EF4444", border: "#DC2626" }, font: {size: 11, color: "#1E293B", bold: true, vadjust: -36}
     });
 
     rawRows.forEach(r => {
@@ -292,19 +293,29 @@ function processarDadosAba1() {
         mapearPar(cp, cat_p); mapearPar(cs, cat_s); mapearPar(ct, cat_t);
     });
 
-    // Camada Intermediária ordenada (Eixos ao Redor do Macro)
+    // Trava Geométrica de Eixos Orbitais (Raio fixado em 140px para simetria ideal)
     const eixosOrdenados = ["Eixo 1", "Eixo 2", "Eixo 3", "Eixo 4", "Eixo 5", "Eixo 6", "Eixo 7"];
-    eixosOrdenados.forEach(ex => {
+    const totalEixos = eixosOrdenados.length;
+    const raioEixos = 140;
+
+    eixosOrdenados.forEach((ex, i) => {
         if (!eixosAtivos[ex]) return;
+        
+        // Divisão angular exata do círculo (360 graus / total de eixos)
+        const angulo = (i * 2 * Math.PI) / totalEixos;
+        const posX = raioEixos * Math.cos(angulo);
+        const posY = raioEixos * Math.sin(angulo);
+
         G_aba1.nodes.push({
-            id: ex, label: ex, title: eixosAtivos[ex].completo, shape: "dot", size: 12,
+            id: ex, label: ex, title: eixosAtivos[ex].completo, shape: "dot", size: 14,
+            x: posX, y: posY, fixed: true,
             color: {background: "#6366F1", border: "#4F46E5"}, font: {size: 10, color: "#475569", bold: true}
         });
-        G_aba1.edges.push({ id: `edge_root_${ex}`, from: "ROOT", to: ex, color: { color: "#CBD5E0", opacity: 0.4 }, width: 1.5 });
+        G_aba1.edges.push({ id: `edge_root_${ex}`, from: "ROOT", to: ex, color: { color: "#CBD5E0", opacity: 0.5 }, width: 1.5 });
         G_aba1.details[ex] = { tipo: "eixo", titulo: eixosAtivos[ex].completo, cor: "#6366F1", subtitulo: "Problema Central do Eixo", conteudo: eixosAtivos[ex].problema };
     });
 
-    // Camada Externa (Categorias nas Extremidades)
+    // Extremidades Exteriores (Calculadas dinamicamente mas ancoradas estavelmente)
     Object.keys(catMap).forEach(catNome => {
         const info = catMap[catNome];
         const totalCausasDiferentes = Object.keys(info.causas).length;
@@ -313,13 +324,13 @@ function processarDadosAba1() {
             if (catNome.toLowerCase().includes(chave.toLowerCase())) { cor = CAT_CORES_MAP[chave]; break; }
         }
         
-        const tamanho = 7 + Math.min(totalCausasDiferentes * 1.2, 12);
+        const tamanho = 8 + Math.min(totalCausasDiferentes * 1.2, 12);
         const labelCurto = catNome.length > 20 ? catNome.slice(0,18) + "..." : catNome;
         const ehTransversal = globalRecorrenciaTexto[Object.keys(info.causas)[0]] > 1 || info.eixos.size > 1;
 
         G_aba1.nodes.push({
             id: `__cat__${catNome}`, label: labelCurto, title: catNome, shape: "dot", size: tamanho,
-            color: {background: cor, border: cor}, font: {size: 9, color: "#64748B", bold: false, vadjust: 16}, _isSpecific: !ehTransversal
+            color: {background: cor, border: cor}, font: {size: 9, color: "#64748B", bold: false, vadjust: 18}, _isSpecific: !ehTransversal
         });
 
         info.eixos.forEach(ex => {
@@ -340,14 +351,14 @@ function renderizarEstruturaRadial() {
     selectedCategoryRadial = null;
     buildSidebarRadialAba1();
 
-    // Carga inicial com animação de afastamento suave
+    // Desativa a física de balanço contínuo para evitar que as bolas fiquem mudando de lugar sozinho
     const opcoesRadial = {
         edges: { width: 1, smooth: { enabled: true, type: "continuous", roundness: 0.4 } },
         physics: { 
             enabled: true, 
             solver: "barnesHut", 
-            barnesHut: { gravitationalConstant: -4000, centralGravity: 0.08, springLength: 120, springConstant: 0.04 },
-            stabilization: { enabled: true, iterations: 140 }
+            barnesHut: { gravitationalConstant: -3500, centralGravity: 0.1, springLength: 95, springConstant: 0.04 },
+            stabilization: { enabled: true, iterations: 120 }
         },
         interaction: { hover: true }
     };
@@ -355,7 +366,7 @@ function renderizarEstruturaRadial() {
     if (networkInstance) networkInstance.destroy();
     networkInstance = new vis.Network(document.getElementById("net"), {nodes: nodesDataSet, edges: edgesDataSet}, opcoesRadial);
     
-    // Congela automaticamente assim que a estrutura concêntrica se organiza
+    // Trava de estabilização estrutural imediata
     networkInstance.on("stabilizationIterationsDone", function () {
         networkInstance.setOptions({ physics: { enabled: false } });
     });
@@ -374,6 +385,28 @@ function renderizarEstruturaRadial() {
     });
     
     aplicarFiltroAba1();
+    
+    // EXECUÇÃO DO EFEITO BIG BANG (Inicialização Progressiva com Afastamento Cinematográfico)
+    setTimeout(() => {
+        // Passo 1: Começa colado por dentro do Problema Macro Central
+        networkInstance.moveTo({
+            position: { x: 0, y: 0 },
+            scale: 3.5,
+            animation: false
+        });
+        
+        // Passo 2: Abre a câmera de forma fluida revelando toda a constelação simétrica
+        setTimeout(() => {
+            networkInstance.moveTo({
+                position: { x: 50, y: 0 },
+                scale: 0.82,
+                animation: {
+                    duration: 1600,
+                    easingFunction: "easeInOutCubic"
+                }
+            });
+        }, 150);
+    }, 50);
 }
 
 function aplicarFiltroAba1() {
@@ -381,6 +414,7 @@ function aplicarFiltroAba1() {
     fecharPainel();
     const nosFiltrados = G_aba1.nodes.filter(n => exibirEspecificas || !n._isSpecific);
     
+    // Libera a física apenas momentaneamente para a reorganização estrita
     networkInstance.setOptions({ physics: { enabled: true } });
     nodesDataSet.clear(); nodesDataSet.add(nosFiltrados);
     const idsAtivos = nosFiltrados.map(n => n.id);
@@ -388,7 +422,6 @@ function aplicarFiltroAba1() {
     networkInstance.stabilize();
 }
 
-// Retificação Cirúrgica: Exibe APENAS a categoria clicada e seus eixos dependentes
 function filtrarTeiaPorCategoria(nomeCat) {
     selectedCategoryRadial = nomeCat;
     
@@ -399,25 +432,41 @@ function filtrarTeiaPorCategoria(nomeCat) {
     });
 
     const catNodeId = `__cat__${nomeCat}`;
-    // Descobre quais eixos estão conectados a essa categoria específica
     const eixosConectados = G_aba1.originalEdges.filter(e => e.to === catNodeId).map(e => e.from);
     
-    // Filtra e isola na tela APENAS a categoria selecionada e os eixos dela
-    const nosFiltrados = G_aba1.nodes.filter(n => n.id === catNodeId || eixosConectados.includes(n.id));
-    const arestasFiltradas = G_aba1.originalEdges.filter(e => e.to === catNodeId);
+    const nosIsolados = G_aba1.nodes.filter(n => n.id === catNodeId || eixosConectados.includes(n.id));
+    const arestasIsoladas = G_aba1.originalEdges.filter(e => e.to === catNodeId);
 
-    // Atualiza o dataset para fazer sumir tudo o que não está ligado
-    nodesDataSet.clear(); nodesDataSet.add(nosFiltrados);
-    edgesDataSet.clear(); edgesDataSet.add(arestasFiltradas);
+    // No modo de isolamento radical desativamos as travas geométricas para colapsar no centro do foco
+    nosIsolados.forEach(n => { if(n.id !== "ROOT") n.fixed = false; });
+
+    networkInstance.setOptions({ physics: { enabled: true } });
+    nodesDataSet.clear(); nodesDataSet.add(nosIsolados);
+    edgesDataSet.clear(); edgesDataSet.add(arestasIsoladas);
+    networkInstance.stabilize();
     
     aoClicarNoNodeRadial(catNodeId);
+    
+    // Enquadra perfeitamente a ramificação filtrada na tela
+    setTimeout(() => {
+        networkInstance.fit({ animation: { duration: 400, easingFunction: "easeOutQuad" } });
+    }, 80);
 }
 
 function resetarFiltroTeiaRadial() {
     selectedCategoryRadial = null;
     document.querySelectorAll(".btn-sidebar-item").forEach(btn => btn.classList.remove("active"));
-    aplicarFiltroAba1(); // Restaura o mapa concêntrico completo original
+    
+    // Restaura as travas rígidas de posicionamento
+    G_aba1.nodes.forEach(n => { if(n.id === "ROOT" || !n.id.startsWith("__cat__")) n.fixed = true; });
+    
+    aplicarFiltroAba1();
     fecharPainel();
+    
+    // Suaviza o retorno para o enquadramento ideal concêntrico
+    setTimeout(() => {
+        networkInstance.moveTo({ position: { x: 50, y: 0 }, scale: 0.82, animation: { duration: 500 } });
+    }, 50);
 }
 
 function aoClicarNoNodeRadial(id) {
@@ -475,7 +524,7 @@ function buildSidebarRadialAba1() {
 
 
 // ==========================================
-// --- ABA 2: MODELAGEM HIERÁRQUICA E AUDITORIA DE ESTRELAS
+// --- ABA 2: MODELAGEM HIERÁRQUICA E INTEGRIDADE DE VOTOS
 // ==========================================
 function renderizarEstruturaHierarquica() {
     if (currentTab !== "hierarquica") return;
@@ -490,7 +539,6 @@ function renderizarEstruturaHierarquica() {
     const arestasCriadasUnicas = new Set();
     hNodesDetails = {}; 
 
-    // Nível Macro Central (Vermelho de Legenda #EF4444)
     const macroId = "H2_MACRO_ROOT";
     hNodes.push({
         id: macroId, label: "BAIXA ALFABETIZAÇÃO", shape: "dot", size: 12,
@@ -503,7 +551,6 @@ function renderizarEstruturaHierarquica() {
         metricasEixos[ex] = { totalP: 0, totalS: 0, totalT: 0, estrelas: 0, probCentral: "" }; 
     });
 
-    // Auditoria Real de Estrelas nas Causas do Eixo
     rawRows.forEach(r => {
         const [eixoCompleto, probCentral, cp, , cs, , votos, ct, ] = r; if (!eixoCompleto) return;
         const sigla = eixoCompleto.split(" - ")[0]; if (!eixosSelecionados.includes(sigla)) return;
@@ -546,9 +593,9 @@ function renderizarEstruturaHierarquica() {
 
         const registrarNoUnico = (texto, categoria, paiId, camadaLabel, tamanho, corNivel, vMaxFiltro) => {
             if (!texto || texto.trim() === "") return null;
-            const txt = texto.trim();
             if (vMaxFiltro < notaCorteVotos) return null;
 
+            const txt = texto.trim();
             const hashTexto = btoa(unescape(encodeURIComponent(txt))).replace(/=/g, "").slice(0, 24);
             const noId = `H2_N_C${camadaLabel}_${hashTexto}`;
             const temaReal = categoria ? categoria.trim() : (globalTextoParaCategorias[txt] || "Sem Categoria");
@@ -593,10 +640,9 @@ function renderizarEstruturaHierarquica() {
             return noId;
         };
 
-        // Encadeamento limpo usando Cores de Legenda Estritas
-        const idP = registrarNoUnico(cp, cat_p, eixoId, "1", 6.5, "#38BDF8", vNumCp); // Primária: Azul
-        const idS = idP ? registrarNoUnico(cs, cat_s, idP, "2", 5, "#34D399", vNumCs) : null;  // Secundária: Verde
-        if (idS) registrarNoUnico(ct, cat_t, idS, "3", 3.5, "#FBBF24", vNumCt);              // Terciária: Amarelo
+        const idP = registrarNoUnico(cp, cat_p, eixoId, "1", 6.5, "#38BDF8", vNumCp); 
+        const idS = idP ? registrarNoUnico(cs, cat_s, idP, "2", 5, "#34D399", vNumCs) : null;  
+        if (idS) registrarNoUnico(ct, cat_t, idS, "3", 3.5, "#FBBF24", vNumCt);              
     });
 
     if (destacarTransversais) {
@@ -641,7 +687,7 @@ function renderizarEstruturaHierarquica() {
             document.getElementById("p-cor").style.background = "#EF4444";
             document.getElementById("p-titulo").textContent = "Baixa Alfabetização";
             document.getElementById("p-sub").textContent = "Problema Macro Central";
-            document.getElementById("painel-body").innerHTML = `<p class="text-xs text-slate-500 font-medium leading-relaxed">Nó Central Diagnóstico Diagnóstico.</p>`;
+            document.getElementById("painel-body").innerHTML = `<p class="text-xs text-slate-500 font-medium leading-relaxed">Nó Central Diagnóstico.</p>`;
             document.getElementById("painel").classList.add("open"); document.getElementById("net").style.right = "460px";
             return;
         }
