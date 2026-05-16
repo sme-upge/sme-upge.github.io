@@ -26,7 +26,6 @@ html,body{height:100%;margin:0;padding:0;overflow:hidden;font-family:"Inter",san
 input:checked + .slider {background-color:#2563EB}
 input:checked + .slider:before {transform:translateX(14px)}
 
-/* Quebra de linha ajustada para o menu esquerdo */
 .btn-sidebar-item {
     width: 100%;
     text-align: left;
@@ -143,8 +142,8 @@ let rawRows = [];
 let G_aba1 = { nodes: [], edges: [], details: [], originalEdges: [] }; 
 let hNodesDetails = {}; 
 let networkInstance = null;
-let nodesDataSet = null;
-let edgesDataSet = null;
+let nodesDataSet = new vis.DataSet([]);
+let edgesDataSet = new vis.DataSet([]);
 
 const CSV_URL = "https://raw.githubusercontent.com/sme-upge/sme-upge.github.io/refs/heads/main/GT%20de%20Alfabetiza%C3%A7%C3%A3o/arvore.csv";
 
@@ -220,15 +219,15 @@ function toggleVisibilidadeComboTema() {
 }
 
 // ==========================================
-// --- PROCESSAMENTO DA LÓGICA DA ABA 1
+// --- MOTOR DA ABA 1 (PRESERVAÇÃO TOTAL + TRANSIÇÃO ELÁSTICA)
 // ==========================================
 function processarDadosAba1() {
     G_aba1 = { nodes: [], edges: [], details: {}, originalEdges: [] };
     const catMap = {}; const eixosAtivos = {};
 
     G_aba1.nodes.push({
-        id: "ROOT", label: "BAIXA\nALFABETIZAÇÃO", shape: "dot", size: 36,
-        color: { background: "#E11D48", border: "#BE123C" }, font: {size: 9, color: "#FFFFFF", bold: true}
+        id: "ROOT", label: "BAIXA\nALFABETIZAÇÃO", shape: "dot", size: 38,
+        color: { background: "#E11D48", border: "#BE123C" }, font: {size: 10, color: "#FFFFFF", bold: true}
     });
 
     rawRows.forEach(r => {
@@ -256,10 +255,10 @@ function processarDadosAba1() {
     Object.keys(eixosAtivos).forEach(ex => {
         const cor = EIXO_CORES[ex] || "#475569";
         G_aba1.nodes.push({
-            id: ex, label: ex, title: eixosAtivos[ex].completo, shape: "dot", size: 24,
-            color: {background: cor, border: cor}, font: {size: 11, color: "#1E293B", bold: true}
+            id: ex, label: ex, title: eixosAtivos[ex].completo, shape: "dot", size: 26,
+            color: {background: cor, border: cor}, font: {size: 12, color: "#1E293B", bold: true}
         });
-        G_aba1.edges.push({ id: `edge_root_${ex}`, from: "ROOT", to: ex, color: { color: "#CBD5E0", opacity: 0.5 }, width: 1.5 });
+        G_aba1.edges.push({ id: `edge_root_${ex}`, from: "ROOT", to: ex, color: { color: "#CBD5E0", opacity: 0.6 }, width: 2 });
         G_aba1.details[ex] = { tipo: "eixo", titulo: eixosAtivos[ex].completo, cor: cor, subtitulo: "Problema Central do Eixo", conteudo: eixosAtivos[ex].problema };
     });
 
@@ -270,17 +269,17 @@ function processarDadosAba1() {
         for (const chave in CAT_CORES_MAP) {
             if (catNome.toLowerCase().includes(chave.toLowerCase())) { cor = CAT_CORES_MAP[chave]; break; }
         }
-        const tamanho = 14 + Math.min(totalCausasDiferentes * 4, 32);
-        const labelCurto = catNome.length > 20 ? catNome.slice(0,20) + "..." : catNome;
+        const tamanho = 16 + Math.min(totalCausasDiferentes * 3.5, 34);
+        const labelCurto = catNome.length > 22 ? catNome.slice(0,20) + "..." : catNome;
         const ehTransversal = info.eixos.size > 1;
 
         G_aba1.nodes.push({
             id: `__cat__${catNome}`, label: labelCurto, title: catNome, shape: "dot", size: tamanho,
-            color: {background: cor, border: cor}, font: {size: 10, color: "#475569", bold: true}, _isSpecific: !ehTransversal
+            color: {background: cor, border: cor}, font: {size: 11, color: "#334155", bold: true}, _isSpecific: !ehTransversal
         });
 
         info.eixos.forEach(ex => {
-            G_aba1.edges.push({ id: `edge_${ex}_${catNome}`, from: ex, to: `__cat__${catNome}`, color: { color: "#E2E8F0", opacity: 0.7 } });
+            G_aba1.edges.push({ id: `edge_${ex}_${catNome}`, from: ex, to: `__cat__${catNome}`, color: { color: "#E2E8F0", opacity: 0.8 }, width: 1.5 });
         });
 
         G_aba1.details[`__cat__${catNome}`] = {
@@ -296,13 +295,26 @@ function renderizarEstruturaRadial() {
     fecharPainel();
     buildSidebarRadialAba1();
 
-    nodesDataSet = new vis.DataSet(G_aba1.nodes);
-    edgesDataSet = new vis.DataSet(G_aba1.edges);
+    nodesDataSet.clear(); nodesDataSet.add(G_aba1.nodes);
+    edgesDataSet.clear(); edgesDataSet.add(G_aba1.edges);
 
-    networkInstance = new vis.Network(document.getElementById("net"), {nodes: nodesDataSet, edges: edgesDataSet}, {
-        edges: { width: 1.5, smooth: { enabled: true, type: "continuous", roundness: 0.4 } },
-        physics: { enabled: true, solver: "barnesHut", barnesHut: { gravitationalConstant: -12000, centralGravity: 0.04, springLength: 200 } },
-        interaction: { hover: true, tooltipDelay: 150 }
+    const opcoesRadial = {
+        edges: { width: 1.5, smooth: { enabled: true, type: "continuous", roundness: 0.3 } },
+        physics: { 
+            enabled: true, 
+            solver: "barnesHut", 
+            barnesHut: { gravitationalConstant: -9000, centralGravity: 0.03, springLength: 160, springConstant: 0.04 },
+            stabilization: { enabled: true, iterations: 150, updateInterval: 25 }
+        },
+        interaction: { hover: true, tooltipDelay: 100 }
+    };
+
+    if (networkInstance) networkInstance.destroy();
+    networkInstance = new vis.Network(document.getElementById("net"), {nodes: nodesDataSet, edges: edgesDataSet}, opcoesRadial);
+    
+    // Trava as bolinhas após a expansão inicial elástica para não ficarem dançando
+    networkInstance.on("stabilizationIterationsDone", function () {
+        networkInstance.setOptions({ physics: { enabled: false } });
     });
 
     networkInstance.on("click", p => p.nodes.length ? aoClicarNoNodeRadial(p.nodes[0]) : fecharPainel());
@@ -313,9 +325,13 @@ function aplicarFiltroAba1() {
     const exibirEspecificas = document.getElementById("filtro-especificas").checked;
     fecharPainel();
     const nosFiltrados = G_aba1.nodes.filter(n => exibirEspecificas || !n._isSpecific);
+    
+    networkInstance.setOptions({ physics: { enabled: true } });
     nodesDataSet.clear(); nodesDataSet.add(nosFiltrados);
     const idsAtivos = nosFiltrados.map(n => n.id);
     edgesDataSet.clear(); edgesDataSet.add(G_aba1.originalEdges.filter(e => idsAtivos.includes(e.from) && idsAtivos.includes(e.to)));
+    
+    networkInstance.stabilize();
 }
 
 function aoClicarNoNodeRadial(id) {
@@ -370,7 +386,7 @@ function buildSidebarRadialAba1() {
 
 
 // ==========================================
-// --- LÓGICA RIGOROSA DA ABA 2 (ÁRVORE DETALHADA)
+// --- MOTOR DA ABA 2 (MÉTRICAS ESTREITAS AUDITADAS E GRAFO ESTABILIZADO)
 // ==========================================
 function renderizarEstruturaHierarquica() {
     if (currentTab !== "hierarquica") return;
@@ -384,66 +400,71 @@ function renderizarEstruturaHierarquica() {
     const hNodes = []; const hEdges = []; const nosCriadosUnicos = new Set();
     hNodesDetails = {}; 
 
-    // Nó Raiz
+    // Nó Macro
     const macroId = "H2_MACRO_ROOT";
     hNodes.push({
-        id: macroId, label: "BAIXA\nALFABETIZAÇÃO", shape: "dot", size: 30,
+        id: macroId, label: "BAIXA\nALFABETIZAÇÃO", shape: "dot", size: 28,
         color: { background: "#E11D48", border: "#BE123C" }, font: { bold: true, size: 10, color: "#FFFFFF" }
     });
 
-    // Mapeador estrito de recorrência e cruzamento qualitativo por string exata
+    // Mapeamento absoluto sem falsos-positivos por colunas estritas
     const mapaRecorrenciaTexto = {}; 
     const mapaTextoParaEixos = {}; 
-    const mapaTextoParaCategorias = {};
     const mapaNodesParaTeia = {};
 
     rawRows.forEach(r => {
-        const [eixo, , cp, cat_p, cs, cat_s, , ct, cat_t] = r; if(!eixo) return;
+        const [eixo, , cp, , cs, , , ct, ] = r; if(!eixo) return;
         const sigla = eixo.split(" - ")[0];
-        [[cp, cat_p], [cs, cat_s], [ct, cat_t]].forEach(([txt, cat]) => {
+        
+        [cp, cs, ct].forEach(txt => {
             if (txt && txt.trim() !== "") {
                 const cleanTxt = txt.trim();
                 if (!mapaTextoParaEixos[cleanTxt]) {
                     mapaTextoParaEixos[cleanTxt] = new Set();
                     mapaRecorrenciaTexto[cleanTxt] = 0;
                 }
-                // Evita duplicar contagem na mesma linha se strings forem idênticas
                 if (!mapaTextoParaEixos[cleanTxt].has(sigla)) {
                     mapaTextoParaEixos[cleanTxt].add(sigla);
                     mapaRecorrenciaTexto[cleanTxt]++;
                 }
-                if (cat && cat.trim() !== "") mapaTextoParaCategorias[cleanTxt] = cat.trim();
             }
         });
     });
 
-    // Auditoria Real de Volumetria Interna por Eixo
+    // CONTADOR MATEMÁTICO REAL POR EIXO E POR COLUNA ESPECÍFICA (Correção Eixo 5)
     const metricasEixos = {};
     eixosSelecionados.forEach(ex => { 
-        metricasEixos[ex] = { totalP: 0, totalS: 0, totalT: 0, transversais: 0, estrelas: 0, probCentral: "" }; 
+        metricasEixos[ex] = { totalP: 0, totalS: 0, totalT: 0, estrelas: 0, probCentral: "" }; 
     });
 
+    // Conjuntos de proteção contra contagens duplicadas de strings idênticas no mesmo eixo
+    const duplicadosPrimarias = {};
+    const duplicadosSecundarias = {};
+    const duplicadosTerciarias = {};
+
     rawRows.forEach(r => {
-        const [eixoCompleto, probCentral, cp, cat_p, cs, cat_s, votos, ct, cat_t] = r; if (!eixoCompleto) return;
+        const [eixoCompleto, probCentral, cp, , cs, , votos, ct, ] = r; if (!eixoCompleto) return;
         const sigla = eixoCompleto.split(" - ")[0]; if (!eixosSelecionados.includes(sigla)) return;
         
         metricasEixos[sigla].probCentral = probCentral;
         const vNum = parseInt(votos) || 0;
+        
+        if (!duplicadosPrimarias[sigla]) duplicadosPrimarias[sigla] = new Set();
+        if (!duplicadosSecundarias[sigla]) duplicadosSecundarias[sigla] = new Set();
+        if (!duplicadosTerciarias[sigla]) duplicadosTerciarias[sigla] = new Set();
 
-        if (cp && cp.trim() !== "") { 
+        if (cp && cp.trim() !== "" && !duplicadosPrimarias[sigla].has(cp.trim())) { 
             metricasEixos[sigla].totalP++; 
-            if(mapaRecorrenciaTexto[cp.trim()] > 1) metricasEixos[sigla].transversais++; 
+            duplicadosPrimarias[sigla].add(cp.trim());
             if(vNum >= 1) metricasEixos[sigla].estrelas++; 
         }
-        if (cs && cs.trim() !== "") { 
+        if (cs && cs.trim() !== "" && !duplicadosSecundarias[sigla].has(cs.trim())) { 
             metricasEixos[sigla].totalS++; 
-            if(mapaRecorrenciaTexto[cs.trim()] > 1) metricasEixos[sigla].transversais++; 
-            if(vNum >= 1) metricasEixos[sigla].estrelas++; 
+            duplicadosSecundarias[sigla].add(cs.trim());
         }
-        if (ct && ct.trim() !== "") { 
+        if (ct && ct.trim() !== "" && !duplicadosTerciarias[sigla].has(ct.trim())) { 
             metricasEixos[sigla].totalT++; 
-            if(mapaRecorrenciaTexto[ct.trim()] > 1) metricasEixos[sigla].transversais++; 
-            if(vNum >= 1) metricasEixos[sigla].estrelas++; 
+            duplicadosTerciarias[sigla].add(ct.trim());
         }
     });
 
@@ -459,7 +480,7 @@ function renderizarEstruturaHierarquica() {
 
         const eixoId = `H2_${siglaEixo}`;
         if (!nosCriadosUnicos.has(eixoId)) {
-            hNodes.push({ id: eixoId, label: siglaEixo, shape: "dot", size: 22, color: { background: corEixo, border: corEixo }, font: { bold: true, size: 11 } });
+            hNodes.push({ id: eixoId, label: siglaEixo, shape: "dot", size: 20, color: { background: corEixo, border: corEixo }, font: { bold: true, size: 11 } });
             hEdges.push({ from: macroId, to: eixoId, color: { color: "#CBD5E0", opacity: 0.5 }, width: 2 });
             nosCriadosUnicos.add(eixoId);
             hNodesDetails[eixoId] = { tipo: "eixo", titulo: eixoCompleto, sigla: siglaEixo, cor: corEixo, dados: metricasEixos[siglaEixo] };
@@ -468,10 +489,10 @@ function renderizarEstruturaHierarquica() {
         const montarNo = (texto, categoria, paiId, camadaLabel, tamanho, corPadrao) => {
             if (!texto || texto.trim() === "") return null;
             const txt = texto.trim();
-            const noId = `H2_N_${siglaEixo}_${camadaLabel}_${txt.slice(0,10)}_${idx}`;
+            const noId = `H2_N_${siglaEixo}_${camadaLabel}_${txt.slice(0,12)}_${idx}`;
             if (nosCriadosUnicos.has(noId)) return noId;
 
-            const temaReal = categoria || mapaTextoParaCategorias[txt] || "Sem Categoria";
+            const temaReal = categoria ? categoria.trim() : "Sem Categoria";
             const ehTransversal = mapaRecorrenciaTexto[txt] > 1;
             
             let cor = corPadrao; let tSize = tamanho; let bW = 0.5; let bColor = "#94A3B8";
@@ -502,7 +523,7 @@ function renderizarEstruturaHierarquica() {
             nosCriadosUnicos.add(noId); return noId;
         };
 
-        const idP = montarNo(cp, cat_p, eixoId, "1", 14, "#E2E8F0");
+        const idP = montarNo(cp, cat_p, eixoId, "1", 13, "#E2E8F0");
         const idS = idP ? montarNo(cs, cat_s, idP, "2", 10, "#F1F5F9") : null;
         if (idS) montarNo(ct, cat_t, idS, "3", 7, "#F8FAFC");
     });
@@ -514,20 +535,33 @@ function renderizarEstruturaHierarquica() {
             for (let i = 0; i < nos.length; i++) {
                 for (let j = i + 1; j < nos.length; j++) {
                     if (nos[i].split("_")[2] !== nos[j].split("_")[2]) {
-                        hEdges.push({ from: nos[i], to: nos[j], color: { color: "#D97706", opacity: 0.4 }, width: 1.2, dashes: [2, 3] });
+                        hEdges.push({ from: nos[i], to: nos[j], color: { color: "#D97706", opacity: 0.4 }, width: 1.2, dashes: [2, 4] });
                     }
                 }
             }
         });
     }
 
-    document.getElementById("sidebar-list").innerHTML = `<div class="p-4 bg-indigo-50/60 border rounded-xl text-[11px] text-slate-600 leading-relaxed"><p class="font-bold text-indigo-900 mb-1">✨ Constelação Ativa</p>Filtros de órbita operacionalizados. Clique nos nós para mapeamento analítico completo.</div>`;
+    document.getElementById("sidebar-list").innerHTML = `<div class="p-4 bg-indigo-50/60 border rounded-xl text-[11px] text-slate-600 leading-relaxed"><p class="font-bold text-indigo-900 mb-1">✨ Constelação Ativa</p>Clique nos eixos ou causas para inspecionar métricas estáveis em tempo real.</div>`;
 
     nodesDataSet.clear(); nodesDataSet.add(hNodes);
     edgesDataSet.clear(); edgesDataSet.add(hEdges);
 
-    networkInstance.setOptions({
-        physics: { enabled: true, solver: "forceAtlas2Based", forceAtlas2Based: { gravitationalConstant: -70, centralGravity: 0.02, springLength: 50, avoidOverlap: 1 } }
+    const opcoesHierarquica = {
+        physics: { 
+            enabled: true, 
+            solver: "forceAtlas2Based", 
+            forceAtlas2Based: { gravitationalConstant: -60, centralGravity: 0.015, springLength: 45, avoidOverlap: 1 },
+            stabilization: { enabled: true, iterations: 180 }
+        }
+    };
+
+    if (networkInstance) networkInstance.destroy();
+    networkInstance = new vis.Network(document.getElementById("net"), {nodes: nodesDataSet, edges: edgesDataSet}, opcoesHierarquica);
+    
+    // FORÇA O CONGELAMENTO IMEDIATO APÓS ORGANIZAÇÃO (Evita bolinhas fugindo do mouse)
+    networkInstance.on("stabilizationIterationsDone", function () {
+        networkInstance.setOptions({ physics: { enabled: false } });
     });
 
     networkInstance.off("click"); 
@@ -604,9 +638,6 @@ function mudarAba(aba) {
         ctrl2.classList.remove("hidden"); ctrl2.classList.add("flex"); ctrl1.classList.add("hidden");
         document.getElementById("main-title").textContent = "Constelação Detalhada de Evidências";
         document.getElementById("main-subtitle").textContent = "Desdobramento radial completo (Eixo → Causa 1ª → 2ª → 3ª)";
-        nodesDataSet = new vis.DataSet([]);
-        edgesDataSet = new vis.DataSet([]);
-        networkInstance = new vis.Network(document.getElementById("net"), {nodes: nodesDataSet, edges: edgesDataSet}, {});
         renderizarEstruturaHierarquica();
     }
 }
