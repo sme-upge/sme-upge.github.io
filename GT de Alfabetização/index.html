@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
@@ -64,12 +65,12 @@ input:checked + .slider:before {transform:translateX(14px)}
 
   <div id="controles-aba2" class="px-6 py-4 bg-slate-50/50 border-b border-slate-100 flex-col gap-3.5 flex-shrink-0 hidden">
     <div class="flex flex-col gap-1 w-full border-b border-slate-100 pb-2.5">
-      <span class="text-[10px] font-bold text-amber-600 uppercase tracking-wider">Mínimo de Relevância</span>
+      <span class="text-[10px] font-bold text-amber-600 uppercase tracking-wider">Priorizações</span>
       <select id="select-votos-hierarquica" class="bg-white border border-slate-200 rounded-lg p-1.5 text-xs font-medium text-slate-700 focus:outline-none" onchange="renderizarEstruturaHierarquica()">
         <option value="0">Todas as Evidências</option>
-        <option value="1">1+ Estrela (Sinalizadas)</option>
-        <option value="4">4+ Estrelas (Alta Relevância)</option>
-        <option value="6">6+ Estrelas (Gargalos Críticos)</option>
+        <option value="1">1 ⭐</option>
+        <option value="4">4 ⭐</option>
+        <option value="6">6 ⭐</option>
       </select>
     </div>
 
@@ -137,6 +138,16 @@ input:checked + .slider:before {transform:translateX(14px)}
 </div>
 
 <script>
+const MAPA_EIXOS_COMPLETO = {
+  "Eixo 1": "Eixo 1 - Práticas Pedagógicas e Materiais Didáticos para a Alfabetização",
+  "Eixo 2": "Eixo 2 - Formação Inicial, Continuada e Desenvolvimento dos Profissionais da Educação",
+  "Eixo 3": "Eixo 3 - Avaliação do Desempenho Escolar, Monitoramento e Indicadores Educacionais",
+  "Eixo 4": "Eixo 4 - Gestão Escolar, Governança da Rede e Liderança de Equipes",
+  "Eixo 5": "Eixo 5 - Infraestrutura Física, Recursos Tecnológicos e Equipamentos das Unidades",
+  "Eixo 6": "Eixo 6 - Articulação Comunitária, Engajamento Familiar e Rede de Proteção Social",
+  "Eixo 7": "Eixo 7 - Inclusão Escolar, Atendimento Especializado e Diversidade na Alfabetização"
+};
+
 const EIXO_CORES = {
   "Eixo 1": "#3B82F6", "Eixo 2": "#8B5CF6", "Eixo 3": "#10B981",
   "Eixo 4": "#F97316", "Eixo 5": "#06B6D4", "Eixo 6": "#F43F5E", "Eixo 7": "#14B8A6"
@@ -171,7 +182,7 @@ async function inicializar() {
         const csv = new TextDecoder("utf-8").decode(await res.arrayBuffer());
         rawRows = parseCSV(csv);
         
-        const listaTemasUnicos = new Set();
+        const listTemasContagem = {};
 
         rawRows.forEach(r => {
             const [eixoCompleto, , cp, cat_p, cs, cat_s, votos, ct, cat_t] = r;
@@ -197,17 +208,20 @@ async function inicializar() {
                         globalTextoParaVotos[cleanTxt] = vNum;
                     }
                     if (cat && cat.trim() !== "") {
-                        globalTextoParaCategorias[cleanTxt] = cat.trim();
-                        listaTemasUnicos.add(cat.trim());
+                        const cNom = cat.trim();
+                        globalTextoParaCategorias[cleanTxt] = cNom;
+                        if(!listTemasContagem[cNom]) listTemasContagem[cNom] = 0;
+                        listTemasContagem[cNom]++;
                     }
                 }
             });
         });
 
+        // Ordenação do Maior para o Menor Tema na Lista Suspensa
         const comboTema = document.getElementById("select-tema-transversal");
-        Array.from(listaTemasUnicos).sort().forEach(t => {
+        Object.keys(listTemasContagem).sort((a,b) => listTemasContagem[b] - listTemasContagem[a]).forEach(t => {
             const opt = document.createElement("option");
-            opt.value = t; opt.textContent = t;
+            opt.value = t; opt.textContent = `${t} (${listTemasContagem[t]})`;
             comboTema.appendChild(opt);
         });
 
@@ -258,10 +272,11 @@ function construirCheckboxEixos() {
         const label = document.createElement("label");
         label.className = "flex items-center gap-2 text-[11px] font-medium text-slate-600 cursor-pointer hover:text-slate-900";
         const checked = idx < 3 ? "checked" : ""; 
+        const nomeCompletoEixo = MAPA_EIXOS_COMPLETO[sigla] || sigla;
         label.innerHTML = `
             <input type="checkbox" value="${sigla}" ${checked} class="axis-checkbox rounded border-gray-300 text-blue-600 focus:ring-blue-500 w-3.5 h-3.5" onchange="renderizarEstruturaHierarquica()">
-            <span class="truncate flex-1">${sigla}</span>
-            <span class="text-[9px] text-slate-400 font-bold bg-slate-100 px-1.5 py-0.5 rounded ml-auto">${contagemEixos[sigla].causas} causas</span>
+            <span class="truncate flex-1" title="${nomeCompletoEixo}">${sigla}</span>
+            <span class="text-[9px] text-slate-400 font-bold bg-slate-100 px-1.5 py-0.5 rounded ml-auto">${contagemEixos[sigla].causas}</span>
         `;
         container.appendChild(label);
     });
@@ -289,7 +304,7 @@ function processarDadosAba1() {
         const cleanEixo = eixoCompleto.split(" - ")[0];
         
         if (!eixosAtivos[cleanEixo]) {
-            eixosAtivos[cleanEixo] = { completo: eixoCompleto, problema: probCentral };
+            eixosAtivos[cleanEixo] = { completo: MAPA_EIXOS_COMPLETO[cleanEixo] || eixoCompleto, problema: probCentral };
         }
 
         const mapearPar = (textoCausa, categoriaCausa) => {
@@ -305,7 +320,6 @@ function processarDadosAba1() {
         mapearPar(cp, cat_p); mapearPar(cs, cat_s); mapearPar(ct, cat_t);
     });
 
-    // Raio expandido para 340px para garantir total espaçamento e organização visual
     const eixosOrdenados = ["Eixo 1", "Eixo 2", "Eixo 3", "Eixo 4", "Eixo 5", "Eixo 6", "Eixo 7"];
     const totalEixos = eixosOrdenados.length;
     const raioEixos = 340; 
@@ -317,7 +331,6 @@ function processarDadosAba1() {
         const posX = raioEixos * Math.cos(angulo);
         const posY = raioEixos * Math.sin(angulo);
 
-        // Retornando a legenda do nó fixo para os eixos centrais
         G_aba1.nodes.push({
             id: ex, label: ex, title: eixosAtivos[ex].completo, shape: "dot", size: 16,
             x: posX, y: posY, fixed: true,
@@ -339,7 +352,6 @@ function processarDadosAba1() {
         const tamanho = 8 + Math.min(totalCausasDiferentes * 1.2, 12);
         const ehTransversal = globalRecorrenciaTexto[Object.keys(info.causas)[0]] > 1 || info.eixos.size > 1;
 
-        // Sem propriedade "label" para ocultar textos embaixo das bolas. O nome surge no hover (title)
         G_aba1.nodes.push({
             id: `__cat__${catNome}`, title: catNome, shape: "dot", size: tamanho,
             color: {background: cor, border: cor}, _isSpecific: !ehTransversal
@@ -430,7 +442,6 @@ function filtrarTeiaPorCategoria(nomeCat) {
     const catNodeId = `__cat__${nomeCat}`;
     const eixosConectados = G_aba1.originalEdges.filter(e => e.to === catNodeId).map(e => e.from);
     
-    // Isolamento radical: apaga do mapa qualquer outra categoria e eixos irrelevantes
     const nosIsolados = G_aba1.nodes.filter(n => n.id === catNodeId || eixosConectados.includes(n.id) || n.id === "ROOT");
     const arestasIsoladas = G_aba1.originalEdges.filter(e => 
         (e.to === catNodeId) || 
@@ -496,7 +507,7 @@ function aoClicarNoNodeRadial(id) {
             html += `<div class="p-3 border border-slate-100 rounded-xl bg-slate-50/40 mb-2.5 text-xs">
                 <div class="mb-1.5">${badges}</div>
                 <p class="text-slate-600 font-medium leading-relaxed">${c.texto}</p>
-                ${c.votos > 0 ? `<span class="inline-block mt-2 text-[10px] font-bold text-amber-700 bg-amber-50 px-2 py-0.5 rounded border border-amber-200/40">⭐ Priorizada com ${c.votos} votos</span>` : ""}
+                ${c.votos > 0 ? `<span class="inline-block mt-2 text-[10px] font-bold text-amber-700 bg-amber-50 px-2 py-0.5 rounded border border-amber-200/40">⭐ Priorizada com ${c.votos} estrelas</span>` : ""}
             </div>`;
         });
         document.getElementById("painel-body").innerHTML = html;
@@ -528,7 +539,7 @@ function buildSidebarRadialAba1() {
             list.appendChild(b);
         });
     };
-    renderGrupo("🔗 Temas Transversais", "text-blue-600", sortedCats.filter(c=>c.ehTransversal));
+    renderGrupo("👥 Temas Transversais", "text-blue-600", sortedCats.filter(c=>c.ehTransversal));
     renderGrupo("📌 Dores Específicas", "text-slate-400", sortedCats.filter(c=>!c.ehTransversal));
 }
 
@@ -547,29 +558,52 @@ function renderizarEstruturaHierarquica() {
 
     const macroId = "H2_MACRO_ROOT";
     hNodes.push({
-        id: macroId, label: "BAIXA ALFABETIZAÇÃO", shape: "dot", size: 12,
-        color: { background: "#EF4444", border: "#DC2626" }, font: { bold: true, size: 8, color: "#475569", vadjust: -18 }
+        id: macroId, label: "BAIXA ALFABETIZAÇÃO", shape: "dot", size: 14,
+        color: { background: "#EF4444", border: "#DC2626" }, font: { bold: true, size: 9, color: "#475569", vadjust: -20 }
     });
 
     const mapaNodesParaTeia = {};
     const metricasEixos = {};
+    
     eixosSelecionados.forEach(ex => { 
-        metricasEixos[ex] = { totalP: 0, totalS: 0, totalT: 0, estrelas: 0, probCentral: "" }; 
+        metricasEixos[ex] = { totalP: 0, totalS: 0, totalT: 0, causasEstreladasCount: 0, probCentral: "" }; 
     });
 
+    // Processamento limpo sem duplicações de contagem
+    const chavesContadasUnicas = new Set();
+
     rawRows.forEach(r => {
-        const [eixoCompleto, probCentral, cp, , cs, , votos, ct, ] = r; if (!eixoCompleto) return;
+        const [eixoCompleto, probCentral, cp, cat_p, cs, cat_s, votos, ct, cat_t] = r; if (!eixoCompleto) return;
         const sigla = eixoCompleto.split(" - ")[0]; if (!eixosSelecionados.includes(sigla)) return;
         
         metricasEixos[sigla].probCentral = probCentral;
         const vNum = parseInt(votos) || 0;
         
         if (cp && cp.trim() !== "") {
-            metricasEixos[sigla].totalP++;
-            if(vNum >= 1) metricasEixos[sigla].estrelas += vNum;
+            const hashP = `${sigla}_P_${cp.trim()}`;
+            if(!chavesContadasUnicas.has(hashP)) {
+                metricasEixos[sigla].totalP++;
+                chavesContadasUnicas.add(hashP);
+                if(vNum > 0) metricasEixos[sigla].causasEstreladasCount++;
+            }
         }
-        if (cs && cs.trim() !== "") metricasEixos[sigla].totalS++;
-        if (ct && ct.trim() !== "") metricasEixos[sigla].totalT++;
+        if (cs && cs.trim() !== "") {
+            const hashS = `${sigla}_S_${cs.trim()}`;
+            if(!chavesContadasUnicas.has(hashS)) {
+                metricasEixos[sigla].totalS++;
+                chavesContadasUnicas.add(hashS);
+                if(vNum > 0 && !(cp && cp.trim() !== "" && vNum > 0)) {
+                    metricasEixos[sigla].causasEstreladasCount++;
+                }
+            }
+        }
+        if (ct && ct.trim() !== "") {
+            const hashT = `${sigla}_T_${ct.trim()}`;
+            if(!chavesContadasUnicas.has(hashT)) {
+                metricasEixos[sigla].totalT++;
+                chavesContadasUnicas.add(hashT);
+            }
+        }
     });
 
     rawRows.forEach((r) => {
@@ -577,7 +611,6 @@ function renderizarEstruturaHierarquica() {
         const siglaEixo = eixoCompleto.split(" - ")[0];
         if (!eixosSelecionados.includes(siglaEixo)) return;
 
-        // Filtro estrutural e absoluto por temas na Aba 2
         if (filtroTemaEscolhido !== "__ALL__") {
             const mP = cp && cat_p && cat_p.trim() === filtroTemaEscolhido;
             const mS = cs && cat_s && cat_s.trim() === filtroTemaEscolhido;
@@ -593,13 +626,13 @@ function renderizarEstruturaHierarquica() {
         
         if (!nosCriadosUnicos.has(eixoId)) {
             hNodes.push({ 
-                id: eixoId, label: siglaEixo, shape: "dot", size: 8, 
+                id: eixoId, label: siglaEixo, shape: "dot", size: 10, 
                 color: { background: "#6366F1", border: "#4F46E5" }, 
-                font: { bold: true, size: 10, color: "#475569" } 
+                font: { bold: true, size: 11, color: "#475569" } 
             });
-            hEdges.push({ from: macroId, to: eixoId, color: { color: "#CBD5E0", opacity: 0.6 }, width: 1 });
+            hEdges.push({ from: macroId, to: eixoId, color: { color: "#CBD5E0", opacity: 0.6 }, width: 1.2 });
             nosCriadosUnicos.add(eixoId);
-            hNodesDetails[eixoId] = { tipo: "eixo", titulo: eixoCompleto, sigla: siglaEixo, cor: "#6366F1", dados: metricasEixos[siglaEixo] };
+            hNodesDetails[eixoId] = { tipo: "eixo", titulo: MAPA_EIXOS_COMPLETO[siglaEixo] || eixoCompleto, sigla: siglaEixo, cor: "#6366F1", dados: metricasEixos[siglaEixo] };
         }
 
         const registrarNoUnico = (texto, categoria, paiId, camadaLabel, tamanho, corNivel, vMaxFiltro) => {
@@ -616,22 +649,22 @@ function renderizarEstruturaHierarquica() {
                 let tSize = tamanho; let bW = 0.5; let bColor = "#CBD5E0";
 
                 if (destacarTransversais && ehTransversal && (filtroTemaEscolhido === "__ALL__" || filtroTemaEscolhido === temaReal)) {
-                    tSize = tamanho + 1.5; bW = 2; bColor = "#F59E0B";
+                    tSize = tamanho + 4; bW = 2.5; bColor = "#F59E0B";
                     if (!mapaNodesParaTeia[temaReal]) mapaNodesParaTeia[temaReal] = [];
                     mapaNodesParaTeia[temaReal].push(noId);
                 }
 
-                const labelCurto = txt.length > 14 ? txt.slice(0, 12) + "..." : txt;
+                const labelCurto = txt.length > 16 ? txt.slice(0, 14) + "..." : txt;
                 const prefixoEstrela = vMaxFiltro > 0 ? '⭐ ' : '';
 
                 hNodes.push({
                     id: noId, label: `${prefixoEstrela}${labelCurto}`, shape: "dot", size: tSize, borderWidth: bW, 
-                    color: { background: corNivel, border: bColor }, font: { size: 8, color: "#475569" }
+                    color: { background: corNivel, border: bColor }, font: { size: 9, color: "#475569" }
                 });
 
                 hNodesDetails[noId] = {
                     tipo: "causa", camada: camadaLabel === "1" ? "Primária" : camadaLabel === "2" ? "Secundária" : "Terciária",
-                    texto: txt, tema: temaReal, votos: vMaxFiltro, eixoOrigem: eixoCompleto,
+                    texto: txt, tema: temaReal, votos: vMaxFiltro, eixoOrigem: MAPA_EIXOS_COMPLETO[siglaEixo] || eixoCompleto,
                     eixos: Array.from(globalTextoParaEixos[txt] || [siglaEixo]), ehTransversal: ehTransversal
                 };
                 nosCriadosUnicos.add(noId);
@@ -639,15 +672,16 @@ function renderizarEstruturaHierarquica() {
 
             const arestaKey = `${paiId}->${noId}`;
             if (!arestasCriadasUnicas.has(arestaKey)) {
-                hEdges.push({ from: paiId, to: noId, color: { color: "#E2E8F0", opacity: 0.5 }, width: 0.8 });
+                hEdges.push({ from: paiId, to: noId, color: { color: "#E2E8F0", opacity: 0.5 }, width: 1.0 });
                 arestasCriadasUnicas.add(arestaKey);
             }
             return noId;
         };
 
-        const idP = registrarNoUnico(cp, cat_p, eixoId, "1", 6.5, "#38BDF8", vNumCp); 
-        const idS = idP ? registrarNoUnico(cs, cat_s, idP, "2", 5, "#34D399", vNumCs) : null;  
-        if (idS) registrarNoUnico(ct, cat_t, idS, "3", 3.5, "#FBBF24", vNumCt);              
+        // AUMENTO DAS BOLAS: Ajustado proporcionalmente de 6.5/5/3.5 para 13/10/7.5
+        const idP = registrarNoUnico(cp, cat_p, eixoId, "1", 13.0, "#38BDF8", vNumCp); 
+        const idS = idP ? registrarNoUnico(cs, cat_s, idP, "2", 10.0, "#34D399", vNumCs) : null;  
+        if (idS) registrarNoUnico(ct, cat_t, idS, "3", 7.5, "#FBBF24", vNumCt);              
     });
 
     if (destacarTransversais) {
@@ -662,7 +696,6 @@ function renderizarEstruturaHierarquica() {
         });
     }
 
-    // Alinhando barra lateral esquerda da Aba 2 com os temas interativos
     buildSidebarHierarquicaAba2();
 
     nodesDataSet.clear(); nodesDataSet.add(hNodes);
@@ -672,7 +705,7 @@ function renderizarEstruturaHierarquica() {
         physics: { 
             enabled: true, 
             solver: "barnesHut", 
-            barnesHut: { gravitationalConstant: -2500, centralGravity: 0.04, springLength: 60, springConstant: 0.04 },
+            barnesHut: { gravitationalConstant: -2800, centralGravity: 0.04, springLength: 75, springConstant: 0.04 },
             stabilization: { enabled: true, iterations: 180 }
         }
     };
@@ -713,13 +746,13 @@ function renderizarEstruturaHierarquica() {
                     <div class="p-3 bg-white border border-slate-100 rounded-xl shadow-sm"><span class="text-slate-400 block text-[10px]">Causas Primárias</span><span class="text-sm font-bold text-slate-700">${det.dados.totalP} causas</span></div>
                     <div class="p-3 bg-white border border-slate-100 rounded-xl shadow-sm"><span class="text-slate-400 block text-[10px]">Causas Secundárias</span><span class="text-sm font-bold text-slate-700">${det.dados.totalS} causas</span></div>
                     <div class="p-3 bg-white border border-slate-100 rounded-xl shadow-sm"><span class="text-slate-400 block text-[10px]">Causas Terciárias</span><span class="text-sm font-bold text-slate-700">${det.dados.totalT} causas</span></div>
-                    <div class="p-3 bg-amber-50/60 border border-amber-100 rounded-xl"><span class="text-amber-700 font-semibold block text-[10px]">Total de Estrelas</span><span class="text-sm font-bold text-amber-800">${det.dados.estrelas} estrelas</span></div>
+                    <div class="p-3 bg-amber-50/60 border border-amber-100 rounded-xl"><span class="text-amber-700 font-semibold block text-[10px]">Nº de causas que receberam estrelas</span><span class="text-sm font-bold text-amber-800">${det.dados.causasEstreladasCount} causas</span></div>
                 </div>`;
         } else {
             document.getElementById("p-titulo").textContent = `Causa ${det.camada}`;
             document.getElementById("p-sub").textContent = "Evidência Qualitativa Mapeada";
             let cCat = CAT_CORES_MAP[Object.keys(CAT_CORES_MAP).find(k=>det.tema.toLowerCase().includes(k.toLowerCase()))] || "#64748B";
-            const badges = det.eixos.map(ex => `<span class="inline-block px-2 py-0.5 text-[9px] font-bold text-white rounded mr-1" style="background:${EIXO_CORES[ex]}">${ex}</span>`).join("");
+            const badges = det.eixos.map(ex => `<span class="inline-block px-2 py-0.5 text-[9px] font-bold text-white rounded mr-1" style="background:${EIXO_CORES[ex]}">${MAPA_EIXOS_COMPLETO[ex] || ex}</span>`).join("");
             
             document.getElementById("painel-body").innerHTML = `
                 <div class="mb-3">
@@ -732,8 +765,8 @@ function renderizarEstruturaHierarquica() {
                     ${det.ehTransversal ? `<span class="ml-auto text-[9px] bg-amber-100 text-amber-800 px-1.5 py-0.5 rounded font-bold uppercase tracking-wide">Transversal</span>` : `<span class="ml-auto text-[9px] bg-slate-100 text-slate-600 px-1.5 py-0.5 rounded font-bold uppercase tracking-wide">Específica</span>`}
                 </div>
                 <div class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1.5">Eixos Compartilhados</div>
-                <div class="mb-4">${badges}</div>
-                ${det.votos > 0 ? `<div class="p-2 bg-amber-50/80 border border-amber-100 rounded-lg text-xs font-semibold text-amber-800 text-center">⭐ Priorizada com ${det.votos} Votos</div>`:''}`;
+                <div class="mb-4 flex flex-col gap-1">${badges}</div>
+                ${det.votos > 0 ? `<div class="p-2 bg-amber-50/80 border border-amber-100 rounded-lg text-xs font-semibold text-amber-800 text-center">⭐ Priorizada com ${det.votos} Estrelas</div>`:''}`;
         }
         document.getElementById("painel").classList.add("open"); document.getElementById("net").style.right = "460px";
     });
@@ -760,7 +793,7 @@ function buildSidebarHierarquicaAba2() {
     
     const h = document.createElement("p"); 
     h.className = "text-[10px] font-bold uppercase tracking-widest mt-2 mb-2 px-2 text-amber-600"; 
-    h.textContent = "⚡ Filtrar por Tema"; 
+    h.textContent = "🔍 Filtrar por Tema"; 
     list.appendChild(h);
 
     sorted.forEach(tema => {
