@@ -19,7 +19,6 @@ html,body{height:100%;margin:0;padding:0;overflow:hidden;font-family:"Inter",san
 ::-webkit-scrollbar{width:5px}
 ::-webkit-scrollbar-thumb{background:#CBD5E0;border-radius:5px}
 
-/* Toggle Switch Styling */
 .switch {position:relative;display:inline-block;width:34px;height:20px}
 .switch input {opacity:0;width:0;height:0}
 .slider {position:absolute;cursor:pointer;inset:0;background-color:#CBD5E0;border-radius:20px;transition:.2s}
@@ -102,7 +101,6 @@ async function inicializar() {
         buildSidebarHierarquica();
         renderTree();
 
-        // Event listener do Filtro Inteligente
         document.getElementById("filtro-especificas").addEventListener("change", (e) => {
             aplicarFiltroGrafo(e.target.checked);
         });
@@ -130,9 +128,9 @@ function processarDados(rows) {
     const catMap = {};
     const eixosAtivos = new Set();
 
-    // 1. NÓ MACRO GRANDE E IMPONENTE (size: 32)
+    // Nó Macro centralizado e destacado
     G.nodes.push({
-        id: "ROOT", label: "Gargalo Central\nEducação Municipal", shape: "dot", size: 32,
+        id: "ROOT", label: "Gargalo Central\nEducação Municipal", shape: "dot", size: 34,
         color: {background: "#DC2626", border: "#991B1B"}, font: {size: 13, color: "#0F172A", bold: true},
         _isMacro: true
     });
@@ -166,11 +164,12 @@ function processarDados(rows) {
 
     eixosAtivos.forEach(ex => {
         G.nodes.push({
-            id: ex, label: ex, shape: "dot", size: 16,
+            id: ex, label: ex, shape: "dot", size: 18,
             color: {background: EIXO_CORES[ex]||"#64748B", border: EIXO_CORES[ex]||"#64748B"},
             font: {size: 11, color: "#1E293B", bold: true},
             _isEixo: true
         });
+        // Conexão principal longa para abrir espaço no centro do mapa
         G.edges.push({ id: `edge_root_${ex}`, from: "ROOT", to: ex, color: "#CBD5E0", width: 3 });
     });
 
@@ -180,8 +179,7 @@ function processarDados(rows) {
         const chaveCor = Object.keys(CAT_CORES_MAP).find(k => catNome.includes(k));
         const corBase = CAT_CORES_MAP[chaveCor] || "#CBD5E0";
 
-        // 2. VOLUMETRIA AVANÇADA E SENSÍVEL (Base maior e multiplicador ampliado para destaque)
-        const tamanhoCalculado = 12 + Math.min(totalCausasDiferentes * 3, 28); 
+        const tamanhoCalculado = 14 + Math.min(totalCausasDiferentes * 3, 30); 
         const labelCurto = catNome.length > 25 ? catNome.slice(0,25) + "..." : catNome;
         const eixosUnicos = Array.from(info.eixos);
         const ehTransversal = eixosUnicos.length > 1;
@@ -208,35 +206,33 @@ function renderTree() {
     vE = new vis.DataSet(G.edges);
 
     net = new vis.Network(document.getElementById("net"), {nodes: vN, edges: vE}, {
+        // --- CALIBRAÇÃO DA FÍSICA ELÁSTICA E ESPAÇADA ---
         physics: {
+            enabled: true,
             solver: "barnesHut",
-            barnesHut: { gravitationalConstant: -4500, centralGravity: 0.25, springLength: 150, springConstant: 0.04, damping: 0.1 },
-            stabilization: { iterations: 150 }
+            barnesHut: {
+                gravitationalConstant: -7000, // Força os eixos e nós para longe uns dos outros (tira o aperto)
+                centralGravity: 0.15,          // Permite que o grafo se espalhe pelas bordas ordenadamente
+                springLength: 220,            // Linhas muito mais longas para dar respiro visual
+                springConstant: 0.02,         // Deixa as molas macias para criar o balanço elástico
+                damping: 0.25                 // Controla o "treme-treme" para balançar de forma fluida sem travar instantaneamente
+            },
+            stabilization: false // FÍSICA ATIVA CONTÍNUA: Faz as bolinhas tremerem e reagirem ao puxar/soltar
         },
-        interaction: { hover: true, tooltipDelay: 150 }
+        interaction: { hover: true, dragNodes: true, tooltipDelay: 150 }
     });
-    net.on("stabilizationIterationsDone", () => net.setOptions({ physics: false }));
+
     net.on("click", p => p.nodes.length && aoClicarNoNode(p.nodes[0]));
 }
 
 function aplicarFiltroGrafo(exibirEspecificas) {
     fecharPainel();
-    
-    // Filtra os nós
-    const nosFiltrados = G.nodes.filter(n => {
-        if (!exibirEspecificas && n._isSpecific) return false;
-        return true;
-    });
+    const nosFiltrados = G.nodes.filter(n => exibirEspecificas || !n._isSpecific);
     vN.clear(); vN.add(nosFiltrados);
 
-    // Filtra as arestas baseadas nos nós ativos
     const idsAtivos = nosFiltrados.map(n => n.id);
     const arestasFiltradas = G.edgesData.filter(e => idsAtivos.includes(e.from) && idsAtivos.includes(e.to));
     vE.clear(); vE.add(arestasFiltradas);
-
-    // Re-estabiliza o layout caso queira ajustar distâncias após ocultar
-    net.setOptions({ physics: true });
-    setTimeout(() => net.setOptions({ physics: false }), 800);
 }
 
 function aoClicarNoNode(id) {
@@ -261,7 +257,6 @@ function aoClicarNoNode(id) {
     document.getElementById("painel").classList.add("open");
     document.getElementById("net").style.right = "480px";
 
-    // Destaca conexões ativas e esmaece o restante
     try {
         const conectados = net.getConnectedNodes(id); conectados.push(id); conectados.push("ROOT");
         vN.update(vN.get().map(n => ({ id: n.id, opacity: conectados.includes(n.id) ? 1 : 0.05 })));
@@ -279,8 +274,6 @@ function buildSidebarHierarquica() {
     list.appendChild(reset);
 
     const sortedCats = Object.keys(G.details).map(id => G.details[id]);
-    
-    // 3. ORDENAÇÃO DE NÍVEL HIERÁRQUICO POR VOLUME DE CAUSAS DESDE O TOPO
     sortedCats.sort((a, b) => b.volumeCausas - a.volumeCausas);
 
     const transversais = sortedCats.filter(c => c.ehTransversal);
