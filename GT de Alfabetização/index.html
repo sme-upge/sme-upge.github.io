@@ -9,8 +9,8 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
 *{box-sizing:border-box}
-html,body{height:100%;margin:0;padding:0;overflow:hidden;font-family:"Inter",sans-serif;background:#F1F5F9}
-#net{position:absolute;top:0;left:280px;right:0;bottom:0;background:#F1F5F9;transition:right .25s ease}
+html,body{height:100%;margin:0;padding:0;overflow:hidden;font-family:"Inter",sans-serif;background:#F8FAFC}
+#net{position:absolute;top:0;left:280px;right:0;bottom:0;background:#F8FAFC;transition:right .25s ease}
 #sidebar{position:fixed;top:0;left:0;width:280px;height:100vh;background:white;border-right:1px solid #E2E8F0;z-index:30;display:flex;flex-direction:column}
 #sidebar-list{flex:1;overflow-y:auto;padding:12px 8px}
 #painel{position:fixed;top:0;right:0;width:480px;height:100vh;background:white;border-left:1px solid #E2E8F0;z-index:40;display:flex;flex-direction:column;transform:translateX(100%);transition:transform .25s ease;box-shadow:-12px 0 30px rgba(0,0,0,0.04)}
@@ -48,7 +48,7 @@ input:checked + .slider:before {transform:translateX(14px)}
 
 <div id="net"></div>
 
-<div style="position:fixed;top:0;left:280px;right:0;z-index:20;pointer-events:none;background:linear-gradient(rgba(241,245,249,1) 50%,rgba(241,245,249,0))">
+<div style="position:fixed;top:0;left:280px;right:0;z-index:20;pointer-events:none;background:linear-gradient(rgba(248,250,252,1) 50%,rgba(248,250,252,0))">
   <div style="display:flex;justify-content:center;padding:28px 0 56px">
     <div style="text-align:center">
       <h1 style="font-size:20px;font-weight:800;color:#0F172A;margin:0;letter-spacing:-0.03em">Árvore Diagnóstica de Vulnerabilidades</h1>
@@ -60,7 +60,7 @@ input:checked + .slider:before {transform:translateX(14px)}
 <div id="painel">
   <div style="padding:28px;border-bottom:1px solid #F1F5F9;flex-shrink:0;display:flex;gap:20px;align-items:start">
     <div style="flex:1;min-width:0">
-      <div id="p-cor" style="width:16px;height:16px;border-radius:50%;margin-bottom:12px;box-shadow:inset 0 0 0 1px rgba(0,0,0,0.05)"></div>
+      <div id="p-cor" style="width:16px;height:16px;border-radius:50%;margin-bottom:12px;box-shadow:0 0 8px rgba(0,0,0,0.15)"></div>
       <h2 id="p-titulo" style="font-size:15px;font-weight:700;color:#0F172A;margin:0;line-height:1.4"></h2>
       <p id="p-sub" style="font-size:11px;color:#64748B;margin:5px 0 0;font-weight:500"></p>
     </div>
@@ -70,9 +70,10 @@ input:checked + .slider:before {transform:translateX(14px)}
 </div>
 
 <script>
+// CORES VIVAS EM ALTA DEFINIÇÃO (FIM DO FOSCO)
 const EIXO_CORES = {
-  "Eixo 1": "#1D4ED8", "Eixo 2": "#7C3AED", "Eixo 3": "#059669",
-  "Eixo 4": "#EA580C", "Eixo 5": "#0891B2", "Eixo 6": "#DC2626", "Eixo 7": "#0F766E"
+  "Eixo 1": "#2563EB", "Eixo 2": "#7C3AED", "Eixo 3": "#059669",
+  "Eixo 4": "#EA580C", "Eixo 5": "#06B6D4", "Eixo 6": "#E11D48", "Eixo 7": "#0D9488"
 };
 
 const EIXO_CURTO = {
@@ -80,12 +81,18 @@ const EIXO_CURTO = {
   "Eixo 4": "Incentivos", "Eixo 5": "Monitoramento", "Eixo 6": "Avaliação", "Eixo 7": "Materiais"
 };
 
+// CORES DE ALTO IMPACTO PARA OS TEMAS TRANSVERSAIS
 const CAT_CORES_MAP = {
-  "Fragmentação da concepção": "#EF4444", "Fragilidade na comunicação": "#2563EB",
-  "Alta rotatividade": "#A855F7", "Sobrecarga de demandas": "#06B6D4",
-  "Participação desigual": "#10B981", "Fragilidade no atendimento": "#F59E0B",
-  "Fragilidade na identidade": "#F472B6", "Fragilidade na articulação": "#FB7185",
-  "Recursos pedagógicos": "#F472B6", "Excesso e sobreposição": "#4ADE80"
+  "Fragmentação da concepção": "#EF4444", 
+  "Fragilidade na comunicação": "#1D4ED8", 
+  "Alta rotatividade": "#9333EA",           
+  "Sobrecarga de demandas": "#06B6D4",      
+  "Participação desigual": "#10B981",        
+  "Fragilidade no atendimento": "#F59E0B",   
+  "Fragilidade na identidade": "#EC4899",    
+  "Fragilidade na articulação": "#F43F5E",   
+  "Recursos pedagógicos": "#D946EF",        
+  "Excesso e sobreposição": "#22C55E"        
 };
 
 let RawRows = [];
@@ -128,10 +135,11 @@ function processarDados(rows) {
     const catMap = {};
     const eixosAtivos = new Set();
 
-    // Nó Macro centralizado e destacado
+    // Nó Macro centralizado e gigante (Fica muito nítido)
     G.nodes.push({
-        id: "ROOT", label: "Gargalo Central\nEducação Municipal", shape: "dot", size: 34,
-        color: {background: "#DC2626", border: "#991B1B"}, font: {size: 13, color: "#0F172A", bold: true},
+        id: "ROOT", label: "PROBLEMA\nMACRO", shape: "dot", size: 36,
+        color: {background: "#1E293B", border: "#0F172A", highlight: {background: "#1E293B", border: "#0F172A"}}, 
+        font: {size: 11, color: "#FFFFFF", bold: true},
         _isMacro: true
     });
 
@@ -163,35 +171,38 @@ function processarDados(rows) {
     });
 
     eixosAtivos.forEach(ex => {
+        const cEixo = EIXO_CORES[ex] || "#64748B";
         G.nodes.push({
-            id: ex, label: ex, shape: "dot", size: 18,
-            color: {background: EIXO_CORES[ex]||"#64748B", border: EIXO_CORES[ex]||"#64748B"},
-            font: {size: 11, color: "#1E293B", bold: true},
+            id: ex, label: ex, shape: "dot", size: 20,
+            color: {background: cEixo, border: cEixo, highlight: {background: cEixo, border: cEixo}},
+            font: {size: 12, color: "#1E293B", bold: true},
             _isEixo: true
         });
-        // Conexão principal longa para abrir espaço no centro do mapa
-        G.edges.push({ id: `edge_root_${ex}`, from: "ROOT", to: ex, color: "#CBD5E0", width: 3 });
+        G.edges.push({ id: `edge_root_${ex}`, from: "ROOT", to: ex, color: "#94A3B8", width: 4 });
     });
 
     Object.keys(catMap).forEach(catNome => {
         const info = catMap[catNome];
         const totalCausasDiferentes = Object.keys(info.causas).length;
         const chaveCor = Object.keys(CAT_CORES_MAP).find(k => catNome.includes(k));
-        const corBase = CAT_CORES_MAP[chaveCor] || "#CBD5E0";
+        const corBase = CAT_CORES_MAP[chaveCor] || "#74808A";
 
-        const tamanhoCalculado = 14 + Math.min(totalCausasDiferentes * 3, 30); 
-        const labelCurto = catNome.length > 25 ? catNome.slice(0,25) + "..." : catNome;
+        // Multiplicador agressivo para volumetria clara das bolinhas
+        const tamanhoCalculado = 14 + Math.min(totalCausasDiferentes * 3.5, 34); 
+        const labelCurto = catNome.length > 22 ? catNome.slice(0,22) + "..." : catNome;
         const eixosUnicos = Array.from(info.eixos);
         const ehTransversal = eixosUnicos.length > 1;
 
         G.nodes.push({
             id: `__cat__${catNome}`, label: labelCurto, title: catNome, shape: "dot", size: tamanhoCalculado,
-            color: {background: corBase, border: corBase}, font: {size: 10, color: "#334155", bold: true},
+            // Evita bordas escuras artificiais que "apagam" a cor
+            color: {background: corBase, border: corBase, highlight: {background: corBase, border: corBase}}, 
+            font: {size: 10, color: "#334155", bold: true},
             _isSpecific: !ehTransversal
         });
 
         info.eixos.forEach(ex => {
-            G.edges.push({ id: `edge_${ex}_${catNome}`, from: ex, to: `__cat__${catNome}`, color: "#E2E8F0", width: 1.5 });
+            G.edges.push({ id: `edge_${ex}_${catNome}`, from: ex, to: `__cat__${catNome}`, color: "#CBD5E0", width: 2 });
         });
 
         G.details[`__cat__${catNome}`] = {
@@ -206,20 +217,22 @@ function renderTree() {
     vE = new vis.DataSet(G.edges);
 
     net = new vis.Network(document.getElementById("net"), {nodes: vN, edges: vE}, {
-        // --- CALIBRAÇÃO DA FÍSICA ELÁSTICA E ESPAÇADA ---
         physics: {
             enabled: true,
             solver: "barnesHut",
             barnesHut: {
-                gravitationalConstant: -7000, // Força os eixos e nós para longe uns dos outros (tira o aperto)
-                centralGravity: 0.15,          // Permite que o grafo se espalhe pelas bordas ordenadamente
-                springLength: 220,            // Linhas muito mais longas para dar respiro visual
-                springConstant: 0.02,         // Deixa as molas macias para criar o balanço elástico
-                damping: 0.25                 // Controla o "treme-treme" para balançar de forma fluida sem travar instantaneamente
+                gravitationalConstant: -12000, // Força expansiva massiva para espalhar e separar os lados
+                centralGravity: 0.1,           // Impede o estrangulamento central
+                springLength: 200,             // Distancia e organiza as causas perto dos seus eixos
+                springConstant: 0.05,          // Deixa a mola super responsiva
+                damping: 0.12                  // FÍSICA DO TREME-TREME: Mantém o balanço elástico ativo por mais tempo ao arrastar!
             },
-            stabilization: false // FÍSICA ATIVA CONTÍNUA: Faz as bolinhas tremerem e reagirem ao puxar/soltar
+            stabilization: false
         },
-        interaction: { hover: true, dragNodes: true, tooltipDelay: 150 }
+        edges: {
+            smooth: { type: "continuous", forceDirection: "none" } // Melhora o fluxo de linhas retas e limpas
+        },
+        interaction: { hover: true, dragNodes: true, tooltipDelay: 100 }
     });
 
     net.on("click", p => p.nodes.length && aoClicarNoNode(p.nodes[0]));
@@ -241,7 +254,7 @@ function aoClicarNoNode(id) {
 
     document.getElementById("p-cor").style.background = det.cor;
     document.getElementById("p-titulo").textContent = det.cat;
-    document.getElementById("p-sub").textContent = `${det.volumeCausas} evidências e vulnerabilidades mapeadas sob este tema`;
+    document.getElementById("p-sub").textContent = `${det.volumeCausas} evidências coletadas neste tema`;
 
     let html = '<p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-4">Evidências Coletadas na Rede</p>';
     det.causas.forEach(c => {
@@ -259,7 +272,7 @@ function aoClicarNoNode(id) {
 
     try {
         const conectados = net.getConnectedNodes(id); conectados.push(id); conectados.push("ROOT");
-        vN.update(vN.get().map(n => ({ id: n.id, opacity: conectados.includes(n.id) ? 1 : 0.05 })));
+        vN.update(vN.get().map(n => ({ id: n.id, opacity: conectados.includes(n.id) ? 1 : 0.04 })));
     } catch(err){}
 }
 
@@ -293,10 +306,10 @@ function buildSidebarHierarquica() {
             const b = document.createElement("button");
             b.className = "cat-btn w-full text-left p-2.5 rounded-xl text-[11px] mb-1 flex items-start gap-3 border border-transparent hover:bg-slate-50 transition";
             b.dataset.id = item.id;
-            b.innerHTML = `<span style="width:10px;height:10px;border-radius:50%;background:${item.cor};margin-top:4px;flex-shrink:0;box-shadow:inset 0 0 0 1px rgba(0,0,0,0.05)"></span>
+            b.innerHTML = `<span style="width:10px;height:10px;border-radius:50%;background:${item.cor};margin-top:4px;flex-shrink:0;box-shadow:0 0 4px rgba(0,0,0,0.1)"></span>
                 <div class="flex-1">
-                    <span class="text-slate-700 font-medium leading-normal">${item.cat}</span>
-                    <span class="text-indigo-600 font-bold text-[10px] block mt-0.5">${item.volumeCausas} causas encontradas</span>
+                    <span class="text-slate-700 font-semibold leading-normal">${item.cat}</span>
+                    <span class="text-indigo-600 font-bold text-[10px] block mt-0.5">${item.volumeCausas} causas</span>
                 </div>`;
             b.onclick = () => {
                 aoClicarNoNode(item.id);
@@ -312,8 +325,8 @@ function buildSidebarHierarquica() {
         list.appendChild(gWrapper);
     };
 
-    renderGrupoHierarquico("🔗 Temas Transversais (Por Relevância)", "text-indigo-600", transversais, "group-transversais");
-    renderGrupoHierarquico("📌 Dores Específicas (Por Relevância)", "text-slate-500", especificas, "group-especificas");
+    renderGrupoHierarquico("🔗 Temas Transversais (Por Volume)", "text-indigo-600", transversais, "group-transversais");
+    renderGrupoHierarquico("📌 Dores Específicas (Por Volume)", "text-slate-500", especificas, "group-especificas");
 }
 
 function fecharPainel() {
