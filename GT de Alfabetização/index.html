@@ -11,310 +11,244 @@
     body { font-family: 'Inter', sans-serif; background-color: #f8fafc; }
     #net { width: 100%; height: 100vh; outline: none; }
     
-    /* Custom Scrollbar */
-    ::-webkit-scrollbar { width: 6px; }
-    ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
-
-    /* Estilo do Painel Lateral */
+    /* Painel Lateral que desliza */
     #painel {
         transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-        box-shadow: -10px 0 30px rgba(0,0,0,0.05);
+        box-shadow: -15px 0 40px rgba(0,0,0,0.08);
     }
     #painel.closed { transform: translateX(100%); }
 
-    /* Tooltip Customizado */
+    /* Estilo dos nós e tooltips */
     .vis-tooltip {
-        position: absolute; visibility: hidden; padding: 8px;
-        background-color: #1e293b; color: #fff; border-radius: 6px;
+        position: absolute; visibility: hidden; padding: 10px;
+        background-color: #1e293b; color: #fff; border-radius: 8px;
         font-size: 11px; z-index: 100; pointer-events: none;
+    }
+
+    /* Botão ativo */
+    .btn-nav.active {
+        background-color: #f8fafc;
+        color: #1e293b;
+        box-shadow: inset 0 2px 4px rgba(0,0,0,0.05);
     }
 </style>
 </head>
 <body class="overflow-hidden">
 
 <!-- Header -->
-<div class="fixed top-8 left-0 right-0 z-10 flex flex-col items-center pointer-events-none">
+<div class="fixed top-10 left-0 right-0 z-10 flex flex-col items-center pointer-events-none">
     <h1 class="text-3xl font-bold text-slate-800 tracking-tight">Árvore de Problemas</h1>
-    <p class="text-slate-500 font-medium">GT de Alfabetização · SME-SP · 2026</p>
+    <p class="text-slate-500 font-medium mt-1">GT de Alfabetização · SME-SP · 2026</p>
 </div>
 
-<!-- Legenda -->
-<div class="fixed bottom-32 left-8 z-10 bg-white/80 backdrop-blur-md p-6 rounded-3xl border border-slate-100 shadow-xl max-w-xs">
-    <h3 class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-4">Legenda</h3>
-    <div class="space-y-3">
-        <div class="flex items-center gap-3">
-            <span class="w-4 h-4 rounded-full bg-[#ef4444]"></span>
+<!-- Legenda Estilo Bento -->
+<div class="fixed bottom-12 left-10 z-10 bg-white/90 backdrop-blur-md p-7 rounded-[2.5rem] border border-slate-100 shadow-2xl max-w-[280px]">
+    <h3 class="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-5">Legenda</h3>
+    <div class="space-y-4">
+        <div class="flex items-center gap-4">
+            <span class="w-4 h-4 rounded-full bg-[#ef4444] shadow-sm shadow-red-200"></span>
             <span class="text-sm font-semibold text-slate-700">Problema macro</span>
         </div>
-        <div class="flex items-center gap-3">
-            <span class="w-4 h-4 rounded-full bg-[#f97316]"></span>
+        <div class="flex items-center gap-4">
+            <span class="w-4 h-4 rounded-full bg-[#f97316] shadow-sm shadow-orange-200"></span>
             <span class="text-sm font-semibold text-slate-700">Eixo temático</span>
         </div>
-        <div class="flex items-center gap-3">
-            <span class="w-4 h-4 rounded-full bg-[#10b981]"></span>
+        <div class="flex items-center gap-4">
+            <span class="w-4 h-4 rounded-full bg-[#10b981] shadow-sm shadow-green-200"></span>
             <span class="text-sm font-semibold text-slate-700">Tema transversal</span>
         </div>
-        <div class="flex items-center gap-3">
-            <span class="w-4 h-4 rounded-full bg-[#cbd5e1]"></span>
+        <div class="flex items-center gap-4">
+            <span class="w-4 h-4 rounded-full bg-[#cbd5e1] shadow-sm shadow-slate-200"></span>
             <span class="text-sm font-semibold text-slate-700">Causas sem tema</span>
         </div>
     </div>
-    <p class="mt-4 text-[11px] italic text-slate-400">Clique num tema para ver as causas</p>
+    <p class="mt-6 text-[11px] italic text-slate-400 border-t border-slate-50 pt-4">Clique num tema para ver as causas</p>
 </div>
 
-<!-- Container da Rede -->
+<!-- Área do Gráfico -->
 <div id="net"></div>
 
-<!-- Menu Inferior -->
-<div class="fixed bottom-10 left-1/2 -translate-x-1/2 z-20">
-    <div class="bg-white/90 backdrop-blur-md p-2 rounded-2xl shadow-2xl border border-slate-100 flex gap-2">
-        <button onclick="setModo('temas')" id="btn-temas" class="px-6 py-3 rounded-xl font-bold text-sm transition-all flex items-center gap-2">
-            <span>📂</span> Por temas
+<!-- Menu de Navegação Inferior -->
+<div class="fixed bottom-12 left-1/2 -translate-x-1/2 z-20">
+    <div class="bg-white p-2 rounded-[2rem] shadow-2xl border border-slate-100 flex gap-2">
+        <button onclick="setModo('temas')" id="btn-temas" class="btn-nav px-8 py-4 rounded-[1.5rem] font-bold text-sm transition-all flex items-center gap-3">
+            <span>📁</span> Por temas
         </button>
-        <button onclick="setModo('completo')" id="btn-completo" class="px-6 py-3 rounded-xl font-bold text-sm transition-all flex items-center gap-2">
+        <button onclick="setModo('completo')" id="btn-completo" class="btn-nav px-8 py-4 rounded-[1.5rem] font-bold text-sm transition-all flex items-center gap-3">
             <span>🌳</span> Completo
         </button>
-        <button onclick="setModo('minuto')" id="btn-minuto" class="px-6 py-3 rounded-xl font-bold text-sm transition-all flex items-center gap-2">
+        <button onclick="setModo('minuto')" id="btn-minuto" class="btn-nav px-8 py-4 rounded-[1.5rem] font-bold text-sm transition-all flex items-center gap-3">
             <span>⚡</span> 1 minuto
         </button>
     </div>
 </div>
 
-<!-- Painel Lateral -->
-<div id="painel" class="fixed top-0 right-0 w-full md:w-[450px] h-full bg-white z-50 closed flex flex-col">
-    <div class="p-8 border-b border-slate-50 flex justify-between items-start">
+<!-- Painel de Detalhes Lateral -->
+<div id="painel" class="fixed top-0 right-0 w-full md:w-[480px] h-full bg-white z-50 closed flex flex-col border-l border-slate-100">
+    <!-- Cabeçalho do Painel -->
+    <div class="p-10 border-b border-slate-50 flex justify-between items-start">
         <div class="flex-1">
-            <div id="p-tag" class="w-3 h-3 rounded-full mb-3"></div>
-            <h2 id="p-titulo" class="text-xl font-bold text-slate-800 leading-tight">Título do Tema</h2>
-            <p id="p-meta" class="text-sm text-slate-400 mt-2 font-medium"></p>
+            <div id="p-tag" class="w-4 h-4 rounded-full mb-4"></div>
+            <h2 id="p-titulo" class="text-2xl font-bold text-slate-800 leading-tight">Título</h2>
+            <p id="p-meta" class="text-xs font-bold text-indigo-500 uppercase tracking-widest mt-3"></p>
         </div>
-        <button onclick="fecharPainel()" class="p-2 hover:bg-slate-100 rounded-full transition-colors">
+        <button onclick="fecharPainel()" class="p-3 hover:bg-slate-50 rounded-full transition-colors">
             <svg class="w-6 h-6 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
         </button>
     </div>
     
-    <div id="p-conteudo" class="flex-1 overflow-y-auto p-8 space-y-8">
-        <!-- Conteúdo dinâmico aqui -->
+    <!-- Conteúdo do Painel -->
+    <div id="p-conteudo" class="flex-1 overflow-y-auto p-10 space-y-10 bg-slate-50/30">
+        <!-- Lista de causas gerada via JS -->
     </div>
 </div>
 
 <script>
-// URL do CSV (mantendo a sua)
+// Link da sua planilha no GitHub
 const CSV_URL = 'https://raw.githubusercontent.com/sme-upge/sme-upge.github.io/main/GT%20de%20Alfabetiza%C3%A7%C3%A3o/arvore.csv';
 
 const COLORS = {
     macro: '#ef4444',
     eixo: '#f97316',
     tema: '#10b981',
-    outros: '#cbd5e1',
-    link: '#e2e8f0'
+    outros: '#cbd5e1'
 };
 
-let network, nodes, edges, rawData;
-let currentModo = 'temas';
+let network, visNodes, visEdges, rawData;
 
-// Carregar Dados
 async function init() {
-    try {
-        const response = await fetch(CSV_URL);
-        const text = await response.text();
-        rawData = parseCSV(text);
-        setModo('temas');
-    } catch (e) {
-        console.error("Erro ao carregar CSV", e);
-    }
+    const response = await fetch(CSV_URL);
+    const text = await response.text();
+    rawData = parseCSV(text);
+    setModo('temas');
 }
 
 function parseCSV(text) {
     const lines = text.split('\n').filter(l => l.trim());
-    const headers = lines[0].split(';');
     return lines.slice(1).map(line => {
-        const values = line.split(';');
+        const v = line.split(';');
         return {
-            eixo: values[0],
-            problema: values[1],
-            c1: values[2],
-            c2: values[3],
-            c3: values[4],
-            votos: parseInt(values[5]) || 0,
-            categoria: values[6]?.trim() || ""
+            eixo: v[0],
+            problema: v[1],
+            c1: v[2],
+            c2: v[3],
+            c3: v[4],
+            votos: parseInt(v[5]) || 0,
+            categoria: v[6]?.trim() || ""
         };
     });
 }
 
 function setModo(modo) {
-    currentModo = modo;
     fecharPainel();
-    
-    // Atualizar botões
-    ['temas', 'completo', 'minuto'].forEach(m => {
-        const btn = document.getElementById(`btn-${m}`);
-        if(m === modo) {
-            btn.className = "px-6 py-3 rounded-xl font-bold text-sm transition-all flex items-center gap-2 bg-indigo-600 text-white shadow-lg shadow-indigo-200";
-        } else {
-            btn.className = "px-6 py-3 rounded-xl font-bold text-sm transition-all flex items-center gap-2 bg-slate-50 text-slate-500 hover:bg-slate-100";
-        }
-    });
+    document.querySelectorAll('.btn-nav').forEach(btn => btn.classList.remove('active'));
+    document.getElementById(`btn-${modo}`).classList.add('active');
 
-    renderNetwork();
-}
+    const nodeMap = new Map();
+    const edgeList = [];
 
-function renderNetwork() {
-    const nodeSet = new Map();
-    const edgeSet = new Set();
+    // Nó Central
+    nodeMap.set('MACRO', { id: 'MACRO', label: 'BAIXA\nAPRENDIZAGEM', color: COLORS.macro, size: 35, font: {color: '#fff', bold: true} });
 
-    // Nó Macro
-    nodeSet.set('MACRO', { 
-        id: 'MACRO', label: 'Baixa\naprendizagem', 
-        color: COLORS.macro, font: { color: '#fff', size: 16, bold: true },
-        size: 35, shape: 'dot' 
-    });
-
-    if (currentModo === 'temas') {
-        const categorias = {};
-        const semCategoria = {};
+    if (modo === 'temas') {
+        const temas = {};
+        const semTemaPorEixo = {};
 
         rawData.forEach(row => {
             // Eixos
-            if(!nodeSet.has(row.eixo)) {
-                nodeSet.set(row.eixo, { id: row.eixo, label: row.eixo, color: COLORS.eixo, size: 25, font: {size: 12, bold: true} });
-                edgeSet.add(`MACRO|${row.eixo}`);
+            if(!nodeMap.has(row.eixo)) {
+                nodeMap.set(row.eixo, { id: row.eixo, label: row.eixo, color: COLORS.eixo, size: 22, font: {size: 11, bold: true} });
+                edgeList.push({ from: 'MACRO', to: row.eixo });
             }
 
             if (row.categoria) {
-                if(!categorias[row.categoria]) categorias[row.categoria] = { eixos: new Set(), causas: [] };
-                categorias[row.categoria].eixos.add(row.eixo);
-                categorias[row.categoria].causas.push(row);
+                if(!temas[row.categoria]) temas[row.categoria] = { causas: [] };
+                temas[row.categoria].causas.push(row);
             } else {
-                if(!semCategoria[row.eixo]) semCategoria[row.eixo] = [];
-                semCategoria[row.eixo].push(row);
+                if(!semTemaPorEixo[row.eixo]) semTemaPorEixo[row.eixo] = [];
+                semTemaPorEixo[row.eixo].push(row);
             }
         });
 
-        // Adicionar Temas Transversais
-        Object.entries(categorias).forEach(([nome, info]) => {
-            const count = info.causas.length;
-            nodeSet.set(nome, { 
-                id: nome, label: breakText(nome, 20), 
+        // Adiciona bolinhas de temas que crescem
+        Object.entries(temas).forEach(([nome, info]) => {
+            const numCausas = info.causas.length;
+            nodeMap.set(nome, { 
+                id: nome, 
+                label: breakText(nome, 18), 
                 color: COLORS.tema, 
-                size: 20 + (count * 2), // Cresce com o número de causas
-                font: { size: 11 },
-                group: 'tema',
-                causas: info.causas
+                size: 18 + (numCausas * 2), // Lógica de crescimento
+                causas: info.causas,
+                font: { size: 10 }
             });
-            info.eixos.forEach(eixo => edgeSet.add(`${eixo}|${nome}`));
+            // Conectar aos eixos que essa categoria abrange
+            const eixosRelacionados = [...new Set(info.causas.map(c => c.eixo))];
+            eixosRelacionados.forEach(ex => edgeList.push({ from: ex, to: nome }));
         });
 
-        // Adicionar bolinhas cinzas (outros) por eixo
-        Object.entries(semCategoria).forEach(([eixo, causas]) => {
+        // Bolinhas cinzas
+        Object.entries(semTemaPorEixo).forEach(([eixo, causas]) => {
             const id = `outros_${eixo}`;
-            nodeSet.set(id, { 
-                id, label: `Outras causas\n(${causas.length})`, 
-                color: COLORS.outros, size: 15, 
-                font: { size: 10, color: '#64748b' },
-                causas: causas
-            });
-            edgeSet.add(`${eixo}|${id}`);
-        });
-
-    } else {
-        // Logica para modo completo e minuto (simplificada para o exemplo)
-        rawData.forEach(row => {
-            if(!nodeSet.has(row.eixo)) nodeSet.set(row.eixo, { id: row.eixo, label: row.eixo, color: COLORS.eixo });
-            edgeSet.add(`MACRO|${row.eixo}`);
-            if(row.problema && !nodeSet.has(row.problema)) {
-                nodeSet.set(row.problema, { id: row.problema, label: breakText(row.problema, 20), size: 15 });
-                edgeSet.add(`${row.eixo}|${row.problema}`);
-            }
+            nodeMap.set(id, { id, label: `Outras causas\n(${causas.length})`, color: COLORS.outros, size: 14, causas, font: {size: 9, color: '#94a3b8'} });
+            edgeList.push({ from: eixo, to: id });
         });
     }
 
-    const visNodes = new vis.DataSet(Array.from(nodeSet.values()));
-    const visEdges = new vis.DataSet(Array.from(edgeSet).map(e => {
-        const [from, to] = e.split('|');
-        return { from, to, color: COLORS.link, width: 1.5 };
-    }));
-
-    const container = document.getElementById('net');
-    const options = {
+    // Render Vis-network
+    visNodes = new vis.DataSet(Array.from(nodeMap.values()));
+    visEdges = new vis.DataSet(edgeList.map(e => ({ ...e, color: '#f1f5f9', width: 2 })));
+    
+    network = new vis.Network(document.getElementById('net'), { nodes: visNodes, edges: visEdges }, {
         nodes: { shape: 'dot', font: { face: 'Inter' } },
-        edges: { smooth: { type: 'cubicBezier', roundness: 0.5 } },
-        physics: {
-            forceAtlas2Based: { gravitationalConstant: -80, centralGravity: 0.01, springLength: 100, damping: 0.4 },
-            solver: 'forceAtlas2Based',
-            stabilization: { iterations: 150 }
-        }
-    };
+        physics: { forceAtlas2Based: { gravitationalConstant: -100, centralGravity: 0.01, springLength: 100 }, solver: 'forceAtlas2Based', stabilization: { iterations: 100 } }
+    });
 
-    network = new vis.Network(container, { nodes: visNodes, edges: visEdges }, options);
-
-    network.on("click", (params) => {
-        if (params.nodes.length > 0) {
-            const nodeId = params.nodes[0];
-            const nodeData = visNodes.get(nodeId);
-            if(nodeData.causas) abrirPainel(nodeData);
+    network.on("click", (p) => {
+        if(p.nodes.length) {
+            const data = visNodes.get(p.nodes[0]);
+            if(data.causas) abrirPainel(data);
         }
     });
 }
 
 function abrirPainel(node) {
-    const painel = document.getElementById('painel');
-    const titulo = document.getElementById('p-titulo');
-    const meta = document.getElementById('p-meta');
+    const p = document.getElementById('painel');
     const conteudo = document.getElementById('p-conteudo');
-    const tag = document.getElementById('p-tag');
+    document.getElementById('p-titulo').innerText = node.label.split('\n')[0];
+    document.getElementById('p-tag').style.backgroundColor = node.color;
+    document.getElementById('p-meta').innerText = `${node.causas.length} causas encontradas`;
 
-    titulo.innerText = node.label.replace('\n', ' ');
-    tag.style.backgroundColor = node.color;
-    
-    const eixosRelacionados = [...new Set(node.causas.map(c => c.eixo))];
-    meta.innerText = `${node.causas.length} causas · ${eixosRelacionados.join(', ')}`;
-
-    // Agrupar causas por eixo no painel
     let html = '';
-    const agrupado = {};
+    const causasPorEixo = {};
     node.causas.forEach(c => {
-        if(!agrupado[c.eixo]) agrupado[c.eixo] = [];
-        agrupado[c.eixo].push(c);
+        if(!causasPorEixo[c.eixo]) causasPorEixo[c.eixo] = [];
+        causasPorEixo[c.eixo].push(c);
     });
 
-    Object.entries(agrupado).forEach(([eixo, lista]) => {
-        html += `
-            <div class="space-y-4">
-                <h4 class="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">${eixo}</h4>
-                <div class="space-y-3">
-                    ${lista.map(c => `
-                        <div class="bg-slate-50 border border-slate-100 p-5 rounded-2xl relative overflow-hidden group">
-                            ${c.votos > 0 ? `
-                                <div class="flex items-center gap-1 mb-2">
-                                    <span class="text-amber-400 text-xs font-bold">⭐ ${c.votos} estrelas</span>
-                                </div>
-                            ` : ''}
-                            <p class="text-sm text-slate-600 leading-relaxed font-medium">${c.c1 || c.problema}</p>
-                            ${c.c2 ? `<p class="text-xs text-slate-400 mt-2 pl-4 border-l-2 border-slate-200">${c.c2}</p>` : ''}
-                        </div>
-                    `).join('')}
-                </div>
+    Object.entries(causasPorEixo).forEach(([eixo, lista]) => {
+        html += `<div class="space-y-4">
+            <h4 class="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-4">${eixo}</h4>
+            <div class="space-y-3">
+                ${lista.map(c => `
+                    <div class="bg-white border border-slate-100 p-6 rounded-2xl shadow-sm hover:shadow-md transition-shadow">
+                        ${c.votos > 0 ? `<div class="text-amber-500 text-xs font-bold mb-2 flex items-center gap-1">⭐ ${c.votos} estrelas</div>` : ''}
+                        <p class="text-sm font-medium text-slate-600 leading-relaxed">${c.c1 || c.problema}</p>
+                    </div>
+                `).join('')}
             </div>
-        `;
+        </div>`;
     });
 
     conteudo.innerHTML = html;
-    painel.classList.remove('closed');
+    p.classList.remove('closed');
 }
 
-function fecharPainel() {
-    document.getElementById('painel').classList.add('closed');
-}
-
+function fecharPainel() { document.getElementById('painel').classList.add('closed'); }
 function breakText(text, limit) {
     if (text.length <= limit) return text;
     const words = text.split(' ');
     let res = '', line = '';
-    words.forEach(w => {
-        if ((line + w).length > limit) { res += line + '\n'; line = ''; }
-        line += w + ' ';
-    });
+    words.forEach(w => { if ((line + w).length > limit) { res += line + '\n'; line = ''; } line += w + ' '; });
     return res + line;
 }
 
