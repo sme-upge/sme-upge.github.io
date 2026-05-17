@@ -54,8 +54,8 @@ input:checked + .slider:before {transform:translateX(14px)}
       <p class="text-[10px] font-bold uppercase tracking-widest text-blue-600">Matriz Diagnóstica</p>
       <p class="text-[12px] text-slate-400 mt-0.5 font-medium">GT Alfabetização · SME-SP</p>
     </div>
-    <button onclick="limparTodosOsFiltros()" class="px-2.5 py-1 text-[10px] font-bold text-slate-500 hover:text-red-600 bg-slate-100 hover:bg-red-50 rounded-md transition-all flex items-center gap-1 border border-slate-200/60" title="Resetar visualização atual">
-      ✨ Limpar
+    <button onclick="limparTodosOsFiltros()" class="px-2.5 py-1 text-[10px] font-bold text-slate-500 hover:text-red-600 bg-slate-100 hover:bg-red-50 rounded-md transition-all flex items-center gap-1 border border-slate-200/60">
+      ✨ Limpar filtros
     </button>
   </div>
   
@@ -89,10 +89,14 @@ input:checked + .slider:before {transform:translateX(14px)}
     <div class="flex flex-col gap-1 w-full border-b border-slate-50 pb-2">
       <span class="text-[10px] font-bold text-amber-600 uppercase tracking-wider">Priorizações (Filtro)</span>
       <select id="select-votos-hierarquica" class="bg-white border border-slate-200 rounded-lg p-1 text-xs font-medium text-slate-700 focus:outline-none" onchange="renderizarEstruturaHierarquica()">
-        <option value="0">Todas as Evidências</option>
-        <option value="1">Apenas Priorizadas (Estrelas)</option>
-        <option value="4">Alta Prioridade (4+ 🔥)</option>
-        <option value="6">Prioridade Máxima (6 🔥)</option>
+        <option value="0">Selecionar tudo</option>
+        <option value="1">1 estrela </option>
+         <option value="2">2 estrelas (2⭐ )</option>
+        <option value="3">3 estrelas (3⭐)</option>  
+       <option value="4">4 estrelas (4⭐)</option>      
+        <option value="5">5 estrelas (5⭐)</option>
+        <option value="6">6 estrelas (5⭐)</option>
+        <option value="7">7 estrelas (5⭐)</option>     
       </select>
     </div>
 
@@ -111,7 +115,7 @@ input:checked + .slider:before {transform:translateX(14px)}
 
     <div>
       <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1 block">Filtrar por Eixos</span>
-      <div id="checkbox-eixos-container" class="flex flex-col gap-1 max-h-[100px] overflow-y-auto"></div>
+      <div id="checkbox-eixos-container" class="flex flex-col gap-1 max-h-[120px] overflow-y-auto"></div>
     </div>
   </div>
 
@@ -147,7 +151,7 @@ input:checked + .slider:before {transform:translateX(14px)}
   </div>
 </div>
 
-<div id="painel">
+<div id="painel animate-slide-in">
   <div style="padding:24px;border-bottom:1px solid #F8FAFC;flex-shrink:0;display:flex;gap:16px;align-items:start">
     <div style="flex:1;min-width:0">
       <div id="p-cor" style="width:10px;height:10px;border-radius:50%;margin-bottom:8px"></div>
@@ -182,36 +186,36 @@ const CAT_CORES_MAP = {
   "Excesso": "#22C55E", "Inadequação": "#F97316", "Qualificação": "#84CC16"
 };
 
-// CONFIGURAÇÃO DE FÍSICA ELASTICIDADE + REBOTE BIG BANG PARA AMBAS AS VISÕES
+// CONFIGURAÇÃO DOS EFEITOS DINÂMICOS (BIG BANG FORTE NO SPAWN + COMPRIMENTO E RETRAÇÃO ELÁSTICA COESOS)
 const FISICA_RADIAL_CONFIG = {
     enabled: true,
     solver: "barnesHut",
     barnesHut: { 
-        gravitationalConstant: -18000, 
-        centralGravity: 0.1, 
+        gravitationalConstant: -22000, 
+        centralGravity: 0.12, 
         springLength: 140, 
-        springConstant: 0.06,
-        damping: 0.15
+        springConstant: 0.05,
+        damping: 0.14
     },
-    stabilization: { enabled: true, iterations: 180, updateInterval: 25 }
+    stabilization: { enabled: true, iterations: 150, updateInterval: 25 }
 };
 
 const FISICA_HIERARQUICA_CONFIG = {
     enabled: true,
     solver: "barnesHut",
     barnesHut: { 
-        gravitationalConstant: -15000, 
-        centralGravity: 0.08, 
-        springLength: 110, 
-        springConstant: 0.07,
-        damping: 0.15
+        gravitationalConstant: -18000, 
+        centralGravity: 0.1, 
+        springLength: 120, 
+        springConstant: 0.06,
+        damping: 0.14
     },
-    stabilization: { enabled: true, iterations: 220, updateInterval: 25 }
+    stabilization: { enabled: true, iterations: 150, updateInterval: 25 }
 };
 
 let currentTab = "radial"; 
 let rawRows = []; 
-let G_aba1 = { nodes: [], edges: [], details: [], originalEdges: [] }; 
+let G_aba1 = { nodes: [], edges: [], details: {}, originalEdges: [] }; 
 let hNodesDetails = {}; 
 let networkInstance = null;
 let nodesDataSet = new vis.DataSet([]);
@@ -290,7 +294,7 @@ async function inicializar() {
         mudarAba("radial");
 
     } catch (e) {
-        console.error(e);
+        console.error("Erro ao carregar ou processar o arquivo de dados:", e);
     }
 }
 
@@ -330,7 +334,7 @@ function construirCheckboxEixos() {
 
     eixosOrdenados.forEach((sigla) => {
         const label = document.createElement("label");
-        label.className = "flex items-center gap-2 text-[11px] font-medium text-slate-600 cursor-pointer hover:text-slate-900";
+        label.className = "flex items-center gap-2 text-[11px] font-medium text-slate-600 cursor-pointer hover:text-slate-900 py-0.5";
         const nomeCompletoEixo = MAPA_EIXOS_COMPLETO[sigla] || sigla;
         label.innerHTML = `
             <input type="checkbox" value="${sigla}" checked class="axis-checkbox rounded border-gray-300 text-blue-600 focus:ring-blue-500 w-3.5 h-3.5" onchange="aoMudarFiltroEixosHierarquico()">
@@ -363,9 +367,10 @@ function rebuildCombosETemasAba2() {
             [[cp, cat_p], [cs, cat_s], [ct, cat_t]].forEach(([txt, cat]) => {
                 if(txt && cat && cat.trim() !== "") {
                     const cNom = cat.trim();
-                    // SE MÚLTIPLOS EIXOS ATIVOS: Remove causas de eixos que não pertencem à seleção ativa
                     const eixosReaisCausa = Array.from(globalTextoParaEixos[txt.trim()] || []);
-                    if (eixosSelecionados.length > 1 && eixosReaisCausa.length === 1 && !eixosSelecionados.includes(eixosReaisCausa[0])) return;
+                    
+                    // FILTRO DE INTERSEÇÃO: Se múltiplos eixos estiverem ativos, limpa causas que não participam das conexões vigentes
+                    if (eixosSelecionados.length > 1 && eixosReaisCausa.length === 1) return;
 
                     if(!listTemasFiltrados[cNom]) listTemasFiltrados[cNom] = 0;
                     listTemasFiltrados[cNom]++;
@@ -638,7 +643,7 @@ function aoClicarNoNodeRadial(id) {
         if(causasPrioritarias.length > 0) {
             html += `
                 <div class="mb-4">
-                    <span class="text-[10px] font-bold text-amber-700 uppercase tracking-wider bg-amber-50 border border-amber-200/60 px-2 py-1 rounded-md block mb-2">🔥 Priorizações de Rede</span>
+                    <span class="text-[10px] font-bold text-amber-700 uppercase tracking-wider bg-amber-50 border border-amber-200/60 px-2 py-1 rounded-md block mb-2"> ⭐ Priorizações dos Eixos</span>
                     <div class="flex flex-col gap-2">
             `;
             causasPrioritarias.forEach(c => {
@@ -700,8 +705,8 @@ function buildSidebarRadialAba1() {
             list.appendChild(b);
         });
     };
-    renderGrupo("📌 Temas Transversais", "text-blue-600", sortedCats.filter(c=>c.ehTransversal));
-    renderGrupo("🔒 Dores Específicas", "text-slate-400", sortedCats.filter(c=>!c.ehTransversal));
+    renderGrupo("Tmas Transversais", "text-blue-600", sortedCats.filter(c=>c.ehTransversal));
+    renderGrupo("Causas Específica por Eixo", "text-slate-400", sortedCats.filter(c=>!c.ehTransversal));
 }
 
 function renderizarEstruturaHierarquica() {
@@ -772,11 +777,11 @@ function renderizarEstruturaHierarquica() {
         const sTxt = cs ? cs.trim() : "";
         const tTxt = ct ? ct.trim() : "";
 
-        // REGRA DE INTERSEÇÃO E ISOLAMENTO: Descarta causas exclusivas de um único eixo quando há múltiplos eixos selecionados
+        // PROTEÇÃO DE INTERSEÇÃO: Descarta causas exclusivas de um único eixo se houver mais de um eixo marcado
         if (eixosSelecionados.length > 1) {
-            if (pTxt !== "" && (globalTextoParaEixos[pTxt]?.size || 0) === 1) return;
-            if (sTxt !== "" && (globalTextoParaEixos[sTxt]?.size || 0) === 1) return;
-            if (tTxt !== "" && (globalTextoParaEixos[tTxt]?.size || 0) === 1) return;
+            if (pTxt !== "" && (!globalTextoParaEixos[pTxt] || globalTextoParaEixos[pTxt].size === 1)) return;
+            if (sTxt !== "" && (!globalTextoParaEixos[sTxt] || globalTextoParaEixos[sTxt].size === 1)) return;
+            if (tTxt !== "" && (!globalTextoParaEixos[tTxt] || globalTextoParaEixos[tTxt].size === 1)) return;
         }
 
         const pCat = (cat_p && cat_p.trim() !== "") ? cat_p.trim() : (globalTextoParaCategorias[pTxt] || "");
@@ -936,7 +941,7 @@ function renderizarEstruturaHierarquica() {
             document.getElementById("p-sub").textContent = "Evidência Qualitativa Mapeada";
             let cCat = CAT_CORES_MAP[Object.keys(CAT_CORES_MAP).find(k=>det.tema.toLowerCase().includes(k.toLowerCase()))] || "#64748B";
             
-            // ADIÇÃO CIRÚRGICA DA TAG NO PAINEL DE DETALHES (EVITA QUEBRA DA LISTA DA ESQUERDA)
+            // TAG DINÂMICA DE TRANVERSALIDADE EXIBIDA DIRETAMENTE NOS DETALHES
             const seloTipo = det.ehTransversal 
                 ? `<span class="ml-auto text-[9px] bg-amber-100 text-amber-800 border border-amber-300 px-2 py-0.5 rounded-md font-bold uppercase tracking-wider">Teia Transversal</span>`
                 : `<span class="ml-auto text-[9px] bg-slate-100 text-slate-600 border border-slate-200 px-2 py-0.5 rounded-md font-bold uppercase tracking-wider">Tema Específico</span>`;
@@ -980,7 +985,7 @@ function buildSidebarHierarquicaAba2(listaTemasFiltrados) {
 
             [[cp, cat_p], [cs, cat_s], [ct, cat_t]].forEach(([txt, cat]) => {
                 if(txt && cat && cat.trim() !== "") {
-                    if (eixosSelecionados.length > 1 && (globalTextoParaEixos[txt.trim()]?.size || 0) === 1) return;
+                    if (eixosSelecionados.length > 1 && (!globalTextoParaEixos[txt.trim()] || globalTextoParaEixos[txt.trim()].size === 1)) return;
                     const c = cat.trim();
                     if(!fonteDados[c]) fonteDados[c] = 0;
                     fonteDados[c]++;
