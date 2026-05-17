@@ -55,7 +55,7 @@ input:checked + .slider:before {transform:translateX(14px)}
       <p class="text-[12px] text-slate-400 mt-0.5 font-medium">GT Alfabetização · SME-SP</p>
     </div>
     <button onclick="limparTodosOsFiltros()" class="px-2.5 py-1 text-[10px] font-bold text-slate-500 hover:text-red-600 bg-slate-100 hover:bg-red-50 rounded-md transition-all flex items-center gap-1 border border-slate-200/60">
-      Limpar filtros
+      ✨ Limpar
     </button>
   </div>
   
@@ -78,7 +78,7 @@ input:checked + .slider:before {transform:translateX(14px)}
   </div>
   
   <div id="controles-aba1" class="px-5 py-2.5 bg-white border-b border-slate-100 flex items-center justify-between flex-shrink-0">
-    <span class="text-[11px] font-medium text-slate-600">Exibir causas específicas</span>
+    <span class="text-[11px] font-medium text-slate-600">Exibir dores específicas</span>
     <label class="switch">
       <input type="checkbox" id="filtro-especificas" checked onchange="aplicarFiltroAba1()">
       <span class="slider"></span>
@@ -89,10 +89,10 @@ input:checked + .slider:before {transform:translateX(14px)}
     <div class="flex flex-col gap-1 w-full border-b border-slate-50 pb-2">
       <span class="text-[10px] font-bold text-amber-600 uppercase tracking-wider">Priorizações (Filtro)</span>
       <select id="select-votos-hierarquica" class="bg-white border border-slate-200 rounded-lg p-1 text-xs font-medium text-slate-700 focus:outline-none" onchange="renderizarEstruturaHierarquica()">
-        <option value="0">Selecionar todos </option>
-        <option value="1">⭐ 1 estrela (Estrelas)</option>
+        <option value="0">todas causas</option>
+        <option value="1">⭐ 1+ estrelas</option>
         <option value="4">⭐ 4+ estrelas</option>
-        <option value="6">⭐ 6+ estrelas </option>
+        <option value="6">⭐ 6+ estrelas</option>
       </select>
     </div>
 
@@ -141,7 +141,7 @@ input:checked + .slider:before {transform:translateX(14px)}
         Matriz de Temas
       </button>
       <button id="btn-aba2" onclick="mudarAba('hierarquica')" class="px-4 py-1.5 rounded-md text-xs font-semibold transition-all text-slate-500 hover:text-slate-800">
-        Árvore Detalhada
+        Constelação Detalhada de Evidências
       </button>
     </div>
   </div>
@@ -492,7 +492,7 @@ function processarDadosAba1() {
 
         G_aba1.nodes.push({
             id: `__cat__${catNome}`, title: catNome, shape: "dot", size: tamanho,
-            color: {background: cor, border: cor}, _isSpecific: !ehTransversal
+            color: {background: fancyCor || cor, border: cor}, _isSpecific: !ehTransversal
         });
 
         info.eixos.forEach(ex => {
@@ -590,11 +590,11 @@ function filtrarTeiaPorCategoria(nomeCat) {
 }
 
 function filtrarTeiaPorEixo(eixoId) {
-    const categoriasConectadas = G_aba1.originalEdges.filter(e => e.from === eixoId && e.to.startsWith("__cat__")).map(e => e.to);
+    const categoriesConectadas = G_aba1.originalEdges.filter(e => e.from === eixoId && e.to.startsWith("__cat__")).map(e => e.to);
     
-    const nosIsolados = G_aba1.nodes.filter(n => n.id === eixoId || categoriasConectadas.includes(n.id) || n.id === "ROOT");
+    const nosIsolados = G_aba1.nodes.filter(n => n.id === eixoId || categoriesConectadas.includes(n.id) || n.id === "ROOT");
     const arestasIsoladas = G_aba1.originalEdges.filter(e => 
-        (e.from === eixoId && categoriasConectadas.includes(e.to)) || 
+        (e.from === eixoId && categoriesConectadas.includes(e.to)) || 
         (e.from === "ROOT" && e.to === eixoId)
     );
 
@@ -640,7 +640,7 @@ function aoClicarNoNodeRadial(id) {
         if(causasPrioritarias.length > 0) {
             html += `
                 <div class="mb-4">
-                    <span class="text-[10px] font-bold text-amber-700 uppercase tracking-wider bg-amber-50 border border-amber-200/60 px-2 py-1 rounded-md block mb-2">⭐ Priorizações dos Eixos</span>
+                    <span class="text-[10px] font-bold text-amber-700 uppercase tracking-wider bg-amber-50 border border-amber-200/60 px-2 py-1 rounded-md block mb-2">🔥 Priorizações de Rede</span>
                     <div class="flex flex-col gap-2">
             `;
             causasPrioritarias.forEach(c => {
@@ -658,7 +658,7 @@ function aoClicarNoNodeRadial(id) {
         if(causasNormais.length > 0) {
             html += `
                 <div>
-                    <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-2">Demais Causas/Descrição</span>
+                    <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-2">Demais Diagnósticos</span>
                     <div class="flex flex-col gap-2">
             `;
             causasNormais.forEach(c => {
@@ -702,8 +702,8 @@ function buildSidebarRadialAba1() {
             list.appendChild(b);
         });
     };
-    renderGrupo(" Temas Transversais", "text-blue-600", sortedCats.filter(c=>c.ehTransversal));
-    renderGrupo("Causas Específicas dos Eixos", "text-slate-400", sortedCats.filter(c=>!c.ehTransversal));
+    renderGrupo("📌 Temas Transversais", "text-blue-600", sortedCats.filter(c=>c.ehTransversal));
+    renderGrupo("🔒 Dores Específicas", "text-slate-400", sortedCats.filter(c=>!c.ehTransversal));
 }
 
 function renderizarEstruturaHierarquica() {
@@ -712,7 +712,7 @@ function renderizarEstruturaHierarquica() {
     const eixosSelecionados = Array.from(document.querySelectorAll(".axis-checkbox:checked")).map(cb => cb.value);
     const destacarTransversais = document.getElementById("switch-transversal-hierarquica").checked;
     const filtroTemaEscolhido = document.getElementById("select-tema-transversal").value;
-    const filtroVotosAtivo = document.getElementById("select-votos-hierarquica").value;
+    const filtroVotosAtivo = parseInt(document.getElementById("select-votos-hierarquica").value) || 0;
 
     const hNodes = []; const hEdges = []; const nosCriadosUnicos = new Set();
     const arestasCriadasUnicas = new Set();
@@ -778,33 +778,45 @@ function renderizarEstruturaHierarquica() {
         const sTxt = cs ? cs.trim() : "";
         const tTxt = ct ? ct.trim() : "";
 
+        if (pTxt === "") return;
+
         const pCat = (cat_p && cat_p.trim() !== "") ? cat_p.trim() : (globalTextoParaCategorias[pTxt] || "");
         const sCat = (cat_s && cat_s.trim() !== "") ? cat_s.trim() : (globalTextoParaCategorias[sTxt] || "");
         const tCat = (cat_t && cat_t.trim() !== "") ? cat_t.trim() : (globalTextoParaCategorias[tTxt] || "");
 
-        const pPassaTema = (filtroTemaEscolhido === "__ALL__") || (pTxt !== "" && pCat === filtroTemaEscolhido);
-        const sPassaTema = (filtroTemaEscolhido === "__ALL__") || (sTxt !== "" && sCat === filtroTemaEscolhido);
-        const tPassaTema = (filtroTemaEscolhido === "__ALL__") || (tTxt !== "" && tCat === filtroTemaEscolhido);
-
-        const vNumCp = pTxt ? (globalTextoParaVotos[pTxt] || 0) : 0;
+        // Obtenção dos valores consolidados acumulados globais de cada nó da ramificação
+        const vNumCp = globalTextoParaVotos[pTxt] || 0;
         const vNumCs = sTxt ? (globalTextoParaVotos[sTxt] || 0) : 0;
         const vNumCt = tTxt ? (globalTextoParaVotos[tTxt] || 0) : 0;
 
-        let sPassaVoto = true;
-        if (filtroVotosAtivo === "1" && vNumCs === 0) sPassaVoto = false;
-        if (filtroVotosAtivo === "4" && vNumCs < 4) sPassaVoto = false;
-        if (filtroVotosAtivo === "6" && vNumCs < 6) sPassaVoto = false;
+        // CRUCIAL: Avaliação do teto máximo de votos pertencente a esta linha/ramificação
+        const maiorVotoDaRamificacao = Math.max(vNumCp, vNumCs, vNumCt);
+
+        // Se o filtro global de estrelas estiver ativado, a linha inteira cai se ninguém nela atinge a meta
+        if (maiorVotoDaRamificacao < filtroVotosAtivo) return;
+
+        // Filtro de Tema Transversal estruturado
+        const pPassaTema = (filtroTemaEscolhido === "__ALL__") || (pCat === filtroTemaEscolhido);
+        const sPassaTema = (filtroTemaEscolhido === "__ALL__") || (sTxt !== "" && sCat === filtroTemaEscolhido);
+        const tPassaTema = (filtroTemaEscolhido === "__ALL__") || (tTxt !== "" && tCat === filtroTemaEscolhido);
+
+        if (filtroTemaEscolhido !== "__ALL__") {
+            if (!pPassaTema && !sPassaTema && !tPassaTema) return;
+        }
 
         const eixoId = `H2_${siglaEixo}`;
-        
-        const temCausaAtivaNaLinha = (pTxt !== "" && pPassaTema) || (sTxt !== "" && sPassaTema && sPassaVoto) || (tTxt !== "" && tPassaTema && sPassaVoto);
-        if (!temCausaAtivaNaLinha) return;
 
-        const registrarNoUnico = (texto, categoriaReal, paiId, camadaLabel, tamanho, corNivel, vMaxFiltro, atendeTemaDireto) => {
+        const registrarNoUnico = (texto, categoriaReal, paiId, camadaLabel, tamanho, corNivel, vMaxFiltro, passaTemaDireto, votoEspecifico) => {
             if (!texto || texto.trim() === "") return null;
-            if (camadaLabel === "2" && !sPassaVoto) return null;
             
-            if (filtroTemaEscolhido !== "__ALL__" && !atendeTemaDireto) {
+            // Garantia extra: Oculta nós folha individuais que falhem no teto estruturado se o filtro for rígido
+            if (filtroVotosAtivo > 0 && votoEspecifico < filtroVotosAtivo) {
+                if (camadaLabel === "3") return null;
+                if (camadaLabel === "2" && !(tTxt !== "" && vNumCt >= filtroVotosAtivo)) return null;
+                if (camadaLabel === "1" && !(sTxt !== "" && vNumCs >= filtroVotosAtivo) && !(tTxt !== "" && vNumCt >= filtroVotosAtivo)) return null;
+            }
+
+            if (filtroTemaEscolhido !== "__ALL__" && !passaTemaDireto) {
                 if (camadaLabel === "3") return null;
                 if (camadaLabel === "2" && !(tTxt !== "" && tCat === filtroTemaEscolhido)) return null;
                 if (camadaLabel === "1" && !((sTxt !== "" && sCat === filtroTemaEscolhido) || (tTxt !== "" && tCat === filtroTemaEscolhido))) return null;
@@ -827,7 +839,7 @@ function renderizarEstruturaHierarquica() {
                 }
 
                 const labelCurto = txt.length > 22 ? txt.slice(0, 20) + "..." : txt;
-                const prefixoEstrela = (camadaLabel === "2" && vMaxFiltro > 0) ? '⭐ ' : '';
+                const prefixoEstrela = (vMaxFiltro > 0) ? '⭐ ' : '';
 
                 nosCausasTemporarios.push({
                     id: noId, label: `${prefixoEstrela}${labelCurto}`, shape: "dot", size: tSize, borderWidth: bW, 
@@ -851,9 +863,9 @@ function renderizarEstruturaHierarquica() {
             return noId;
         };
 
-        const idP = registrarNoUnico(pTxt, pCat, eixoId, "1", 20.0, "#38BDF8", vNumCp, pPassaTema); 
-        const idS = idP ? registrarNoUnico(sTxt, sCat, idP, "2", 16.0, "#34D399", vNumCs, sPassaTema) : null;  
-        if (idS) registrarNoUnico(tTxt, tCat, idS, "3", 13.0, "#FBBF24", vNumCt, tPassaTema);              
+        const idP = registrarNoUnico(pTxt, pCat, eixoId, "1", 20.0, "#38BDF8", vNumCp, pPassaTema, vNumCp); 
+        const idS = idP ? registrarNoUnico(sTxt, sCat, idP, "2", 16.0, "#34D399", vNumCs, sPassaTema, vNumCs) : null;  
+        if (idS) registrarNoUnico(tTxt, tCat, idS, "3", 13.0, "#FBBF24", vNumCt, tPassaTema, vNumCt);              
     });
 
     eixosSelecionados.forEach(siglaEixo => {
@@ -909,7 +921,7 @@ function renderizarEstruturaHierarquica() {
             document.getElementById("p-cor").style.background = "#EF4444";
             document.getElementById("p-titulo").textContent = "Baixa Alfabetização";
             document.getElementById("p-sub").textContent = "Problema Macro Central";
-            document.getElementById("painel-body").innerHTML = `<p class="text-xs text-slate-500 font-medium leading-relaxed">Nó que conecta os diferentes eixos.</p>`;
+            document.getElementById("painel-body").innerHTML = `<p class="text-xs text-slate-500 font-medium leading-relaxed">Nó Central Diagnóstico.</p>`;
             document.getElementById("painel").classList.add("open"); document.getElementById("net").style.right = "460px";
             return;
         }
@@ -933,26 +945,25 @@ function renderizarEstruturaHierarquica() {
                 </div>`;
         } else {
             document.getElementById("p-titulo").textContent = `Causa ${det.camada}`;
-            document.getElementById("p-sub").textContent = "Causas Mapeadas";
+            document.getElementById("p-sub").textContent = "Evidência Qualitativa Mapeada";
             let cCat = CAT_CORES_MAP[Object.keys(CAT_CORES_MAP).find(k=>det.tema.toLowerCase().includes(k.toLowerCase()))] || "#64748B";
             
             const seloTipo = det.ehTransversal 
-                ? `<span class="ml-auto text-[9px] bg-amber-100 text-amber-800 border border-amber-300 px-2 py-0.5 rounded-md font-bold uppercase tracking-wider">Temas Transversais</span>`
+                ? `<span class="ml-auto text-[9px] bg-amber-100 text-amber-800 border border-amber-300 px-2 py-0.5 rounded-md font-bold uppercase tracking-wider">Teia Transversal</span>`
                 : `<span class="ml-auto text-[9px] bg-slate-100 text-slate-600 border border-slate-200 px-2 py-0.5 rounded-md font-bold uppercase tracking-wider">Tema Específico</span>`;
 
-            // Bloco de Priorização adicionado abaixo
             const blocoVotos = det.votos > 0 
                 ? `<div class="mb-4 bg-amber-50 border border-amber-200 text-amber-900 rounded-xl p-3 flex items-center gap-2 text-xs">
                     <span class="text-base">⭐</span>
                     <div>
-                        <p class="font-bold">Causas Priorizadas pelos Eixos</p>
+                        <p class="font-bold">Evidência Priorizada pela Rede</p>
                         <p class="text-[11px] text-amber-800 font-medium">Esta causa recebeu <strong>${det.votos} estrelas</strong> no processo de votação.</p>
                     </div>
                    </div>`
                 : `<div class="mb-4 bg-slate-50 border border-slate-150 text-slate-600 rounded-xl p-3 flex items-center gap-2 text-xs">
                     <span class="text-base text-slate-400">☆</span>
                     <div>
-                        <p class="font-semibold text-slate-700">Priorizações</p>
+                        <p class="font-semibold text-slate-700">Mapeamento de Diagnóstico</p>
                         <p class="text-[11px] text-slate-500">Esta causa não recebeu estrelas diretas de priorização na rede.</p>
                     </div>
                    </div>`;
@@ -1058,8 +1069,8 @@ function mudarAba(aba) {
         btn1.className = "px-4 py-1.5 rounded-md text-xs font-semibold transition-all text-slate-500 hover:text-slate-800";
         ctrl2.classList.remove("hidden"); ctrl2.classList.add("flex"); ctrl1.classList.add("hidden");
         legenda.classList.remove("hidden"); 
-        document.getElementById("main-title").textContent = "Árvore Detalhada";
-        document.getElementById("main-subtitle").textContent = "Desdobramento por Problema Macro ➔ Eixo ➔ Causa 1ª ➔ 2ª ➔ 3ª)";
+        document.getElementById("main-title").textContent = "Constelação Detalhada de Evidências";
+        document.getElementById("main-subtitle").textContent = "Desdobramento - Problema Macro ➔ Eixos ➔ Causas 1ª ➔ 2ª ➔ 3ª";
         rebuildCombosETemasAba2();
         renderizarEstruturaHierarquica();
     }
