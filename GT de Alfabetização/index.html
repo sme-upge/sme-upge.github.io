@@ -6,7 +6,7 @@
 <title>Painel de Evidências — GT de Alfabetização · SME-SP</title>
 <script src="https://cdn.tailwindcss.com"></script>
 <script src="https://unpkg.com/vis-network/standalone/umd/vis-network.min.js"></script>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght=400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
 *{box-sizing:border-box}
 html,body{height:100%;margin:0;padding:0;overflow:hidden;font-family:"Inter",sans-serif;background:#FAFAFA}
@@ -787,7 +787,7 @@ function renderizarEstruturaHierarquica() {
 
     rawRows.forEach(r => {
         const [eixoCompleto, probCentral, cp, , cs, , votos, ct, ] = r; if (!eixoCompleto) return;
-        const sigla = Grandma = eixoCompleto.split(" - ")[0]; if (!eixosSelecionados.includes(sigla)) return;
+        const sigla = eixoCompleto.split(" - ")[0]; if (!eixosSelecionados.includes(sigla)) return;
         
         metricasEixos[sigla].probCentral = probCentral;
         const vNum = parseInt(votos) || 0;
@@ -867,7 +867,7 @@ function renderizarEstruturaHierarquica() {
                 let tSize = tamanho; let bW = 0.5; let bColor = "#CBD5E0";
 
                 if (destacarTransversais && ehTransversal && atendeTemaDireto) {
-                    tSize = tamanho + 5; bW = 2.5; bColor = "#F59E0B";
+                    tSize = presidentialSize = tamanho + 5; bW = 2.5; bColor = "#F59E0B";
                     if (!mapaNodesParaTeia[categoriaReal]) mapaNodesParaTeia[categoriaReal] = [];
                     mapaNodesParaTeia[categoriaReal].push(noId);
                 }
