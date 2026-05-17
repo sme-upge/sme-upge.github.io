@@ -55,7 +55,7 @@ input:checked + .slider:before {transform:translateX(14px)}
       <p class="text-[12px] text-slate-400 mt-0.5 font-medium">GT Alfabetização · SME-SP</p>
     </div>
     <button onclick="limparTodosOsFiltros()" class="px-2.5 py-1 text-[10px] font-bold text-slate-500 hover:text-red-600 bg-slate-100 hover:bg-red-50 rounded-md transition-all flex items-center gap-1 border border-slate-200/60">
-       Limpar filtros
+      ✨ Limpar
     </button>
   </div>
   
@@ -78,7 +78,7 @@ input:checked + .slider:before {transform:translateX(14px)}
   </div>
   
   <div id="controles-aba1" class="px-5 py-2.5 bg-white border-b border-slate-100 flex items-center justify-between flex-shrink-0">
-    <span class="text-[11px] font-medium text-slate-600">Exibir causas específicas por eixos</span>
+    <span class="text-[11px] font-medium text-slate-600">Exibir dores específicas</span>
     <label class="switch">
       <input type="checkbox" id="filtro-especificas" checked onchange="aplicarFiltroAba1()">
       <span class="slider"></span>
@@ -89,11 +89,10 @@ input:checked + .slider:before {transform:translateX(14px)}
     <div class="flex flex-col gap-1 w-full border-b border-slate-50 pb-2">
       <span class="text-[10px] font-bold text-amber-600 uppercase tracking-wider">Priorizações (Filtro)</span>
       <select id="select-votos-hierarquica" class="bg-white border border-slate-200 rounded-lg p-1 text-xs font-medium text-slate-700 focus:outline-none" onchange="renderizarEstruturaHierarquica()">
-        <option value="0">Selecionar todos </option>
-        <option value="1">⭐ 1 estrela</option>      
-        <option value="2">⭐ 2+ estrelas</option>
-        <option value="4">⭐ 4+ estrelas</option>          
-        <option value="6">⭐ 6+ estrelas</option>
+        <option value="0">Todas as Evidências</option>
+        <option value="1">Apenas Priorizadas (Estrelas)</option>
+        <option value="4">Alta Prioridade (4+ 🔥)</option>
+        <option value="6">Prioridade Máxima (6 🔥)</option>
       </select>
     </div>
 
@@ -142,7 +141,7 @@ input:checked + .slider:before {transform:translateX(14px)}
         Matriz de Temas
       </button>
       <button id="btn-aba2" onclick="mudarAba('hierarquica')" class="px-4 py-1.5 rounded-md text-xs font-semibold transition-all text-slate-500 hover:text-slate-800">
-        Árvore Detalhada
+        Constelação Detalhada de Evidências
       </button>
     </div>
   </div>
@@ -183,7 +182,6 @@ const CAT_CORES_MAP = {
   "Excesso": "#22C55E", "Inadequação": "#F97316", "Qualificação": "#84CC16"
 };
 
-// Configuração elástica e fluida constante para a Aba 1
 const FISICA_RADIAL_CONFIG = {
     enabled: true,
     solver: "barnesHut",
@@ -197,7 +195,6 @@ const FISICA_RADIAL_CONFIG = {
     stabilization: { enabled: true, iterations: 100, updateInterval: 25 }
 };
 
-// Configuração elástica e fluida constante para a Aba 2
 const FISICA_HIERARQUICA_CONFIG = {
     enabled: true,
     solver: "barnesHut",
@@ -270,7 +267,7 @@ async function inicializar() {
                     }
                     globalTextoParaEixos[cleanTxt].add(sigla);
                     
-                    if (idx === 1 && vNum > (globalTextoParaVotos[cleanTxt] || 0)) {
+                    if (vNum > (globalTextoParaVotos[cleanTxt] || 0)) {
                         globalTextoParaVotos[cleanTxt] = vNum;
                     }
                     
@@ -523,7 +520,6 @@ function renderizarEstruturaRadial() {
         interaction: { hover: true, dragNodes: true }
     });
     
-    // Deixamos a física habilitada constantemente para manter a tremidinha sutil
     networkInstance.on("stabilizationIterationsDone", function () {
         networkInstance.setOptions({ physics: { enabled: true } });
     });
@@ -644,14 +640,14 @@ function aoClicarNoNodeRadial(id) {
         if(causasPrioritarias.length > 0) {
             html += `
                 <div class="mb-4">
-                    <span class="text-[10px] font-bold text-amber-700 uppercase tracking-wider bg-amber-50 border border-amber-200/60 px-2 py-1 rounded-md block mb-2"> Priorizações dos Eixos</span>
+                    <span class="text-[10px] font-bold text-amber-700 uppercase tracking-wider bg-amber-50 border border-amber-200/60 px-2 py-1 rounded-md block mb-2">🔥 Priorizações de Rede</span>
                     <div class="flex flex-col gap-2">
             `;
             causasPrioritarias.forEach(c => {
                 const badges = c.eixos.map(ex => `<span class="inline-block px-2 py-0.5 text-[9px] font-bold text-white rounded mr-1" style="background:${EIXO_CORES[ex]}">${MAPA_EIXOS_COMPLETO[ex] || ex}</span>`).join("");
                 html += `
                     <div class="p-3 border border-amber-200 bg-amber-50/30 rounded-xl text-xs">
-                        <div class="mb-1.5 flex items-center justify-between">${badges} <span class="text-[9px] font-bold bg-amber-100 text-amber-800 px-1.5 py-0.5 rounded">⭐ Prioritário: ${c.votos} estrelinhas</span></div>
+                        <div class="mb-1.5 flex items-center justify-between">${badges} <span class="text-[9px] font-bold bg-amber-100 text-amber-800 px-1.5 py-0.5 rounded">⭐ Prioritário: ${c.votos}v</span></div>
                         <p class="text-slate-700 font-semibold leading-relaxed">${c.texto}</p>
                     </div>
                 `;
@@ -662,7 +658,7 @@ function aoClicarNoNodeRadial(id) {
         if(causasNormais.length > 0) {
             html += `
                 <div>
-                    <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-2">Outras Causas</span>
+                    <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-2">Demais Diagnósticos</span>
                     <div class="flex flex-col gap-2">
             `;
             causasNormais.forEach(c => {
@@ -706,8 +702,8 @@ function buildSidebarRadialAba1() {
             list.appendChild(b);
         });
     };
-    renderGrupo("Temas Transversais", "text-blue-600", sortedCats.filter(c=>c.ehTransversal));
-    renderGrupo("Causas Específicas dos Eixosores Específicas", "text-slate-400", sortedCats.filter(c=>!c.ehTransversal));
+    renderGrupo("📌 Temas Transversais", "text-blue-600", sortedCats.filter(c=>c.ehTransversal));
+    renderGrupo("🔒 Dores Específicas", "text-slate-400", sortedCats.filter(c=>!c.ehTransversal));
 }
 
 function renderizarEstruturaHierarquica() {
@@ -790,9 +786,9 @@ function renderizarEstruturaHierarquica() {
         const sPassaTema = (filtroTemaEscolhido === "__ALL__") || (sTxt !== "" && sCat === filtroTemaEscolhido);
         const tPassaTema = (filtroTemaEscolhido === "__ALL__") || (tTxt !== "" && tCat === filtroTemaEscolhido);
 
-        const vNumCp = 0;
+        const vNumCp = pTxt ? (globalTextoParaVotos[pTxt] || 0) : 0;
         const vNumCs = sTxt ? (globalTextoParaVotos[sTxt] || 0) : 0;
-        const vNumCt = 0;
+        const vNumCt = tTxt ? (globalTextoParaVotos[tTxt] || 0) : 0;
 
         let sPassaVoto = true;
         if (filtroVotosAtivo === "1" && vNumCs === 0) sPassaVoto = false;
@@ -900,7 +896,6 @@ function renderizarEstruturaHierarquica() {
         interaction: { hover: true, dragNodes: true }
     });
     
-    // Deixamos a física habilitada constantemente também na Aba 2 para a tremidinha fluida
     networkInstance.on("stabilizationIterationsDone", function () {
         networkInstance.setOptions({ physics: { enabled: true } });
     });
@@ -945,14 +940,31 @@ function renderizarEstruturaHierarquica() {
                 ? `<span class="ml-auto text-[9px] bg-amber-100 text-amber-800 border border-amber-300 px-2 py-0.5 rounded-md font-bold uppercase tracking-wider">Teia Transversal</span>`
                 : `<span class="ml-auto text-[9px] bg-slate-100 text-slate-600 border border-slate-200 px-2 py-0.5 rounded-md font-bold uppercase tracking-wider">Tema Específico</span>`;
 
-            // Bloco "Conectado aos Eixos" removido daqui por completo
+            // Bloco de Priorização adicionado abaixo
+            const blocoVotos = det.votos > 0 
+                ? `<div class="mb-4 bg-amber-50 border border-amber-200 text-amber-900 rounded-xl p-3 flex items-center gap-2 text-xs">
+                    <span class="text-base">⭐</span>
+                    <div>
+                        <p class="font-bold">Evidência Priorizada pela Rede</p>
+                        <p class="text-[11px] text-amber-800 font-medium">Esta causa recebeu <strong>${det.votos} estrelas</strong> no processo de votação.</p>
+                    </div>
+                   </div>`
+                : `<div class="mb-4 bg-slate-50 border border-slate-150 text-slate-600 rounded-xl p-3 flex items-center gap-2 text-xs">
+                    <span class="text-base text-slate-400">☆</span>
+                    <div>
+                        <p class="font-semibold text-slate-700">Mapeamento de Diagnóstico</p>
+                        <p class="text-[11px] text-slate-500">Esta causa não recebeu estrelas diretas de priorização na rede.</p>
+                    </div>
+                   </div>`;
+
             document.getElementById("painel-body").innerHTML = `
                 <div class="mb-3">
                     <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-1">Eixo atual de navegação:</span>
                     <p class="text-xs font-semibold text-slate-800">${det.eixoOrigem}</p>
                 </div>
                 <div class="p-3.5 bg-slate-50 border border-slate-100 rounded-xl text-xs font-medium text-slate-600 leading-relaxed mb-4">${det.texto}</div>
-                <div class="flex items-center gap-2 p-2.5 border border-slate-100 rounded-xl bg-white text-xs mb-3 font-medium text-slate-600">
+                ${blocoVotos}
+                <div class="flex items-center gap-2 p-2.5 border border-slate-100 rounded-xl bg-white text-xs font-medium text-slate-600">
                     <span class="w-2.5 h-2.5 rounded-full" style="background:${cCat}"></span><span>Tema: ${det.tema}</span>
                     ${seloTipo}
                 </div>
@@ -1047,7 +1059,7 @@ function mudarAba(aba) {
         ctrl2.classList.remove("hidden"); ctrl2.classList.add("flex"); ctrl1.classList.add("hidden");
         legenda.classList.remove("hidden"); 
         document.getElementById("main-title").textContent = "Constelação Detalhada de Evidências";
-        document.getElementById("main-subtitle").textContent = "Desdobramento - Problema Macro ➔ Eixos ➔ Causas 1ª ➔ 2ª ➔ 3ª)";
+        document.getElementById("main-subtitle").textContent = "Desdobramento radial unificado (Eixo ➔ Causa 1ª ➔ 2ª ➔ 3ª)";
         rebuildCombosETemasAba2();
         renderizarEstruturaHierarquica();
     }
