@@ -98,9 +98,9 @@ input:checked + .slider:before {transform:translateX(14px)}
 
     <div class="flex flex-col gap-1 w-full border-b border-slate-50 pb-2">
       <div class="flex items-center justify-between">
-        <span class="text-[10px] font-bold text-blue-600 uppercase tracking-wider">Teia Transversal</span>
+        <span class="text-[10px] font-bold text-blue-600 uppercase tracking-wider">Destaque de Transversalidade</span>
         <label class="switch">
-          <input type="checkbox" id="switch-transversal-hierarquica" checked onchange="toggleVisibilidadeComboTema()">
+          <input type="checkbox" id="switch-transversal-hierarquica" checked onchange="renderizarEstruturaHierarquica()">
           <span class="slider"></span>
         </label>
       </div>
@@ -199,13 +199,13 @@ const FISICA_HIERARQUICA_CONFIG = {
     enabled: true,
     solver: "barnesHut",
     barnesHut: { 
-        gravitationalConstant: -18000, 
-        centralGravity: 0.1, 
-        springLength: 120, 
-        springConstant: 0.06,
-        damping: 0.14
+        gravitationalConstant: -14000, 
+        centralGravity: 0.08, 
+        springLength: 90, 
+        springConstant: 0.04,
+        damping: 0.16
     },
-    stabilization: { enabled: true, iterations: 150, updateInterval: 25 }
+    stabilization: { enabled: true, iterations: 120, updateInterval: 25 }
 };
 
 let currentTab = "radial"; 
@@ -223,7 +223,6 @@ let globalTextoParaVotos = {};
 
 const CSV_URL = "https://raw.githubusercontent.com/sme-upge/sme-upge.github.io/refs/heads/main/GT%20de%20Alfabetiza%C3%A7%C3%A3o/arvore.csv";
 
-// FUNÇÃO DE HASH ROBUSTA (Substitui o btoa que quebrava com acentuação brasileira)
 function gerarHashSeguro(str) {
     let hash = 2166136261;
     for (let i = 0; i < str.length; i++) {
@@ -308,10 +307,10 @@ function parseCSV(text) {
     return lines.slice(1).map(line => {
         const cols = []; let q = false; let curr = "";
         for (let i = 0; i < line.length; i++) {
-            const c = line[i];
-            if (c === '"') q = !q;
-            else if (c === ';' && !q) { cols.push(curr.trim()); curr = ""; }
-            else curr += c;
+            const c = line[line[i] === '"' ? i : i]; 
+            if (line[i] === '"') q = !q;
+            else if (line[i] === ';' && !q) { cols.push(curr.trim()); curr = ""; }
+            else curr += line[i];
         }
         cols.push(curr.trim());
         return cols;
@@ -372,10 +371,6 @@ function rebuildCombosETemasAba2() {
             [[cp, cat_p], [cs, cat_s], [ct, cat_t]].forEach(([txt, cat]) => {
                 if(txt && cat && cat.trim() !== "") {
                     const cNom = cat.trim();
-                    const eixosReaisCausa = Array.from(globalTextoParaEixos[txt.trim()] || []);
-                    
-                    if (eixosSelecionados.length > 1 && eixosReaisCausa.length === 1) return;
-
                     if(!listTemasFiltrados[cNom]) listTemasFiltrados[cNom] = 0;
                     listTemasFiltrados[cNom]++;
                 }
@@ -398,12 +393,6 @@ function rebuildCombosETemasAba2() {
     buildSidebarHierarquicaAba2(listTemasFiltrados);
 }
 
-function toggleVisibilidadeComboTema() {
-    const ativo = document.getElementById("switch-transversal-hierarquica").checked;
-    document.getElementById("select-tema-transversal").disabled = !ativo;
-    renderizarEstruturaHierarquica();
-}
-
 function atualizarInterfaceTemaAba2() {
     const valorTema = document.getElementById("select-tema-transversal").value;
     document.querySelectorAll("#sidebar-list .btn-sidebar-item").forEach(btn => {
@@ -422,7 +411,7 @@ function limparTodosOsFiltros() {
     } else {
         document.getElementById("select-votos-hierarquica").value = "0";
         document.getElementById("switch-transversal-hierarquica").checked = true;
-        document.getElementById("select-tema-transversal").disabled = false;
+        document.getElementById("select-tema-transversal").value = "__ALL__";
         document.querySelectorAll(".axis-checkbox").forEach(cb => cb.checked = true);
         rebuildCombosETemasAba2();
         renderizarEstruturaHierarquica();
@@ -781,12 +770,6 @@ function renderizarEstruturaHierarquica() {
         const sTxt = cs ? cs.trim() : "";
         const tTxt = ct ? ct.trim() : "";
 
-        if (eixosSelecionados.length > 1) {
-            if (pTxt !== "" && (!globalTextoParaEixos[pTxt] || globalTextoParaEixos[pTxt].size === 1)) return;
-            if (sTxt !== "" && (!globalTextoParaEixos[sTxt] || globalTextoParaEixos[sTxt].size === 1)) return;
-            if (tTxt !== "" && (!globalTextoParaEixos[tTxt] || globalTextoParaEixos[tTxt].size === 1)) return;
-        }
-
         const pCat = (cat_p && cat_p.trim() !== "") ? cat_p.trim() : (globalTextoParaCategorias[pTxt] || "");
         const sCat = (cat_s && cat_s.trim() !== "") ? cat_s.trim() : (globalTextoParaCategorias[sTxt] || "");
         const tCat = (cat_t && cat_t.trim() !== "") ? cat_t.trim() : (globalTextoParaCategorias[tTxt] || "");
@@ -820,8 +803,6 @@ function renderizarEstruturaHierarquica() {
             }
 
             const txt = texto.trim();
-            
-            // CORREÇÃO CRUCIAL: Utilizando hash numérico seguro no lugar do btoa
             const hashTexto = gerarHashSeguro(txt);
             const noId = `H2_N_C${camadaLabel}_${hashTexto}`;
             
@@ -831,13 +812,13 @@ function renderizarEstruturaHierarquica() {
             if (!nosCriadosUnicos.has(noId)) {
                 let tSize = tamanho; let bW = 0.5; let bColor = "#CBD5E0";
 
-                if (destacarTransversais && ehTransversal && (filtroTemaEscolhido === "__ALL__" || filtroTemaEscolhido === categoriaReal)) {
-                    tSize = tamanho + 5; bW = 2.5; bColor = "#F59E0B";
+                if (destacarTransversais && ehTransversal) {
+                    tSize = tamanho + 4; bW = 2.0; bColor = "#F59E0B";
                     if (!mapaNodesParaTeia[categoriaReal]) mapaNodesParaTeia[categoriaReal] = [];
                     mapaNodesParaTeia[categoriaReal].push(noId);
                 }
 
-                const labelCurto = txt.length > 18 ? txt.slice(0, 16) + "..." : txt;
+                const labelCurto = txt.length > 22 ? txt.slice(0, 20) + "..." : txt;
                 const prefixoEstrela = (camadaLabel === "2" && vMaxFiltro > 0) ? '⭐ ' : '';
 
                 nosCausasTemporarios.push({
@@ -990,7 +971,6 @@ function buildSidebarHierarquicaAba2(listaTemasFiltrados) {
 
             [[cp, cat_p], [cs, cat_s], [ct, cat_t]].forEach(([txt, cat]) => {
                 if(txt && cat && cat.trim() !== "") {
-                    if (eixosSelecionados.length > 1 && (!globalTextoParaEixos[txt.trim()] || globalTextoParaEixos[txt.trim()].size === 1)) return;
                     const c = cat.trim();
                     if(!fonteDados[c]) fonteDados[c] = 0;
                     fonteDados[c]++;
