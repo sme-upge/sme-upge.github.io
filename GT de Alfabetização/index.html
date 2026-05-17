@@ -193,8 +193,8 @@ let rawRows = [];
 let G_aba1 = { nodes: [], edges: [], details: [], originalEdges: [] }; 
 let hNodesDetails = {}; 
 let networkInstance = null;
-let nodesDataSet = new vis.DataSet([]);
-let edgesDataSet = new vis.DataSet([]);
+let nodesDataSet = null;
+let edgesDataSet = null;
 let selectedCategoryRadial = null;
 
 let globalTextoParaCategorias = {};
@@ -266,10 +266,13 @@ async function inicializar() {
 
         construirCheckboxEixos();
         processarDadosAba1(); 
-        mudarAba("radial");
+        
+        // Inicialização limpa e segura da primeira aba
+        currentTab = "radial";
+        renderizarEstruturaRadial();
 
     } catch (e) {
-        console.error(e);
+        console.error("Erro na inicialização dos dados:", e);
     }
 }
 
@@ -328,6 +331,7 @@ function aoMudarFiltroEixosHierarquico() {
 function rebuildCombosETemasAba2() {
     const eixosSelecionados = Array.from(document.querySelectorAll(".axis-checkbox:checked")).map(cb => cb.value);
     const comboTema = document.getElementById("select-tema-transversal");
+    if (!comboTema) return;
     const valorAntigo = comboTema.value;
     
     comboTema.innerHTML = '<option value="__ALL__">Todos os Temas</option>';
@@ -510,7 +514,9 @@ function renderizarEstruturaRadial() {
         interaction: { hover: true }
     };
 
-    if (networkInstance) { networkInstance.destroy(); networkInstance = null; }
+    try {
+        if (networkInstance) { networkInstance.destroy(); networkInstance = null; }
+    } catch(err) { console.log(err); }
     
     nodesDataSet = new vis.DataSet(nosComPosicaoRadial);
     edgesDataSet = new vis.DataSet(G_aba1.originalEdges);
@@ -536,41 +542,29 @@ function renderizarEstruturaRadial() {
         }
     });
     
-    aplicarFiltroAba1();
+    // Executa sem entrar em loop infinito
+    const exibirEspecificas = document.getElementById("filtro-especificas").checked;
+    if(!exibirEspecificas) {
+        const nosParaRemover = G_aba1.nodes.filter(n => n._isSpecific).map(n => n.id);
+        nodesDataSet.remove(nosParaRemover);
+        const idsAtuaisValidos = nodesDataSet.getIds();
+        edgesDataSet.clear();
+        edgesDataSet.add(G_aba1.originalEdges.filter(e => idsAtuaisValidos.includes(e.from) && idsAtuaisValidos.includes(e.to)));
+    }
     
     setTimeout(() => {
-        networkInstance.moveTo({ position: { x: 0, y: 0 }, scale: 3.5, animation: false });
-        setTimeout(() => {
-            networkInstance.moveTo({ position: { x: 50, y: 0 }, scale: 0.65, animation: { duration: 1000, easingFunction: "easeInOutCubic" } });
-        }, 100);
+        if(networkInstance) {
+            networkInstance.moveTo({ position: { x: 0, y: 0 }, scale: 3.5, animation: false });
+            setTimeout(() => {
+                if(networkInstance) networkInstance.moveTo({ position: { x: 50, y: 0 }, scale: 0.65, animation: { duration: 1000, easingFunction: "easeInOutCubic" } });
+            }, 100);
+        }
     }, 50);
 }
 
 function aplicarFiltroAba1() {
     if (currentTab !== "radial") return;
-    const exibirEspecificas = document.getElementById("filtro-especificas").checked;
-    fecharPainel();
-    
-    const nosParaRemover = [];
-    G_aba1.nodes.forEach(n => {
-        if (!exibirEspecificas && n._isSpecific) {
-            nosParaRemover.push(n.id);
-        }
-    });
-
-    if(!exibirEspecificas) {
-        nodesDataSet.remove(nosParaRemover);
-    } else {
-        renderizarEstruturaRadial();
-        return;
-    }
-
-    const idsAtuaisValidos = nodesDataSet.getIds();
-    edgesDataSet.clear();
-    edgesDataSet.add(G_aba1.originalEdges.filter(e => idsAtuaisValidos.includes(e.from) && idsAtuaisValidos.includes(e.to)));
-    
-    networkInstance.setOptions({ physics: { enabled: true } });
-    networkInstance.stabilize();
+    renderizarEstruturaRadial();
 }
 
 function filtrarTeiaPorCategoria(nomeCat) {
@@ -596,32 +590,32 @@ function filtrarTeiaPorCategoria(nomeCat) {
         (e.from === "ROOT" && eixosConectados.includes(e.to))
     );
 
-    networkInstance.setOptions({ physics: { enabled: true } });
-    nodesDataSet.clear(); nodesDataSet.add(nosIsolados);
-    edgesDataSet.clear(); edgesDataSet.add(arestasIsoladas);
-    networkInstance.stabilize();
+    if(networkInstance) networkInstance.setOptions({ physics: { enabled: true } });
+    if(nodesDataSet) { nodesDataSet.clear(); nodesDataSet.add(nosIsolados); }
+    if(edgesDataSet) { edgesDataSet.clear(); edgesDataSet.add(arestasIsoladas); }
+    if(networkInstance) networkInstance.stabilize();
     
     aoClicarNoNodeRadial(catNodeId);
 }
 
 function filtrarTeiaPorEixo(eixoId) {
-    const categoriasConectadas = G_aba1.originalEdges.filter(e => e.from === eixoId && e.to.startsWith("__cat__")).map(e => e.to);
+    const categoriesConectadas = G_aba1.originalEdges.filter(e => e.from === eixoId && e.to.startsWith("__cat__")).map(e => e.to);
     
-    const nosIsolados = G_aba1.nodes.filter(n => n.id === eixoId || categoriasConectadas.includes(n.id) || n.id === "ROOT").map(n => {
+    const nosIsolados = G_aba1.nodes.filter(n => n.id === eixoId || categoriesConectadas.includes(n.id) || n.id === "ROOT").map(n => {
         let clone = Object.assign({}, n);
         clone.fixed = false;
         return clone;
     });
 
     const arestasIsoladas = G_aba1.originalEdges.filter(e => 
-        (e.from === eixoId && categoriasConectadas.includes(e.to)) || 
+        (e.from === eixoId && categoriesConectadas.includes(e.to)) || 
         (e.from === "ROOT" && e.to === eixoId)
     );
 
-    networkInstance.setOptions({ physics: { enabled: true } });
-    nodesDataSet.clear(); nodesDataSet.add(nosIsolados);
-    edgesDataSet.clear(); edgesDataSet.add(arestasIsoladas);
-    networkInstance.stabilize();
+    if(networkInstance) networkInstance.setOptions({ physics: { enabled: true } });
+    if(nodesDataSet) { nodesDataSet.clear(); nodesDataSet.add(nosIsolados); }
+    if(edgesDataSet) { edgesDataSet.clear(); edgesDataSet.add(arestasIsoladas); }
+    if(networkInstance) networkInstance.stabilize();
     
     aoClicarNoNodeRadial(eixoId);
 }
@@ -681,7 +675,7 @@ function aoClicarNoNodeRadial(id) {
                     <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-2">Demais Diagnósticos</span>
                     <div class="flex flex-col gap-2">
             `;
-            caunasNormais.forEach(c => {
+            causasNormais.forEach(c => {
                 const badges = c.eixos.map(ex => {
                   const corBG = EIXO_CORES_PAINEL[ex] || "#E2E8F0";
                   return `<span class="inline-block px-2 py-0.5 text-[9px] font-bold text-slate-800 rounded mr-1" style="background:${corBG}">${MAPA_EIXOS_COMPLETO[ex] || ex}</span>`
@@ -704,7 +698,8 @@ function aoClicarNoNodeRadial(id) {
 }
 
 function buildSidebarRadialAba1() {
-    const list = document.getElementById("sidebar-list"); list.innerHTML = "";
+    const list = document.getElementById("sidebar-list"); if(!list) return;
+    list.innerHTML = "";
     const sortedCats = Object.keys(G_aba1.details).map(id => G_aba1.details[id]).filter(item => item.tipo === "categoria").sort((a,b)=>b.volumeCausas - a.volumeCausas);
     
     const renderGrupo = (titulo, classeCor, lista) => {
@@ -901,7 +896,6 @@ function renderizarEstruturaHierarquica() {
             for (let i = 0; i < nos.length; i++) {
                 for (let j = i + 1; j < nos.length; j++) {
                     if(nosCriadosUnicos.has(nos[i]) && nosCriadosUnicos.has(nos[j])) {
-                        // CRÍTICO: physics: false adicionado na aresta para impedir que a linha puxe mecanicamente os nós de lugar
                         hEdges.push({ from: nos[i], to: nos[j], color: { color: "#F59E0B", opacity: 0.35 }, width: 0.8, dashes: [2, 3], physics: false });
                     }
                 }
@@ -909,12 +903,13 @@ function renderizarEstruturaHierarquica() {
         });
     }
 
-    if (networkInstance) { networkInstance.destroy(); networkInstance = null; }
+    try {
+        if (networkInstance) { networkInstance.destroy(); networkInstance = null; }
+    } catch(err) { console.log(err); }
 
     nodesDataSet = new vis.DataSet(hNodes);
     edgesDataSet = new vis.DataSet(hEdges);
 
-    // CRÍTICO: Desativação total de física de gravidade nesta aba para manter a árvore estruturalmente perfeita para baixo (UD)
     const opcoesHierarquicas = {
         layout: {
             hierarchical: {
@@ -989,12 +984,12 @@ function renderizarEstruturaHierarquica() {
     });
 
     setTimeout(() => {
-        networkInstance.fit({ animation: { duration: 600, easingFunction: "easeInOutQuad" } });
+        if(networkInstance) networkInstance.fit({ animation: { duration: 600, easingFunction: "easeInOutQuad" } });
     }, 200);
 }
 
 function buildSidebarHierarquicaAba2(listaTemasFiltrados) {
-    const list = document.getElementById("sidebar-list"); 
+    const list = document.getElementById("sidebar-list"); if(!list) return;
     list.innerHTML = "";
     
     let fonteDados = listaTemasFiltrados;
@@ -1034,7 +1029,8 @@ function buildSidebarHierarquicaAba2(listaTemasFiltrados) {
         b.className = "btn-sidebar-item";
         const col = CAT_CORES_MAP[Object.keys(CAT_CORES_MAP).find(k => tema.toLowerCase().includes(k.toLowerCase()))] || "#64748B";
         
-        const atualSelecionado = document.getElementById("select-tema-transversal").value;
+        const combo = document.getElementById("select-tema-transversal");
+        const atualSelecionado = combo ? combo.value : "__ALL__";
         if (atualSelecionado === tema) b.classList.add("active");
         
         b.innerHTML = `
@@ -1044,10 +1040,11 @@ function buildSidebarHierarquicaAba2(listaTemasFiltrados) {
         `;
         b.onclick = (e) => {
             e.stopPropagation();
-            const combo = document.getElementById("select-tema-transversal");
-            
-            combo.value = combo.value === tema ? "__ALL__" : tema;
-            atualizarInterfaceTemaAba2();
+            const cbo = document.getElementById("select-tema-transversal");
+            if(cbo) {
+                cbo.value = cbo.value === tema ? "__ALL__" : tema;
+                atualizarInterfaceTemaAba2();
+            }
         };
         list.appendChild(b);
     });
@@ -1059,25 +1056,28 @@ function mudarAba(aba) {
     const ctrl1 = document.getElementById("controles-aba1"); const ctrl2 = document.getElementById("controles-aba2");
     const legenda = document.getElementById("legenda-container");
     
-    // CRÍTICO: Força a destruição limpa da rede atual antes de recalcular o novo modelo de aba
-    if (networkInstance) {
-        networkInstance.destroy();
-        networkInstance = null;
-    }
+    try {
+        if (networkInstance) {
+            networkInstance.destroy();
+            networkInstance = null;
+        }
+    } catch(err) { console.log(err); }
 
     if (aba === "radial") {
-        btn1.className = "px-4 py-1.5 rounded-md text-xs font-semibold transition-all bg-white text-slate-800 shadow-sm";
-        btn2.className = "px-4 py-1.5 rounded-md text-xs font-semibold transition-all text-slate-500 hover:text-slate-800";
-        ctrl1.classList.remove("hidden"); ctrl2.classList.add("hidden");
-        legenda.classList.add("hidden"); 
+        if(btn1) btn1.className = "px-4 py-1.5 rounded-md text-xs font-semibold transition-all bg-white text-slate-800 shadow-sm";
+        if(btn2) btn2.className = "px-4 py-1.5 rounded-md text-xs font-semibold transition-all text-slate-500 hover:text-slate-800";
+        if(ctrl1) ctrl1.classList.remove("hidden"); 
+        if(ctrl2) ctrl2.classList.add("hidden");
+        if(legenda) legenda.classList.add("hidden"); 
         document.getElementById("main-title").textContent = "Árvore Diagnóstica de Problemas";
         document.getElementById("main-subtitle").textContent = "Volumetria proporcional e conexões transversais unificadas";
         renderizarEstruturaRadial();
     } else {
-        btn2.className = "px-4 py-1.5 rounded-md text-xs font-semibold transition-all bg-white text-slate-800 shadow-sm";
-        btn1.className = "px-4 py-1.5 rounded-md text-xs font-semibold transition-all text-slate-500 hover:text-slate-800";
-        ctrl2.classList.remove("hidden"); ctrl2.classList.add("flex"); ctrl1.classList.add("hidden");
-        legenda.classList.remove("hidden"); 
+        if(btn2) btn2.className = "px-4 py-1.5 rounded-md text-xs font-semibold transition-all bg-white text-slate-800 shadow-sm";
+        if(btn1) btn1.className = "px-4 py-1.5 rounded-md text-xs font-semibold transition-all text-slate-500 hover:text-slate-800";
+        if(ctrl2) { ctrl2.classList.remove("hidden"); ctrl2.classList.add("flex"); }
+        if(ctrl1) ctrl1.classList.add("hidden");
+        if(legenda) legenda.classList.remove("hidden"); 
         document.getElementById("main-title").textContent = "Árvore Detalhada";
         document.getElementById("main-subtitle").textContent = "Desdobramento por Problema Macro ➔ Eixo ➔ Causa 1ª ➔ 2ª ➔ 3ª";
         rebuildCombosETemasAba2();
