@@ -205,7 +205,7 @@ async function inicializar() {
         
         const setCausasUnicasTotal = new Set();
         const setCausasPrioritariasUnicas = new Set();
-        const mapaTemaParaEixos = {}; // Mapeia quais eixos possuem cada categoria
+        const mapaTemaParaEixos = {}; 
 
         rawRows.forEach(r => {
             const [eixoCompleto, , cp, cat_p, cs, cat_s, votos, ct, cat_t] = r;
@@ -230,7 +230,7 @@ async function inicializar() {
                     }
                     globalTextoParaEixos[cleanTxt].add(sigla);
                     
-                    if (idx === 1 && vNum > globalTextoParaVotos[cleanTxt]) {
+                    if (idx === 1 && vNum > (globalTextoParaVotos[cleanTxt] || 0)) {
                         globalTextoParaVotos[cleanTxt] = vNum;
                     }
                     
@@ -238,7 +238,6 @@ async function inicializar() {
                         const cleanCat = cat.trim();
                         globalTextoParaCategorias[cleanTxt] = cleanCat;
                         
-                        // Registra o eixo onde essa categoria/tema apareceu
                         if (!mapaTemaParaEixos[cleanCat]) {
                             mapaTemaParaEixos[cleanCat] = new Set();
                         }
@@ -248,7 +247,6 @@ async function inicializar() {
             });
         });
 
-        // AJUSTE PREVISTO (OPÇÃO A): Conta quantos TEMAS aparecem em 2 ou mais eixos
         let countTemasTransversaisReais = 0;
         Object.keys(mapaTemaParaEixos).forEach(tema => {
             if (mapaTemaParaEixos[tema].size >= 2) {
@@ -366,7 +364,14 @@ function toggleVisibilidadeComboTema() {
     renderizarEstruturaHierarquica();
 }
 
-function actualizarInterfaceTemaAba2() {
+function atualizarInterfaceTemaAba2() {
+    // Sincroniza o destaque visual dos botões da barra lateral esquerda com o valor do select suspenso
+    const valorTema = document.getElementById("select-tema-transversal").value;
+    document.querySelectorAll("#sidebar-list .btn-sidebar-item").forEach(btn => {
+        const txt = btn.querySelector(".btn-sidebar-text").textContent;
+        if(txt === valorTema) btn.classList.add("active");
+        else btn.classList.remove("active");
+    });
     renderizarEstruturaHierarquica();
 }
 
@@ -731,6 +736,11 @@ function renderizarEstruturaHierarquica() {
         metricasEixos[ex].causasEstreladasCount = causasEstreladasPorEixo[ex].size;
     });
 
+    // Guardas para guardar quais eixos de fato contêm nós válidos após os filtros qualitativos
+    const eixosComNosFiltradosValidos = new Set();
+    const nosCausasTemporarios = [];
+    const arestasTemporarias = [];
+
     rawRows.forEach((r) => {
         const [eixoCompleto, , cp, cat_p, cs, cat_s, votos, ct, cat_t] = r;
         const siglaEixo = eixoCompleto.split(" - ")[0];
@@ -758,26 +768,16 @@ function renderizarEstruturaHierarquica() {
         if (filtroVotosAtivo === "6" && vNumCs < 6) sPassaVoto = false;
 
         const eixoId = `H2_${siglaEixo}`;
-        const nomeEixoOficial = MAPA_EIXOS_COMPLETO[siglaEixo] || eixoCompleto;
         
+        // CORREÇÃO LOGICA RESPONSIVA: Uma linha só gera nós se satisfizer o filtro estrito de Tema selecionado
         const temCausaAtivaNaLinha = (pTxt !== "" && pPassaTema) || (sTxt !== "" && sPassaTema && sPassaVoto) || (tTxt !== "" && tPassaTema && sPassaVoto);
         if (!temCausaAtivaNaLinha) return;
-
-        if (!nosCriadosUnicos.has(eixoId)) {
-            hNodes.push({ 
-                id: eixoId, label: siglaEixo, title: nomeEixoOficial, shape: "dot", size: 22, 
-                color: { background: "#6366F1", border: "#4F46E5" }, 
-                font: { bold: true, size: 12, color: "#475569" } 
-            });
-            hEdges.push({ from: macroId, to: eixoId, color: { color: "#CBD5E0", opacity: 0.6 }, width: 1.2 });
-            nosCriadosUnicos.add(eixoId);
-            hNodesDetails[eixoId] = { tipo: "eixo", titulo: nomeEixoOficial, sigla: siglaEixo, cor: "#6366F1", dados: metricasEixos[siglaEixo] };
-        }
 
         const registrarNoUnico = (texto, categoriaReal, paiId, camadaLabel, tamanho, corNivel, vMaxFiltro, atendeTemaDireto) => {
             if (!texto || texto.trim() === "") return null;
             if (camadaLabel === "2" && !sPassaVoto) return null;
             
+            // Filtro rígido cascata de temas na visualização da árvore
             if (filtroTemaEscolhido !== "__ALL__" && !atendeTemaDireto) {
                 if (camadaLabel === "3") return null;
                 if (camadaLabel === "2" && !(tTxt !== "" && tCat === filtroTemaEscolhido)) return null;
@@ -802,22 +802,23 @@ function renderizarEstruturaHierarquica() {
                 const labelCurto = txt.length > 18 ? txt.slice(0, 16) + "..." : txt;
                 const prefixoEstrela = (camadaLabel === "2" && vMaxFiltro > 0) ? '⭐ ' : '';
 
-                hNodes.push({
+                nosCausasTemporarios.push({
                     id: noId, label: `${prefixoEstrela}${labelCurto}`, shape: "dot", size: tSize, borderWidth: bW, 
                     color: { background: corNivel, border: bColor }, font: { size: 10, color: "#334155" }
                 });
 
                 hNodesDetails[noId] = {
                     tipo: "causa", camada: camadaLabel === "1" ? "Primária" : camadaLabel === "2" ? "Secundária" : "Terciária",
-                    texto: txt, tema: categoriaReal || "Sem Categoria", votos: vMaxFiltro, eixoOrigem: nomeEixoOficial,
+                    texto: txt, tema: categoriaReal || "Sem Categoria", votos: vMaxFiltro, eixoOrigem: MAPA_EIXOS_COMPLETO[siglaEixo] || eixoCompleto,
                     siglaOrigem: siglaEixo, eixos: eixosReaisDaCausa, ehTransversal: ehTransversal
                 };
                 nosCriadosUnicos.add(noId);
+                eixosComNosFiltradosValidos.add(siglaEixo);
             }
 
             const arestaKey = `${paiId}->${noId}`;
             if (!arestasCriadasUnicas.has(arestaKey)) {
-                hEdges.push({ from: paiId, to: noId, color: { color: "#E2E8F0", opacity: 0.6 }, width: 1.1 });
+                arestasTemporarias.push({ from: paiId, to: noId, color: { color: "#E2E8F0", opacity: 0.6 }, width: 1.1 });
                 arestasCriadasUnicas.add(arestaKey);
             }
             return noId;
@@ -828,13 +829,34 @@ function renderizarEstruturaHierarquica() {
         if (idS) registrarNoUnico(tTxt, tCat, idS, "3", 13.0, "#FBBF24", vNumCt, tPassaTema);              
     });
 
+    // Insere apenas os eixos que possuem causas conectadas sob as condições do filtro atual
+    eixosSelecionados.forEach(siglaEixo => {
+        if(eixosComNosFiltradosValidos.has(siglaEixo)) {
+            const eixoId = `H2_${siglaEixo}`;
+            const nomeEixoOficial = MAPA_EIXOS_COMPLETO[siglaEixo] || siglaEixo;
+            hNodes.push({ 
+                id: eixoId, label: siglaEixo, title: nomeEixoOficial, shape: "dot", size: 22, 
+                color: { background: "#6366F1", border: "#4F46E5" }, 
+                font: { bold: true, size: 12, color: "#475569" } 
+            });
+            hEdges.push({ from: macroId, to: eixoId, color: { color: "#CBD5E0", opacity: 0.6 }, width: 1.2 });
+            hNodesDetails[eixoId] = { tipo: "eixo", titulo: nomeEixoOficial, sigla: siglaEixo, cor: "#6366F1", dados: metricasEixos[siglaEixo] };
+        }
+    });
+
+    // Despeja as causas e conexões filtradas no array oficial
+    hNodes.push(...nosCausasTemporarios);
+    hEdges.push(...arestasTemporarias);
+
     if (destacarTransversais) {
         Object.keys(mapaNodesParaTeia).forEach(tema => {
             if (filtroTemaEscolhido !== "__ALL__" && filtroTemaEscolhido !== tema) return;
             const nos = [...new Set(mapaNodesParaTeia[tema])];
             for (let i = 0; i < nos.length; i++) {
                 for (let j = i + 1; j < nos.length; j++) {
-                    hEdges.push({ from: nos[i], to: nos[j], color: { color: "#F59E0B", opacity: 0.35 }, width: 0.8, dashes: [2, 3] });
+                    if(nosCriadosUnicos.has(nos[i]) && nosCriadosUnicos.has(nos[j])) {
+                        hEdges.push({ from: nos[i], to: nos[j], color: { color: "#F59E0B", opacity: 0.35 }, width: 0.8, dashes: [2, 3] });
+                    }
                 }
             }
         });
@@ -955,6 +977,7 @@ function buildSidebarHierarquicaAba2(listaTemasFiltrados) {
         const b = document.createElement("button");
         b.className = "btn-sidebar-item";
         const cor = CAT_CORES_MAP[Object.keys(CAT_CORES_MAP).find(k => tema.toLowerCase().includes(k.toLowerCase()))] || "#64748B";
+        
         const atualSelecionado = document.getElementById("select-tema-transversal").value;
         if (atualSelecionado === tema) b.classList.add("active");
         
@@ -966,14 +989,10 @@ function buildSidebarHierarquicaAba2(listaTemasFiltrados) {
         b.onclick = (e) => {
             e.stopPropagation();
             const combo = document.getElementById("select-tema-transversal");
-            combo.value = combo.value === tema ? "__ALL__" : tema;
-            renderizarEstruturaHierarquica();
             
-            document.querySelectorAll("#sidebar-list .btn-sidebar-item").forEach(btn => {
-                const txt = btn.querySelector(".btn-sidebar-text").textContent;
-                if(txt === combo.value) btn.classList.add("active");
-                else btn.classList.remove("active");
-            });
+            // Alterna o tema se clicar no mesmo botão ativo
+            combo.value = combo.value === tema ? "__ALL__" : tema;
+            atualizarInterfaceTemaAba2();
         };
         list.appendChild(b);
     });
