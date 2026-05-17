@@ -181,27 +181,6 @@ const EIXO_CORES_PAINEL = {
   "Eixo 4": "#86EFAC", "Eixo 5": "#FDE68A", "Eixo 6": "#FECACA", "Eixo 7": "#DDD6FE"
 };
 
-const FISICA_HIERARQUICA_CONFIG = {
-    enabled: true,
-    solver: "hierarchicalRepulsion",
-    hierarchicalRepulsion: {
-        centralGravity: 0.0,
-        springLength: 100,
-        springConstant: 0.15,
-        nodeDistance: 150,
-        damping: 0.15
-    },
-    stabilization: { enabled: true, iterations: 200, fit: true }
-};
-
-const LAYOUT_HIERARQUICO_CONFIG = {
-    enabled: true,
-    direction: "UD",
-    sortMethod: "directed",
-    nodeSpacing: 160,
-    treeSpacing: 200
-};
-
 const CAT_CORES_MAP = {
   "Fragmentação": "#EF4444", "Comunicação": "#3B82F6", "Rotatividade": "#A855F7",
   "Sobrecarga": "#06B6D4", "Participação": "#10B981", "Atendimento": "#F59E0B",
@@ -420,9 +399,9 @@ function processarDadosAba1() {
     G_aba1 = { nodes: [], edges: [], details: [], originalEdges: [] };
     const catMap = {}; const eixosAtivos = {};
 
+    // Removidas posições estáticas duras da raiz para que ela possa se reposicionar livremente em outros layouts
     G_aba1.nodes.push({
         id: "ROOT", label: "BAIXA ALFABETIZAÇÃO", shape: "dot", size: 30,
-        x: 0, y: 0, fixed: true,
         color: { background: "#EF4444", border: "#DC2626" }, font: {size: 11, color: "#1E293B", bold: true, vadjust: -36}
     });
 
@@ -452,20 +431,13 @@ function processarDadosAba1() {
     });
 
     const eixosOrdenados = ["Eixo 1", "Eixo 2", "Eixo 3", "Eixo 4", "Eixo 5", "Eixo 6", "Eixo 7"];
-    const totalEixos = eixosOrdenados.length;
-    const raioEixos = 340; 
 
     eixosOrdenados.forEach((ex, i) => {
         if (!eixosAtivos[ex]) return;
-        
-        const angulo = (i * 2 * Math.PI) / totalEixos;
-        const posX = raioEixos * Math.cos(angulo);
-        const posY = raioEixos * Math.sin(angulo);
         const nomeEixoExibicao = eixosAtivos[ex].completo;
 
         G_aba1.nodes.push({
             id: ex, label: ex, title: nomeEixoExibicao, shape: "dot", size: 16,
-            x: posX, y: posY, fixed: true,
             color: {background: "#6366F1", border: "#4F46E5"},
             font: { size: 11, color: "#475569", bold: true, vadjust: 26 }
         });
@@ -507,19 +479,45 @@ function renderizarEstruturaRadial() {
     selectedCategoryRadial = null;
     buildSidebarRadialAba1();
 
+    // No modo radial, injetamos posições circulares fixas temporárias apenas para renderizar esta tela adequadamente
+    const eixosOrdenados = ["Eixo 1", "Eixo 2", "Eixo 3", "Eixo 4", "Eixo 5", "Eixo 6", "Eixo 7"];
+    const totalEixos = eixosOrdenados.length;
+    const raioEixos = 340;
+
+    const nosComPosicaoRadial = G_aba1.nodes.map(n => {
+        let clone = Object.assign({}, n);
+        if (clone.id === "ROOT") {
+            clone.x = 0; clone.y = 0; clone.fixed = true;
+        } else if (eixosOrdenados.includes(clone.id)) {
+            const idx = eixosOrdenados.indexOf(clone.id);
+            const angulo = (idx * 2 * Math.PI) / totalEixos;
+            clone.x = raioEixos * Math.cos(angulo);
+            clone.y = raioEixos * Math.sin(angulo);
+            clone.fixed = true;
+        } else {
+            // Garante que categorias herdem dinâmica livre
+            delete clone.x; delete clone.y; clone.fixed = false;
+        }
+        return clone;
+    });
+
     const opcoesRadial = {
         edges: { width: 1, smooth: { enabled: true, type: "continuous", roundness: 0.4 } },
         layout: { hierarchical: { enabled: false } },
         physics: { 
             enabled: true, 
             solver: "barnesHut", 
-            barnesHut: { gravitationalConstant: -5000, centralGravity: 0.02, springLength: 130, springConstant: 0.05 },
-            stabilization: { enabled: true, iterations: 140 }
+            barnesHut: { gravitationalConstant: -4500, centralGravity: 0.02, springLength: 120, springConstant: 0.05 },
+            stabilization: { enabled: true, iterations: 150 }
         },
         interaction: { hover: true }
     };
 
-    if (networkInstance) networkInstance.destroy();
+    if (networkInstance) { networkInstance.destroy(); networkInstance = null; }
+    
+    nodesDataSet = new vis.DataSet(nosComPosicaoRadial);
+    edgesDataSet = new vis.DataSet(G_aba1.originalEdges);
+    
     networkInstance = new vis.Network(document.getElementById("net"), {nodes: nodesDataSet, edges: edgesDataSet}, opcoesRadial);
     
     networkInstance.on("stabilizationIterationsDone", function () {
@@ -546,20 +544,40 @@ function renderizarEstruturaRadial() {
     setTimeout(() => {
         networkInstance.moveTo({ position: { x: 0, y: 0 }, scale: 3.5, animation: false });
         setTimeout(() => {
-            networkInstance.moveTo({ position: { x: 50, y: 0 }, scale: 0.65, animation: { duration: 1200, easingFunction: "easeInOutCubic" } });
-        }, 150);
+            networkInstance.moveTo({ position: { x: 50, y: 0 }, scale: 0.65, animation: { duration: 1000, easingFunction: "easeInOutCubic" } });
+        }, 100);
     }, 50);
 }
 
 function aplicarFiltroAba1() {
+    if (currentTab !== "radial") return;
     const exibirEspecificas = document.getElementById("filtro-especificas").checked;
     fecharPainel();
-    const nosFiltrados = G_aba1.nodes.filter(n => exibirEspecificas || !n._isSpecific);
+    
+    // Filtramos os nós baseados no estado atual da aba 1
+    const idsAtivos = nodesDataSet.getIds();
+    const nosParaRemover = [];
+    
+    G_aba1.nodes.forEach(n => {
+        if (!exibirEspecificas && n._isSpecific) {
+            nosParaRemover.push(n.id);
+        }
+    });
+
+    // Remove do dataset apenas os específicos se o filtro pedir
+    if(!exibirEspecificas) {
+        nodesDataSet.remove(nosParaRemover);
+    } else {
+        // Se ativo recarrega as posições adequadas
+        renderizarEstruturaRadial();
+        return;
+    }
+
+    const idsAtuaisValidos = nodesDataSet.getIds();
+    edgesDataSet.clear();
+    edgesDataSet.add(G_aba1.originalEdges.filter(e => idsAtuaisValidos.includes(e.from) && idsAtuaisValidos.includes(e.to)));
     
     networkInstance.setOptions({ physics: { enabled: true } });
-    nodesDataSet.clear(); nodesDataSet.add(nosFiltrados);
-    const idsAtivos = nosFiltrados.map(n => n.id);
-    edgesDataSet.clear(); edgesDataSet.add(G_aba1.originalEdges.filter(e => idsAtivos.includes(e.from) && idsAtivos.includes(e.to)));
     networkInstance.stabilize();
 }
 
@@ -575,13 +593,17 @@ function filtrarTeiaPorCategoria(nomeCat) {
     const catNodeId = `__cat__${nomeCat}`;
     const eixosConectados = G_aba1.originalEdges.filter(e => e.to === catNodeId).map(e => e.from);
     
-    const nosIsolados = G_aba1.nodes.filter(n => n.id === catNodeId || eixosConectados.includes(n.id) || n.id === "ROOT");
+    // Clona removendo o travamento fixo para permitir espalhamento limpo na seleção
+    const nosIsolados = G_aba1.nodes.filter(n => n.id === catNodeId || eixosConectados.includes(n.id) || n.id === "ROOT").map(n => {
+        let clone = Object.assign({}, n);
+        clone.fixed = false; // Destrava tudo temporariamente
+        return clone;
+    });
+    
     const arestasIsoladas = G_aba1.originalEdges.filter(e => 
         (e.to === catNodeId) || 
         (e.from === "ROOT" && eixosConectados.includes(e.to))
     );
-
-    nosIsolados.forEach(n => { if(n.id !== "ROOT") n.fixed = false; });
 
     networkInstance.setOptions({ physics: { enabled: true } });
     nodesDataSet.clear(); nodesDataSet.add(nosIsolados);
@@ -592,14 +614,18 @@ function filtrarTeiaPorCategoria(nomeCat) {
 }
 
 function filtrarTeiaPorEixo(eixoId) {
-    const categoriasConectadas = G_aba1.originalEdges.filter(e => e.from ===微轴Id && e.to.startsWith("__cat__")).map(e => e.to);
-    const nosIsolados = G_aba1.nodes.filter(n => n.id === eixoId || categoriasConectadas.includes(n.id) || n.id === "ROOT");
+    const categoriasConectadas = G_aba1.originalEdges.filter(e => e.from === eixoId && e.to.startsWith("__cat__")).map(e => e.to);
+    
+    const nosIsolados = G_aba1.nodes.filter(n => n.id === eixoId || categoriasConectadas.includes(n.id) || n.id === "ROOT").map(n => {
+        let clone = Object.assign({}, n);
+        clone.fixed = false;
+        return clone;
+    });
+
     const arestasIsoladas = G_aba1.originalEdges.filter(e => 
         (e.from === eixoId && categoriasConectadas.includes(e.to)) || 
         (e.from === "ROOT" && e.to === eixoId)
     );
-
-    nosIsolados.forEach(n => { if(n.id !== "ROOT") n.fixed = false; });
 
     networkInstance.setOptions({ physics: { enabled: true } });
     nodesDataSet.clear(); nodesDataSet.add(nosIsolados);
@@ -612,9 +638,7 @@ function filtrarTeiaPorEixo(eixoId) {
 function resetarFiltroTeiaRadial() {
     selectedCategoryRadial = null;
     document.querySelectorAll(".btn-sidebar-item").forEach(btn => btn.classList.remove("active"));
-    G_aba1.nodes.forEach(n => { if(n.id === "ROOT" || !n.id.startsWith("__cat__")) n.fixed = true; });
-    aplicarFiltroAba1();
-    fecharPainel();
+    renderizarEstruturaRadial();
 }
 
 function aoClicarNoNodeRadial(id) {
@@ -728,6 +752,8 @@ function renderizarEstruturaHierarquica() {
     hNodesDetails = {}; 
 
     const macroId = "H2_MACRO_ROOT";
+    
+    // CRÍTICO: Removido qualquer resquício de x, y ou fixed para que o layout hierárquico possa mandar neles
     hNodes.push({
         id: macroId, label: "BAIXA ALFABETIZAÇÃO", shape: "dot", size: 36,
         color: { background: "#EF4444", border: "#DC2626" }, font: { bold: true, size: 14, color: "#1E293B", vadjust: -32 }
@@ -892,19 +918,31 @@ function renderizarEstruturaHierarquica() {
         });
     }
 
-    nodesDataSet.clear(); nodesDataSet.add(hNodes);
-    edgesDataSet.clear(); edgesDataSet.add(hEdges);
+    if (networkInstance) { networkInstance.destroy(); networkInstance = null; }
 
-    if (networkInstance) networkInstance.destroy();
-    
-    // Força o motor com o Layout Hierárquico Direcionado (De cima para baixo)
-    networkInstance = new vis.Network(document.getElementById("net"), {nodes: nodesDataSet, edges: edgesDataSet}, {
-        layout: { hierarchical: LAYOUT_HIERARQUICO_CONFIG },
+    nodesDataSet = new vis.DataSet(hNodes);
+    edgesDataSet = new vis.DataSet(hEdges);
+
+    // Configuração estrita do Layout Hierárquico Direcionado (UD = Up to Down)
+    const opcoesHierarquicas = {
+        layout: {
+            hierarchical: {
+                enabled: true,
+                direction: "UD",
+                sortMethod: "directed",
+                nodeSpacing: 180,
+                treeSpacing: 240,
+                blockShifting: true,
+                edgeMinimization: true,
+                parentCentralization: true
+            }
+        },
         physics: { enabled: false },
         interaction: { hover: true, dragNodes: true }
-    });
+    };
+
+    networkInstance = new vis.Network(document.getElementById("net"), {nodes: nodesDataSet, edges: edgesDataSet}, opcoesHierarquicas);
     
-    networkInstance.off("click"); 
     networkInstance.on("click", p => {
         if(!p.nodes.length) { fecharPainel(); return; }
         const id = p.nodes[0];
@@ -958,6 +996,10 @@ function renderizarEstruturaHierarquica() {
         }
         document.getElementById("painel").classList.add("open"); document.getElementById("net").style.right = "460px";
     });
+
+    setTimeout(() => {
+        networkInstance.fit({ animation: { duration: 600, easingFunction: "easeInOutQuad" } });
+    }, 200);
 }
 
 function buildSidebarHierarquicaAba2(listaTemasFiltrados) {
@@ -1033,7 +1075,6 @@ function mudarAba(aba) {
         legenda.classList.add("hidden"); 
         document.getElementById("main-title").textContent = "Árvore Diagnóstica de Problemas";
         document.getElementById("main-subtitle").textContent = "Volumetria proporcional e conexões transversais unificadas";
-        buildSidebarRadialAba1();
         renderizarEstruturaRadial();
     } else {
         btn2.className = "px-4 py-1.5 rounded-md text-xs font-semibold transition-all bg-white text-slate-800 shadow-sm";
