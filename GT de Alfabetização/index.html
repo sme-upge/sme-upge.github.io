@@ -91,8 +91,8 @@ input:checked + .slider:before {transform:translateX(14px)}
       <select id="select-votos-hierarquica" class="bg-white border border-slate-200 rounded-lg p-1 text-xs font-medium text-slate-700 focus:outline-none" onchange="renderizarEstruturaHierarquica()">
         <option value="0">Todas as Evidências</option>
         <option value="1">Apenas Priorizadas (Estrelas)</option>
-        <option value="4">Alta Prioridade (4+ ⭐)</option>
-        <option value="6">Prioridade Máxima (6 ⭐)</option>
+        <option value="4">Alta Prioridade (4+ 🔥)</option>
+        <option value="6">Prioridade Máxima (6 🔥)</option>
       </select>
     </div>
 
@@ -180,6 +180,33 @@ const CAT_CORES_MAP = {
   "Sobrecarga": "#06B6D4", "Participação": "#10B981", "Atendimento": "#F59E0B",
   "Identidade": "#EC4899", "Articulação": "#F43F5E", "Recursos": "#D946EF",
   "Excesso": "#22C55E", "Inadequação": "#F97316", "Qualificação": "#84CC16"
+};
+
+// CONFIGURAÇÃO DE FÍSICA ELASTICIDADE + REBOTE BIG BANG PARA AMBAS AS VISÕES
+const FISICA_RADIAL_CONFIG = {
+    enabled: true,
+    solver: "barnesHut",
+    barnesHut: { 
+        gravitationalConstant: -18000, 
+        centralGravity: 0.1, 
+        springLength: 140, 
+        springConstant: 0.06,
+        damping: 0.15
+    },
+    stabilization: { enabled: true, iterations: 180, updateInterval: 25 }
+};
+
+const FISICA_HIERARQUICA_CONFIG = {
+    enabled: true,
+    solver: "barnesHut",
+    barnesHut: { 
+        gravitationalConstant: -15000, 
+        centralGravity: 0.08, 
+        springLength: 110, 
+        springConstant: 0.07,
+        damping: 0.15
+    },
+    stabilization: { enabled: true, iterations: 220, updateInterval: 25 }
 };
 
 let currentTab = "radial"; 
@@ -336,6 +363,10 @@ function rebuildCombosETemasAba2() {
             [[cp, cat_p], [cs, cat_s], [ct, cat_t]].forEach(([txt, cat]) => {
                 if(txt && cat && cat.trim() !== "") {
                     const cNom = cat.trim();
+                    // SE MÚLTIPLOS EIXOS ATIVOS: Remove causas de eixos que não pertencem à seleção ativa
+                    const eixosReaisCausa = Array.from(globalTextoParaEixos[txt.trim()] || []);
+                    if (eixosSelecionados.length > 1 && eixosReaisCausa.length === 1 && !eixosSelecionados.includes(eixosReaisCausa[0])) return;
+
                     if(!listTemasFiltrados[cNom]) listTemasFiltrados[cNom] = 0;
                     listTemasFiltrados[cNom]++;
                 }
@@ -365,7 +396,6 @@ function toggleVisibilidadeComboTema() {
 }
 
 function atualizarInterfaceTemaAba2() {
-    // Sincroniza o destaque visual dos botões da barra lateral esquerda com o valor do select suspenso
     const valorTema = document.getElementById("select-tema-transversal").value;
     document.querySelectorAll("#sidebar-list .btn-sidebar-item").forEach(btn => {
         const txt = btn.querySelector(".btn-sidebar-text").textContent;
@@ -481,19 +511,12 @@ function renderizarEstruturaRadial() {
     selectedCategoryRadial = null;
     buildSidebarRadialAba1();
 
-    const opcoesRadial = {
-        edges: { width: 1, smooth: { enabled: true, type: "continuous", roundness: 0.4 } },
-        physics: { 
-            enabled: true, 
-            solver: "barnesHut", 
-            barnesHut: { gravitationalConstant: -5000, centralGravity: 0.02, springLength: 130, springConstant: 0.05 },
-            stabilization: { enabled: true, iterations: 140 }
-        },
-        interaction: { hover: true }
-    };
-
     if (networkInstance) networkInstance.destroy();
-    networkInstance = new vis.Network(document.getElementById("net"), {nodes: nodesDataSet, edges: edgesDataSet}, opcoesRadial);
+    networkInstance = new vis.Network(document.getElementById("net"), {nodes: nodesDataSet, edges: edgesDataSet}, {
+        edges: { width: 1, smooth: { enabled: true, type: "continuous", roundness: 0.4 } },
+        physics: FISICA_RADIAL_CONFIG,
+        interaction: { hover: true, dragNodes: true }
+    });
     
     networkInstance.on("stabilizationIterationsDone", function () {
         networkInstance.setOptions({ physics: { enabled: false } });
@@ -615,7 +638,7 @@ function aoClicarNoNodeRadial(id) {
         if(causasPrioritarias.length > 0) {
             html += `
                 <div class="mb-4">
-                    <span class="text-[10px] font-bold text-amber-700 uppercase tracking-wider bg-amber-50 border border-amber-200/60 px-2 py-1 rounded-md block mb-2">📍 Priorizações de Rede</span>
+                    <span class="text-[10px] font-bold text-amber-700 uppercase tracking-wider bg-amber-50 border border-amber-200/60 px-2 py-1 rounded-md block mb-2">🔥 Priorizações de Rede</span>
                     <div class="flex flex-col gap-2">
             `;
             causasPrioritarias.forEach(c => {
@@ -677,8 +700,8 @@ function buildSidebarRadialAba1() {
             list.appendChild(b);
         });
     };
-    renderGrupo("👥 Temas Transversais", "text-blue-600", sortedCats.filter(c=>c.ehTransversal));
-    renderGrupo("📌 Dores Específicas", "text-slate-400", sortedCats.filter(c=>!c.ehTransversal));
+    renderGrupo("📌 Temas Transversais", "text-blue-600", sortedCats.filter(c=>c.ehTransversal));
+    renderGrupo("🔒 Dores Específicas", "text-slate-400", sortedCats.filter(c=>!c.ehTransversal));
 }
 
 function renderizarEstruturaHierarquica() {
@@ -736,7 +759,6 @@ function renderizarEstruturaHierarquica() {
         metricasEixos[ex].causasEstreladasCount = causasEstreladasPorEixo[ex].size;
     });
 
-    // Guardas para guardar quais eixos de fato contêm nós válidos após os filtros qualitativos
     const eixosComNosFiltradosValidos = new Set();
     const nosCausasTemporarios = [];
     const arestasTemporarias = [];
@@ -749,6 +771,13 @@ function renderizarEstruturaHierarquica() {
         const pTxt = cp ? cp.trim() : "";
         const sTxt = cs ? cs.trim() : "";
         const tTxt = ct ? ct.trim() : "";
+
+        // REGRA DE INTERSEÇÃO E ISOLAMENTO: Descarta causas exclusivas de um único eixo quando há múltiplos eixos selecionados
+        if (eixosSelecionados.length > 1) {
+            if (pTxt !== "" && (globalTextoParaEixos[pTxt]?.size || 0) === 1) return;
+            if (sTxt !== "" && (globalTextoParaEixos[sTxt]?.size || 0) === 1) return;
+            if (tTxt !== "" && (globalTextoParaEixos[tTxt]?.size || 0) === 1) return;
+        }
 
         const pCat = (cat_p && cat_p.trim() !== "") ? cat_p.trim() : (globalTextoParaCategorias[pTxt] || "");
         const sCat = (cat_s && cat_s.trim() !== "") ? cat_s.trim() : (globalTextoParaCategorias[sTxt] || "");
@@ -769,7 +798,6 @@ function renderizarEstruturaHierarquica() {
 
         const eixoId = `H2_${siglaEixo}`;
         
-        // CORREÇÃO LOGICA RESPONSIVA: Uma linha só gera nós se satisfizer o filtro estrito de Tema selecionado
         const temCausaAtivaNaLinha = (pTxt !== "" && pPassaTema) || (sTxt !== "" && sPassaTema && sPassaVoto) || (tTxt !== "" && tPassaTema && sPassaVoto);
         if (!temCausaAtivaNaLinha) return;
 
@@ -777,7 +805,6 @@ function renderizarEstruturaHierarquica() {
             if (!texto || texto.trim() === "") return null;
             if (camadaLabel === "2" && !sPassaVoto) return null;
             
-            // Filtro rígido cascata de temas na visualização da árvore
             if (filtroTemaEscolhido !== "__ALL__" && !atendeTemaDireto) {
                 if (camadaLabel === "3") return null;
                 if (camadaLabel === "2" && !(tTxt !== "" && tCat === filtroTemaEscolhido)) return null;
@@ -788,7 +815,7 @@ function renderizarEstruturaHierarquica() {
             const hashTexto = btoa(unescape(encodeURIComponent(txt))).replace(/=/g, "").slice(0, 24);
             const noId = `H2_N_C${camadaLabel}_${hashTexto}`;
             const eixosReaisDaCausa = Array.from(globalTextoParaEixos[txt] || [siglaEixo]);
-            const ehTransversal = G_aba1.details[`__cat__${categoriaReal}`]?.ehTransversal || false;
+            const ehTransversal = (eixosReaisDaCausa.length >= 2) || (G_aba1.details[`__cat__${categoriaReal}`]?.ehTransversal || false);
 
             if (!nosCriadosUnicos.has(noId)) {
                 let tSize = tamanho; let bW = 0.5; let bColor = "#CBD5E0";
@@ -829,7 +856,6 @@ function renderizarEstruturaHierarquica() {
         if (idS) registrarNoUnico(tTxt, tCat, idS, "3", 13.0, "#FBBF24", vNumCt, tPassaTema);              
     });
 
-    // Insere apenas os eixos que possuem causas conectadas sob as condições do filtro atual
     eixosSelecionados.forEach(siglaEixo => {
         if(eixosComNosFiltradosValidos.has(siglaEixo)) {
             const eixoId = `H2_${siglaEixo}`;
@@ -844,7 +870,6 @@ function renderizarEstruturaHierarquica() {
         }
     });
 
-    // Despeja as causas e conexões filtradas no array oficial
     hNodes.push(...nosCausasTemporarios);
     hEdges.push(...arestasTemporarias);
 
@@ -865,17 +890,11 @@ function renderizarEstruturaHierarquica() {
     nodesDataSet.clear(); nodesDataSet.add(hNodes);
     edgesDataSet.clear(); edgesDataSet.add(hEdges);
 
-    const opcoesHierarquica = {
-        physics: { 
-            enabled: true, 
-            solver: "barnesHut", 
-            barnesHut: { gravitationalConstant: -7500, centralGravity: 0.01, springLength: 95, springConstant: 0.05 },
-            stabilization: { enabled: true, iterations: 220 }
-        }
-    };
-
     if (networkInstance) networkInstance.destroy();
-    networkInstance = new vis.Network(document.getElementById("net"), {nodes: nodesDataSet, edges: edgesDataSet}, opcoesHierarquica);
+    networkInstance = new vis.Network(document.getElementById("net"), {nodes: nodesDataSet, edges: edgesDataSet}, {
+        physics: FISICA_HIERARQUICA_CONFIG,
+        interaction: { hover: true, dragNodes: true }
+    });
     
     networkInstance.on("stabilizationIterationsDone", function () {
         networkInstance.setOptions({ physics: { enabled: false } });
@@ -917,9 +936,10 @@ function renderizarEstruturaHierarquica() {
             document.getElementById("p-sub").textContent = "Evidência Qualitativa Mapeada";
             let cCat = CAT_CORES_MAP[Object.keys(CAT_CORES_MAP).find(k=>det.tema.toLowerCase().includes(k.toLowerCase()))] || "#64748B";
             
+            // ADIÇÃO CIRÚRGICA DA TAG NO PAINEL DE DETALHES (EVITA QUEBRA DA LISTA DA ESQUERDA)
             const seloTipo = det.ehTransversal 
-                ? `<span class="ml-auto text-[9px] bg-amber-100 text-amber-800 px-1.5 py-0.5 rounded font-bold uppercase tracking-wide">Tema Transversal</span>`
-                : `<span class="ml-auto text-[9px] bg-slate-100 text-slate-600 px-1.5 py-0.5 rounded font-bold uppercase tracking-wide">Tema Específico</span>`;
+                ? `<span class="ml-auto text-[9px] bg-amber-100 text-amber-800 border border-amber-300 px-2 py-0.5 rounded-md font-bold uppercase tracking-wider">Teia Transversal</span>`
+                : `<span class="ml-auto text-[9px] bg-slate-100 text-slate-600 border border-slate-200 px-2 py-0.5 rounded-md font-bold uppercase tracking-wider">Tema Específico</span>`;
 
             document.getElementById("painel-body").innerHTML = `
                 <div class="mb-3">
@@ -930,6 +950,12 @@ function renderizarEstruturaHierarquica() {
                 <div class="flex items-center gap-2 p-2.5 border border-slate-100 rounded-xl bg-white text-xs mb-3 font-medium text-slate-600">
                     <span class="w-2.5 h-2.5 rounded-full" style="background:${cCat}"></span><span>Tema: ${det.tema}</span>
                     ${seloTipo}
+                </div>
+                <div class="bg-slate-50 p-3 rounded-xl border border-slate-100 mt-2">
+                     <p class="text-[10px] font-bold text-slate-400 uppercase mb-1.5">Conectado aos Eixos:</p>
+                     <div class="flex flex-wrap gap-1">
+                         ${det.eixos.map(ex => `<span class="px-1.5 py-0.5 text-[9px] font-bold text-white rounded" style="background:${EIXO_CORES[ex]}">${ex}</span>`).join("")}
+                     </div>
                 </div>
             `;
         }
@@ -945,11 +971,16 @@ function buildSidebarHierarquicaAba2(listaTemasFiltrados) {
     
     if (!fonteDados) {
         fonteDados = {};
+        const eixosSelecionados = Array.from(document.querySelectorAll(".axis-checkbox:checked")).map(cb => cb.value);
         rawRows.forEach(r => {
             const [eixoCompleto, , cp, cat_p, cs, cat_s, , ct, cat_t] = r;
             if(!eixoCompleto) return;
+            const sigla = eixoCompleto.split(" - ")[0];
+            if (!eixosSelecionados.includes(sigla)) return;
+
             [[cp, cat_p], [cs, cat_s], [ct, cat_t]].forEach(([txt, cat]) => {
                 if(txt && cat && cat.trim() !== "") {
+                    if (eixosSelecionados.length > 1 && (globalTextoParaEixos[txt.trim()]?.size || 0) === 1) return;
                     const c = cat.trim();
                     if(!fonteDados[c]) fonteDados[c] = 0;
                     fonteDados[c]++;
@@ -962,13 +993,13 @@ function buildSidebarHierarquicaAba2(listaTemasFiltrados) {
     
     const h = document.createElement("p"); 
     h.className = "text-[10px] font-bold uppercase tracking-widest mt-2 mb-2 px-2 text-amber-600"; 
-    h.textContent = "🔍 Temas Presentes nos Eixos"; 
+    h.textContent = "📊 Temas Presentes nos Eixos"; 
     list.appendChild(h);
 
     if(sorted.length === 0) {
         const aviso = document.createElement("p");
         aviso.className = "text-xs text-slate-400 italic px-2 mt-2";
-        aviso.textContent = "Nenhum tema encontrado para essa combinação.";
+        aviso.textContent = "Nenhum tema compartilhado para essa combinação.";
         list.appendChild(aviso);
         return;
     }
@@ -989,8 +1020,6 @@ function buildSidebarHierarquicaAba2(listaTemasFiltrados) {
         b.onclick = (e) => {
             e.stopPropagation();
             const combo = document.getElementById("select-tema-transversal");
-            
-            // Alterna o tema se clicar no mesmo botão ativo
             combo.value = combo.value === tema ? "__ALL__" : tema;
             atualizarInterfaceTemaAba2();
         };
@@ -1019,7 +1048,7 @@ function mudarAba(aba) {
         ctrl2.classList.remove("hidden"); ctrl2.classList.add("flex"); ctrl1.classList.add("hidden");
         legenda.classList.remove("hidden"); 
         document.getElementById("main-title").textContent = "Constelação Detalhada de Evidências";
-        document.getElementById("main-subtitle").textContent = "Desdobramento radial unificado (Eixo → Causa 1ª → 2ª → 3ª)";
+        document.getElementById("main-subtitle").textContent = "Desdobramento radial unificado (Eixo ➔ Causa 1ª ➔ 2ª ➔ 3ª)";
         rebuildCombosETemasAba2();
         renderizarEstruturaHierarquica();
     }
