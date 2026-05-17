@@ -399,7 +399,6 @@ function processarDadosAba1() {
     G_aba1 = { nodes: [], edges: [], details: [], originalEdges: [] };
     const catMap = {}; const eixosAtivos = {};
 
-    // Removidas posições estáticas duras da raiz para que ela possa se reposicionar livremente em outros layouts
     G_aba1.nodes.push({
         id: "ROOT", label: "BAIXA ALFABETIZAÇÃO", shape: "dot", size: 30,
         color: { background: "#EF4444", border: "#DC2626" }, font: {size: 11, color: "#1E293B", bold: true, vadjust: -36}
@@ -479,7 +478,6 @@ function renderizarEstruturaRadial() {
     selectedCategoryRadial = null;
     buildSidebarRadialAba1();
 
-    // No modo radial, injetamos posições circulares fixas temporárias apenas para renderizar esta tela adequadamente
     const eixosOrdenados = ["Eixo 1", "Eixo 2", "Eixo 3", "Eixo 4", "Eixo 5", "Eixo 6", "Eixo 7"];
     const totalEixos = eixosOrdenados.length;
     const raioEixos = 340;
@@ -495,7 +493,6 @@ function renderizarEstruturaRadial() {
             clone.y = raioEixos * Math.sin(angulo);
             clone.fixed = true;
         } else {
-            // Garante que categorias herdem dinâmica livre
             delete clone.x; delete clone.y; clone.fixed = false;
         }
         return clone;
@@ -554,21 +551,16 @@ function aplicarFiltroAba1() {
     const exibirEspecificas = document.getElementById("filtro-especificas").checked;
     fecharPainel();
     
-    // Filtramos os nós baseados no estado atual da aba 1
-    const idsAtivos = nodesDataSet.getIds();
     const nosParaRemover = [];
-    
     G_aba1.nodes.forEach(n => {
         if (!exibirEspecificas && n._isSpecific) {
             nosParaRemover.push(n.id);
         }
     });
 
-    // Remove do dataset apenas os específicos se o filtro pedir
     if(!exibirEspecificas) {
         nodesDataSet.remove(nosParaRemover);
     } else {
-        // Se ativo recarrega as posições adequadas
         renderizarEstruturaRadial();
         return;
     }
@@ -593,10 +585,9 @@ function filtrarTeiaPorCategoria(nomeCat) {
     const catNodeId = `__cat__${nomeCat}`;
     const eixosConectados = G_aba1.originalEdges.filter(e => e.to === catNodeId).map(e => e.from);
     
-    // Clona removendo o travamento fixo para permitir espalhamento limpo na seleção
     const nosIsolados = G_aba1.nodes.filter(n => n.id === catNodeId || eixosConectados.includes(n.id) || n.id === "ROOT").map(n => {
         let clone = Object.assign({}, n);
-        clone.fixed = false; // Destrava tudo temporariamente
+        clone.fixed = false; 
         return clone;
     });
     
@@ -690,7 +681,7 @@ function aoClicarNoNodeRadial(id) {
                     <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-2">Demais Diagnósticos</span>
                     <div class="flex flex-col gap-2">
             `;
-            causasNormais.forEach(c => {
+            caunasNormais.forEach(c => {
                 const badges = c.eixos.map(ex => {
                   const corBG = EIXO_CORES_PAINEL[ex] || "#E2E8F0";
                   return `<span class="inline-block px-2 py-0.5 text-[9px] font-bold text-slate-800 rounded mr-1" style="background:${corBG}">${MAPA_EIXOS_COMPLETO[ex] || ex}</span>`
@@ -753,7 +744,6 @@ function renderizarEstruturaHierarquica() {
 
     const macroId = "H2_MACRO_ROOT";
     
-    // CRÍTICO: Removido qualquer resquício de x, y ou fixed para que o layout hierárquico possa mandar neles
     hNodes.push({
         id: macroId, label: "BAIXA ALFABETIZAÇÃO", shape: "dot", size: 36,
         color: { background: "#EF4444", border: "#DC2626" }, font: { bold: true, size: 14, color: "#1E293B", vadjust: -32 }
@@ -911,7 +901,8 @@ function renderizarEstruturaHierarquica() {
             for (let i = 0; i < nos.length; i++) {
                 for (let j = i + 1; j < nos.length; j++) {
                     if(nosCriadosUnicos.has(nos[i]) && nosCriadosUnicos.has(nos[j])) {
-                        hEdges.push({ from: nos[i], to: nos[j], color: { color: "#F59E0B", opacity: 0.35 }, width: 0.8, dashes: [2, 3] });
+                        // CRÍTICO: physics: false adicionado na aresta para impedir que a linha puxe mecanicamente os nós de lugar
+                        hEdges.push({ from: nos[i], to: nos[j], color: { color: "#F59E0B", opacity: 0.35 }, width: 0.8, dashes: [2, 3], physics: false });
                     }
                 }
             }
@@ -923,7 +914,7 @@ function renderizarEstruturaHierarquica() {
     nodesDataSet = new vis.DataSet(hNodes);
     edgesDataSet = new vis.DataSet(hEdges);
 
-    // Configuração estrita do Layout Hierárquico Direcionado (UD = Up to Down)
+    // CRÍTICO: Desativação total de física de gravidade nesta aba para manter a árvore estruturalmente perfeita para baixo (UD)
     const opcoesHierarquicas = {
         layout: {
             hierarchical: {
@@ -1068,6 +1059,12 @@ function mudarAba(aba) {
     const ctrl1 = document.getElementById("controles-aba1"); const ctrl2 = document.getElementById("controles-aba2");
     const legenda = document.getElementById("legenda-container");
     
+    // CRÍTICO: Força a destruição limpa da rede atual antes de recalcular o novo modelo de aba
+    if (networkInstance) {
+        networkInstance.destroy();
+        networkInstance = null;
+    }
+
     if (aba === "radial") {
         btn1.className = "px-4 py-1.5 rounded-md text-xs font-semibold transition-all bg-white text-slate-800 shadow-sm";
         btn2.className = "px-4 py-1.5 rounded-md text-xs font-semibold transition-all text-slate-500 hover:text-slate-800";
