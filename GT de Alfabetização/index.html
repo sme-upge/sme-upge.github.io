@@ -45,9 +45,7 @@ input:checked + .slider:before {transform:translateX(14px)}
 .btn-sidebar-item.active { background-color: #EFF6FF; }
 .btn-sidebar-item.active .btn-sidebar-text { color: #1E40AF; font-weight: 600; }
 
-/* Estilo para o contorno tracejado na lateral direita (Apenas quando no grupo de priorização) */
 .highlight-group {
-    border: 1.5px dashed #FBBF24; /* Laranja/Amarelo delicado */
     border-radius: 12px;
     padding: 8px;
     margin-bottom: 16px;
@@ -178,33 +176,30 @@ const MAPA_EIXOS_COMPLETO = {
   "Eixo 7": "Eixo 7 - Materiais Didáticos e Pedagógicos"
 };
 
-// Cores personalizadas para os eixos no painel lateral
 const EIXO_CORES_PAINEL = {
-  "Eixo 1": "#BFDBFE", // Azul claro
-  "Eixo 2": "#FBCFE8", // Rosa claro
-  "Eixo 3": "#FDBA74", // Laranja
-  "Eixo 4": "#86EFAC", // Verde
-  "Eixo 5": "#FDE68A", // Amarelo
-  "Eixo 6": "#FECACA", // Vermelho
-  "Eixo 7": "#DDD6FE"  // Lilás
-};
-
-const EIXO_CORES = {
-  "Eixo 1": "#3B82F6", "Eixo 2": "#8B5CF6", "Eixo 3": "#10B981",
-  "Eixo 4": "#F97316", "Eixo 5": "#06B6D4", "Eixo 6": "#F43F5E", "Eixo 7": "#14B8A6"
+  "Eixo 1": "#BFDBFE", "Eixo 2": "#FBCFE8", "Eixo 3": "#FDBA74", 
+  "Eixo 4": "#86EFAC", "Eixo 5": "#FDE68A", "Eixo 6": "#FECACA", "Eixo 7": "#DDD6FE"
 };
 
 const FISICA_HIERARQUICA_CONFIG = {
     enabled: true,
-    solver: "barcode",
+    solver: "hierarchicalRepulsion",
     hierarchicalRepulsion: {
         centralGravity: 0.0,
-        springLength: 140,
-        springConstant: 0.38,
-        nodeDistance: 160,
-        damping: 0.09
+        springLength: 100,
+        springConstant: 0.15,
+        nodeDistance: 150,
+        damping: 0.15
     },
-    stabilization: { enabled: true, iterations: 180, fit: true }
+    stabilization: { enabled: true, iterations: 200, fit: true }
+};
+
+const LAYOUT_HIERARQUICO_CONFIG = {
+    enabled: true,
+    direction: "UD",
+    sortMethod: "directed",
+    nodeSpacing: 160,
+    treeSpacing: 200
 };
 
 const CAT_CORES_MAP = {
@@ -243,7 +238,7 @@ async function inicializar() {
             const [eixoCompleto, , cp, cat_p, cs, cat_s, votos, ct, cat_t] = r;
             if(!eixoCompleto) return;
             
-            const sigla = ejeCompleto = eixoCompleto.split(" - ")[0];
+            const sigla = eixoCompleto.split(" - ")[0];
             const vNum = parseInt(votos) || 0;
 
             if (cp && cp.trim() !== "") setCausasUnicasTotal.add(cp.trim());
@@ -514,6 +509,7 @@ function renderizarEstruturaRadial() {
 
     const opcoesRadial = {
         edges: { width: 1, smooth: { enabled: true, type: "continuous", roundness: 0.4 } },
+        layout: { hierarchical: { enabled: false } },
         physics: { 
             enabled: true, 
             solver: "barnesHut", 
@@ -596,8 +592,7 @@ function filtrarTeiaPorCategoria(nomeCat) {
 }
 
 function filtrarTeiaPorEixo(eixoId) {
-    const categoriasConectadas = G_aba1.originalEdges.filter(e => e.from === eixoId && e.to.startsWith("__cat__")).map(e => e.to);
-    
+    const categoriasConectadas = G_aba1.originalEdges.filter(e => e.from ===微轴Id && e.to.startsWith("__cat__")).map(e => e.to);
     const nosIsolados = G_aba1.nodes.filter(n => n.id === eixoId || categoriasConectadas.includes(n.id) || n.id === "ROOT");
     const arestasIsoladas = G_aba1.originalEdges.filter(e => 
         (e.from === eixoId && categoriasConectadas.includes(e.to)) || 
@@ -901,15 +896,14 @@ function renderizarEstruturaHierarquica() {
     edgesDataSet.clear(); edgesDataSet.add(hEdges);
 
     if (networkInstance) networkInstance.destroy();
+    
+    // Força o motor com o Layout Hierárquico Direcionado (De cima para baixo)
     networkInstance = new vis.Network(document.getElementById("net"), {nodes: nodesDataSet, edges: edgesDataSet}, {
-        physics: FISICA_HIERARQUICA_CONFIG,
+        layout: { hierarchical: LAYOUT_HIERARQUICO_CONFIG },
+        physics: { enabled: false },
         interaction: { hover: true, dragNodes: true }
     });
     
-    networkInstance.on("stabilizationIterationsDone", function () {
-        networkInstance.setOptions({ physics: { enabled: true } });
-    });
-
     networkInstance.off("click"); 
     networkInstance.on("click", p => {
         if(!p.nodes.length) { fecharPainel(); return; }
@@ -1005,13 +999,13 @@ function buildSidebarHierarquicaAba2(listaTemasFiltrados) {
     sorted.forEach(tema => {
         const b = document.createElement("button");
         b.className = "btn-sidebar-item";
-        const cor = CAT_CORES_MAP[Object.keys(CAT_CORES_MAP).find(k => tema.toLowerCase().includes(k.toLowerCase()))] || "#64748B";
+        const col = CAT_CORES_MAP[Object.keys(CAT_CORES_MAP).find(k => tema.toLowerCase().includes(k.toLowerCase()))] || "#64748B";
         
         const atualSelecionado = document.getElementById("select-tema-transversal").value;
         if (atualSelecionado === tema) b.classList.add("active");
         
         b.innerHTML = `
-            <span class="w-2 h-2 rounded-full mt-1.5 flex-shrink-0" style="background:${cor}"></span>
+            <span class="w-2 h-2 rounded-full mt-1.5 flex-shrink-0" style="background:${col}"></span>
             <span class="btn-sidebar-text">${tema}</span>
             <span class="text-[10px] font-bold text-slate-400 mt-0.5 flex-shrink-0 whitespace-nowrap">${fonteDados[tema]} dores</span>
         `;
