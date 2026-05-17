@@ -393,7 +393,9 @@ function rebuildCombosETemasAba2() {
         comboTema.value = "__ALL__";
     }
 
-    buildSidebarHierarquicaAba2(listTemasFiltrados);
+    if (currentTab === "hierarquica") {
+        buildSidebarHierarquicaAba2(listTemasFiltrados);
+    }
 }
 
 function atualizarInterfaceTemaAba2() {
@@ -508,6 +510,11 @@ function processarDadosAba1() {
     G_aba1.originalEdges = [...G_aba1.edges];
 }
 
+function renderizarStructureRadial() {
+    // Mantida retrocompatibilidade por segurança
+    renderizarEstruturaRadial();
+}
+
 function renderizarEstruturaRadial() {
     fecharPainel();
     selectedCategoryRadial = null;
@@ -588,7 +595,7 @@ function filtrarTeiaPorCategoria(nomeCat) {
 function filtrarTeiaPorEixo(eixoId) {
     const categoriasConectadas = G_aba1.originalEdges.filter(e => e.from === eixoId && e.to.startsWith("__cat__")).map(e => e.to);
     const nosIsolados = G_aba1.nodes.filter(n => n.id === eixoId || categoriasConectadas.includes(n.id) || n.id === "ROOT");
-    const arestasIsoladas = G_aba1.originalEdges.filter(e => (e.from ===_eixoId && categoriasConectadas.includes(e.to)) || (e.from === "ROOT" && e.to === eixoId) );
+    const arestasIsoladas = G_aba1.originalEdges.filter(e => (e.from === eixoId && categoriasConectadas.includes(e.to)) || (e.from === "ROOT" && e.to === eixoId) );
 
     nosIsolados.forEach(n => { if(n.id !== "ROOT") n.fixed = false; });
     networkInstance.setOptions({ physics: { enabled: true } });
@@ -668,6 +675,7 @@ function aoClicarNoNodeRadial(id) {
     document.getElementById("painel").classList.add("open"); document.getElementById("net").style.right = "460px";
 }
 
+// CORREÇÃO DA EMISSÃO DA LISTA LATERAL (Mapeamento Direto por Temas Existentes na Estrutura Geral)
 function buildSidebarRadialAba1() {
     const listContainer = document.getElementById("sidebar-list");
     listContainer.innerHTML = "";
@@ -676,7 +684,16 @@ function buildSidebarRadialAba1() {
     div.className = "space-y-1";
     div.innerHTML = `<p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider px-2 mb-2">Selecione um Tema da Matriz</p>`;
     
-    Object.keys(CAT_CORES_MAP).forEach(cat => {
+    // Coleta dinamicamente todas as categorias geradas do CSV
+    const todasCategoriasReais = [];
+    G_aba1.nodes.forEach(n => {
+        if (n.id.startsWith("__cat__")) {
+            todasCategoriasReais.push(n.id.replace("__cat__", ""));
+        }
+    });
+
+    // Ordena alfabeticamente para melhor visualização
+    todasCategoriasReais.sort().forEach(cat => {
         const catId = `__cat__${cat}`;
         const det = G_aba1.details[catId];
         if(!det) return;
@@ -691,7 +708,7 @@ function buildSidebarRadialAba1() {
         btn.innerHTML = `
             <span class="w-2.5 h-2.5 rounded-full mt-1 flex-shrink-0" style="background:${det.cor}"></span>
             <span class="btn-sidebar-text">${cat}</span>
-            <span class="text-[9px] font-bold text-slate-400 bg-slate-150 px-1.5 py-0.5 rounded ml-auto">${det.volumeCausas}</span>
+            <span class="text-[9px] font-bold text-slate-400 bg-slate-100 px-1.5 py-0.5 rounded ml-auto">${det.volumeCausas}</span>
         `;
         div.appendChild(btn);
     });
@@ -729,9 +746,6 @@ function buildSidebarHierarquicaAba2(listTemasAtivos) {
     listContainer.appendChild(div);
 }
 
-// ==========================================
-// FUNÇÃO CORRIGIDA PARA FILTRAGEM TOTAL
-// ==========================================
 function renderizarEstruturaHierarquica() {
     if (currentTab !== "hierarquica") return;
     
@@ -816,7 +830,6 @@ function renderizarEstruturaHierarquica() {
 
         const maiorVotoDaRamificacao = Math.max(vNumCp, vNumCs, vNumCt);
 
-        // CORREÇÃO LOGICA: Descarta linhas onde nenhum nó cumpre a pontuação selecionada no filtro
         if (maiorVotoDaRamificacao < filtroVotosAtivo) return;
 
         const pPassaTema = (filtroTemaEscolhido === "__ALL__") || (pCat === filtroTemaEscolhido);
@@ -832,7 +845,6 @@ function renderizarEstruturaHierarquica() {
         const registrarNoUnico = (texto, categoriaReal, paiId, camadaLabel, tamanho, corNivel, vMaxFiltro, passaTemaDireto, votoEspecifico) => {
             if (!texto || texto.trim() === "") return null;
             
-            // Impede a criação e ramificação de nós que possuam valor menor do que o filtro ativo
             if (filtroVotosAtivo > 0 && votoEspecifico < filtroVotosAtivo) {
                 if (camadaLabel === "3") return null;
                 if (camadaLabel === "2" && !(tTxt !== "" && vNumCt >= filtroVotosAtivo)) return null;
