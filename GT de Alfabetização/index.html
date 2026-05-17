@@ -45,7 +45,7 @@ input:checked + .slider:before {transform:translateX(14px)}
 .btn-sidebar-item.active { background-color: #EFF6FF; }
 .btn-sidebar-item.active .btn-sidebar-text { color: #1E40AF; font-weight: 600; }
 
-/* Estilo para o contorno tracejado na lateral direita */
+/* Estilo para o contorno tracejado na lateral direita (Apenas quando no grupo de priorização) */
 .highlight-group {
     border: 1.5px dashed #FBBF24; /* Laranja/Amarelo delicado */
     border-radius: 12px;
@@ -63,7 +63,7 @@ input:checked + .slider:before {transform:translateX(14px)}
       <p class="text-[12px] text-slate-400 mt-0.5 font-medium">GT Alfabetização · SME-SP</p>
     </div>
     <button onclick="limparTodosOsFiltros()" class="px-2.5 py-1 text-[10px] font-bold text-slate-500 hover:text-red-600 bg-slate-100 hover:bg-red-50 rounded-md transition-all flex items-center gap-1 border border-slate-200/60" title="Resetar visualização atual">
-      ? Limpar
+      🔄 Limpar
     </button>
   </div>
   
@@ -99,8 +99,8 @@ input:checked + .slider:before {transform:translateX(14px)}
       <select id="select-votos-hierarquica" class="bg-white border border-slate-200 rounded-lg p-1 text-xs font-medium text-slate-700 focus:outline-none" onchange="renderizarEstruturaHierarquica()">
         <option value="0">Todas as Evidências</option>
         <option value="1">Apenas Priorizadas (Estrelas)</option>
-        <option value="4">Alta Prioridade (4+ ?)</option>
-        <option value="6">Prioridade Máxima (6 ?)</option>
+        <option value="4">Alta Prioridade (4+ ⭐)</option>
+        <option value="6">Prioridade Máxima (6 ⭐)</option>
       </select>
     </div>
 
@@ -194,6 +194,19 @@ const EIXO_CORES = {
   "Eixo 4": "#F97316", "Eixo 5": "#06B6D4", "Eixo 6": "#F43F5E", "Eixo 7": "#14B8A6"
 };
 
+const FISICA_HIERARQUICA_CONFIG = {
+    enabled: true,
+    solver: "barcode",
+    hierarchicalRepulsion: {
+        centralGravity: 0.0,
+        springLength: 140,
+        springConstant: 0.38,
+        nodeDistance: 160,
+        damping: 0.09
+    },
+    stabilization: { enabled: true, iterations: 180, fit: true }
+};
+
 const CAT_CORES_MAP = {
   "Fragmentação": "#EF4444", "Comunicação": "#3B82F6", "Rotatividade": "#A855F7",
   "Sobrecarga": "#06B6D4", "Participação": "#10B981", "Atendimento": "#F59E0B",
@@ -230,7 +243,7 @@ async function inicializar() {
             const [eixoCompleto, , cp, cat_p, cs, cat_s, votos, ct, cat_t] = r;
             if(!eixoCompleto) return;
             
-            const sigla = eixoCompleto.split(" - ")[0];
+            const sigla = ejeCompleto = eixoCompleto.split(" - ")[0];
             const vNum = parseInt(votos) || 0;
 
             if (cp && cp.trim() !== "") setCausasUnicasTotal.add(cp.trim());
@@ -384,7 +397,6 @@ function toggleVisibilidadeComboTema() {
 }
 
 function atualizarInterfaceTemaAba2() {
-    // Sincroniza o destaque visual dos botões da barra lateral esquerda com o valor do select suspenso
     const valorTema = document.getElementById("select-tema-transversal").value;
     document.querySelectorAll("#sidebar-list .btn-sidebar-item").forEach(btn => {
         const txt = btn.querySelector(".btn-sidebar-text").textContent;
@@ -633,8 +645,8 @@ function aoClicarNoNodeRadial(id) {
 
         if(causasPrioritarias.length > 0) {
             html += `
-                <div class="mb-4 highlight-group">
-                    <span class="text-[10px] font-bold text-amber-700 uppercase tracking-wider bg-amber-50 border border-amber-200/60 px-2 py-1 rounded-md block mb-2">? Priorizações de Rede</span>
+                <div class="mb-4">
+                    <span class="text-[10px] font-bold text-amber-700 uppercase tracking-wider bg-amber-50 border border-amber-200/60 px-2 py-1 rounded-md block mb-2">⭐ Priorizações de Rede</span>
                     <div class="flex flex-col gap-2">
             `;
             causasPrioritarias.forEach(c => {
@@ -645,7 +657,7 @@ function aoClicarNoNodeRadial(id) {
                 
                 html += `
                     <div class="p-3 border border-amber-200 bg-amber-50/30 rounded-xl text-xs">
-                        <div class="mb-1.5 flex items-center justify-between">${badges} <span class="text-[9px] font-bold bg-amber-100 text-amber-800 px-1.5 py-0.5 rounded">? Prioritário: ${c.votos}v</span></div>
+                        <div class="mb-1.5 flex items-center justify-between">${badges} <span class="text-[9px] font-bold bg-amber-100 text-amber-800 px-1.5 py-0.5 rounded">⭐ Prioritário: ${c.votos}v</span></div>
                         <p class="text-slate-700 font-semibold leading-relaxed">${c.texto}</p>
                     </div>
                 `;
@@ -704,8 +716,8 @@ function buildSidebarRadialAba1() {
             list.appendChild(b);
         });
     };
-    renderGrupo(" Temas Transversais", "text-blue-600", sortedCats.filter(c=>c.ehTransversal));
-    renderGrupo("Causas Específicas dos Eixos", "text-slate-400", sortedCats.filter(c=>!c.ehTransversal));
+    renderGrupo("👥 Temas Transversais", "text-blue-600", sortedCats.filter(c=>c.ehTransversal));
+    renderGrupo("📌 Causas Específicas dos Eixos", "text-slate-400", sortedCats.filter(c=>!c.ehTransversal));
 }
 
 function renderizarEstruturaHierarquica() {
@@ -825,7 +837,7 @@ function renderizarEstruturaHierarquica() {
                 }
 
                 const labelCurto = txt.length > 22 ? txt.slice(0, 20) + "..." : txt;
-                const prefixoEstrela = (camadaLabel === "2" && vMaxFiltro > 0) ? '? ' : '';
+                const prefixoEstrela = (camadaLabel === "2" && vMaxFiltro > 0) ? '⭐ ' : '';
 
                 nosCausasTemporarios.push({
                     id: noId, label: `${prefixoEstrela}${labelCurto}`, shape: "dot", size: tSize, borderWidth: bW, 
@@ -979,7 +991,7 @@ function buildSidebarHierarquicaAba2(listaTemasFiltrados) {
     
     const h = document.createElement("p"); 
     h.className = "text-[10px] font-bold uppercase tracking-widest mt-2 mb-2 px-2 text-amber-600"; 
-    h.textContent = "?? Temas Presentes nos Eixos"; 
+    h.textContent = "👥 Temas Presentes nos Eixos"; 
     list.appendChild(h);
 
     if(sorted.length === 0) {
@@ -1007,7 +1019,6 @@ function buildSidebarHierarquicaAba2(listaTemasFiltrados) {
             e.stopPropagation();
             const combo = document.getElementById("select-tema-transversal");
             
-            // Alterna o tema se clicar no mesmo botão ativo
             combo.value = combo.value === tema ? "__ALL__" : tema;
             atualizarInterfaceTemaAba2();
         };
@@ -1035,8 +1046,8 @@ function mudarAba(aba) {
         btn1.className = "px-4 py-1.5 rounded-md text-xs font-semibold transition-all text-slate-500 hover:text-slate-800";
         ctrl2.classList.remove("hidden"); ctrl2.classList.add("flex"); ctrl1.classList.add("hidden");
         legenda.classList.remove("hidden"); 
-        document.getElementById("main-title").textContent = "Constelação Detalhada de Evidências";
-        document.getElementById("main-subtitle").textContent = "Desdobramento radial unificado (Eixo ? Causa 1ª ? 2ª ? 3ª)";
+        document.getElementById("main-title").textContent = "Árvore Detalhada";
+        document.getElementById("main-subtitle").textContent = "Desdobramento por Problema Macro ➔ Eixo ➔ Causa 1ª ➔ 2ª ➔ 3ª";
         rebuildCombosETemasAba2();
         renderizarEstruturaHierarquica();
     }
