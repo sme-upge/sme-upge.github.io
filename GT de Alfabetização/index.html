@@ -6,7 +6,7 @@
 <title>Painel de Evidências — GT de Alfabetização · SME-SP</title>
 <script src="https://cdn.tailwindcss.com"></script>
 <script src="https://unpkg.com/vis-network/standalone/umd/vis-network.min.js"></script>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght=400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
 *{box-sizing:border-box}
 html,body{height:100%;margin:0;padding:0;overflow:hidden;font-family:"Inter",sans-serif;background:#FAFAFA}
@@ -267,7 +267,6 @@ async function inicializar() {
         construirCheckboxEixos();
         processarDadosAba1(); 
         
-        // Inicialização limpa e segura da primeira aba
         currentTab = "radial";
         renderizarEstruturaRadial();
 
@@ -293,6 +292,7 @@ function parseCSV(text) {
 
 function construirCheckboxEixos() {
     const container = document.getElementById("checkbox-eixos-container");
+    if(!container) return;
     container.innerHTML = "";
     const eixosOrdenados = ["Eixo 1", "Eixo 2", "Eixo 3", "Eixo 4", "Eixo 5", "Eixo 6", "Eixo 7"];
     
@@ -369,13 +369,18 @@ function rebuildCombosETemasAba2() {
 }
 
 function toggleVisibilidadeComboTema() {
-    const ativo = document.getElementById("switch-transversal-hierarquica").checked;
-    document.getElementById("select-tema-transversal").disabled = !ativo;
+    const elSwitch = document.getElementById("switch-transversal-hierarquica");
+    const comboTema = document.getElementById("select-tema-transversal");
+    if(comboTema && elSwitch) {
+        comboTema.disabled = !elSwitch.checked;
+    }
     renderizarEstruturaHierarquica();
 }
 
 function atualizarInterfaceTemaAba2() {
-    const valorTema = document.getElementById("select-tema-transversal").value;
+    const comboTema = document.getElementById("select-tema-transversal");
+    if(!comboTema) return;
+    const valorTema = comboTema.value;
     document.querySelectorAll("#sidebar-list .btn-sidebar-item").forEach(btn => {
         const txt = btn.querySelector(".btn-sidebar-text").textContent;
         if(txt === valorTema) btn.classList.add("active");
@@ -387,12 +392,18 @@ function atualizarInterfaceTemaAba2() {
 function limparTodosOsFiltros() {
     fecharPainel();
     if(currentTab === "radial") {
-        document.getElementById("filtro-especificas").checked = true;
+        const checkEsp = document.getElementById("filtro-especificas");
+        if(checkEsp) checkEsp.checked = true;
         resetarFiltroTeiaRadial();
     } else {
-        document.getElementById("select-votos-hierarquica").value = "0";
-        document.getElementById("switch-transversal-hierarquica").checked = true;
-        document.getElementById("select-tema-transversal").disabled = false;
+        const selVotos = document.getElementById("select-votos-hierarquica");
+        const swTrans = document.getElementById("switch-transversal-hierarquica");
+        const selTema = document.getElementById("select-tema-transversal");
+        
+        if(selVotos) selVotos.value = "0";
+        if(swTrans) swTrans.checked = true;
+        if(selTema) selTema.disabled = false;
+        
         document.querySelectorAll(".axis-checkbox").forEach(cb => cb.checked = true);
         rebuildCombosETemasAba2();
         renderizarEstruturaHierarquica();
@@ -435,7 +446,7 @@ function processarDadosAba1() {
 
     const eixosOrdenados = ["Eixo 1", "Eixo 2", "Eixo 3", "Eixo 4", "Eixo 5", "Eixo 6", "Eixo 7"];
 
-    eixosOrdenados.forEach((ex, i) => {
+    eixosOrdenados.forEach((ex) => {
         if (!eixosAtivos[ex]) return;
         const nomeEixoExibicao = eixosAtivos[ex].completo;
 
@@ -524,7 +535,7 @@ function renderizarEstruturaRadial() {
     networkInstance = new vis.Network(document.getElementById("net"), {nodes: nodesDataSet, edges: edgesDataSet}, opcoesRadial);
     
     networkInstance.on("stabilizationIterationsDone", function () {
-        networkInstance.setOptions({ physics: { enabled: false } });
+        if(networkInstance) networkInstance.setOptions({ physics: { enabled: false } });
     });
 
     networkInstance.on("click", p => {
@@ -542,8 +553,8 @@ function renderizarEstruturaRadial() {
         }
     });
     
-    // Executa sem entrar em loop infinito
-    const exibirEspecificas = document.getElementById("filtro-especificas").checked;
+    const checkEsp = document.getElementById("filtro-especificas");
+    const exibirEspecificas = checkEsp ? checkEsp.checked : true;
     if(!exibirEspecificas) {
         const nosParaRemover = G_aba1.nodes.filter(n => n._isSpecific).map(n => n.id);
         nodesDataSet.remove(nosParaRemover);
@@ -628,20 +639,29 @@ function resetarFiltroTeiaRadial() {
 
 function aoClicarNoNodeRadial(id) {
     const det = G_aba1.details[id]; if (!det) return;
-    document.getElementById("p-cor").style.background = det.cor;
+    const pCor = document.getElementById("p-cor");
+    if(pCor) pCor.style.background = det.cor;
     
     if (det.tipo === "eixo") {
-        document.getElementById("p-titulo").textContent = det.titulo;
-        document.getElementById("p-sub").textContent = det.subtitulo;
-        document.getElementById("painel-body").innerHTML = `
-            <div class="mb-4">
-                <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-1">Problema Central do Eixo:</span>
-                <div class="p-4 border rounded-xl bg-slate-50/50 text-xs font-medium text-slate-700 leading-relaxed">${det.conteudo}</div>
-            </div>
-        `;
+        const pTit = document.getElementById("p-titulo");
+        const pSub = document.getElementById("p-sub");
+        if(pTit) pTit.textContent = det.titulo;
+        if(pSub) pSub.textContent = det.subtitulo;
+        
+        const pBody = document.getElementById("painel-body");
+        if(pBody) {
+            pBody.innerHTML = `
+                <div class="mb-4">
+                    <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-1">Problema Central do Eixo:</span>
+                    <div class="p-4 border rounded-xl bg-slate-50/50 text-xs font-medium text-slate-700 leading-relaxed">${det.conteudo}</div>
+                </div>
+            `;
+        }
     } else {
-        document.getElementById("p-titulo").textContent = det.cat;
-        document.getElementById("p-sub").textContent = `${det.volumeCausas} causas mapeadas sob este tema`;
+        const pTit = document.getElementById("p-titulo");
+        const pSub = document.getElementById("p-sub");
+        if(pTit) pTit.textContent = det.cat;
+        if(pSub) pSub.textContent = `${det.volumeCausas} causas mapeadas sob este tema`;
         
         let html = '';
         const causasPrioritarias = det.causas.filter(c => c.votos > 0).sort((a,b)=>b.votos - a.votos);
@@ -691,10 +711,14 @@ function aoClicarNoNodeRadial(id) {
             html += `</div></div>`;
         }
         
-        document.getElementById("painel-body").innerHTML = html;
+        const pBody = document.getElementById("painel-body");
+        if(pBody) pBody.innerHTML = html;
     }
-    document.getElementById("painel").classList.add("open");
-    document.getElementById("net").style.right = "460px";
+    
+    const elPainel = document.getElementById("painel");
+    const elNet = document.getElementById("net");
+    if(elPainel) elPainel.classList.add("open");
+    if(elNet) elNet.style.right = "460px";
 }
 
 function buildSidebarRadialAba1() {
@@ -729,9 +753,15 @@ function renderizarEstruturaHierarquica() {
     if (currentTab !== "hierarquica") return;
     
     const eixosSelecionados = Array.from(document.querySelectorAll(".axis-checkbox:checked")).map(cb => cb.value);
-    const destacarTransversais = document.getElementById("switch-transversal-hierarquica").checked;
-    const filtroTemaEscolhido = document.getElementById("select-tema-transversal").value;
-    const filtroVotosAtivo = document.getElementById("select-votos-hierarquica").value;
+    
+    const elSw = document.getElementById("switch-transversal-hierarquica");
+    const destacarTransversais = elSw ? elSw.checked : true;
+    
+    const elTema = document.getElementById("select-tema-transversal");
+    const filtroTemaEscolhido = elTema ? elTema.value : "__ALL__";
+    
+    const elVotos = document.getElementById("select-votos-hierarquica");
+    const filtroVotosAtivo = elVotos ? elVotos.value : "0";
 
     const hNodes = []; const hEdges = []; const nosCriadosUnicos = new Set();
     const arestasCriadasUnicas = new Set();
@@ -757,7 +787,7 @@ function renderizarEstruturaHierarquica() {
 
     rawRows.forEach(r => {
         const [eixoCompleto, probCentral, cp, , cs, , votos, ct, ] = r; if (!eixoCompleto) return;
-        const sigla = eixoCompleto.split(" - ")[0]; if (!eixosSelecionados.includes(sigla)) return;
+        const sigla = Grandma = eixoCompleto.split(" - ")[0]; if (!eixosSelecionados.includes(sigla)) return;
         
         metricasEixos[sigla].probCentral = probCentral;
         const vNum = parseInt(votos) || 0;
@@ -934,53 +964,78 @@ function renderizarEstruturaHierarquica() {
         const id = p.nodes[0];
         
         if(id === "H2_MACRO_ROOT") {
-            document.getElementById("p-cor").style.background = "#EF4444";
-            document.getElementById("p-titulo").textContent = "Baixa Alfabetização";
-            document.getElementById("p-sub").textContent = "Problema Macro Central";
-            document.getElementById("painel-body").innerHTML = `<p class="text-xs text-slate-500 font-medium leading-relaxed">Nó Central Diagnóstico.</p>`;
-            document.getElementById("painel").classList.add("open"); document.getElementById("net").style.right = "460px";
+            const pCor = document.getElementById("p-cor");
+            const pTit = document.getElementById("p-titulo");
+            const pSub = document.getElementById("p-sub");
+            const pBody = document.getElementById("painel-body");
+            
+            if(pCor) pCor.style.background = "#EF4444";
+            if(pTit) pTit.textContent = "Baixa Alfabetização";
+            if(pSub) pSub.textContent = "Problema Macro Central";
+            if(pBody) pBody.innerHTML = `<p class="text-xs text-slate-500 font-medium leading-relaxed">Nó Central Diagnóstico.</p>`;
+            
+            const elPainel = document.getElementById("painel");
+            const elNet = document.getElementById("net");
+            if(elPainel) elPainel.classList.add("open"); 
+            if(elNet) elNet.style.right = "460px";
             return;
         }
 
         const det = hNodesDetails[id]; if (!det) return;
-        document.getElementById("p-cor").style.background = det.cor || "#64748B";
+        const pCor = document.getElementById("p-cor");
+        if(pCor) pCor.style.background = det.cor || "#64748B";
 
         if(det.tipo === "eixo") {
-            document.getElementById("p-titulo").textContent = det.titulo;
-            document.getElementById("p-sub").textContent = "Métricas Consolidadas do Eixo";
-            document.getElementById("painel-body").innerHTML = `
-                <div class="mb-4">
-                    <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-1">Problema Central do Eixo:</span>
-                    <div class="p-3 bg-slate-50 border border-slate-100 rounded-xl text-xs font-medium text-slate-700 leading-relaxed">${det.dados.probCentral}</div>
-                </div>
-                <div class="grid grid-cols-2 gap-2 text-xs">
-                    <div class="p-3 bg-white border border-slate-100 rounded-xl shadow-sm"><span class="text-slate-400 block text-[10px]">Causas Primárias</span><span class="text-sm font-bold text-slate-700">${det.dados.totalP} causas</span></div>
-                    <div class="p-3 bg-white border border-slate-100 rounded-xl shadow-sm"><span class="text-slate-400 block text-[10px]">Causas Secundárias</span><span class="text-sm font-bold text-slate-700">${det.dados.totalS} causas</span></div>
-                    <div class="p-3 bg-white border border-slate-100 rounded-xl shadow-sm"><span class="text-slate-400 block text-[10px]">Causas Terciárias</span><span class="text-sm font-bold text-slate-700">${det.dados.totalT} causas</span></div>
-                    <div class="p-3 bg-amber-50/60 border border-amber-100 rounded-xl"><span class="text-amber-700 font-semibold block text-[10px]">Priorizações (Estreladas)</span><span class="text-sm font-bold text-amber-800">${det.dados.causasEstreladasCount} causas</span></div>
-                </div>`;
-        } else {
-            document.getElementById("p-titulo").textContent = `Causa ${det.camada}`;
-            document.getElementById("p-sub").textContent = "Causas Mapeadas";
-            let cCat = CAT_CORES_MAP[Object.keys(CAT_CORES_MAP).find(k=>det.tema.toLowerCase().includes(k.toLowerCase()))] || "#64748B";
+            const pTit = document.getElementById("p-titulo");
+            const pSub = document.getElementById("p-sub");
+            if(pTit) pTit.textContent = det.titulo;
+            if(pSub) pSub.textContent = "Métricas Consolidadas do Eixo";
             
+            const pBody = document.getElementById("painel-body");
+            if(pBody) {
+                pBody.innerHTML = `
+                    <div class="mb-4">
+                        <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-1">Problema Central do Eixo:</span>
+                        <div class="p-3 bg-slate-50 border border-slate-100 rounded-xl text-xs font-medium text-slate-700 leading-relaxed">${det.dados.probCentral}</div>
+                    </div>
+                    <div class="grid grid-cols-2 gap-2 text-xs">
+                        <div class="p-3 bg-white border border-slate-100 rounded-xl shadow-sm"><span class="text-slate-400 block text-[10px]">Causas Primárias</span><span class="text-sm font-bold text-slate-700">${det.dados.totalP} causas</span></div>
+                        <div class="p-3 bg-white border border-slate-100 rounded-xl shadow-sm"><span class="text-slate-400 block text-[10px]">Causas Secundárias</span><span class="text-sm font-bold text-slate-700">${det.dados.totalS} causas</span></div>
+                        <div class="p-3 bg-white border border-slate-100 rounded-xl shadow-sm"><span class="text-slate-400 block text-[10px]">Causas Terciárias</span><span class="text-sm font-bold text-slate-700">${det.dados.totalT} causas</span></div>
+                        <div class="p-3 bg-amber-50/60 border border-amber-100 rounded-xl"><span class="text-amber-700 font-semibold block text-[10px]">Priorizações (Estreladas)</span><span class="text-sm font-bold text-amber-800">${det.dados.causasEstreladasCount} causas</span></div>
+                    </div>`;
+            }
+        } else {
+            const pTit = document.getElementById("p-titulo");
+            const pSub = document.getElementById("p-sub");
+            if(pTit) pTit.textContent = `Causa ${det.camada}`;
+            if(pSub) pSub.textContent = "Causas Mapeadas";
+            
+            let cCat = CAT_CORES_MAP[Object.keys(CAT_CORES_MAP).find(k=>det.tema.toLowerCase().includes(k.toLowerCase()))] || "#64748B";
             const seloTipo = det.ehTransversal 
                 ? `<span class="ml-auto text-[9px] bg-amber-100 text-amber-800 border border-amber-300 px-2 py-0.5 rounded-md font-bold uppercase tracking-wider">Temas Transversais</span>`
                 : `<span class="ml-auto text-[9px] bg-slate-100 text-slate-600 border border-slate-200 px-2 py-0.5 rounded-md font-bold uppercase tracking-wider">Tema Específico</span>`;
 
-            document.getElementById("painel-body").innerHTML = `
-                <div class="mb-3">
-                    <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-1">Eixo atual de navegação:</span>
-                    <p class="text-xs font-semibold text-slate-800">${det.eixoOrigem}</p>
-                </div>
-                <div class="p-3.5 bg-slate-50 border border-slate-100 rounded-xl text-xs font-medium text-slate-600 leading-relaxed mb-4">${det.texto}</div>
-                <div class="flex items-center gap-2 p-2.5 border border-slate-100 rounded-xl bg-white text-xs mb-3 font-medium text-slate-600">
-                    <span class="w-2.5 h-2.5 rounded-full" style="background:${cCat}"></span><span>Tema: ${det.tema}</span>
-                    ${seloTipo}
-                </div>
-            `;
+            const pBody = document.getElementById("painel-body");
+            if(pBody) {
+                pBody.innerHTML = `
+                    <div class="mb-3">
+                        <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-1">Eixo atual de navegação:</span>
+                        <p class="text-xs font-semibold text-slate-800">${det.eixoOrigem}</p>
+                    </div>
+                    <div class="p-3.5 bg-slate-50 border border-slate-100 rounded-xl text-xs font-medium text-slate-600 leading-relaxed mb-4">${det.texto}</div>
+                    <div class="flex items-center gap-2 p-2.5 border border-slate-100 rounded-xl bg-white text-xs mb-3 font-medium text-slate-600">
+                        <span class="w-2.5 h-2.5 rounded-full" style="background:${cCat}"></span><span>Tema: ${det.tema}</span>
+                        ${seloTipo}
+                    </div>
+                `;
+            }
         }
-        document.getElementById("painel").classList.add("open"); document.getElementById("net").style.right = "460px";
+        
+        const elPainel = document.getElementById("painel");
+        const elNet = document.getElementById("net");
+        if(elPainel) elPainel.classList.add("open"); 
+        if(elNet) elNet.style.right = "460px";
     });
 
     setTimeout(() => {
@@ -1067,10 +1122,13 @@ function mudarAba(aba) {
         if(btn1) btn1.className = "px-4 py-1.5 rounded-md text-xs font-semibold transition-all bg-white text-slate-800 shadow-sm";
         if(btn2) btn2.className = "px-4 py-1.5 rounded-md text-xs font-semibold transition-all text-slate-500 hover:text-slate-800";
         if(ctrl1) ctrl1.classList.remove("hidden"); 
-        if(ctrl2) ctrl2.classList.add("hidden");
+        if(ctrl2) { ctrl2.classList.add("hidden"); ctrl2.classList.remove("flex"); }
         if(legenda) legenda.classList.add("hidden"); 
-        document.getElementById("main-title").textContent = "Árvore Diagnóstica de Problemas";
-        document.getElementById("main-subtitle").textContent = "Volumetria proporcional e conexões transversais unificadas";
+        
+        const mTit = document.getElementById("main-title");
+        const mSub = document.getElementById("main-subtitle");
+        if(mTit) mTit.textContent = "Árvore Diagnóstica de Problemas";
+        if(mSub) mSub.textContent = "Volumetria proporcional e conexões transversais unificadas";
         renderizarEstruturaRadial();
     } else {
         if(btn2) btn2.className = "px-4 py-1.5 rounded-md text-xs font-semibold transition-all bg-white text-slate-800 shadow-sm";
@@ -1078,15 +1136,21 @@ function mudarAba(aba) {
         if(ctrl2) { ctrl2.classList.remove("hidden"); ctrl2.classList.add("flex"); }
         if(ctrl1) ctrl1.classList.add("hidden");
         if(legenda) legenda.classList.remove("hidden"); 
-        document.getElementById("main-title").textContent = "Árvore Detalhada";
-        document.getElementById("main-subtitle").textContent = "Desdobramento por Problema Macro ➔ Eixo ➔ Causa 1ª ➔ 2ª ➔ 3ª";
+        
+        const mTit = document.getElementById("main-title");
+        const mSub = document.getElementById("main-subtitle");
+        if(mTit) mTit.textContent = "Árvore Detalhada";
+        if(mSub) mSub.textContent = "Desdobramento por Problema Macro ➔ Eixo ➔ Causa 1ª ➔ 2ª ➔ 3ª";
         rebuildCombosETemasAba2();
         renderizarEstruturaHierarquica();
     }
 }
 
 function fecharPainel() {
-    document.getElementById("painel").classList.remove("open"); document.getElementById("net").style.right = "0";
+    const elPainel = document.getElementById("painel");
+    const elNet = document.getElementById("net");
+    if(elPainel) elPainel.classList.remove("open"); 
+    if(elNet) elNet.style.right = "0";
     if(currentTab === "radial" && selectedCategoryRadial) {
         resetarFiltroTeiaRadial();
     }
