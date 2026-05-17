@@ -510,11 +510,6 @@ function processarDadosAba1() {
     G_aba1.originalEdges = [...G_aba1.edges];
 }
 
-function renderizarStructureRadial() {
-    // Mantida retrocompatibilidade por segurança
-    renderizarEstruturaRadial();
-}
-
 function renderizarEstruturaRadial() {
     fecharPainel();
     selectedCategoryRadial = null;
@@ -618,7 +613,7 @@ function aoClicarNoNodeRadial(id) {
     document.getElementById("p-cor").style.background = det.cor;
 
     if (det.tipo === "eixo") {
-        document.getElementById("p-titulo").textContent = det.titulo;
+        document.getElementById("p-titulo").textContent = det.titulo; // Nome Completo do Eixo
         document.getElementById("p-sub").textContent = det.subtitulo;
         document.getElementById("painel-body").innerHTML = `
             <div class="mb-4">
@@ -641,13 +636,20 @@ function aoClicarNoNodeRadial(id) {
                     <div class="flex flex-col gap-2">
             `;
             causasPrioritarias.forEach(c => {
-                const badges = c.eixos.map(ex => `<span class="inline-block px-2 py-0.5 text-[9px] font-bold bg-slate-100 text-slate-600 rounded-md border border-slate-200/40">${ex}</span>`).join(' ');
+                // Nome Completo do Eixo nos Badges Laterais Direitos
+                const badges = c.eixos.map(ex => {
+                    const nomeComp = MAPA_EIXOS_COMPLETO[ex] || ex;
+                    return `<span class="inline-block px-2 py-0.5 text-[9px] font-bold bg-slate-100 text-slate-600 rounded-md border border-slate-200/40" title="${nomeComp}">${nomeComp}</span>`;
+                }).join(' ');
+                
                 html += `
                     <div class="p-3 bg-gradient-to-r from-amber-50/40 to-white border border-amber-150 rounded-xl shadow-sm text-xs">
                         <div class="font-medium text-slate-700 mb-2 leading-relaxed">${c.texto}</div>
-                        <div class="flex items-center gap-1.5 mt-1">
-                            <span class="text-amber-600 font-bold text-[10px] bg-amber-100/70 px-1.5 py-0.5 rounded">⭐ ${c.votos} estrelas</span>
-                            ${badges}
+                        <div class="flex flex-col gap-1.5 mt-1">
+                            <div class="flex items-center gap-1.5">
+                                <span class="text-amber-600 font-bold text-[10px] bg-amber-100/70 px-1.5 py-0.5 rounded">⭐ ${c.votos} estrelas</span>
+                            </div>
+                            <div class="flex flex-wrap gap-1">${badges}</div>
                         </div>
                     </div>`;
             });
@@ -661,11 +663,16 @@ function aoClicarNoNodeRadial(id) {
                     <div class="flex flex-col gap-1.5">
             `;
             causasNormais.forEach(c => {
-                const badges = c.eixos.map(ex => `<span class="inline-block px-1.5 py-0.5 text-[8px] font-semibold bg-slate-50 text-slate-500 rounded">${ex}</span>`).join(' ');
+                // Nome Completo do Eixo nos Badges Laterais Direitos
+                const badges = c.eixos.map(ex => {
+                    const nomeComp = MAPA_EIXOS_COMPLETO[ex] || ex;
+                    return `<span class="inline-block px-1.5 py-0.5 text-[8px] font-semibold bg-slate-50 text-slate-500 rounded border border-slate-150" title="${nomeComp}">${nomeComp}</span>`;
+                }).join(' ');
+                
                 html += `
                     <div class="p-3 bg-white border border-slate-100 rounded-xl text-xs">
                         <div class="font-medium text-slate-600 leading-relaxed">${c.texto}</div>
-                        <div class="flex gap-1 mt-2">${badges}</div>
+                        <div class="flex flex-wrap gap-1 mt-2">${badges}</div>
                     </div>`;
             });
             html += `</div></div>`;
@@ -675,44 +682,70 @@ function aoClicarNoNodeRadial(id) {
     document.getElementById("painel").classList.add("open"); document.getElementById("net").style.right = "460px";
 }
 
-// CORREÇÃO DA EMISSÃO DA LISTA LATERAL (Mapeamento Direto por Temas Existentes na Estrutura Geral)
+// ORGANIZAÇÃO "ESTADO DA ARTE" DA LATERAL ESQUERDA (Separado em Transversais e Específicos Ordenados do Maior para o Menor)
 function buildSidebarRadialAba1() {
     const listContainer = document.getElementById("sidebar-list");
     listContainer.innerHTML = "";
     
-    const div = document.createElement("div");
-    div.className = "space-y-1";
-    div.innerHTML = `<p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider px-2 mb-2">Selecione um Tema da Matriz</p>`;
-    
-    // Coleta dinamicamente todas as categorias geradas do CSV
-    const todasCategoriasReais = [];
+    const transversais = [];
+    const especificos = [];
+
     G_aba1.nodes.forEach(n => {
         if (n.id.startsWith("__cat__")) {
-            todasCategoriasReais.push(n.id.replace("__cat__", ""));
+            const catNome = n.id.replace("__cat__", "");
+            const det = G_aba1.details[n.id];
+            if (det) {
+                if (det.ehTransversal) transversais.push(det);
+                else especificos.push(det);
+            }
         }
     });
 
-    // Ordena alfabeticamente para melhor visualização
-    todasCategoriasReais.sort().forEach(cat => {
-        const catId = `__cat__${cat}`;
-        const det = G_aba1.details[catId];
-        if(!det) return;
+    // Ordenação do maior para o menor (volumeCausas)
+    transversais.sort((a, b) => b.volumeCausas - a.volumeCausas);
+    especificos.sort((a, b) => b.volumeCausas - a.volumeCausas);
 
-        const btn = document.createElement("button");
-        btn.className = `btn-sidebar-item ${selectedCategoryRadial === cat ? 'active' : ''}`;
-        btn.onclick = () => {
-            if(selectedCategoryRadial === cat) resetarFiltroTeiaRadial();
-            else filtrarTeiaPorCategoria(cat);
-        };
+    // Bloco 1: Temas Transversais
+    if (transversais.length > 0) {
+        const divTransv = document.createElement("div");
+        divTransv.className = "mb-4 space-y-1";
+        divTransv.innerHTML = `<p class="text-[10px] font-bold text-blue-600 uppercase tracking-wider px-2 mb-2 flex items-center gap-1"><span>✦</span> Grupo de Temas Transversais</p>`;
+        
+        transversais.forEach(det => {
+            const btn = criarBotaoItemSidebar(det);
+            divTransv.appendChild(btn);
+        });
+        listContainer.appendChild(divTransv);
+    }
 
-        btn.innerHTML = `
-            <span class="w-2.5 h-2.5 rounded-full mt-1 flex-shrink-0" style="background:${det.cor}"></span>
-            <span class="btn-sidebar-text">${cat}</span>
-            <span class="text-[9px] font-bold text-slate-400 bg-slate-100 px-1.5 py-0.5 rounded ml-auto">${det.volumeCausas}</span>
-        `;
-        div.appendChild(btn);
-    });
-    listContainer.appendChild(div);
+    // Bloco 2: Causas Específicas
+    if (especificos.length > 0) {
+        const divEspec = document.createElement("div");
+        divEspec.className = "space-y-1";
+        divEspec.innerHTML = `<p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider px-2 mb-2 flex items-center gap-1"><span>📂</span> Causas Específicas</p>`;
+        
+        especificos.forEach(det => {
+            const btn = criarBotaoItemSidebar(det);
+            divEspec.appendChild(btn);
+        });
+        listContainer.appendChild(divEspec);
+    }
+}
+
+function criarBotaoItemSidebar(det) {
+    const btn = document.createElement("button");
+    btn.className = `btn-sidebar-item ${selectedCategoryRadial === det.cat ? 'active' : ''}`;
+    btn.onclick = () => {
+        if(selectedCategoryRadial === det.cat) resetarFiltroTeiaRadial();
+        else filtrarTeiaPorCategoria(det.cat);
+    };
+
+    btn.innerHTML = `
+        <span class="w-2.5 h-2.5 rounded-full mt-1 flex-shrink-0" style="background:${det.cor}"></span>
+        <span class="btn-sidebar-text">${det.cat}</span>
+        <span class="text-[9px] font-bold text-slate-400 bg-slate-100 px-1.5 py-0.5 rounded ml-auto">${det.volumeCausas}</span>
+    `;
+    return btn;
 }
 
 function buildSidebarHierarquicaAba2(listTemasAtivos) {
@@ -725,7 +758,7 @@ function buildSidebarHierarquicaAba2(listTemasAtivos) {
     
     const filtroTemaAtivo = document.getElementById("select-tema-transversal").value;
 
-    Object.keys(listTemasAtivos).forEach(cat => {
+    Object.keys(listTemasAtivos).sort((a,b) => listTemasAtivos[b] - listTemasAtivos[a]).forEach(cat => {
         let cor = CAT_CORES_MAP[Object.keys(CAT_CORES_MAP).find(k => cat.toLowerCase().includes(k.toLowerCase()))] || "#64748B";
         const btn = document.createElement("button");
         btn.className = `btn-sidebar-item ${filtroTemaAtivo === cat ? 'active' : ''}`;
@@ -965,7 +998,7 @@ function renderizarEstruturaHierarquica() {
         document.getElementById("p-cor").style.background = det.cor || "#64748B";
 
         if(det.tipo === "eixo") {
-            document.getElementById("p-titulo").textContent = det.titulo;
+            document.getElementById("p-titulo").textContent = det.titulo; // Nome completo do Eixo no Menu Direito
             document.getElementById("p-sub").textContent = "Métricas Consolidadas do Eixo";
             document.getElementById("painel-body").innerHTML = `
                 <div class="mb-4">
@@ -1003,14 +1036,15 @@ function renderizarEstruturaHierarquica() {
                     </div>
                    </div>`;
 
+            // Exibição do nome completo do Eixo no contexto do menu direito
             document.getElementById("painel-body").innerHTML = `
                 <div class="mb-3">
-                    <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-1">Eixo atual de navegação:</span>
-                    <p class="text-xs font-semibold text-slate-800">${det.eixoOrigem}</p>
+                    <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-1">Eixo de Origem:</span>
+                    <p class="text-xs font-semibold text-slate-800 bg-slate-50 border border-slate-150 p-2.5 rounded-xl">${det.eixoOrigem}</p>
                 </div>
-                <div class="p-3.5 bg-slate-50 border border-slate-100 rounded-xl text-xs font-medium text-slate-600 leading-relaxed mb-4">${det.texto}</div>
+                <div class="p-3.5 bg-white border border-slate-150 rounded-xl text-xs font-medium text-slate-600 leading-relaxed mb-4 shadow-sm">${det.texto}</div>
                 ${blocoVotos}
-                <div class="flex items-center gap-2 p-2.5 border border-slate-100 rounded-xl bg-white text-xs font-medium text-slate-600">
+                <div class="flex items-center gap-2 p-2.5 border border-slate-100 rounded-xl bg-white text-xs font-medium text-slate-600 shadow-sm">
                     <span class="w-2.5 h-2.5 rounded-full" style="background:${cCat}"></span><span>Tema: ${det.tema}</span>
                     ${seloTipo}
                 </div>
