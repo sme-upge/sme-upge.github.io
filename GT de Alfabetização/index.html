@@ -182,30 +182,32 @@ const CAT_CORES_MAP = {
   "Excesso": "#22C55E", "Inadequação": "#F97316", "Qualificação": "#84CC16"
 };
 
+// Configuração elástica e fluida constante para a Aba 1
 const FISICA_RADIAL_CONFIG = {
     enabled: true,
     solver: "barnesHut",
     barnesHut: { 
-        gravitationalConstant: -22000, 
-        centralGravity: 0.12, 
-        springLength: 140, 
-        springConstant: 0.05,
-        damping: 0.14
+        gravitationalConstant: -18000, 
+        centralGravity: 0.15, 
+        springLength: 130, 
+        springConstant: 0.04,
+        damping: 0.25
     },
-    stabilization: { enabled: true, iterations: 150, updateInterval: 25 }
+    stabilization: { enabled: true, iterations: 100, updateInterval: 25 }
 };
 
+// Configuração elástica e fluida constante para a Aba 2
 const FISICA_HIERARQUICA_CONFIG = {
     enabled: true,
     solver: "barnesHut",
     barnesHut: { 
-        gravitationalConstant: -14000, 
-        centralGravity: 0.08, 
-        springLength: 90, 
+        gravitationalConstant: -10000, 
+        centralGravity: 0.18, 
+        springLength: 85, 
         springConstant: 0.04,
-        damping: 0.16
+        damping: 0.25
     },
-    stabilization: { enabled: true, iterations: 120, updateInterval: 25 }
+    stabilization: { enabled: true, iterations: 100, updateInterval: 25 }
 };
 
 let currentTab = "radial"; 
@@ -244,9 +246,9 @@ async function inicializar() {
         const mapaTemaParaEixos = {}; 
 
         rawRows.forEach(r => {
-            if (!r || r.length < 3) return; // Proteção adicional para linhas corrompidas
+            if (!r || r.length < 3) return; 
             const [eixoCompleto, , cp, cat_p, cs, cat_s, votos, ct, cat_t] = r;
-            if(!eixoCompleto || eixoCompleto.trim() === "") return; // Validação do Eixo para evitar o erro do split
+            if(!eixoCompleto || eixoCompleto.trim() === "") return; 
             
             const sigla = eixoCompleto.split(" - ")[0];
             const vNum = parseInt(votos) || 0;
@@ -315,7 +317,7 @@ function parseCSV(text) {
         }
         cols.push(curr.trim());
         return cols;
-    }).filter(row => row.length > 0 && row[0] !== ""); // Ignora linhas em branco geradas no split
+    }).filter(row => row.length > 0 && row[0] !== ""); 
 }
 
 function construirCheckboxEixos() {
@@ -520,8 +522,9 @@ function renderizarEstruturaRadial() {
         interaction: { hover: true, dragNodes: true }
     });
     
+    // Deixamos a física habilitada constantemente para manter a tremidinha sutil
     networkInstance.on("stabilizationIterationsDone", function () {
-        networkInstance.setOptions({ physics: { enabled: false } });
+        networkInstance.setOptions({ physics: { enabled: true } });
     });
 
     networkInstance.on("click", p => {
@@ -896,8 +899,9 @@ function renderizarEstruturaHierarquica() {
         interaction: { hover: true, dragNodes: true }
     });
     
+    // Deixamos a física habilitada constantemente também na Aba 2 para a tremidinha fluida
     networkInstance.on("stabilizationIterationsDone", function () {
-        networkInstance.setOptions({ physics: { enabled: false } });
+        networkInstance.setOptions({ physics: { enabled: true } });
     });
 
     networkInstance.off("click"); 
@@ -940,6 +944,7 @@ function renderizarEstruturaHierarquica() {
                 ? `<span class="ml-auto text-[9px] bg-amber-100 text-amber-800 border border-amber-300 px-2 py-0.5 rounded-md font-bold uppercase tracking-wider">Teia Transversal</span>`
                 : `<span class="ml-auto text-[9px] bg-slate-100 text-slate-600 border border-slate-200 px-2 py-0.5 rounded-md font-bold uppercase tracking-wider">Tema Específico</span>`;
 
+            // Bloco "Conectado aos Eixos" removido daqui por completo
             document.getElementById("painel-body").innerHTML = `
                 <div class="mb-3">
                     <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-1">Eixo atual de navegação:</span>
@@ -949,12 +954,6 @@ function renderizarEstruturaHierarquica() {
                 <div class="flex items-center gap-2 p-2.5 border border-slate-100 rounded-xl bg-white text-xs mb-3 font-medium text-slate-600">
                     <span class="w-2.5 h-2.5 rounded-full" style="background:${cCat}"></span><span>Tema: ${det.tema}</span>
                     ${seloTipo}
-                </div>
-                <div class="bg-slate-50 p-3 rounded-xl border border-slate-100 mt-2">
-                     <p class="text-[10px] font-bold text-slate-400 uppercase mb-1.5">Conectado aos Eixos:</p>
-                     <div class="flex flex-wrap gap-1">
-                         ${det.eixos.map(ex => `<span class="px-1.5 py-0.5 text-[9px] font-bold text-white rounded" style="background:${EIXO_CORES[ex]}">${ex}</span>`).join("")}
-                     </div>
                 </div>
             `;
         }
