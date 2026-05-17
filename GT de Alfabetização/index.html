@@ -55,7 +55,7 @@ input:checked + .slider:before {transform:translateX(14px)}
       <p class="text-[12px] text-slate-400 mt-0.5 font-medium">GT Alfabetização · SME-SP</p>
     </div>
     <button onclick="limparTodosOsFiltros()" class="px-2.5 py-1 text-[10px] font-bold text-slate-500 hover:text-red-600 bg-slate-100 hover:bg-red-50 rounded-md transition-all flex items-center gap-1 border border-slate-200/60">
-      ✨ Limpar filtros
+      ✨ Limpar
     </button>
   </div>
   
@@ -89,14 +89,10 @@ input:checked + .slider:before {transform:translateX(14px)}
     <div class="flex flex-col gap-1 w-full border-b border-slate-50 pb-2">
       <span class="text-[10px] font-bold text-amber-600 uppercase tracking-wider">Priorizações (Filtro)</span>
       <select id="select-votos-hierarquica" class="bg-white border border-slate-200 rounded-lg p-1 text-xs font-medium text-slate-700 focus:outline-none" onchange="renderizarEstruturaHierarquica()">
-        <option value="0">Selecionar tudo</option>
-        <option value="1">1 estrela </option>
-         <option value="2">2 estrelas (2⭐ )</option>
-        <option value="3">3 estrelas (3⭐)</option>  
-       <option value="4">4 estrelas (4⭐)</option>      
-        <option value="5">5 estrelas (5⭐)</option>
-        <option value="6">6 estrelas (5⭐)</option>
-        <option value="7">7 estrelas (5⭐)</option>     
+        <option value="0">Todas as Evidências</option>
+        <option value="1">Apenas Priorizadas (Estrelas)</option>
+        <option value="4">Alta Prioridade (4+ 🔥)</option>
+        <option value="6">Prioridade Máxima (6 🔥)</option>
       </select>
     </div>
 
@@ -186,7 +182,6 @@ const CAT_CORES_MAP = {
   "Excesso": "#22C55E", "Inadequação": "#F97316", "Qualificação": "#84CC16"
 };
 
-// CONFIGURAÇÃO DOS EFEITOS DINÂMICOS (BIG BANG FORTE NO SPAWN + COMPRIMENTO E RETRAÇÃO ELÁSTICA COESOS)
 const FISICA_RADIAL_CONFIG = {
     enabled: true,
     solver: "barnesHut",
@@ -227,6 +222,16 @@ let globalTextoParaEixos = {};
 let globalTextoParaVotos = {}; 
 
 const CSV_URL = "https://raw.githubusercontent.com/sme-upge/sme-upge.github.io/refs/heads/main/GT%20de%20Alfabetiza%C3%A7%C3%A3o/arvore.csv";
+
+// FUNÇÃO DE HASH ROBUSTA (Substitui o btoa que quebrava com acentuação brasileira)
+function gerarHashSeguro(str) {
+    let hash = 2166136261;
+    for (let i = 0; i < str.length; i++) {
+        hash ^= str.charCodeAt(i);
+        hash += (hash << 1) + (hash << 4) + (hash << 7) + (hash << 8) + (hash << 24);
+    }
+    return (hash >>> 0).toString(16);
+}
 
 async function inicializar() {
     try {
@@ -369,7 +374,6 @@ function rebuildCombosETemasAba2() {
                     const cNom = cat.trim();
                     const eixosReaisCausa = Array.from(globalTextoParaEixos[txt.trim()] || []);
                     
-                    // FILTRO DE INTERSEÇÃO: Se múltiplos eixos estiverem ativos, limpa causas que não participam das conexões vigentes
                     if (eixosSelecionados.length > 1 && eixosReaisCausa.length === 1) return;
 
                     if(!listTemasFiltrados[cNom]) listTemasFiltrados[cNom] = 0;
@@ -643,7 +647,7 @@ function aoClicarNoNodeRadial(id) {
         if(causasPrioritarias.length > 0) {
             html += `
                 <div class="mb-4">
-                    <span class="text-[10px] font-bold text-amber-700 uppercase tracking-wider bg-amber-50 border border-amber-200/60 px-2 py-1 rounded-md block mb-2"> ⭐ Priorizações dos Eixos</span>
+                    <span class="text-[10px] font-bold text-amber-700 uppercase tracking-wider bg-amber-50 border border-amber-200/60 px-2 py-1 rounded-md block mb-2">🔥 Priorizações de Rede</span>
                     <div class="flex flex-col gap-2">
             `;
             causasPrioritarias.forEach(c => {
@@ -705,8 +709,8 @@ function buildSidebarRadialAba1() {
             list.appendChild(b);
         });
     };
-    renderGrupo("Tmas Transversais", "text-blue-600", sortedCats.filter(c=>c.ehTransversal));
-    renderGrupo("Causas Específica por Eixo", "text-slate-400", sortedCats.filter(c=>!c.ehTransversal));
+    renderGrupo("📌 Temas Transversais", "text-blue-600", sortedCats.filter(c=>c.ehTransversal));
+    renderGrupo("🔒 Dores Específicas", "text-slate-400", sortedCats.filter(c=>!c.ehTransversal));
 }
 
 function renderizarEstruturaHierarquica() {
@@ -777,7 +781,6 @@ function renderizarEstruturaHierarquica() {
         const sTxt = cs ? cs.trim() : "";
         const tTxt = ct ? ct.trim() : "";
 
-        // PROTEÇÃO DE INTERSEÇÃO: Descarta causas exclusivas de um único eixo se houver mais de um eixo marcado
         if (eixosSelecionados.length > 1) {
             if (pTxt !== "" && (!globalTextoParaEixos[pTxt] || globalTextoParaEixos[pTxt].size === 1)) return;
             if (sTxt !== "" && (!globalTextoParaEixos[sTxt] || globalTextoParaEixos[sTxt].size === 1)) return;
@@ -817,8 +820,11 @@ function renderizarEstruturaHierarquica() {
             }
 
             const txt = texto.trim();
-            const hashTexto = btoa(unescape(encodeURIComponent(txt))).replace(/=/g, "").slice(0, 24);
+            
+            // CORREÇÃO CRUCIAL: Utilizando hash numérico seguro no lugar do btoa
+            const hashTexto = gerarHashSeguro(txt);
             const noId = `H2_N_C${camadaLabel}_${hashTexto}`;
+            
             const eixosReaisDaCausa = Array.from(globalTextoParaEixos[txt] || [siglaEixo]);
             const ehTransversal = (eixosReaisDaCausa.length >= 2) || (G_aba1.details[`__cat__${categoriaReal}`]?.ehTransversal || false);
 
@@ -941,7 +947,6 @@ function renderizarEstruturaHierarquica() {
             document.getElementById("p-sub").textContent = "Evidência Qualitativa Mapeada";
             let cCat = CAT_CORES_MAP[Object.keys(CAT_CORES_MAP).find(k=>det.tema.toLowerCase().includes(k.toLowerCase()))] || "#64748B";
             
-            // TAG DINÂMICA DE TRANVERSALIDADE EXIBIDA DIRETAMENTE NOS DETALHES
             const seloTipo = det.ehTransversal 
                 ? `<span class="ml-auto text-[9px] bg-amber-100 text-amber-800 border border-amber-300 px-2 py-0.5 rounded-md font-bold uppercase tracking-wider">Teia Transversal</span>`
                 : `<span class="ml-auto text-[9px] bg-slate-100 text-slate-600 border border-slate-200 px-2 py-0.5 rounded-md font-bold uppercase tracking-wider">Tema Específico</span>`;
