@@ -120,7 +120,7 @@ input:checked + .slider:before {transform:translateX(14px)}
     <div class="flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-[#EF4444]"></span><span>Problema Macro</span></div>
     <div class="flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-[#6366F1]"></span><span>Eixos Estruturantes</span></div>
     <div class="flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-[#38BDF8]"></span><span>Causa Primária</span></div>
-    <div class="flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-[#34D399]"></span><span>Causa Secundária (Alvo de Votos)</span></div>
+    <div class="flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-[#34D399]"></span><span>Causa Secundária</span></div>
     <div class="flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-[#FBBF24]"></span><span>Causa Terciária</span></div>
   </div>
 
@@ -619,7 +619,7 @@ function aoClicarNoNodeRadial(id) {
                 const badges = c.eixos.map(ex => `<span class="inline-block px-2 py-0.5 text-[9px] font-bold text-white rounded mr-1" style="background:${EIXO_CORES[ex]}">${MAPA_EIXOS_COMPLETO[ex] || ex}</span>`).join("");
                 html += `
                     <div class="p-3 border border-amber-200 bg-amber-50/30 rounded-xl text-xs">
-                        <div class="mb-1.5 flex items-center justify-between">${badges} <span class="text-[9px] font-bold bg-amber-100 text-amber-800 px-1.5 py-0.5 rounded">⭐ Prioritário: ${c.votos}v</span></div>
+                        <div class="mb-1.5 flex items-center justify-between">${badges} <span class="text-[9px] font-bold bg-amber-100 text-amber-800 px-1.5 py-0.5 rounded">⭐ Priorizações: ${c.votos}v</span></div>
                         <p class="text-slate-700 font-semibold leading-relaxed">${c.texto}</p>
                     </div>`;
             });
@@ -661,7 +661,7 @@ function buildSidebarRadialAba1() {
             b.innerHTML = `
                 <span class="w-2 h-2 rounded-full mt-1.5 flex-shrink-0" style="background:${item.cor}"></span>
                 <span class="btn-sidebar-text">${item.cat}</span>
-                <span class="text-[10px] font-bold text-slate-400 mt-0.5 flex-shrink-0 whitespace-nowrap">${item.volumeCausas} causas</span>`;
+                <span class="text-[10px] font-bold text-slate-400 mt-0.5 flex-shrink-0 whitespace-nowrap">${item.volumeCausas} causa(s)</span>`;
             b.onclick = (e) => {
                 e.stopPropagation();
                 filtrarTeiaPorCategoria(item.cat);
