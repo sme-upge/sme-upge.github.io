@@ -68,7 +68,7 @@ input:checked + .slider:before {transform:translateX(14px)}
       </div>
       <div class="bg-white border border-slate-200/60 p-1.5 rounded-lg">
         <span id="stat-total-transversais" class="block text-xs font-bold text-blue-600">-</span>
-        <span class="text-[8px] text-slate-400 font-medium block leading-tight">Temas Transv.</span>
+        <span class="text-[8px] text-slate-400 font-medium block leading-tight">Temas relacionados</span>
       </div>
       <div class="bg-white border border-slate-200/60 p-1.5 rounded-lg">
         <span id="stat-total-priorizados" class="block text-xs font-bold text-amber-600">-</span>
@@ -604,7 +604,7 @@ function aoClicarNoNodeRadial(id) {
             </div>`;
     } else {
         document.getElementById("p-titulo").textContent = det.cat;
-        document.getElementById("p-sub").textContent = `${det.volumeCausas} causas mapeadas sob este tema`;
+        document.getElementById("p-sub").textContent = `${det.volumeCausas} causa(s) mapeadas sob este tema`;
         
         let html = '';
         const causasPrioritarias = det.causas.filter(c => c.votos > 0).sort((a,b)=>b.votos - a.votos);
@@ -904,12 +904,12 @@ function renderizarEstruturaHierarquica() {
                 ? `<div class="mb-4 bg-amber-50 border border-amber-200 text-amber-900 rounded-xl p-3 flex items-center gap-2 text-xs">
                     <span class="text-base">⭐</span>
                     <div>
-                        <p class="font-bold">Causas Priorizadas pelos Eixos</p>
+                        <p class="font-bold">Causa(s) Priorizadas pelos Eixos</p>
                         <p class="text-[11px] text-amber-800 font-medium">Esta causa recebeu <strong>${det.votos} estrelas</strong> no processo de votação.</p>
                     </div>
                    </div>`
                 : `<div class="mb-4 bg-slate-50 border border-slate-150 text-slate-600 rounded-xl p-3 flex items-center gap-2 text-xs">
-                    <span class="text-base text-slate-400">❓</span>
+                    <span class="text-base text-slate-400"> </span>
                     <div>
                         <p class="font-semibold text-slate-700">Priorizações</p>
                         <p class="text-[11px] text-slate-500">${det.camada === "Secundária" ? "Esta causa não recebeu estrelas de priorização." : "Este nível não passou por votação direta de estrelas."}</p>
@@ -988,7 +988,7 @@ function buildSidebarHierarquicaAba2(listaTemasFiltrados) {
         b.innerHTML = `
             <span class="w-2 h-2 rounded-full mt-1.5 flex-shrink-0" style="background:${cor}"></span>
             <span class="btn-sidebar-text">${tema}</span>
-            <span class="text-[10px] font-bold text-slate-400 mt-0.5 flex-shrink-0 whitespace-nowrap">${fonteDados[tema]} dores</span>`;
+            <span class="text-[10px] font-bold text-slate-400 mt-0.5 flex-shrink-0 whitespace-nowrap">${fonteDados[tema]} causa(s)</span>`;
         b.onclick = (e) => {
             e.stopPropagation();
             const combo = document.getElementById("select-tema-transversal");
@@ -1011,7 +1011,7 @@ function mudarAba(aba) {
         ctrl1.classList.remove("hidden"); ctrl2.classList.add("hidden");
         legenda.classList.add("hidden"); 
         document.getElementById("main-title").textContent = "Árvore Diagnóstica de Problemas";
-        document.getElementById("main-subtitle").textContent = "Volumetria proporcional e conexões transversais unificadas";
+        document.getElementById("main-subtitle").textContent = "Número de eixos com causas convergentes";
         buildSidebarRadialAba1();
         renderizarEstruturaRadial();
     } else {
