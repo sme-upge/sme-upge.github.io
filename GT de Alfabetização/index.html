@@ -51,7 +51,7 @@ input:checked + .slider:before {transform:translateX(14px)}
 <div id="sidebar">
   <div class="px-5 pt-5 pb-3 border-b border-slate-100 flex-shrink-0 flex items-center justify-between">
     <div>
-      <p class="text-[10px] font-bold uppercase tracking-widest text-blue-600">Matriz Diagnóstica</p>
+      <p class="text-[10px] font-bold uppercase tracking-widest text-blue-600">Árvore de Problemas</p>
       <p class="text-[12px] text-slate-400 mt-0.5 font-medium">GT Alfabetização · SME-SP</p>
     </div>
     <button onclick="limparTodosOsFiltros()" class="px-2.5 py-1 text-[10px] font-bold text-slate-500 hover:text-red-600 bg-slate-100 hover:bg-red-50 rounded-md transition-all flex items-center gap-1 border border-slate-200/60">
@@ -60,7 +60,7 @@ input:checked + .slider:before {transform:translateX(14px)}
   </div>
   
   <div class="px-5 py-3 border-b border-slate-100 bg-slate-50/50 flex flex-col gap-1.5 flex-shrink-0">
-    <p class="text-[9px] font-bold text-slate-400 uppercase tracking-wider">Consolidado Geral de Rede</p>
+    <p class="text-[9px] font-bold text-slate-400 uppercase tracking-wider">Consolidado Geral dos Eixos</p>
     <div class="grid grid-cols-3 gap-1 text-center">
       <div class="bg-white border border-slate-200/60 p-1.5 rounded-lg">
         <span id="stat-total-evidencias" class="block text-xs font-bold text-slate-700">-</span>
@@ -68,7 +68,7 @@ input:checked + .slider:before {transform:translateX(14px)}
       </div>
       <div class="bg-white border border-slate-200/60 p-1.5 rounded-lg">
         <span id="stat-total-transversais" class="block text-xs font-bold text-blue-600">-</span>
-        <span class="text-[8px] text-slate-400 font-medium block leading-tight">Temas Transv.</span>
+        <span class="text-[8px] text-slate-400 font-medium block leading-tight">Temas</span>
       </div>
       <div class="bg-white border border-slate-200/60 p-1.5 rounded-lg">
         <span id="stat-total-priorizados" class="block text-xs font-bold text-amber-600">-</span>
@@ -89,10 +89,10 @@ input:checked + .slider:before {transform:translateX(14px)}
     <div class="flex flex-col gap-1 w-full border-b border-slate-50 pb-2">
       <span class="text-[10px] font-bold text-amber-600 uppercase tracking-wider">Priorizações (Filtro)</span>
       <select id="select-votos-hierarquica" class="bg-white border border-slate-200 rounded-lg p-1 text-xs font-medium text-slate-700 focus:outline-none" onchange="renderizarEstruturaHierarquica()">
-        <option value="0">Selecionar todos</option>
-        <option value="1">⭐ 1 estrela (Estrelas)</option>
-        <option value="4">⭐ 4+ estrelas</option>
-        <option value="6">⭐ 6+ estrelas</option>
+        <option value="0">Selecionar todas as causas</option>
+        <option value="1">⭐ 1 estrela(s)</option>
+        <option value="4">⭐ 4+ estrela(s)</option>
+        <option value="6">⭐ 6+ estrela(s)</option>
       </select>
     </div>
 
@@ -702,7 +702,7 @@ function buildSidebarRadialAba1() {
             list.appendChild(b);
         });
     };
-    renderGrupo("Temas Transversais", "text-blue-600", sortedCats.filter(c=>c.ehTransversal));
+    renderGrupo("Temas - Causas Convergentes", "text-blue-600", sortedCats.filter(c=>c.ehTransversal));
     renderGrupo("Causas Específicas dos Eixos", "text-slate-400", sortedCats.filter(c=>!c.ehTransversal));
 }
 
@@ -919,7 +919,7 @@ function renderizarEstruturaHierarquica() {
 
         if(det.tipo === "eixo") {
             document.getElementById("p-titulo").textContent = det.titulo;
-            document.getElementById("p-sub").textContent = "Métricas Consolidadas do Eixo";
+            document.getElementById("p-sub").textContent = "Síntese do Eixo";
             document.getElementById("painel-body").innerHTML = `
                 <div class="mb-4">
                     <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-1">Problema Central do Eixo:</span>
@@ -929,7 +929,7 @@ function renderizarEstruturaHierarquica() {
                     <div class="p-3 bg-white border border-slate-100 rounded-xl shadow-sm"><span class="text-slate-400 block text-[10px]">Causas Primárias</span><span class="text-sm font-bold text-slate-700">${det.dados.totalP} causas</span></div>
                     <div class="p-3 bg-white border border-slate-100 rounded-xl shadow-sm"><span class="text-slate-400 block text-[10px]">Causas Secundárias</span><span class="text-sm font-bold text-slate-700">${det.dados.totalS} causas</span></div>
                     <div class="p-3 bg-white border border-slate-100 rounded-xl shadow-sm"><span class="text-slate-400 block text-[10px]">Causas Terciárias</span><span class="text-sm font-bold text-slate-700">${det.dados.totalT} causas</span></div>
-                    <div class="p-3 bg-amber-50/60 border border-amber-100 rounded-xl"><span class="text-amber-700 font-semibold block text-[10px]">Priorizações (Estreladas)</span><span class="text-sm font-bold text-amber-800">${det.dados.causasEstreladasCount} causas</span></div>
+                    <div class="p-3 bg-amber-50/60 border border-amber-100 rounded-xl"><span class="text-amber-700 font-semibold block text-[10px]">Causas Priorizadas</span><span class="text-sm font-bold text-amber-800">${det.dados.causasEstreladasCount} causas</span></div>
                 </div>`;
         } else {
             document.getElementById("p-titulo").textContent = `Causa ${det.camada}`;
@@ -945,7 +945,7 @@ function renderizarEstruturaHierarquica() {
                     <span class="text-base">⭐</span>
                     <div>
                         <p class="font-bold">Causas Priorizadas pelos Eixos</p>
-                        <p class="text-[11px] text-amber-800 font-medium">Esta causa recebeu <strong>${det.votos} estrelas</strong> no processo de votação.</p>
+                        <p class="text-[11px] text-amber-800 font-medium">Esta causa recebeu <strong>${det.votos} estrela(s)</strong> no processo de votação.</p>
                     </div>
                    </div>`
                 : `<div class="mb-4 bg-slate-50 border border-slate-150 text-slate-600 rounded-xl p-3 flex items-center gap-2 text-xs">
