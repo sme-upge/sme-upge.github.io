@@ -976,54 +976,7 @@ function renderizarEstruturaHierarquica() {
 function buildSidebarHierarquicaAba2(listaTemasFiltrados) {
     const list = document.getElementById("sidebar-list"); 
     list.innerHTML = "";
-    
-    let fonteDados = listaTemasFiltrados;
-    
-    if (!fonteDados) {
-        fonteDados = {};
-        const eixosSelecionados = Array.from(document.querySelectorAll(".axis-checkbox:checked")).map(cb => cb.value);
-        rawRows.forEach(r => {
-            if (!r || r.length === 0) return;
-            const [eixoCompleto, , cp, cat_p, cs, cat_s, , ct, cat_t] = r;
-            if(!eixoCompleto || eixoCompleto.trim() === "") return;
-            const sigla = eixoCompleto.split(" - ")[0];
-            if (!eixosSelecionados.includes(sigla)) return;
-
-            [[cp, cat_p], [cs, cat_s], [ct, cat_t]].forEach(([txt, cat]) => {
-                if(txt && cat && cat.trim() !== "") {
-                    const c = cat.trim();
-                    if(!fonteDados[c]) fonteDados[c] = 0;
-                    fonteDados[c]++;
-                }
-            });
-        });
-    }
-
-    const sorted = Object.keys(fonteDados).sort((a,b) => fonteDados[b] - fonteDados[a]);
-    
-    if(sorted.length === 0) return;
-
-    sorted.forEach(tema => {
-        const b = document.createElement("button");
-        b.className = "btn-sidebar-item";
-        const cor = CAT_CORES_MAP[Object.keys(CAT_CORES_MAP).find(k => tema.toLowerCase().includes(k.toLowerCase()))] || "#64748B";
-        
-        const atualSelecionado = document.getElementById("select-tema-transversal").value;
-        if (atualSelecionado === tema) b.classList.add("active");
-        
-        b.innerHTML = `
-            <span class="w-2 h-2 rounded-full mt-1.5 flex-shrink-0" style="background:${cor}"></span>
-            <span class="btn-sidebar-text">${tema}</span>
-            <span class="text-[10px] font-bold text-slate-400 mt-0.5 flex-shrink-0 whitespace-nowrap">${fonteDados[tema]} dores</span>
-        `;
-        b.onclick = (e) => {
-            e.stopPropagation();
-            const combo = document.getElementById("select-tema-transversal");
-            combo.value = combo.value === tema ? "__ALL__" : tema;
-            atualizarInterfaceTemaAba2();
-        };
-        list.appendChild(b);
-    });
+    // Limpado completamente: Nao renderiza nenhum botao de tema na Aba 2
 }
 
 function mudarAba(aba) {
