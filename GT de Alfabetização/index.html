@@ -51,7 +51,7 @@ input:checked + .slider:before {transform:translateX(14px)}
 <div id="sidebar">
   <div class="px-5 pt-5 pb-3 border-b border-slate-100 flex-shrink-0 flex items-center justify-between">
     <div>
-      <p class="text-[10px] font-bold uppercase tracking-widest text-blue-600">Árvore de Problemas</p>
+      <p class="text-[10px] font-bold uppercase tracking-widest text-blue-600">Matriz Diagnóstica</p>
       <p class="text-[12px] text-slate-400 mt-0.5 font-medium">GT Alfabetização · SME-SP</p>
     </div>
     <button onclick="limparTodosOsFiltros()" class="px-2.5 py-1 text-[10px] font-bold text-slate-500 hover:text-red-600 bg-slate-100 hover:bg-red-50 rounded-md transition-all flex items-center gap-1 border border-slate-200/60">
@@ -60,7 +60,7 @@ input:checked + .slider:before {transform:translateX(14px)}
   </div>
   
   <div class="px-5 py-3 border-b border-slate-100 bg-slate-50/50 flex flex-col gap-1.5 flex-shrink-0">
-    <p class="text-[9px] font-bold text-slate-400 uppercase tracking-wider">Consolidado Geral dos Eixos</p>
+    <p class="text-[9px] font-bold text-slate-400 uppercase tracking-wider">Consolidado Geral de Rede</p>
     <div class="grid grid-cols-3 gap-1 text-center">
       <div class="bg-white border border-slate-200/60 p-1.5 rounded-lg">
         <span id="stat-total-evidencias" class="block text-xs font-bold text-slate-700">-</span>
@@ -68,7 +68,7 @@ input:checked + .slider:before {transform:translateX(14px)}
       </div>
       <div class="bg-white border border-slate-200/60 p-1.5 rounded-lg">
         <span id="stat-total-transversais" class="block text-xs font-bold text-blue-600">-</span>
-        <span class="text-[8px] text-slate-400 font-medium block leading-tight">Temas Conv.</span>
+        <span class="text-[8px] text-slate-400 font-medium block leading-tight">Temas Transv.</span>
       </div>
       <div class="bg-white border border-slate-200/60 p-1.5 rounded-lg">
         <span id="stat-total-priorizados" class="block text-xs font-bold text-amber-600">-</span>
@@ -89,16 +89,16 @@ input:checked + .slider:before {transform:translateX(14px)}
     <div class="flex flex-col gap-1 w-full border-b border-slate-50 pb-2">
       <span class="text-[10px] font-bold text-amber-600 uppercase tracking-wider">Priorizações (Filtro)</span>
       <select id="select-votos-hierarquica" class="bg-white border border-slate-200 rounded-lg p-1 text-xs font-medium text-slate-700 focus:outline-none" onchange="renderizarEstruturaHierarquica()">
-        <option value="0">Selecionar todas as causas </option>
-        <option value="1">⭐ 1 estrela(s) </option>
-        <option value="4">⭐ 4+ estrela(s)</option>
-        <option value="6">⭐ 6+ estrela(s) </option>
+        <option value="0">Selecionar todos</option>
+        <option value="1">⭐ 1 estrela (Estrelas)</option>
+        <option value="4">⭐ 4+ estrelas</option>
+        <option value="6">⭐ 6+ estrelas</option>
       </select>
     </div>
 
     <div class="flex flex-col gap-1 w-full border-b border-slate-50 pb-2">
       <div class="flex items-center justify-between">
-        <span class="text-[10px] font-bold text-blue-600 uppercase tracking-wider">Exibir Temas</span>
+        <span class="text-[10px] font-bold text-blue-600 uppercase tracking-wider">Destaque de Transversalidade</span>
         <label class="switch">
           <input type="checkbox" id="switch-transversal-hierarquica" checked onchange="renderizarEstruturaHierarquica()">
           <span class="slider"></span>
@@ -118,7 +118,7 @@ input:checked + .slider:before {transform:translateX(14px)}
   <div id="legenda-container" class="px-5 py-2.5 border-t border-slate-100 bg-slate-50/30 text-[11px] text-slate-500 space-y-1 flex-shrink-0 hidden">
     <p class="font-bold uppercase tracking-wider text-[9px] text-slate-400 mb-1">Legenda de Níveis</p>
     <div class="flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-[#EF4444]"></span><span>Problema Macro</span></div>
-    <div class="flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-[#6366F1]"></span><span>Eixos</span></div>
+    <div class="flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-[#6366F1]"></span><span>Eixos Estruturantes</span></div>
     <div class="flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-[#38BDF8]"></span><span>Causa Primária</span></div>
     <div class="flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-[#34D399]"></span><span>Causa Secundária</span></div>
     <div class="flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-[#FBBF24]"></span><span>Causa Terciária</span></div>
@@ -307,13 +307,13 @@ async function inicializar() {
 function parseCSV(text) {
     const lines = text.split(/\r?\n/).filter(l => l.trim() !== "");
     return lines.slice(1).map(line => {
-        const cols = []; let q = false; let curr = "";
+        const cols = []; let q = false; let cubic = "";
         for (let i = 0; i < line.length; i++) {
             if (line[i] === '"') q = !q;
-            else if (line[i] === ';' && !q) { cols.push(curr.trim()); curr = ""; }
-            else curr += line[i];
+            else if (line[i] === ';' && !q) { cols.push(cubic.trim()); cubic = ""; }
+            else cubic += line[i];
         }
-        cols.push(curr.trim());
+        cols.push(cubic.trim());
         return cols;
     }).filter(row => row.length > 0 && row[0] !== ""); 
 }
@@ -590,12 +590,12 @@ function filtrarTeiaPorCategoria(nomeCat) {
 }
 
 function filtrarTeiaPorEixo(eixoId) {
-    const categoriasConectadas = G_aba1.originalEdges.filter(e => e.from === eixoId && e.to.startsWith("__cat__")).map(e => e.to);
+    const categoriasConectadas = G_aba1.originalEdges.filter(e => e.oficial === eixoId && e.to.startsWith("__cat__")).map(e => e.to);
     
     const nosIsolados = G_aba1.nodes.filter(n => n.id === eixoId || categoriasConectadas.includes(n.id) || n.id === "ROOT");
     const arestasIsoladas = G_aba1.originalEdges.filter(e => 
-        (e.from === eixoId && categoriasConectadas.includes(e.to)) || 
-        (e.from === "ROOT" && e.to === eixoId)
+        (e.oficial === eixoId && categoriasConectadas.includes(e.to)) || 
+        (e.oficial === "ROOT" && e.to === eixoId)
     );
 
     nosIsolados.forEach(n => { if(n.id !== "ROOT") n.fixed = false; });
@@ -640,14 +640,14 @@ function aoClicarNoNodeRadial(id) {
         if(causasPrioritarias.length > 0) {
             html += `
                 <div class="mb-4">
-                    <span class="text-[10px] font-bold text-amber-700 uppercase tracking-wider bg-amber-50 border border-amber-200/60 px-2 py-1 rounded-md block mb-2">? Priorizações dos Eixos</span>
+                    <span class="text-[10px] font-bold text-amber-700 uppercase tracking-wider bg-amber-50 border border-amber-200/60 px-2 py-1 rounded-md block mb-2">⭐ Priorizações dos Eixos</span>
                     <div class="flex flex-col gap-2">
             `;
             causasPrioritarias.forEach(c => {
                 const badges = c.eixos.map(ex => `<span class="inline-block px-2 py-0.5 text-[9px] font-bold text-white rounded mr-1" style="background:${EIXO_CORES[ex]}">${MAPA_EIXOS_COMPLETO[ex] || ex}</span>`).join("");
                 html += `
                     <div class="p-3 border border-amber-200 bg-amber-50/30 rounded-xl text-xs">
-                        <div class="mb-1.5 flex items-center justify-between">${badges} <span class="text-[9px] font-bold bg-amber-100 text-amber-800 px-1.5 py-0.5 rounded">⭐ Priorizadas: ${c.votos}v</span></div>
+                        <div class="mb-1.5 flex items-center justify-between">${badges} <span class="text-[9px] font-bold bg-amber-100 text-amber-800 px-1.5 py-0.5 rounded">⭐ Prioritário: ${c.votos}v</span></div>
                         <p class="text-slate-700 font-semibold leading-relaxed">${c.texto}</p>
                     </div>
                 `;
@@ -693,7 +693,7 @@ function buildSidebarRadialAba1() {
             b.innerHTML = `
                 <span class="w-2 h-2 rounded-full mt-1.5 flex-shrink-0" style="background:${item.cor}"></span>
                 <span class="btn-sidebar-text">${item.cat}</span>
-                <span class="text-[10px] font-bold text-slate-400 mt-0.5 flex-shrink-0 whitespace-nowrap">${item.volumeCausas} causa(s)</span>
+                <span class="text-[10px] font-bold text-slate-400 mt-0.5 flex-shrink-0 whitespace-nowrap">${item.volumeCausas} causas</span>
             `;
             b.onclick = (e) => {
                 e.stopPropagation();
@@ -702,7 +702,7 @@ function buildSidebarRadialAba1() {
             list.appendChild(b);
         });
     };
-    renderGrupo(" Temas Transversais", "text-blue-600", sortedCats.filter(c=>c.ehTransversal));
+    renderGrupo("Temas Transversais", "text-blue-600", sortedCats.filter(c=>c.ehTransversal));
     renderGrupo("Causas Específicas dos Eixos", "text-slate-400", sortedCats.filter(c=>!c.ehTransversal));
 }
 
@@ -760,11 +760,11 @@ function renderizarEstruturaHierarquica() {
     });
 
     eixosSelecionados.forEach(ex => {
-        metricasEixos[ex].Prioritário:EstreladasCount = Prioritário:EstreladasPorEixo[ex].size;
+        metricasEixos[ex].causasEstreladasCount = causasEstreladasPorEixo[ex].size;
     });
 
     const eixosComNosFiltradosValidos = new Set();
-    const nosPrioritário:Temporarios = [];
+    const nosCausasTemporarios = [];
     const arestasTemporarias = [];
 
     rawRows.forEach((r) => {
@@ -827,9 +827,9 @@ function renderizarEstruturaHierarquica() {
                 }
 
                 const labelCurto = txt.length > 22 ? txt.slice(0, 20) + "..." : txt;
-                const prefixoEstrela = (camadaLabel === "2" && vMaxFiltro > 0) ? '? ' : '';
+                const prefixoEstrela = (camadaLabel === "2" && vMaxFiltro > 0) ? '⭐ ' : '';
 
-                nosPrioritárioTemporarios.push({
+                nosCausasTemporarios.push({
                     id: noId, label: `${prefixoEstrela}${labelCurto}`, shape: "dot", size: tSize, borderWidth: bW, 
                     color: { background: corNivel, border: bColor }, font: { size: 10, color: "#334155" }
                 });
@@ -870,7 +870,7 @@ function renderizarEstruturaHierarquica() {
         }
     });
 
-    hNodes.push(...nosPrioritárioTemporarios);
+    hNodes.push(...nosCausasTemporarios);
     hEdges.push(...arestasTemporarias);
 
     if (destacarTransversais) {
@@ -929,12 +929,12 @@ function renderizarEstruturaHierarquica() {
                     <div class="p-3 bg-white border border-slate-100 rounded-xl shadow-sm"><span class="text-slate-400 block text-[10px]">Causas Primárias</span><span class="text-sm font-bold text-slate-700">${det.dados.totalP} causas</span></div>
                     <div class="p-3 bg-white border border-slate-100 rounded-xl shadow-sm"><span class="text-slate-400 block text-[10px]">Causas Secundárias</span><span class="text-sm font-bold text-slate-700">${det.dados.totalS} causas</span></div>
                     <div class="p-3 bg-white border border-slate-100 rounded-xl shadow-sm"><span class="text-slate-400 block text-[10px]">Causas Terciárias</span><span class="text-sm font-bold text-slate-700">${det.dados.totalT} causas</span></div>
-                    <div class="p-3 bg-amber-50/60 border border-amber-100 rounded-xl"><span class="text-amber-700 font-semibold block text-[10px]">⭐ Priorizações</span><span class="text-sm font-bold text-amber-800">${det.dados.causasEstreladasCount} causas</span></div>
+                    <div class="p-3 bg-amber-50/60 border border-amber-100 rounded-xl"><span class="text-amber-700 font-semibold block text-[10px]">Priorizações (Estreladas)</span><span class="text-sm font-bold text-amber-800">${det.dados.causasEstreladasCount} causas</span></div>
                 </div>`;
         } else {
             document.getElementById("p-titulo").textContent = `Causa ${det.camada}`;
             document.getElementById("p-sub").textContent = "Causas Mapeadas";
-            let cCat = CAT_CORES_MAP[Object.keys(CAT_CORES_MAP).find(k=>det.tema.toLowerCase().includes(k.toLowerCase()))] || "#64748B";
+            let cubicCat = CAT_CORES_MAP[Object.keys(CAT_CORES_MAP).find(k=>det.tema.toLowerCase().includes(k.toLowerCase()))] || "#64748B";
             
             const seloTipo = det.ehTransversal 
                 ? `<span class="ml-auto text-[9px] bg-amber-100 text-amber-800 border border-amber-300 px-2 py-0.5 rounded-md font-bold uppercase tracking-wider">Temas Transversais</span>`
@@ -942,14 +942,14 @@ function renderizarEstruturaHierarquica() {
 
             const blocoVotos = det.votos > 0 
                 ? `<div class="mb-4 bg-amber-50 border border-amber-200 text-amber-900 rounded-xl p-3 flex items-center gap-2 text-xs">
-                    <span class="text-base">?</span>
+                    <span class="text-base">⭐</span>
                     <div>
-                        <p class="font-bold">⭐ Causas priorizadas pelos eixos</p>
-                        <p class="text-[11px] text-amber-800 font-medium">Esta causa recebeu <strong>${det.votos} estrela(s)</strong> no processo de votação.</p>
+                        <p class="font-bold">Causas Priorizadas pelos Eixos</p>
+                        <p class="text-[11px] text-amber-800 font-medium">Esta causa recebeu <strong>${det.votos} estrelas</strong> no processo de votação.</p>
                     </div>
                    </div>`
                 : `<div class="mb-4 bg-slate-50 border border-slate-150 text-slate-600 rounded-xl p-3 flex items-center gap-2 text-xs">
-                    <span class="text-base text-slate-400">?</span>
+                    <span class="text-base text-slate-400">⭐</span>
                     <div>
                         <p class="font-semibold text-slate-700">Priorizações</p>
                         <p class="text-[11px] text-slate-500">Esta causa não recebeu estrelas diretas de priorização na rede.</p>
@@ -964,7 +964,7 @@ function renderizarEstruturaHierarquica() {
                 <div class="p-3.5 bg-slate-50 border border-slate-100 rounded-xl text-xs font-medium text-slate-600 leading-relaxed mb-4">${det.texto}</div>
                 ${blocoVotos}
                 <div class="flex items-center gap-2 p-2.5 border border-slate-100 rounded-xl bg-white text-xs font-medium text-slate-600">
-                    <span class="w-2.5 h-2.5 rounded-full" style="background:${cCat}"></span><span>Tema: ${det.tema}</span>
+                    <span class="w-2.5 h-2.5 rounded-full" style="background:${cubicCat}"></span><span>Tema: ${det.tema}</span>
                     ${seloTipo}
                 </div>
             `;
@@ -991,7 +991,7 @@ function mudarAba(aba) {
         ctrl1.classList.remove("hidden"); ctrl2.classList.add("hidden");
         legenda.classList.add("hidden"); 
         document.getElementById("main-title").textContent = "Árvore Diagnóstica de Problemas";
-        document.getElementById("main-subtitle").textContent = "Organização das causas por temas convergentes";
+        document.getElementById("main-subtitle").textContent = "Volumetria proporcional e conexões transversais unificadas";
         buildSidebarRadialAba1();
         renderizarEstruturaRadial();
     } else {
@@ -1000,7 +1000,7 @@ function mudarAba(aba) {
         ctrl2.classList.remove("hidden"); ctrl2.classList.add("flex"); ctrl1.classList.add("hidden");
         legenda.classList.remove("hidden"); 
         document.getElementById("main-title").textContent = "Árvore Detalhada";
-        document.getElementById("main-subtitle").textContent = "Desdobramento por Problema Macro ? Eixo ? Causa 1ª ? 2ª ? 3ª)";
+        document.getElementById("main-subtitle").textContent = "Desdobramento por Problema Macro → Eixo → Causa 1ª → 2ª → 3ª";
         rebuildCombosETemasAba2();
         renderizarEstruturaHierarquica();
     }
