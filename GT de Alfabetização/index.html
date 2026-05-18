@@ -87,12 +87,12 @@ input:checked + .slider:before {transform:translateX(14px)}
 
   <div id="controles-aba2" class="px-5 py-3.5 bg-white border-b border-slate-100 flex-col gap-3 flex-shrink-0 hidden">
     <div class="flex flex-col gap-1 w-full border-b border-slate-50 pb-2">
-      <span class="text-[10px] font-bold text-amber-600 uppercase tracking-wider">Priorizações (Filtro)</span>
+      <span class="text-[10px] font-bold text-amber-600 uppercase tracking-wider">Priorização das Secundárias</span>
       <select id="select-votos-hierarquica" class="bg-white border border-slate-200 rounded-lg p-1 text-xs font-medium text-slate-700 focus:outline-none" onchange="renderizarEstruturaHierarquica()">
-        <option value="0">Selecionar todos </option>
-        <option value="1">⭐ 1 estrela (Estrelas)</option>
+        <option value="0">Selecionar todos</option>
+        <option value="1">⭐ 1+ estrela</option>
         <option value="4">⭐ 4+ estrelas</option>
-        <option value="6">⭐ 6+ estrelas </option>
+        <option value="6">⭐ 6+ estrelas</option>
       </select>
     </div>
 
@@ -120,7 +120,7 @@ input:checked + .slider:before {transform:translateX(14px)}
     <div class="flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-[#EF4444]"></span><span>Problema Macro</span></div>
     <div class="flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-[#6366F1]"></span><span>Eixos Estruturantes</span></div>
     <div class="flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-[#38BDF8]"></span><span>Causa Primária</span></div>
-    <div class="flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-[#34D399]"></span><span>Causa Secundária</span></div>
+    <div class="flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-[#34D399]"></span><span>Causa Secundária (Alvo de Votos)</span></div>
     <div class="flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-[#FBBF24]"></span><span>Causa Terciária</span></div>
   </div>
 
@@ -183,26 +183,14 @@ const CAT_CORES_MAP = {
 const FISICA_RADIAL_CONFIG = {
     enabled: true,
     solver: "barnesHut",
-    barnesHut: { 
-        gravitationalConstant: -18000, 
-        centralGravity: 0.15, 
-        springLength: 130, 
-        springConstant: 0.04,
-        damping: 0.25
-    },
+    barnesHut: { gravitationalConstant: -18000, centralGravity: 0.15, springLength: 130, springConstant: 0.04, damping: 0.25 },
     stabilization: { enabled: true, iterations: 100, updateInterval: 25 }
 };
 
 const FISICA_HIERARQUICA_CONFIG = {
     enabled: true,
     solver: "barnesHut",
-    barnesHut: { 
-        gravitationalConstant: -10000, 
-        centralGravity: 0.18, 
-        springLength: 85, 
-        springConstant: 0.04,
-        damping: 0.25
-    },
+    barnesHut: { gravitationalConstant: -10000, centralGravity: 0.18, springLength: 85, springConstant: 0.04, damping: 0.25 },
     stabilization: { enabled: true, iterations: 100, updateInterval: 25 }
 };
 
@@ -234,9 +222,7 @@ function gerarHashSeguro(str) {
 async function inicializar() {
     try {
         const res = await fetch(CSV_URL);
-        if(!res.ok) {
-            throw new Error("Não foi possível carregar o arquivo CSV do GitHub.");
-        }
+        if(!res.ok) throw new Error("Não foi possível carregar o arquivo CSV.");
         const csv = new TextDecoder("utf-8").decode(await res.arrayBuffer());
         rawRows = parseCSV(csv);
         
@@ -262,23 +248,21 @@ async function inicializar() {
             [[cp, cat_p], [cs, cat_s], [ct, cat_t]].forEach(([txt, cat], idx) => {
                 if(txt && txt.trim() !== "") {
                     const cleanTxt = txt.trim();
-                    
-                    if (!globalTextoParaEixos[cleanTxt]) {
-                        globalTextoParaEixos[cleanTxt] = new Set();
-                    }
+                    if (!globalTextoParaEixos[cleanTxt]) globalTextoParaEixos[cleanTxt] = new Set();
                     globalTextoParaEixos[cleanTxt].add(sigla);
                     
-                    if (vNum > (globalTextoParaVotos[cleanTxt] || 0)) {
-                        globalTextoParaVotos[cleanTxt] = vNum;
+                    if (idx === 1) {
+                        if (vNum > (globalTextoParaVotos[cleanTxt] || 0)) {
+                            globalTextoParaVotos[cleanTxt] = vNum;
+                        }
+                    } else {
+                        if (!globalTextoParaVotos[cleanTxt]) globalTextoParaVotos[cleanTxt] = 0;
                     }
                     
                     if (cat && cat.trim() !== "") {
                         const cleanCat = cat.trim();
                         globalTextoParaCategorias[cleanTxt] = cleanCat;
-                        
-                        if (!mapaTemaParaEixos[cleanCat]) {
-                            mapaTemaParaEixos[cleanCat] = new Set();
-                        }
+                        if (!mapaTemaParaEixos[cleanCat]) mapaTemaParaEixos[cleanCat] = new Set();
                         mapaTemaParaEixos[cleanCat].add(sigla);
                     }
                 }
@@ -287,9 +271,7 @@ async function inicializar() {
 
         let countTemasTransversaisReais = 0;
         Object.keys(mapaTemaParaEixos).forEach(tema => {
-            if (mapaTemaParaEixos[tema].size >= 2) {
-                countTemasTransversaisReais++;
-            }
+            if (mapaTemaParaEixos[tema].size >= 2) countTemasTransversaisReais++;
         });
 
         document.getElementById("stat-total-evidencias").textContent = setCausasUnicasTotal.size;
@@ -301,8 +283,8 @@ async function inicializar() {
         mudarAba("radial");
 
     } catch (e) {
-        console.error("Erro crítico:", e);
-        document.getElementById("net").innerHTML = `<div style="padding:40px; color:red; font-weight:bold; text-align:center;">Erro ao carregar dados do repositório remoto. Verifique a conexão com o GitHub ou as permissões de CORS.</div>`;
+        console.error(e);
+        document.getElementById("net").innerHTML = `<div style="padding:40px; color:red; font-weight:bold; text-align:center;">Erro ao carregar dados do repositório remoto.</div>`;
     }
 }
 
@@ -389,11 +371,8 @@ function rebuildCombosETemasAba2() {
         comboTema.appendChild(opt);
     });
 
-    if (listTemasFiltrados[valorAntigo]) {
-        comboTema.value = valorAntigo;
-    } else {
-        comboTema.value = "__ALL__";
-    }
+    if (listTemasFiltrados[valorAntigo]) comboTema.value = valorAntigo;
+    else comboTema.value = "__ALL__";
 
     buildSidebarHierarquicaAba2(listTemasFiltrados);
 }
@@ -465,7 +444,6 @@ function processarDadosAba1() {
 
     eixosOrdenados.forEach((ex, i) => {
         if (!eixosAtivos[ex]) return;
-        
         const angulo = (i * 2 * Math.PI) / totalEixos;
         const posX = raioEixos * Math.cos(angulo);
         const posY = raioEixos * Math.sin(angulo);
@@ -543,7 +521,6 @@ function renderizarEstruturaRadial() {
     
     aplicarFiltroAba1();
     
-    // CORREÇÃO VIS-NETWORK: Força renderização e enquadramento imediato
     setTimeout(() => {
         if(networkInstance) {
             networkInstance.redraw();
@@ -570,7 +547,6 @@ function aplicarFiltroAba1() {
 
 function filtrarTeiaPorCategoria(nomeCat) {
     selectedCategoryRadial = nomeCat;
-    
     document.querySelectorAll(".btn-sidebar-item").forEach(btn => {
         const textNode = btn.querySelector(".btn-sidebar-text");
         if(textNode && textNode.textContent === nomeCat) btn.classList.add("active");
@@ -581,10 +557,7 @@ function filtrarTeiaPorCategoria(nomeCat) {
     const eixosConectados = G_aba1.originalEdges.filter(e => e.to === catNodeId).map(e => e.from);
     
     const nosIsolados = G_aba1.nodes.filter(n => n.id === catNodeId || eixosConectados.includes(n.id) || n.id === "ROOT");
-    const arestasIsoladas = G_aba1.originalEdges.filter(e => 
-        (e.to === catNodeId) || 
-        (e.from === "ROOT" && eixosConectados.includes(e.to))
-    );
+    const arestasIsoladas = G_aba1.originalEdges.filter(e => (e.to === catNodeId) || (e.from === "ROOT" && eixosConectados.includes(e.to)));
 
     nosIsolados.forEach(n => { if(n.id !== "ROOT") n.fixed = false; });
 
@@ -592,17 +565,13 @@ function filtrarTeiaPorCategoria(nomeCat) {
     nodesDataSet.clear(); nodesDataSet.add(nosIsolados);
     edgesDataSet.clear(); edgesDataSet.add(arestasIsoladas);
     networkInstance.stabilize();
-    
     aoClicarNoNodeRadial(catNodeId);
 }
 
 function filtrarTeiaPorEixo(eixoId) {
-    const categoriasConectadas = G_aba1.originalEdges.filter(e => e.from ===微轴Id && e.to.startsWith("__cat__")).map(e => e.to);
+    const categoriasConectadas = G_aba1.originalEdges.filter(e => e.from === eixoId && e.to.startsWith("__cat__")).map(e => e.to);
     const nosIsolados = G_aba1.nodes.filter(n => n.id === eixoId || categoriasConectadas.includes(n.id) || n.id === "ROOT");
-    const arestasIsoladas = G_aba1.originalEdges.filter(e => 
-        (e.from === eixoId && categoriasConectadas.includes(e.to)) || 
-        (e.from === "ROOT" && e.to === eixoId)
-    );
+    const arestasIsoladas = G_aba1.originalEdges.filter(e => (e.from === eixoId && categoriasConectadas.includes(e.to)) || (e.from === "ROOT" && e.to === eixoId));
 
     nosIsolados.forEach(n => { if(n.id !== "ROOT") n.fixed = false; });
 
@@ -610,7 +579,6 @@ function filtrarTeiaPorEixo(eixoId) {
     nodesDataSet.clear(); nodesDataSet.add(nosIsolados);
     edgesDataSet.clear(); edgesDataSet.add(arestasIsoladas);
     networkInstance.stabilize();
-    
     aoClicarNoNodeRadial(eixoId);
 }
 
@@ -633,8 +601,7 @@ function aoClicarNoNodeRadial(id) {
             <div class="mb-4">
                 <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-1">Problema Central do Eixo:</span>
                 <div class="p-4 border rounded-xl bg-slate-50/50 text-xs font-medium text-slate-700 leading-relaxed">${det.conteudo}</div>
-            </div>
-        `;
+            </div>`;
     } else {
         document.getElementById("p-titulo").textContent = det.cat;
         document.getElementById("p-sub").textContent = `${det.volumeCausas} causas mapeadas sob este tema`;
@@ -647,16 +614,14 @@ function aoClicarNoNodeRadial(id) {
             html += `
                 <div class="mb-4">
                     <span class="text-[10px] font-bold text-amber-700 uppercase tracking-wider bg-amber-50 border border-amber-200/60 px-2 py-1 rounded-md block mb-2">⭐ Priorizações dos Eixos</span>
-                    <div class="flex flex-col gap-2">
-            `;
+                    <div class="flex flex-col gap-2">`;
             causasPrioritarias.forEach(c => {
                 const badges = c.eixos.map(ex => `<span class="inline-block px-2 py-0.5 text-[9px] font-bold text-white rounded mr-1" style="background:${EIXO_CORES[ex]}">${MAPA_EIXOS_COMPLETO[ex] || ex}</span>`).join("");
                 html += `
                     <div class="p-3 border border-amber-200 bg-amber-50/30 rounded-xl text-xs">
                         <div class="mb-1.5 flex items-center justify-between">${badges} <span class="text-[9px] font-bold bg-amber-100 text-amber-800 px-1.5 py-0.5 rounded">⭐ Prioritário: ${c.votos}v</span></div>
                         <p class="text-slate-700 font-semibold leading-relaxed">${c.texto}</p>
-                    </div>
-                `;
+                    </div>`;
             });
             html += `</div></div>`;
         }
@@ -665,20 +630,17 @@ function aoClicarNoNodeRadial(id) {
             html += `
                 <div>
                     <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-2">Demais Causas/Descrição</span>
-                    <div class="flex flex-col gap-2">
-            `;
+                    <div class="flex flex-col gap-2">`;
             causasNormais.forEach(c => {
                 const badges = c.eixos.map(ex => `<span class="inline-block px-2 py-0.5 text-[9px] font-bold text-white rounded mr-1" style="background:${EIXO_CORES[ex]}">${MAPA_EIXOS_COMPLETO[ex] || ex}</span>`).join("");
                 html += `
                     <div class="p-3 border border-slate-100 rounded-xl bg-slate-50/40 text-xs">
                         <div class="mb-1.5">${badges}</div>
                         <p class="text-slate-600 font-medium leading-relaxed">${c.texto}</p>
-                    </div>
-                `;
+                    </div>`;
             });
             html += `</div></div>`;
         }
-        
         document.getElementById("painel-body").innerHTML = html;
     }
     document.getElementById("painel").classList.add("open");
@@ -699,8 +661,7 @@ function buildSidebarRadialAba1() {
             b.innerHTML = `
                 <span class="w-2 h-2 rounded-full mt-1.5 flex-shrink-0" style="background:${item.cor}"></span>
                 <span class="btn-sidebar-text">${item.cat}</span>
-                <span class="text-[10px] font-bold text-slate-400 mt-0.5 flex-shrink-0 whitespace-nowrap">${item.volumeCausas} causas</span>
-            `;
+                <span class="text-[10px] font-bold text-slate-400 mt-0.5 flex-shrink-0 whitespace-nowrap">${item.volumeCausas} causas</span>`;
             b.onclick = (e) => {
                 e.stopPropagation();
                 filtrarTeiaPorCategoria(item.cat);
@@ -718,7 +679,7 @@ function renderizarEstruturaHierarquica() {
     const eixosSelecionados = Array.from(document.querySelectorAll(".axis-checkbox:checked")).map(cb => cb.value);
     const destacarTransversais = document.getElementById("switch-transversal-hierarquica").checked;
     const filtroTemaEscolhido = document.getElementById("select-tema-transversal").value;
-    const filtroVotosAtivo = document.getElementById("select-votos-hierarquica").value;
+    const filtroVotosAtivo = parseInt(document.getElementById("select-votos-hierarquica").value) || 0;
 
     const hNodes = []; const hEdges = []; const nosCriadosUnicos = new Set();
     const arestasCriadasUnicas = new Set();
@@ -732,10 +693,7 @@ function renderizarEstruturaHierarquica() {
 
     const mapaNodesParaTeia = {};
     const metricasEixos = {};
-    
-    eixosSelecionados.forEach(ex => { 
-        metricasEixos[ex] = { totalP: 0, totalS: 0, totalT: 0, causasEstreladasCount: 0, probCentral: "" }; 
-    });
+    eixosSelecionados.forEach(ex => { metricasEixos[ex] = { totalP: 0, totalS: 0, totalT: 0, causasEstreladasCount: 0, probCentral: "" }; });
 
     const chavesContadasUnicas = new Set();
     const causasEstreladasPorEixo = {};
@@ -757,7 +715,7 @@ function renderizarEstruturaHierarquica() {
         if (cs && cs.trim() !== "") {
             const hashS = `${sigla}_S_${cs.trim()}`;
             if(!chavesContadasUnicas.has(hashS)) { metricasEixos[sigla].totalS++; chavesContadasUnicas.add(hashS); }
-            if (vNum > 0) { causasEstreladasPorEixo[sigla].add(cs.trim()); }
+            if (vNum >= filtroVotosAtivo && vNum > 0) causasEstreladasPorEixo[sigla].add(cs.trim());
         }
         if (ct && ct.trim() !== "") {
             const hashT = `${sigla}_T_${ct.trim()}`;
@@ -765,9 +723,7 @@ function renderizarEstruturaHierarquica() {
         }
     });
 
-    eixosSelecionados.forEach(ex => {
-        metricasEixos[ex].causasEstreladasCount = causasEstreladasPorEixo[ex].size;
-    });
+    eixosSelecionados.forEach(ex => { metricasEixos[ex].causasEstreladasCount = causasEstreladasPorEixo[ex].size; });
 
     const eixosComNosFiltradosValidos = new Set();
     const nosCausasTemporarios = [];
@@ -788,27 +744,24 @@ function renderizarEstruturaHierarquica() {
         const sCat = (cat_s && cat_s.trim() !== "") ? cat_s.trim() : (globalTextoParaCategorias[sTxt] || "");
         const tCat = (cat_t && cat_t.trim() !== "") ? cat_t.trim() : (globalTextoParaCategorias[tTxt] || "");
 
+        const vNumCs = sTxt ? (globalTextoParaVotos[sTxt] || 0) : 0;
+
+        // REGRA REFORMULADA: O filtro estrito de estrelas agora analisa única e exclusivamente o vNumCs (Causa Secundária)
+        if (filtroVotosAtivo > 0 && vNumCs < filtroVotosAtivo) {
+            return; 
+        }
+
         const pPassaTema = (filtroTemaEscolhido === "__ALL__") || (pTxt !== "" && pCat === filtroTemaEscolhido);
         const sPassaTema = (filtroTemaEscolhido === "__ALL__") || (sTxt !== "" && sCat === filtroTemaEscolhido);
         const tPassaTema = (filtroTemaEscolhido === "__ALL__") || (tTxt !== "" && tCat === filtroTemaEscolhido);
 
-        const vNumCp = pTxt ? (globalTextoParaVotos[pTxt] || 0) : 0;
-        const vNumCs = sTxt ? (globalTextoParaVotos[sTxt] || 0) : 0;
-        const vNumCt = tTxt ? (globalTextoParaVotos[tTxt] || 0) : 0;
-
-        let sPassaVoto = true;
-        if (filtroVotosAtivo === "1" && vNumCs === 0) sPassaVoto = false;
-        if (filtroVotosAtivo === "4" && vNumCs < 4) sPassaVoto = false;
-        if (filtroVotosAtivo === "6" && vNumCs < 6) sPassaVoto = false;
-
-        const eixoId = `H2_${siglaEixo}`;
-        
-        const temCausaAtivaNaLinha = (pTxt !== "" && pPassaTema) || (sTxt !== "" && sPassaTema && sPassaVoto) || (tTxt !== "" && tPassaTema && sPassaVoto);
+        const temCausaAtivaNaLinha = (pTxt !== "" && pPassaTema) || (sTxt !== "" && sPassaTema) || (tTxt !== "" && tPassaTema);
         if (!temCausaAtivaNaLinha) return;
 
-        const registrarNoUnico = (texto, categoriaReal, paiId, camadaLabel, tamanho, corNivel, vMaxFiltro, atendeTemaDireto) => {
+        const eixoId = `H2_${siglaEixo}`;
+
+        const registrarNoUnico = (texto, categoriaReal, paiId, camadaLabel, tamanho, corNivel, vExibido, atendeTemaDireto) => {
             if (!texto || texto.trim() === "") return null;
-            if (camadaLabel === "2" && !sPassaVoto) return null;
             
             if (filtroTemaEscolhido !== "__ALL__" && !atendeTemaDireto) {
                 if (camadaLabel === "3") return null;
@@ -833,7 +786,8 @@ function renderizarEstruturaHierarquica() {
                 }
 
                 const labelCurto = txt.length > 22 ? txt.slice(0, 20) + "..." : txt;
-                const prefixoEstrela = (camadaLabel === "2" && vMaxFiltro > 0) ? '⭐ ' : '';
+                // Exibe o selo de estrelas apenas nas causas secundárias (camada 2)
+                const prefixoEstrela = (camadaLabel === "2" && vExibido > 0) ? `⭐ [${vExibido}v] ` : '';
 
                 nosCausasTemporarios.push({
                     id: noId, label: `${prefixoEstrela}${labelCurto}`, shape: "dot", size: tSize, borderWidth: bW, 
@@ -842,7 +796,7 @@ function renderizarEstruturaHierarquica() {
 
                 hNodesDetails[noId] = {
                     tipo: "causa", camada: camadaLabel === "1" ? "Primária" : camadaLabel === "2" ? "Secundária" : "Terciária",
-                    texto: txt, tema: categoriaReal || "Sem Categoria", votos: vMaxFiltro, eixoOrigem: MAPA_EIXOS_COMPLETO[siglaEixo] || eixoCompleto,
+                    texto: txt, tema: categoriaReal || "Sem Categoria", votos: vExibido, eixoOrigem: MAPA_EIXOS_COMPLETO[siglaEixo] || eixoCompleto,
                     siglaOrigem: siglaEixo, eixos: eixosReaisDaCausa, ehTransversal: ehTransversal
                 };
                 nosCriadosUnicos.add(noId);
@@ -857,9 +811,9 @@ function renderizarEstruturaHierarquica() {
             return noId;
         };
 
-        const idP = registrarNoUnico(pTxt, pCat, eixoId, "1", 20.0, "#38BDF8", vNumCp, pPassaTema); 
+        const idP = registrarNoUnico(pTxt, pCat, eixoId, "1", 20.0, "#38BDF8", 0, pPassaTema); 
         const idS = idP ? registrarNoUnico(sTxt, sCat, idP, "2", 16.0, "#34D399", vNumCs, sPassaTema) : null;  
-        if (idS) registrarNoUnico(tTxt, tCat, idS, "3", 13.0, "#FBBF24", vNumCt, tPassaTema);              
+        if (idS) registrarNoUnico(tTxt, tCat, idS, "3", 13.0, "#FBBF24", 0, tPassaTema);              
     });
 
     eixosSelecionados.forEach(siglaEixo => {
@@ -946,7 +900,7 @@ function renderizarEstruturaHierarquica() {
                 ? `<span class="ml-auto text-[9px] bg-amber-100 text-amber-800 border border-amber-300 px-2 py-0.5 rounded-md font-bold uppercase tracking-wider">Temas Transversais</span>`
                 : `<span class="ml-auto text-[9px] bg-slate-100 text-slate-600 border border-slate-200 px-2 py-0.5 rounded-md font-bold uppercase tracking-wider">Tema Específico</span>`;
 
-            const blocoVotos = det.votos > 0 
+            const blocoVotos = det.camada === "Secundária" && det.votos > 0 
                 ? `<div class="mb-4 bg-amber-50 border border-amber-200 text-amber-900 rounded-xl p-3 flex items-center gap-2 text-xs">
                     <span class="text-base">⭐</span>
                     <div>
@@ -958,7 +912,7 @@ function renderizarEstruturaHierarquica() {
                     <span class="text-base text-slate-400">❓</span>
                     <div>
                         <p class="font-semibold text-slate-700">Priorizações</p>
-                        <p class="text-[11px] text-slate-500">Esta causa não recebeu estrelas diretas de priorização na rede.</p>
+                        <p class="text-[11px] text-slate-500">${det.camada === "Secundária" ? "Esta causa não recebeu estrelas de priorização." : "Este nível não passou por votação direta de estrelas."}</p>
                     </div>
                    </div>`;
 
@@ -972,13 +926,11 @@ function renderizarEstruturaHierarquica() {
                 <div class="flex items-center gap-2 p-2.5 border border-slate-100 rounded-xl bg-white text-xs font-medium text-slate-600">
                     <span class="w-2.5 h-2.5 rounded-full" style="background:${cCat}"></span><span>Tema: ${det.tema}</span>
                     ${seloTipo}
-                </div>
-            `;
+                </div>`;
         }
         document.getElementById("painel").classList.add("open"); document.getElementById("net").style.right = "460px";
     });
 
-    // CORREÇÃO VIS-NETWORK: Força renderização imediata na troca de aba
     setTimeout(() => {
         if(networkInstance) {
             networkInstance.redraw();
@@ -990,7 +942,6 @@ function renderizarEstruturaHierarquica() {
 function buildSidebarHierarquicaAba2(listaTemasFiltrados) {
     const list = document.getElementById("sidebar-list"); 
     list.innerHTML = "";
-    
     let fonteDados = listaTemasFiltrados;
     
     if (!fonteDados) {
@@ -1014,7 +965,6 @@ function buildSidebarHierarquicaAba2(listaTemasFiltrados) {
     }
 
     const sorted = Object.keys(fonteDados).sort((a,b) => fonteDados[b] - fonteDados[a]);
-    
     const h = document.createElement("p"); 
     h.className = "text-[10px] font-bold uppercase tracking-widest mt-2 mb-2 px-2 text-amber-600"; 
     h.textContent = "📂 Temas Presentes nos Eixos"; 
@@ -1032,15 +982,13 @@ function buildSidebarHierarquicaAba2(listaTemasFiltrados) {
         const b = document.createElement("button");
         b.className = "btn-sidebar-item";
         const cor = CAT_CORES_MAP[Object.keys(CAT_CORES_MAP).find(k => tema.toLowerCase().includes(k.toLowerCase()))] || "#64748B";
-        
-        const atualSelecionado = document.getElementById("select-tema-transversal").value;
-        if (atualSelecionado === tema) b.classList.add("active");
+        const TentoSelecionado = document.getElementById("select-tema-transversal").value;
+        if (TentoSelecionado === tema) b.classList.add("active");
         
         b.innerHTML = `
             <span class="w-2 h-2 rounded-full mt-1.5 flex-shrink-0" style="background:${cor}"></span>
             <span class="btn-sidebar-text">${tema}</span>
-            <span class="text-[10px] font-bold text-slate-400 mt-0.5 flex-shrink-0 whitespace-nowrap">${fonteDados[tema]} dores</span>
-        `;
+            <span class="text-[10px] font-bold text-slate-400 mt-0.5 flex-shrink-0 whitespace-nowrap">${fonteDados[tema]} dores</span>`;
         b.onclick = (e) => {
             e.stopPropagation();
             const combo = document.getElementById("select-tema-transversal");
