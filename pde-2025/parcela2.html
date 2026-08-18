@@ -53,7 +53,7 @@
                     <option value="assistente_diretor">Assistente de Diretor(a)</option>
                     <option value="coordenador">Coordenador(a) Pedagógico(a)</option>
                     <option value="supervisor">Supervisor(a) Escolar</option>
-                    <option value="outros_cargos">ATE / Agente Escolar / Outros</option>
+                    <option value="outros_cargos">Auxliar Técnico de Educação, Agente Escolar  e Outros</option>
                 </select>
             </div>
             <div>
@@ -61,9 +61,9 @@
                 <select id="localTrabalho" class="w-full p-3 rounded-xl border-none shadow-sm font-semibold text-slate-700">
                     <option value="emef">EMEF / EMEFM</option>
                     <option value="emei">EMEI / CEMEI</option>
-                    <option value="cei">CEI DIRETO</option>
+                    <option value="cei">CEI</option>
                     <option value="cieja">CIEJA / CCI / CIP</option>
-                    <option value="dre">DRE / SME / GESTÃO CEU</option>
+                    <option value="dre">DRE / SME / GESTÃO CEU / EMEBS </option>
                 </select>
             </div>
             <div>
@@ -96,15 +96,15 @@
             <h2 class="text-blue-900 font-black uppercase tracking-widest text-sm mb-6 border-l-4 border-blue-600 pl-3">1ª Etapa (Agosto de 2026)</h2>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
                 <div>
-                    <h3 class="text-[10px] font-bold text-slate-400 uppercase mb-3">Individual (Assiduidade)</h3>
+                    <h3 class="text-[10px] font-bold text-slate-400 uppercase mb-3">Desempenho Individual (Assiduidade)</h3>
                     <label class="block text-sm text-slate-600 mb-2 flex items-center font-medium">Faltas no 1º semestre <span class="help-icon" data-modal="assiduidade">?</span></label>
                     <div class="flex items-center gap-4">
                         <input type="number" id="f1" value="0" min="0" class="w-24 p-3 border rounded-xl bg-slate-50 font-black text-2xl text-center text-blue-600">
-                        <span class="text-[10px] text-slate-400 font-bold uppercase">Bônus se zero</span>
+                        <span class="text-[10px] text-slate-400 font-bold uppercase">Faltas</span>
                     </div>
                 </div>
                 <div>
-                    <h3 class="text-[10px] font-bold text-slate-400 uppercase mb-3">Coletivo (Unidades)</h3>
+                    <h3 class="text-[10px] font-bold text-slate-400 uppercase mb-3">Desempenho Coletivo (Unidades)</h3>
                     <div id="e1_metrics" class="space-y-4"></div>
                 </div>
             </div>
@@ -115,15 +115,15 @@
             <h2 class="text-blue-900 font-black uppercase tracking-widest text-sm mb-6 border-l-4 border-blue-600 pl-3">2ª Etapa (Abril 2027)</h2>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
                 <div>
-                    <h3 class="text-[10px] font-bold text-slate-400 uppercase mb-3 font-bold">Individual (Assiduidade)</h3>
+                    <h3 class="text-[10px] font-bold text-slate-400 uppercase mb-3 font-bold">Desempenho Individual (Assiduidade)</h3>
                     <label class="block text-sm text-slate-600 mb-2 flex items-center font-medium">Faltas no 2º semestre <span class="help-icon" data-modal="assiduidade">?</span></label>
                     <div class="flex items-center gap-4">
                         <input type="number" id="f2" value="0" min="0" class="w-24 p-3 border rounded-xl bg-slate-50 font-black text-2xl text-center text-blue-600">
-                        <span class="text-[10px] text-slate-400 font-bold uppercase">Bônus se zero</span>
+                        <span class="text-[10px] text-slate-400 font-bold uppercase">Faltas</span>
                     </div>
                 </div>
                 <div>
-                    <h3 class="text-[10px] font-bold text-slate-400 uppercase mb-3 font-bold">Coletivo (Unidades)</h3>
+                    <h3 class="text-[10px] font-bold text-slate-400 uppercase mb-3 font-bold">Desempenho Coletivo (Unidades)</h3>
                     <div id="e2_metrics" class="space-y-4"></div>
                 </div>
             </div>
@@ -170,14 +170,14 @@
 <script>
 document.addEventListener('DOMContentLoaded', function () {
     const modais = {
-        assiduidade: { t: "Tabela de Assiduidade 2026", b: "O Valor Base é R$ 10.000,00. A assiduidade representa 42% (Geral) ou 80% (CEI). <br><br><b>Descontos por faltas (Anexo III):</b> <table><tr><th>Ausências</th><th>Resultado Atribuído</th></tr><tr><td>0 ou 1</td><td>100% (+ bônus antecipação)</td></tr><tr><td>2 faltas</td><td>95%</td></tr><tr><td>3 faltas</td><td>90%</td></tr><tr><td>4 faltas</td><td>85%</td></tr><tr><td>5 faltas</td><td>80%</td></tr><tr><td>6 a 10 faltas</td><td>0% do componente</td></tr><tr><td>Mais de 10 faltas</td><td>Deixa de fazer jus à etapa integral</td></tr></table>" },
+        assiduidade: { t: "Tabela de Assiduidade 2026", b: "O valor será correspondente a 80% da base de cálculo para os servidores em exercício nos Centros de Educação Infantil (CEI), e a 42% da base de cálculo para os demais servidores. O pagamento será realizado em duas etapas. <br><br><b>Descontos por faltas (Anexo III):</b> <table><tr><th>Ausências</th><th>Resultado Atribuído</th></tr><tr><td>0 ou 1</td><td>100% (+ bônus antecipação)</td></tr><tr><td>2 faltas</td><td>95%</td></tr><tr><td>3 faltas</td><td>90%</td></tr><tr><td>4 faltas</td><td>85%</td></tr><tr><td>5 faltas</td><td>80%</td></tr><tr><td>6 a 10 faltas</td><td>0% do componente</td></tr><tr><td>Mais de 10 faltas</td><td>Deixa de fazer jus à etapa integral</td></tr></table>" },
         freq_emef: { t: "Frequência Estudantes (EMEF/EMEFM)", b: "Corresponde a 4% da base de cálculo anual. <br><br><table><tr><th>Média Frequência</th><th>% do Prêmio</th><th>Valor (Ref R$ 10k)</th></tr><tr><td>90% ou maior</td><td>100%</td><td>R$ 400,00</td></tr><tr><td>85% a 89,99%</td><td>75%</td><td>R$ 300,00</td></tr><tr><td>80% a 84,99%</td><td>50%</td><td>R$ 200,00</td></tr><tr><td>75% a 79,99%</td><td>25%</td><td>R$ 100,00</td></tr><tr><td>Abaixo de 75%</td><td>0%</td><td>R$ 0,00</td></tr></table>" },
         saresp_lp: { t: "Desempenho LP - SARESP (Anexo I)", b: "Avanço na proficiência em Língua Portuguesa (2º ano). Peso de 12,5% da base. <br><br><table><tr><th>Apuração</th><th>% do Prêmio</th><th>Valor (Ref R$ 10k)</th></tr><tr><td>Avançou + Nível Avançado</td><td>100%</td><td>R$ 1.250,00</td></tr><tr><td>Avançou + Nível Adequado</td><td>75%</td><td>R$ 937,50</td></tr><tr><td>Não avançou, mas manteve Avançado</td><td>50%</td><td>R$ 625,00</td></tr><tr><td>Não avançou ou estagnou</td><td>0%</td><td>R$ 0,00</td></tr></table>" },
         freq_emei: { t: "Frequência Estudantes (EMEI/CEMEI)", b: "Corresponde a 58% da base de cálculo anual (R$ 5.800,00). <br><br><table><tr><th>Média Frequência</th><th>% do Prêmio</th><th>Valor por Etapa</th></tr><tr><td>90% ou maior</td><td>100%</td><td>R$ 2.900,00</td></tr><tr><td>80% a 89,99%</td><td>75%</td><td>R$ 2.175,00</td></tr><tr><td>70% a 79,99%</td><td>50%</td><td>R$ 1.450,00</td></tr><tr><td>Abaixo de 70%</td><td>0%</td><td>R$ 0,00</td></tr></table>" },
         ocup_cei: { t: "Taxa de Ocupação (CEI)", b: "Representa 20% da base anual (R$ 2.000,00). <br><br><table><tr><th>Ocupação</th><th>% do Prêmio</th><th>Valor por Etapa</th></tr><tr><td>90% ou maior</td><td>100%</td><td>R$ 1.000,00</td></tr><tr><td>80% a 89,99%</td><td>50%</td><td>R$ 500,00</td></tr><tr><td>70% a 79,99%</td><td>30%</td><td>R$ 300,00</td></tr><tr><td>Abaixo de 70%</td><td>0%</td><td>R$ 0,00</td></tr></table>" },
         ocup_cieja: { t: "Taxa de Ocupação (CIEJA/CCI/CIP)", b: "Representa 58% da base anual (R$ 5.800,00). <br><br><table><tr><th>Ocupação</th><th>% do Prêmio</th><th>Valor por Etapa</th></tr><tr><td>80% ou maior</td><td>100%</td><td>R$ 2.900,00</td></tr><tr><td>70% a 79,99%</td><td>50%</td><td>R$ 1.450,00</td></tr><tr><td>60% a 69,99%</td><td>30%</td><td>R$ 870,00</td></tr><tr><td>Abaixo de 60%</td><td>0%</td><td>R$ 0,00</td></tr></table>" },
         superv_help: { t: "Supervisor Escolar", b: "O desempenho é calculado 50% pela média da DRE e 50% pela média das unidades supervisionadas (Art. 2º § 2º)." },
-        complex_help: { t: "Nível de Complexidade de Gestão (Anexo IV)", b: "Majoração exclusiva para Diretor, CP e Assistente. O Índice (ICG) aumenta a base do prêmio em até 80%. <br><br><table><tr><th>Nível ICG</th><th>Majoração</th><th>Valor Total PDE (100%)</th></tr><tr><td>Nível 5</td><td>+ 80%</td><td>R$ 18.000,00</td></tr><tr><td>Nível 4</td><td>+ 50%</td><td>R$ 15.000,00</td></tr><tr><td>Nível 3</td><td>+ 20%</td><td>R$ 12.000,00</td></tr><tr><td>Nível 2</td><td>+ 10%</td><td>R$ 11.000,00</td></tr><tr><td>Nível 1</td><td>0%</td><td>R$ 10.000,00</td></tr></table>" }
+        complex_help: { t: "Nível de Complexidade de Gestão (Anexo IV)", b: "Majoração exclusiva para Diretor, Coordenador Pedagógico e Assistente de Diretor. O Índice (ICG) poderá aumentar a base do prêmio em até 80%. <br><br><table><tr><th>Nível ICG</th><th>Majoração</th><th>Valor máximo de majoração th></tr><tr><td>Nível 5 ou +</td><td>+ 80%</td><td>R$ 8.000,00</td></tr><tr><td>Nível 4</td><td>+ 50%</td><td>R$ 5.000,00</td></tr><tr><td>Nível 3</td><td>+ 20%</td><td>R$ 2.000,00</td></tr><tr><td>Nível 2</td><td>+ 10%</td><td>R$ 1.000,00</td></tr><tr><td>Nível 1</td><td>0%</td><td>R$ 0</td></tr></table>" }
     };
 
     function calculate() {
