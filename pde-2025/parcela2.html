@@ -24,27 +24,29 @@
         #results-bar.is-expanded #toggle-icon { transform: rotate(180deg); }
         .card { background: white; border-radius: 1rem; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); border: 1px solid #e2e8f0; }
         table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 11px; }
-        th, td { border: 1px solid #e2e8f0; padding: 6px; text-align: center; }
-        th { background-color: #f8fafc; color: #64748b; text-transform: uppercase; }
+        th, td { border: 1px solid #e2e8f0; padding: 8px; text-align: center; }
+        th { background-color: #f8fafc; color: #64748b; text-transform: uppercase; font-weight: 800; }
+        .modal-table td { text-align: left; padding-left: 15px; }
+        .modal-table .val-col { text-align: center; font-weight: bold; color: #0056b3; }
     </style>
 </head>
 <body class="pb-72">
 
     <header class="bg-[#003562] text-white p-5 shadow-lg border-b-4 border-[#fbbf24]">
-        <div class="max-w-6xl mx-auto flex justify-between items-center text-sm md:text-base">
+        <div class="max-w-6xl mx-auto flex justify-between items-center">
             <div>
                 <h1 class="text-xl md:text-2xl font-black tracking-tighter uppercase">Simulador PDE 2026</h1>
                 <p class="text-[10px] md:text-xs text-blue-200 uppercase tracking-widest mt-1 font-medium font-bold">Secretaria Municipal de Educação</p>
             </div>
-            <img src="https://sme-upge.github.io/pde-2025/logo-sme.png" alt="SME" class="h-10 md:h-16 w-auto">
+            <img src="https://sme-upge.github.io/pde-2025/logo-sme.png" alt="SME" class="h-10 md:h-14 w-auto">
         </div>
     </header>
 
     <main class="p-4 md:p-8 max-w-5xl mx-auto">
         <!-- PERFIL -->
-        <div class="bg-blue-50 p-6 rounded-2xl mb-8 border border-blue-100 shadow-inner grid grid-cols-1 md:grid-cols-3 gap-6 text-sm font-medium">
+        <div class="bg-blue-50 p-6 rounded-2xl mb-8 border border-blue-100 shadow-inner grid grid-cols-1 md:grid-cols-3 gap-6 text-sm">
             <div>
-                <label class="block font-bold text-blue-900 mb-2 uppercase text-[10px] tracking-widest">Seu Cargo</label>
+                <label class="block font-bold text-blue-900 mb-2 uppercase text-[10px]">Seu Cargo</label>
                 <select id="cargo" class="w-full p-3 rounded-xl border-none shadow-sm font-semibold text-slate-700">
                     <option value="professor">Professor(a)</option>
                     <option value="diretor">Diretor(a) de Escola</option>
@@ -55,7 +57,7 @@
                 </select>
             </div>
             <div>
-                <label class="block font-bold text-blue-900 mb-2 uppercase text-[10px] tracking-widest">Onde trabalha?</label>
+                <label class="block font-bold text-blue-900 mb-2 uppercase text-[10px]">Local de Trabalho</label>
                 <select id="localTrabalho" class="w-full p-3 rounded-xl border-none shadow-sm font-semibold text-slate-700">
                     <option value="emef">EMEF / EMEFM</option>
                     <option value="emei">EMEI / CEMEI</option>
@@ -65,7 +67,7 @@
                 </select>
             </div>
             <div>
-                <label class="block font-bold text-blue-900 mb-2 uppercase text-[10px] tracking-widest">Jornada</label>
+                <label class="block font-bold text-blue-900 mb-2 uppercase text-[10px]">Jornada (Art. 8º)</label>
                 <select id="jornada" class="w-full p-3 rounded-xl border-none shadow-sm font-semibold text-slate-700">
                     <option value="1.0">JEIF / JB 30 / JB 40 / JE 40 (100%)</option>
                     <option value="0.75">JBD (75%)</option>
@@ -82,16 +84,16 @@
             </label>
             <select id="nivel_complexidade" class="w-full p-3 rounded-xl border-none shadow-sm font-bold text-indigo-700 text-lg">
                 <option value="0">Nível 1 (0% de majoração)</option>
-                <option value="0.10">Nível 2 (+ 10%)</option>
-                <option value="0.20">Nível 3 (+ 20%)</option>
-                <option value="0.50">Nível 4 (+ 50%)</option>
-                <option value="0.80">Nível 5 (+ 80%)</option>
+                <option value="0.10">Nível 2 (+ R$ 1.000,00)</option>
+                <option value="0.20">Nível 3 (+ R$ 2.000,00)</option>
+                <option value="0.50">Nível 4 (+ R$ 5.000,00)</option>
+                <option value="0.80">Nível 5 (+ R$ 8.000,00)</option>
             </select>
         </div>
 
         <!-- 1ª ETAPA -->
         <div class="card p-6 mb-6">
-            <h2 class="text-blue-900 font-black uppercase tracking-widest text-sm mb-6 border-l-4 border-blue-600 pl-3 font-bold">1ª Etapa (Agosto de 2026)</h2>
+            <h2 class="text-blue-900 font-black uppercase tracking-widest text-sm mb-6 border-l-4 border-blue-600 pl-3">1ª Etapa (Agosto de 2026)</h2>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
                 <div>
                     <h3 class="text-[10px] font-bold text-slate-400 uppercase mb-3">Individual (Assiduidade)</h3>
@@ -110,7 +112,7 @@
 
         <!-- 2ª ETAPA -->
         <div class="card p-6 mb-6">
-            <h2 class="text-blue-900 font-black uppercase tracking-widest text-sm mb-6 border-l-4 border-blue-600 pl-3 font-bold">2ª Etapa (Abril 2027)</h2>
+            <h2 class="text-blue-900 font-black uppercase tracking-widest text-sm mb-6 border-l-4 border-blue-600 pl-3">2ª Etapa (Abril 2027)</h2>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
                 <div>
                     <h3 class="text-[10px] font-bold text-slate-400 uppercase mb-3 font-bold">Individual (Assiduidade)</h3>
@@ -132,26 +134,24 @@
     <footer id="results-bar" class="fixed bottom-0 left-0 right-0 bg-[#0f172a] text-white shadow-2xl transition-all duration-300 is-expanded z-50 border-t-4 border-[#fbbf24]">
         <div id="results-header" class="max-w-6xl mx-auto flex items-center justify-between p-4 cursor-pointer hover:bg-slate-800">
             <div class="flex-grow grid grid-cols-2 gap-4 px-2">
-                <!-- TOTAL ESTIMADO NA ESQUERDA (AZUL) -->
                 <div class="bg-blue-600 p-3 rounded-2xl text-center border border-blue-400 shadow-lg">
-                    <span class="block text-[10px] uppercase font-black tracking-widest text-blue-100 font-bold">Total Estimado no Ano</span>
+                    <span class="block text-[10px] uppercase font-black tracking-widest text-blue-100">Total Estimado no Ano</span>
                     <span id="res_total" class="block text-xl md:text-3xl font-black">R$ 0,00</span>
                 </div>
-                <!-- TETO MÁXIMO NA DIREITA (VERDE) -->
                 <div class="bg-emerald-600 p-3 rounded-2xl text-center border border-emerald-500 shadow-lg">
-                    <span class="block text-[10px] uppercase font-black tracking-widest text-emerald-100 font-bold">Teto Máximo Possível</span>
-                    <span id="res_teto" class="block text-xl md:text-3xl font-black text-white font-bold">R$ 0,00</span>
+                    <span class="block text-[10px] uppercase font-black tracking-widest text-emerald-100">Teto Máximo Possível</span>
+                    <span id="res_teto" class="block text-xl md:text-3xl font-black text-white">R$ 0,00</span>
                 </div>
             </div>
             <div class="pl-4 text-center">
-                <span class="text-[10px] text-gray-400 block font-bold uppercase mb-1 font-bold">Detalhes</span>
+                <span class="text-[10px] text-gray-400 block font-bold uppercase mb-1">Detalhes</span>
                 <svg id="toggle-icon" class="h-6 w-6 mx-auto text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path d="M5 15l7-7 7 7" /></svg>
             </div>
         </div>
-        <div id="results-details" class="bg-slate-900 border-t border-slate-800 font-bold">
+        <div id="results-details" class="bg-slate-900 border-t border-slate-800">
             <div class="max-w-6xl mx-auto p-6 grid grid-cols-1 md:grid-cols-2 gap-4 text-center">
-                <div class="bg-blue-900/30 border border-blue-500 p-3 rounded-xl shadow-inner font-bold"><p class="text-[10px] uppercase font-black text-blue-400 font-bold tracking-widest">1ª Etapa (Antecipação)</p><p id="res_e1_total_f" class="text-xl font-black text-white font-bold">R$ 0,00</p></div>
-                <div class="bg-blue-900/30 border border-blue-500 p-3 rounded-xl shadow-inner font-bold"><p class="text-[10px] uppercase font-black text-blue-400 font-bold tracking-widest">2ª Etapa (Final)</p><p id="res_e2_total_f" class="text-xl font-black text-white font-bold">R$ 0,00</p></div>
+                <div class="bg-blue-900/30 border border-blue-500 p-3 rounded-xl shadow-inner"><p class="text-[10px] uppercase font-black text-blue-400">1ª Etapa (Antecipação)</p><p id="res_e1_total_f" class="text-xl font-black text-white">R$ 0,00</p></div>
+                <div class="bg-blue-900/30 border border-blue-500 p-3 rounded-xl shadow-inner"><p class="text-[10px] uppercase font-black text-blue-400">2ª Etapa (Final)</p><p id="res_e2_total_f" class="text-xl font-black text-white">R$ 0,00</p></div>
             </div>
         </div>
     </footer>
@@ -163,20 +163,21 @@
                 <h3 id="m_title" class="text-lg font-black text-slate-800 uppercase tracking-tight"></h3>
                 <button id="close_modal" class="text-slate-400 hover:text-red-500 text-3xl transition-colors font-bold">&times;</button>
             </div>
-            <div id="m_body" class="p-8 text-slate-600 overflow-y-auto leading-relaxed font-medium"></div>
+            <div id="m_body" class="p-8 text-slate-600 overflow-y-auto leading-relaxed"></div>
         </div>
     </div>
 
 <script>
 document.addEventListener('DOMContentLoaded', function () {
     const modais = {
-        assiduidade: { t: "Tabela de Assiduidade 2026", b: "O Valor Base é R$ 10.000,00. A assiduidade representa 42% (Geral) ou 80% (CEI). <br><br><b>Escala de descontos por faltas (Anexo III):</b> <table><tr><th>Faltas</th><th>% do Valor da Etapa</th></tr><tr><td>0 ou 1</td><td>100% (+ Bônus se zero)</td></tr><tr><td>2</td><td>95%</td></tr><tr><td>3</td><td>90%</td></tr><tr><td>4</td><td>85%</td></tr><tr><td>5</td><td>80%</td></tr><tr><td>6 a 10</td><td>0% do componente assiduidade</td></tr><tr><td>Mais de 10</td><td>Perde o direito à parcela integral daquela etapa do PDE</td></tr></table>" },
-        freq_emef: { t: "Frequência Estudantes (EMEF)", b: "A frequência escolar dos estudantes corresponde aos dias de efetiva presença do estudante na unidade escolar ao longo do ano letivo. Será correspondente a 4% da base de cálculo anual, ou seja, ao valor de até R$ 400,00 (considerando a base de R$ 10k sem majoração). <br><br><b>Faixas de apuração:</b><br>• 90% ou + (100% do componente)<br>• 85% a 89,9% (75%)<br>• 80% a 84,9% (50%)<br>• 75% a 79,9% (25%)<br>• Abaixo de 75% (0%)" },
-        saresp_lp: { t: "Desempenho LP - 2º Ano SARESP", b: "Será considerado o aumento da média e o nível de proficiência no SARESP – Língua Portuguesa (LP), considerando a comparação entre os anos de 2024 e 2025. Este objetivo correspondente a 12,5% da base de cálculo anual (até R$ 1.250,00). <br><br><b>Faixas de apuração:</b><br>• Avançou e tem média no nível avançado (100%)<br>• Avançou e tem média no nível adequado (75%)<br>• Não avançou, mas se mantém no nível avançado (50%)<br>• Não avançou ou estagnou (0%)" },
-        ocup_cei: { t: "Taxa de Ocupação (CEI)", b: "A ocupação escolar dos estudantes corresponde à relação entre o número de vagas da unidade escolar e o número de estudantes efetivamente matriculados. Representa 20% da base anual. <br><br><b>Faixas:</b> 90% ou + (100%), 80% a 89,9% (50%), 70% a 79,9% (30%)." },
-        ocup_cieja: { t: "Taxa de Ocupação (CIEJA)", b: "A ocupação escolar dos estudantes corresponde à relação entre o número de vagas e o número de estudantes matriculados. Representa 58% da base anual. <br><br><b>Faixas:</b> 80% ou + (100%), 70% a 79,9% (50%), 60% a 69,9% (30%)." },
-        superv_help: { t: "Supervisor Escolar", b: "Para supervisores (as) escolares, a segunda parcela do prêmio corresponde a média de desempenho das unidades supervisionadas (Art. 2º § 2º)." },
-        complex_help: { t: "Nível de Complexidade de Gestão (Anexo IV)", b: "Majoração do valor de referência em até 80%, ou seja, até 8 mil reais para os profissionais de educação em efetivo exercício nos cargos de Diretor, CP e Assistente a partir dos critérios estabelecidos pelo MEC referente ao Índice de Complexidade de Gestão Escolar (ICG). <br><br><b>Valores Limites Possíveis (100% de metas):</b><br>• Nível 5 (+80%): Até R$ 18.000,00<br>• Nível 4 (+50%): Até R$ 15.000,00<br>• Nível 3 (+20%): Até R$ 12.000,00<br>• Nível 2 (+10%): Até R$ 11.000,00<br>• Nível 1 (0%): R$ 10.000,00" }
+        assiduidade: { t: "Tabela de Assiduidade 2026", b: "O Valor Base é R$ 10.000,00. A assiduidade representa 42% (Geral) ou 80% (CEI). <br><br><b>Descontos por faltas (Anexo III):</b> <table><tr><th>Ausências</th><th>Resultado Atribuído</th></tr><tr><td>0 ou 1</td><td>100% (+ bônus antecipação)</td></tr><tr><td>2 faltas</td><td>95%</td></tr><tr><td>3 faltas</td><td>90%</td></tr><tr><td>4 faltas</td><td>85%</td></tr><tr><td>5 faltas</td><td>80%</td></tr><tr><td>6 a 10 faltas</td><td>0% do componente</td></tr><tr><td>Mais de 10 faltas</td><td>Deixa de fazer jus à etapa integral</td></tr></table>" },
+        freq_emef: { t: "Frequência Estudantes (EMEF/EMEFM)", b: "Corresponde a 4% da base de cálculo anual. <br><br><table><tr><th>Média Frequência</th><th>% do Prêmio</th><th>Valor (Ref R$ 10k)</th></tr><tr><td>90% ou maior</td><td>100%</td><td>R$ 400,00</td></tr><tr><td>85% a 89,99%</td><td>75%</td><td>R$ 300,00</td></tr><tr><td>80% a 84,99%</td><td>50%</td><td>R$ 200,00</td></tr><tr><td>75% a 79,99%</td><td>25%</td><td>R$ 100,00</td></tr><tr><td>Abaixo de 75%</td><td>0%</td><td>R$ 0,00</td></tr></table>" },
+        saresp_lp: { t: "Desempenho LP - SARESP (Anexo I)", b: "Avanço na proficiência em Língua Portuguesa (2º ano). Peso de 12,5% da base. <br><br><table><tr><th>Apuração</th><th>% do Prêmio</th><th>Valor (Ref R$ 10k)</th></tr><tr><td>Avançou + Nível Avançado</td><td>100%</td><td>R$ 1.250,00</td></tr><tr><td>Avançou + Nível Adequado</td><td>75%</td><td>R$ 937,50</td></tr><tr><td>Não avançou, mas manteve Avançado</td><td>50%</td><td>R$ 625,00</td></tr><tr><td>Não avançou ou estagnou</td><td>0%</td><td>R$ 0,00</td></tr></table>" },
+        freq_emei: { t: "Frequência Estudantes (EMEI/CEMEI)", b: "Corresponde a 58% da base de cálculo anual (R$ 5.800,00). <br><br><table><tr><th>Média Frequência</th><th>% do Prêmio</th><th>Valor por Etapa</th></tr><tr><td>90% ou maior</td><td>100%</td><td>R$ 2.900,00</td></tr><tr><td>80% a 89,99%</td><td>75%</td><td>R$ 2.175,00</td></tr><tr><td>70% a 79,99%</td><td>50%</td><td>R$ 1.450,00</td></tr><tr><td>Abaixo de 70%</td><td>0%</td><td>R$ 0,00</td></tr></table>" },
+        ocup_cei: { t: "Taxa de Ocupação (CEI)", b: "Representa 20% da base anual (R$ 2.000,00). <br><br><table><tr><th>Ocupação</th><th>% do Prêmio</th><th>Valor por Etapa</th></tr><tr><td>90% ou maior</td><td>100%</td><td>R$ 1.000,00</td></tr><tr><td>80% a 89,99%</td><td>50%</td><td>R$ 500,00</td></tr><tr><td>70% a 79,99%</td><td>30%</td><td>R$ 300,00</td></tr><tr><td>Abaixo de 70%</td><td>0%</td><td>R$ 0,00</td></tr></table>" },
+        ocup_cieja: { t: "Taxa de Ocupação (CIEJA/CCI/CIP)", b: "Representa 58% da base anual (R$ 5.800,00). <br><br><table><tr><th>Ocupação</th><th>% do Prêmio</th><th>Valor por Etapa</th></tr><tr><td>80% ou maior</td><td>100%</td><td>R$ 2.900,00</td></tr><tr><td>70% a 79,99%</td><td>50%</td><td>R$ 1.450,00</td></tr><tr><td>60% a 69,99%</td><td>30%</td><td>R$ 870,00</td></tr><tr><td>Abaixo de 60%</td><td>0%</td><td>R$ 0,00</td></tr></table>" },
+        superv_help: { t: "Supervisor Escolar", b: "O desempenho é calculado 50% pela média da DRE e 50% pela média das unidades supervisionadas (Art. 2º § 2º)." },
+        complex_help: { t: "Nível de Complexidade de Gestão (Anexo IV)", b: "Majoração exclusiva para Diretor, CP e Assistente. O Índice (ICG) aumenta a base do prêmio em até 80%. <br><br><table><tr><th>Nível ICG</th><th>Majoração</th><th>Valor Total PDE (100%)</th></tr><tr><td>Nível 5</td><td>+ 80%</td><td>R$ 18.000,00</td></tr><tr><td>Nível 4</td><td>+ 50%</td><td>R$ 15.000,00</td></tr><tr><td>Nível 3</td><td>+ 20%</td><td>R$ 12.000,00</td></tr><tr><td>Nível 2</td><td>+ 10%</td><td>R$ 11.000,00</td></tr><tr><td>Nível 1</td><td>0%</td><td>R$ 10.000,00</td></tr></table>" }
     };
 
     function calculate() {
@@ -205,7 +206,6 @@ document.addEventListener('DOMContentLoaded', function () {
 
         const gV = (id) => parseFloat(document.getElementById(id)?.value || 0);
 
-        // COLETIVO
         let e1_c = 0, e2_c = 0;
         if(local === 'emef' && !isSupervisor) {
             e1_c = (base_total * 0.04 * gV('e1_m_val')) + (base_total * 0.125 * gV('e1_ex_val'));
@@ -253,18 +253,19 @@ document.addEventListener('DOMContentLoaded', function () {
         let h1 = '', h2 = '';
         if(local === 'emef' && !isSupervisor) {
             const opt = `<option value="1">90% ou maior</option><option value="0.75">85% a 89,9%</option><option value="0.5">80% a 84,9%</option><option value="0.25">75% a 79,9%</option><option value="0">Menor</option>`;
-            h1 = `<div><label class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Frequência <span class="help-icon" data-modal="freq_emef">?</span></label><select id="e1_m_val" class="w-full p-2 border rounded-lg bg-slate-50 font-bold tracking-tighter">${opt}</select></div><div><label class="block text-[10px] font-bold text-slate-400 uppercase mb-1">SARESP LP <span class="help-icon" data-modal="saresp_lp">?</span></label><select id="e1_ex_val" class="w-full p-2 border rounded-lg bg-slate-50 font-bold tracking-tighter"><option value="1">Avançou/Nível Avançado</option><option value="0.75">Avançou/Nível Adequado</option><option value="0.5">Manteve Avançado</option><option value="0">Não</option></select></div>`;
-            h2 = `<div><label class="block text-[10px] font-bold text-slate-400 uppercase mb-1 tracking-tighter">Frequência</label><select id="e2_m_val" class="w-full p-2 border rounded-lg bg-slate-50 font-bold tracking-tighter">${opt}</select></div><div><label class="block text-[10px] font-bold text-slate-400 uppercase mb-1 tracking-tighter">Prova São Paulo</label><select id="e2_ex_val" class="w-full p-2 border rounded-lg bg-slate-50 font-bold tracking-tighter"><option value="1">Meta 100% + Redução</option><option value="0.75">Meta 90%</option><option value="0">Não</option></select></div><div><label class="block text-[10px] font-bold text-slate-400 uppercase mb-1 font-bold tracking-tighter">Meta IDEB</label><select id="e2_ideb" class="w-full p-2 border rounded-lg bg-slate-50 font-bold tracking-tighter"><option value="1">Atingiu Meta</option><option value="0.75">90% da meta</option><option value="0">Não</option></select></div>`;
+            h1 = `<div><label class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Frequência <span class="help-icon" data-modal="freq_emef">?</span></label><select id="e1_m_val" class="w-full p-2 border rounded-lg bg-slate-50 font-bold tracking-tighter font-bold">${opt}</select></div><div><label class="block text-[10px] font-bold text-slate-400 uppercase mb-1">SARESP LP <span class="help-icon" data-modal="saresp_lp">?</span></label><select id="e1_ex_val" class="w-full p-2 border rounded-lg bg-slate-50 font-bold tracking-tighter font-bold"><option value="1">Avançou/Nível Avançado</option><option value="0.75">Avançou/Nível Adequado</option><option value="0.5">Manteve Avançado</option><option value="0">Não</option></select></div>`;
+            h2 = `<div><label class="block text-[10px] font-bold text-slate-400 uppercase mb-1 tracking-tighter font-bold">Frequência</label><select id="e2_m_val" class="w-full p-2 border rounded-lg bg-slate-50 font-bold tracking-tighter font-bold font-bold">${opt}</select></div><div><label class="block text-[10px] font-bold text-slate-400 uppercase mb-1 tracking-tighter font-bold">Prova São Paulo</label><select id="e2_ex_val" class="w-full p-2 border rounded-lg bg-slate-50 font-bold tracking-tighter font-bold font-bold font-bold"><option value="1">Meta 100% + Redução</option><option value="0.75">Meta 90%</option><option value="0">Não</option></select></div><div><label class="block text-[10px] font-bold text-slate-400 uppercase mb-1 font-bold tracking-tighter font-bold">Meta IDEB</label><select id="e2_ideb" class="w-full p-2 border rounded-lg bg-slate-50 font-bold tracking-tighter font-bold font-bold font-bold font-bold font-bold"><option value="1">Atingiu Meta</option><option value="0.75">90% da meta</option><option value="0">Não</option></select></div>`;
         } else {
             let label1 = isSupervisor ? 'Média da DRE (%)' : (local === 'cei' || local === 'cieja' ? 'Taxa Ocupação' : 'Desempenho (%)');
             let label2 = isSupervisor ? 'Média Unid. Supervisionadas (%)' : label1;
-            let mId = (local === 'cei') ? 'ocup_cei' : (local === 'cieja') ? 'ocup_cieja' : '';
-            let opt = (local === 'cei') ? '<option value="1">90% ou +</option><option value="0.5">80% a 89%</option><option value="0.3">70% a 79%</option><option value="0">Menor</option>' : 
-                      (local === 'cieja') ? '<option value="1">80% ou +</option><option value="0.5">70% a 79%</option><option value="0.3">60% a 69%</option><option value="0">Menor</option>' :
+            let mId = (local === 'cei') ? 'ocup_cei' : (local === 'cieja') ? 'ocup_cieja' : (local === 'emei' ? 'freq_emei' : '');
+            let opt = (local === 'cei') ? '<option value="1">90% ou +</option><option value="0.5">80% a 89,9%</option><option value="0.3">70% a 79,9%</option><option value="0">Menor</option>' : 
+                      (local === 'cieja') ? '<option value="1">80% ou +</option><option value="0.5">70% a 79,9%</option><option value="0.3">60% a 69,9%</option><option value="0">Menor</option>' :
+                      (local === 'emei') ? '<option value="1">90% ou +</option><option value="0.75">80% a 89,9%</option><option value="0.5">70% a 79,9%</option><option value="0">Menor</option>' :
                       '<option value="1">90% ou +</option><option value="0.75">80% a 89,9%</option><option value="0.5">70% a 79,9%</option><option value="0">Menor</option>';
             
-            h1 = `<div><label class="block text-[10px] font-bold text-slate-400 uppercase mb-1 font-bold tracking-tighter">${label1} ${mId?`<span class="help-icon" data-modal="${mId}">?</span>`:''}</label>${(local==='dre'||isSupervisor)?`<input type="number" id="e1_m_val" value="100" class="w-full p-2 border rounded-lg bg-slate-50 font-black text-blue-600 text-center text-lg">`:`<select id="e1_m_val" class="w-full p-2 border rounded-lg bg-slate-50 font-bold font-bold font-bold tracking-tighter">${opt}</select>`}</div>`;
-            h2 = `<div><label class="block text-[10px] font-bold text-slate-400 uppercase mb-1 font-bold tracking-tighter">${label2} ${isSupervisor?`<span class="help-icon" data-modal="superv_help">?</span>`:''}</label>${(local==='dre'||isSupervisor)?`<input type="number" id="e2_m_val" value="100" class="w-full p-2 border rounded-lg bg-slate-50 font-black text-emerald-600 text-center text-lg">`:`<select id="e2_m_val" class="w-full p-2 border rounded-lg bg-slate-50 font-bold font-bold font-bold tracking-tighter">${opt}</select>`}</div>`;
+            h1 = `<div><label class="block text-[10px] font-bold text-slate-400 uppercase mb-1 font-bold tracking-tighter">${label1} ${mId?`<span class="help-icon" data-modal="${mId}">?</span>`:''}</label>${(local==='dre'||isSupervisor)?`<input type="number" id="e1_m_val" value="100" class="w-full p-2 border rounded-lg bg-slate-50 font-black text-blue-600 text-center text-lg font-bold">`:`<select id="e1_m_val" class="w-full p-2 border rounded-lg bg-slate-50 font-bold font-bold font-bold tracking-tighter">${opt}</select>`}</div>`;
+            h2 = `<div><label class="block text-[10px] font-bold text-slate-400 uppercase mb-1 font-bold tracking-tighter">${label2} ${isSupervisor?`<span class="help-icon" data-modal="superv_help">?</span>`:''}</label>${(local==='dre'||isSupervisor)?`<input type="number" id="e2_m_val" value="100" class="w-full p-2 border rounded-lg bg-slate-50 font-black text-emerald-600 text-center text-lg font-bold">`:`<select id="e2_m_val" class="w-full p-2 border rounded-lg bg-slate-50 font-bold font-bold font-bold tracking-tighter">${opt}</select>`}</div>`;
         }
         document.getElementById('e1_metrics').innerHTML = h1; document.getElementById('e2_metrics').innerHTML = h2;
         document.querySelectorAll('input, select').forEach(el => el.addEventListener('input', calculate));
