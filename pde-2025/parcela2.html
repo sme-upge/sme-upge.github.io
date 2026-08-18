@@ -34,7 +34,7 @@
         <div class="max-w-6xl mx-auto flex justify-between items-center text-sm md:text-base">
             <div>
                 <h1 class="text-xl md:text-2xl font-black tracking-tighter uppercase">Simulador PDE 2026</h1>
-                <p class="text-[10px] md:text-xs text-blue-200 uppercase tracking-widest mt-1 font-medium font-bold">Secretaria Municipal de Educação de São Paulo</p>
+                <p class="text-[10px] md:text-xs text-blue-200 uppercase tracking-widest mt-1 font-medium font-bold">Secretaria Municipal de Educação</p>
             </div>
             <img src="https://sme-upge.github.io/pde-2025/logo-sme.png" alt="SME" class="h-10 md:h-14 w-auto">
         </div>
@@ -51,7 +51,7 @@
                     <option value="assistente_diretor">Assistente de Diretor(a)</option>
                     <option value="coordenador">Coordenador(a) Pedagógico(a)</option>
                     <option value="supervisor">Supervisor(a) Escolar</option>
-                    <option value="outros_cargos">Auxiliar Técnico de Educação, Agente Escolar e Outros</option>
+                    <option value="outros_cargos">ATE / Agente Escolar / Outros</option>
                 </select>
             </div>
             <div>
@@ -59,9 +59,9 @@
                 <select id="localTrabalho" class="w-full p-3 rounded-xl border-none shadow-sm font-semibold text-slate-700">
                     <option value="emef">EMEF / EMEFM</option>
                     <option value="emei">EMEI / CEMEI</option>
-                    <option value="cei">CEI </option>
-                    <option value="cieja">CIEJA</option>
-                    <option value="dre">DRE / SME / GESTÃO CEU / EMEBS</option>
+                    <option value="cei">CEI DIRETO</option>
+                    <option value="cieja">CIEJA / CCI / CIP</option>
+                    <option value="dre">DRE / SME / GESTÃO CEU</option>
                 </select>
             </div>
             <div>
@@ -98,7 +98,7 @@
                     <label class="block text-sm text-slate-600 mb-2 flex items-center font-medium">Faltas no 1º semestre <span class="help-icon" data-modal="assiduidade">?</span></label>
                     <div class="flex items-center gap-4">
                         <input type="number" id="f1" value="0" min="0" class="w-24 p-3 border border-gray-300 rounded-xl bg-slate-50 font-black text-2xl text-center text-blue-600">
-                        <span class="text-[10px] text-slate-400 font-bold uppercase tracking-tighter tracking-widest">Faltas</span>
+                        <span class="text-[10px] text-slate-400 font-bold uppercase tracking-tighter">Faltas</span>
                     </div>
                 </div>
                 <div>
@@ -117,7 +117,7 @@
                     <label class="block text-sm text-slate-600 mb-2 flex items-center font-medium">Faltas no 2º semestre <span class="help-icon" data-modal="assiduidade">?</span></label>
                     <div class="flex items-center gap-4">
                         <input type="number" id="f2" value="0" min="0" class="w-24 p-3 border border-gray-300 rounded-xl bg-slate-50 font-black text-2xl text-center text-blue-600">
-                        <span class="text-[10px] text-slate-400 font-bold uppercase tracking-tighter tracking-widest">Faltas</span>
+                        <span class="text-[10px] text-slate-400 font-bold uppercase tracking-tighter text-sm">Faltas</span>
                     </div>
                 </div>
                 <div>
@@ -131,7 +131,7 @@
     <!-- RODAPÉ -->
     <footer id="results-bar" class="fixed bottom-0 left-0 right-0 bg-[#0f172a] text-white shadow-2xl transition-all duration-300 is-expanded z-50 border-t-4 border-[#fbbf24]">
         <div id="results-header" class="max-w-6xl mx-auto flex items-center justify-between p-4 cursor-pointer hover:bg-slate-800">
-            <div class="flex-grow grid grid-cols-2 gap-4 px-2">
+            <div class="flex-grow grid grid-cols-2 gap-4 px-2 font-bold">
                 <div class="bg-blue-600 p-3 rounded-2xl text-center border border-blue-400 shadow-lg font-bold">
                     <span class="block text-[10px] uppercase font-black tracking-widest text-blue-100 font-bold">Total Estimado no Ano</span>
                     <span id="res_total" class="block text-xl md:text-3xl font-black font-bold">R$ 0,00</span>
@@ -148,8 +148,8 @@
         </div>
         <div id="results-details" class="bg-slate-900 border-t border-slate-800">
             <div class="max-w-6xl mx-auto p-6 grid grid-cols-1 md:grid-cols-2 gap-4 text-center font-bold">
-                <div class="bg-blue-900/30 border border-blue-500 p-3 rounded-xl shadow-inner font-bold"><p class="text-[10px] uppercase font-black text-blue-400 tracking-widest">1ª Etapa (Antecipação)</p><p id="res_e1_total_f" class="text-xl font-black text-white font-bold">R$ 0,00</p></div>
-                <div class="bg-blue-900/30 border border-blue-500 p-3 rounded-xl shadow-inner font-bold"><p class="text-[10px] uppercase font-black text-blue-400 tracking-widest">2ª Etapa (Final)</p><p id="res_e2_total_f" class="text-xl font-black text-white font-bold">R$ 0,00</p></div>
+                <div class="bg-blue-900/30 border border-blue-500 p-3 rounded-xl shadow-inner font-bold"><p class="text-[10px] uppercase font-black text-blue-400 font-bold tracking-widest">1ª Etapa (Antecipação)</p><p id="res_e1_total_f" class="text-xl font-black text-white font-bold">R$ 0,00</p></div>
+                <div class="bg-blue-900/30 border border-blue-500 p-3 rounded-xl shadow-inner font-bold"><p class="text-[10px] uppercase font-black text-blue-400 font-bold tracking-widest">2ª Etapa (Final)</p><p id="res_e2_total_f" class="text-xl font-black text-white font-bold">R$ 0,00</p></div>
             </div>
         </div>
     </footer>
@@ -168,15 +168,15 @@
 <script>
 document.addEventListener('DOMContentLoaded', function () {
     const modais = {
-        assiduidade: { t: "Tabela de Assiduidade 2026 (Anexo III)", b: "A assiduidade representa 80% do prêmio para profissionais que atuam em CEIs e 42% do prêmio para os demais servidores. <br><br><b>Escala de descontos por faltas:</b> <table><tr><th>Ausências</th><th>CEI</th><th>Demais Unidades (R$)</th></tr><tr><td>0 ou 1 falta</td><td>R$ 4.000,00</td><td>R$ 2.100,00</td></tr><tr><td>2 faltas</td><td>R$ 2.057,14</td><td>R$ 1.080,00</td></tr><tr><td>3 faltas</td><td>R$ 1.542,86</td><td>R$ 810,00</td></tr><tr><td>4 faltas</td><td>R$ 1.028,57</td><td>R$ 540,00</td></tr><tr><td>5 faltas</td><td>R$ 514,29</td><td>R$ 270,00</td></tr><tr><td>Mais de 6 faltas</td><td>R$ 0,00</td><td>R$ 0,00</td></tr><tr><td>Mais de 10 faltas</td><td colspan='2'>Perde o direito à parcela do PDE</td></tr></table>" },
-        freq_emef: { t: "Frequência Estudantes (EMEF/EMEFM)", b: "Corresponde a 4% do prêmio. <br><br><table><tr><th>Média Frequência</th><th>Valor de referência(R$)</th></tr><tr><td>90% ou maior</td><td>R$ 400,00</td></tr><tr><td>85% a 89,99%</td><td>R$ 300,00</td></tr><tr><td>80% a 84,99%</td><td>R$ 200,00</td></tr><tr><td>75% a 79,99%</td><td>R$ 100,00</td></tr><tr><td>Abaixo de 75%</td><td>R$ 0,00</td></tr></table>" },
-        saresp_lp: { t: "Desempenho LP - SARESP (Anexo I)", b: "Avanço na proficiência em Língua Portuguesa (2º ano). Peso de 12,5% da base anual. <br><br><table><tr><th>Apuração</th><th>Valor (R$)</th></tr><tr><td>Aumentou a proficiência e está no nível avançado</td><td>R$ 1.250,00</td></tr><tr><td>Aumentou a proficiência e está no nível adequado</td><td>R$ 937,50</td></tr><tr><td>Não aumentou a proficiência, mas está no nível avançado</td><td>R$ 625,00</td></tr><tr><td>Não aumentou a proficiência ou estagnou</td><td>R$ 0,00</td></tr></table>" },
-        prova_sp: { t: "Prova São Paulo (Anexo I)", b: "Peso de 12,5% da base anual. <br><br><table><tr><th>Apuração</th><th>Valor (R$)</th></tr><tr><td>Meta >= 100% + redução de estudantes abaixo do básico</td><td>R$ 1.250,00</td></tr><tr><td>Meta >= 100% sem redução de estudantes abaixo do básico</td><td>R$ 625,00</td></tr><tr><td>Meta >= 90% + redução de estudantes abaixo do básico</td><td>R$ 937,50</td></tr><tr><td>Meta >= 80% + redução de estudantes abaixo do básico</td><td>R$ 625,00</td></tr></table>" },
-        ideb_meta: { t: "Meta IDEB (Anexo I)", b: "Peso de 25% da base anual. <br><br><table><tr><th>Apuração</th><th>Valor (R$)</th></tr><tr><td>Atingimento ou superação</td><td>R$ 2.500,00</td></tr><tr><td>90% a 99,99% da meta</td><td>R$ 1.875,00</td></tr><tr><td>80% a 89,99% + redução básico</td><td>R$ 1.250,00</td></tr></table>" },
-        freq_emei: { t: "Frequência Estudantes (EMEI/CEMEI)", b: "Corresponde a 58% da base anual. <br><br><table><tr><th>Média Frequência</th><th>1ª Etapa (R$)</th><th>2ª Etapa (R$)</th></tr><tr><td>90% ou maior</td><td>R$ 2.900,00</td><td>R$ 2.900,00</td></tr><tr><td>80% a 89,99%</td><td>R$ 2.175,00</td><td>R$ 2.175,00</td></tr><tr><td>70% a 79,99%</td><td>R$ 1.450,00</td><td>R$ 1.450,00</td></tr><tr><td>Abaixo de 70%</td><td>R$ 0,00</td><td>R$ 0,00</td></tr></table>" },
-        ocup_cei: { t: "Taxa de Ocupação (CEI)", b: "Representa 20% da base anual. <br><br><table><tr><th>Ocupação</th><th>1ª Etapa (R$)</th><th>2ª Etapa (R$)</th></tr><tr><td>90% ou maior</td><td>R$ 1.000,00</td><td>R$ 1.000,00</td></tr><tr><td>80% a 89,99%</td><td>R$ 500,00</td><td>R$ 500,00</td></tr><tr><td>70% a 79,99%</td><td>R$ 300,00</td><td>R$ 300,00</td></tr><tr><td>Abaixo de 70%</td><td>R$ 0,00</td><td>R$ 0,00</td></tr></table>" },
-        ocup_cieja: { t: "Taxa de Ocupação (CIEJA/CCI/CIP)", b: "Representa 58% da base anual. <br><br><table><tr><th>Ocupação</th><th>1ª Etapa (R$)</th><th>2ª Etapa (R$)</th></tr><tr><td>80% ou maior</td><td>R$ 2.900,00</td><td>R$ 2.900,00</td></tr><tr><td>70% a 79,99%</td><td>R$ 1.450,00</td><td>R$ 1.450,00</td></tr><tr><td>60% a 69,99%</td><td>R$ 870,00</td><td>R$ 870,00</td></tr><tr><td>Abaixo de 60%</td><td>R$ 0,00</td><td>R$ 0,00</td></tr></table>" },
-        complex_help: { t: "Nível de Complexidade de Gestão (Anexo IV)", b: "O ICG reconhece que unidades maiores e com mais turnos exigem esforço de gestão diferenciado. O valor base do PDE é acrescido conforme a escola: <br><br>• <b>Nível 5:</b> + R$ 8.000,00 (Total R$ 18.000)<br>• <b>Nível 4:</b> + R$ 5.000,00 (Total R$ 15.000)<br>• <b>Nível 3:</b> + R$ 2.000,00 (Total R$ 12.000)<br>• <b>Nível 2:</b> + R$ 1.000,00 (Total R$ 11.000)<br>• <b>Nível 1:</b> R$ 0,00 (Total R$ 10.000)" },
+        assiduidade: { t: "Tabela de Assiduidade 2026 (Anexo III)", b: "O Valor de Referência é R$ 10.000,00 (podendo ser majorado pelo ICG). A assiduidade representa 42% (Geral) ou 80% (CEI). <br><br><b>Valores da Etapa (Por Semestre):</b> <table><tr><th>Ausências</th><th>CEI (R$)</th><th>Demais (R$)</th></tr><tr><td>0 ou 1 falta</td><td>R$ 4.000,00</td><td>R$ 2.100,00</td></tr><tr><td>2 faltas</td><td>R$ 2.057,14</td><td>R$ 1.080,00</td></tr><tr><td>3 faltas</td><td>R$ 1.542,86</td><td>R$ 810,00</td></tr><tr><td>4 faltas</td><td>R$ 1.028,57</td><td>R$ 540,00</td></tr><tr><td>5 faltas</td><td>R$ 514,29</td><td>R$ 270,00</td></tr><tr><td>Mais de 6 dias</td><td>R$ 0,00</td><td>R$ 0,00</td></tr><tr><td>Mais de 10 dias</td><td colspan='2'>Perde o direito à parcela integral do PDE</td></tr></table>" },
+        freq_emef: { t: "Frequência Estudantes (EMEF/EMEFM)", b: "Corresponde a 4% da base total anual. <br><br><table><tr><th>Média Frequência</th><th>Resultado Atribuído</th><th>Valor por Etapa (R$)</th></tr><tr><td>90% ou maior</td><td>100%</td><td>R$ 400,00</td></tr><tr><td>85% a 89,99%</td><td>75%</td><td>R$ 300,00</td></tr><tr><td>80% a 84,99%</td><td>50%</td><td>R$ 200,00</td></tr><tr><td>75% a 79,99%</td><td>25%</td><td>R$ 100,00</td></tr><tr><td>Abaixo de 75%</td><td>0%</td><td>R$ 0,00</td></tr></table>" },
+        saresp_lp: { t: "Desempenho LP - SARESP (Anexo I)", b: "Avanço na proficiência em Língua Portuguesa (2º ano). Peso de 12,5% da base anual. <br><br><table><tr><th>Apuração</th><th>Resultado Atribuído</th><th>Valor do Prêmio (R$)</th></tr><tr><td>Avançou + Nível Avançado</td><td>100%</td><td>R$ 1.250,00</td></tr><tr><td>Avançou + Nível Adequado</td><td>75%</td><td>R$ 937,50</td></tr><tr><td>Não avançou, mas manteve Avançado</td><td>50%</td><td>R$ 625,00</td></tr><tr><td>Não avançou ou estagnou</td><td>0%</td><td>R$ 0,00</td></tr></table>" },
+        prova_sp: { t: "Evolução Prova São Paulo (Anexo I)", b: "Cálculo baseado no atingimento de meta e redução de alunos no nível 'abaixo do básico'. <br><br><table><tr><th>Apuração</th><th>Resultado Atribuído</th><th>Valor do Prêmio (R$)</th></tr><tr><td>Meta >= 100% + Redução Abaixo Básico</td><td>100%</td><td>R$ 1.250,00</td></tr><tr><td>Meta >= 100% sem Redução</td><td>50%</td><td>R$ 625,00</td></tr><tr><td>Meta >= 90% + Redução Abaixo Básico</td><td>75%</td><td>R$ 937,50</td></tr><tr><td>Meta >= 90% sem Redução</td><td>37,5%</td><td>R$ 468,75</td></tr><tr><td>Meta >= 80% + Redução Abaixo Básico</td><td>50%</td><td>R$ 625,00</td></tr><tr><td>Meta >= 80% sem Redução</td><td>25%</td><td>R$ 312,50</td></tr><tr><td>Demais situações</td><td>0%</td><td>R$ 0,00</td></tr></table>" },
+        ideb_meta: { t: "Meta IDEB (Anexo I)", b: "Atingimento da meta fixada pelo INEP. Peso de 25% da base anual. <br><br><table><tr><th>Apuração</th><th>Resultado Atribuído</th><th>Valor do Prêmio (R$)</th></tr><tr><td>Atingimento ou superação da meta</td><td>100%</td><td>R$ 2.500,00</td></tr><tr><td>Atingimento de 90% a 99,99% da meta</td><td>75%</td><td>R$ 1.875,00</td></tr><tr><td>Atingimento de 80% a 89,99% + Redução Abaixo Básico</td><td>50%</td><td>R$ 1.250,00</td></tr><tr><td>Menos de 80% da meta</td><td>0%</td><td>R$ 0,00</td></tr></table>" },
+        freq_emei: { t: "Frequência Estudantes (EMEI/CEMEI)", b: "Corresponde a 58% da base anual. <br><br><table><tr><th>Média Frequência</th><th>Resultado Atribuído</th><th>Valor por Etapa (R$)</th></tr><tr><td>90% ou maior</td><td>100%</td><td>R$ 2.900,00</td></tr><tr><td>80% a 89,99%</td><td>75%</td><td>R$ 2.175,00</td></tr><tr><td>70% a 79,99%</td><td>50%</td><td>R$ 1.450,00</td></tr><tr><td>Abaixo de 70%</td><td>0%</td><td>R$ 0,00</td></tr></table>" },
+        ocup_cei: { t: "Taxa de Ocupação (CEI)", b: "Representa 20% da base anual. <br><br><table><tr><th>Ocupação</th><th>Resultado Atribuído</th><th>Valor por Etapa (R$)</th></tr><tr><td>90% ou maior</td><td>100%</td><td>R$ 1.000,00</td></tr><tr><td>80% a 89,99%</td><td>50%</td><td>R$ 500,00</td></tr><tr><td>70% a 79,99%</td><td>30%</td><td>R$ 300,00</td></tr><tr><td>Abaixo de 70%</td><td>0%</td><td>R$ 0,00</td></tr></table>" },
+        ocup_cieja: { t: "Taxa de Ocupação (CIEJA/CCI/CIP)", b: "Representa 58% da base anual. <br><br><table><tr><th>Ocupação</th><th>Resultado Atribuído</th><th>Valor por Etapa (R$)</th></tr><tr><td>80% ou maior</td><td>100%</td><td>R$ 2.900,00</td></tr><tr><td>70% a 79,99%</td><td>50%</td><td>R$ 1.450,00</td></tr><tr><td>60% a 69,99%</td><td>30%</td><td>R$ 870,00</td></tr><tr><td>Abaixo de 60%</td><td>0%</td><td>R$ 0,00</td></tr></table>" },
+        complex_help: { t: "Nível de Complexidade de Gestão (Anexo IV)", b: "Majoração em Reais (R$) sobre a base de R$ 10.000,00 exclusiva para exercício em unidades educacionais. <br><br><b>Valores máximos atingíveis (100% de metas):</b><br>• Nível 5: + R$ 8.000,00 (Total R$ 18.000)<br>• Nível 4: + R$ 5.000,00 (Total R$ 15.000)<br>• Nível 3: + R$ 2.000,00 (Total R$ 12.000)<br>• Nível 2: + R$ 1.000,00 (Total R$ 11.000)<br>• Nível 1: R$ 0,00 (Total R$ 10.000)" },
         superv_help: { t: "Supervisor Escolar", b: "Para supervisores (as) escolares, a segunda parcela do prêmio corresponde a média de desempenho das unidades supervisionadas (Art. 2º § 2º)." }
     };
 
@@ -212,7 +212,6 @@ document.addEventListener('DOMContentLoaded', function () {
             e1_c = (base_total * 0.04 * gV('e1_m_val')) + (base_total * 0.125 * gV('e1_ex_val'));
             e2_c = (base_total * 0.04 * gV('e2_m_val')) + (base_total * 0.125 * gV('e2_ex_val')) + (base_total * 0.25 * gV('e2_ideb'));
         } else {
-            // Unidades e Órgãos Centrais (Escala 0 a 100 digitada pelo usuário)
             e1_c = (base_total * pCol / 2) * (gV('e1_m_val') / 100);
             e2_c = (base_total * pCol / 2) * (gV('e2_m_val') / 100);
         }
@@ -255,9 +254,9 @@ document.addEventListener('DOMContentLoaded', function () {
 
         let h1 = '', h2 = '';
         if(local === 'emef' && !isSupervisor) {
-            const opt = `<option value="1">90% ou maior</option><option value="0.75">85% a 89,99%</option><option value="0.5">80% a 84,99%</option><option value="0.25">75% a 79,99%</option><option value="0">Abaixo de 75%</option>`;
-            h1 = `<div><label class="block text-[10px] font-bold text-slate-400 uppercase mb-1 font-bold tracking-tighter">Taxa de Frequência <span class="help-icon" data-modal="freq_emef">?</span></label><select id="e1_m_val" class="w-full p-2 border rounded-lg bg-slate-50 font-bold font-bold tracking-tighter">${opt}</select></div><div><label class="block text-[10px] font-bold text-slate-400 uppercase mb-1 font-bold tracking-tighter">Desempenho do 2º ano em Língua Portuguesa - SARESP <span class="help-icon" data-modal="saresp_lp">?</span></label><select id="e1_ex_val" class="w-full p-2 border rounded-lg bg-slate-50 font-bold font-bold tracking-tighter"><option value="1">Aumentou sua média e está no nível avançado</option><option value="0.75">Aumentou sua média e está no nível adequado</option><option value="0.5">Não aumentou sua média, mas está no nível avançado</option><option value="0">Não aumentou sua média ou estagnou</option></select></div>`;
-            h2 = `<div><label class="block text-[10px] font-bold text-slate-400 uppercase mb-1 font-bold tracking-tighter">Taxa de Frequência</label><select id="e2_m_val" class="w-full p-2 border rounded-lg bg-slate-50 font-bold font-bold tracking-tighter">${opt}</select></div><div><label class="block text-[10px] font-bold text-slate-400 uppercase mb-1 font-bold tracking-tighter text-slate-400">Prova São Paulo <span class="help-icon" data-modal="prova_sp">?</span></label><select id="e2_ex_val" class="w-full p-2 border rounded-lg bg-slate-50 font-bold font-bold tracking-tighter"><option value="1">Meta >= 100% e redução de estudantes abaixo do básico</option><option value="0.75">Meta >= 90% e redução de estudantes abaixo do básico</option><option value="0.5">Meta >= 80% e redução de estudantes abaixo do básico</option><option value="0">Não</option></select></div><div><label class="block text-[10px] font-bold text-slate-400 uppercase mb-1 font-bold font-bold tracking-tighter">Meta IDEB <span class="help-icon" data-modal="ideb_meta">?</span></label><select id="e2_ideb" class="w-full p-2 border rounded-lg bg-slate-50 font-bold font-bold tracking-tighter"><option value="1">Atingiu ou superou a meta</option><option value="0.75">90% da meta</option><option value="0.5">80% da meta</option><option value="0">Não atingiu a meta</option></select></div>`;
+            const opt = `<option value="1">90% ou maior</option><option value="0.75">85% a 89,99%</option><option value="0.5">80% a 84,99%</option><option value="0.25">75% a 79,99%</option><option value="0">Menor</option>`;
+            h1 = `<div><label class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Taxa de Frequência <span class="help-icon" data-modal="freq_emef">?</span></label><select id="e1_m_val" class="w-full p-2 border rounded-lg bg-slate-50 font-bold">${opt}</select></div><div><label class="block text-[10px] font-bold text-slate-400 uppercase mb-1 font-bold">Desempenho LP (SARESP) <span class="help-icon" data-modal="saresp_lp">?</span></label><select id="e1_ex_val" class="w-full p-2 border rounded-lg bg-slate-50 font-bold"><option value="1">Avançou/Nível Avançado</option><option value="0.75">Avançou/Nível Adequado</option><option value="0.5">Manteve Avançado</option><option value="0">Não</option></select></div>`;
+            h2 = `<div><label class="block text-[10px] font-bold text-slate-400 uppercase mb-1 font-bold">Taxa de Frequência</label><select id="e2_m_val" class="w-full p-2 border rounded-lg bg-slate-50 font-bold">${opt}</select></div><div><label class="block text-[10px] font-bold text-slate-400 uppercase mb-1 font-bold">Prova São Paulo <span class="help-icon" data-modal="prova_sp">?</span></label><select id="e2_ex_val" class="w-full p-2 border rounded-lg bg-slate-50 font-bold"><option value="1">Meta >= 100% + Redução</option><option value="0.5">Meta >= 100% sem Redução</option><option value="0.75">Meta >= 90% + Redução</option><option value="0.375">Meta >= 90% sem Redução</option><option value="0.5">Meta >= 80% + Redução</option><option value="0.25">Meta >= 80% sem Redução</option><option value="0">Não</option></select></div><div><label class="block text-[10px] font-bold text-slate-400 uppercase mb-1 font-bold">Meta IDEB <span class="help-icon" data-modal="ideb_meta">?</span></label><select id="e2_ideb" class="w-full p-2 border rounded-lg bg-slate-50 font-bold"><option value="1">Atingiu Meta</option><option value="0.75">90% da meta</option><option value="0.5">80% da meta + Redução</option><option value="0">Não</option></select></div>`;
         } else {
             let label1 = isSupervisor ? 'Média da DRE (%)' : (local === 'cei' || local === 'cieja' ? 'Taxa Ocupação (%)' : 'Frequência Estudantes (%)');
             let label2 = isSupervisor ? 'Média Unid. Supervisionadas (%)' : label1;
