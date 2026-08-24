@@ -5,23 +5,23 @@ library(readr)
 library(lubridate)
 options(scipen = 999) # Garante que números grandes não virem '1e+10'
 
-# 1. GERAR LINK DINÂMICO
-get_url <- function(data) {
-  ano <- format(data, "%Y")
-  mes_ano <- format(data, "%m%y")
-  return(paste0("https://orcamento.sf.prefeitura.sp.gov.br/orcamento/uploads/", 
-                ano, "/basedadosexecucaoconsolidados_", mes_ano, ".xlsx"))
-}
+# 1. LINK DA SEPLAN (O link atualizado que você encontrou)
+# Este link é o oficial para o exercício de 2026
+url_base <- "https://prefeitura.sp.gov.br/cidade/secretarias/upload/seplan/arquivos/Exercicio_2026/basedadosexecucaoconsolidados_2026.xlsx"
 
-# Tenta o mês atual, se falhar tenta o anterior
-url_base <- get_url(Sys.Date())
 arquivo_temp <- tempfile(fileext = ".xlsx")
 
+message("Iniciando download do arquivo da SEPLAN...")
+
+# Tenta baixar o arquivo
 try_download <- try(download.file(url_base, destfile = arquivo_temp, mode = "wb"), silent = TRUE)
 
+# Se o link da SEPLAN falhar por algum motivo, ele tenta o link antigo da Fazenda como backup
 if(inherits(try_download, "try-error")) {
-  message("Mês atual não disponível, tentando mês anterior...")
-  url_base <- get_url(Sys.Date() %m-% months(1))
+  message("Link da SEPLAN falhou, tentando link reserva da Fazenda...")
+  url_base <- paste0("https://orcamento.sf.prefeitura.sp.gov.br/orcamento/uploads/", 
+                     format(Sys.Date(), "%Y"), "/basedadosexecucaoconsolidados_", 
+                     format(Sys.Date() %m-% months(1), "%m%y"), ".xlsx")
   download.file(url_base, destfile = arquivo_temp, mode = "wb")
 }
 
@@ -67,6 +67,7 @@ base_filtrada <- base_completa %>%
   mutate(
     Cd_AnoExecucao = as.numeric(Cd_AnoExecucao),
     Ds_Orgao = trimws(Ds_Orgao),
+    # Converte datas para o formato limpo (remove horas 23:59:59)
     DataInicial = as.Date(DataInicial),
     DataFinal = as.Date(DataFinal),
     DataExtracao = Sys.time()
@@ -80,7 +81,7 @@ base_filtrada$Ds_Unidade <- recode(base_filtrada$Ds_Unidade, !!!mapa_unidade)
 # Criar pasta orcamento se não existir
 if(!dir.exists("orcamento")) { dir.create("orcamento") }
 
-# Gravar o CSV
+# Gravar o CSV (padrão brasileiro: ; e ,)
 write_excel_csv2(base_filtrada, "orcamento/Execucao_Orcamentaria_Atualizada.csv")
 
 message("Arquivo CSV gerado com sucesso!")
