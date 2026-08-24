@@ -1,40 +1,38 @@
-name: Atualizar Base de Orcamento
+name: Atualizacao Execucao Orcamentaria
 
 on:
+  workflow_dispatch:
   schedule:
-    - cron: '0 8 * * *' # Roda todo dia às 08:00 AM
-  workflow_dispatch: # Permite rodar manualmente no botão do GitHub
+    - cron: '0 9 * * *' # Roda todos os dias às 09:00 UTC (06:00 AM Brasil)
 
 jobs:
-  build:
+  atualiza_base:
     runs-on: ubuntu-latest
-    permissions:
-      contents: write # Permissão para salvar o arquivo de volta no repositório
 
     steps:
-      - name: Checkout repository
+      - name: Checkout do repositorio
         uses: actions/checkout@v3
 
-      - name: Setup R
+      - name: Instalar R
         uses: r-lib/actions/setup-r@v2
 
-      - name: Instalar dependencias do sistema Linux
+      - name: Instalar dependencias do sistema
         run: |
           sudo apt-get update
           sudo apt-get install -y libcurl4-openssl-dev libssl-dev libxml2-dev
 
-      - name: Instalar pacotes do R
+      - name: Instalar pacotes necessarios
         run: |
-          install.packages(c("readxl", "dplyr", "readr", "lubridate"), repos='https://cloud.r-project.org')
+          install.packages(c("readxl", "readr", "dplyr", "lubridate"))
         shell: Rscript {0}
 
       - name: Rodar script de atualizacao
         run: Rscript orcamento/atualiza_base.R
 
-      - name: Commit e Push dos resultados
+      - name: Commit e push se houver mudancas
         run: |
-          git config --local user.email "actions@github.com"
-          git config --local user.name "GitHub Actions"
-          git add orcamento/Execucao_Orcamentaria_Atualizada.csv
-          git commit -m "Dados atualizados: $(date)" || echo "Sem mudanças para salvar"
+          git config --global user.name 'GitHub Actions'
+          git config --global user.email 'github-actions@github.com'
+          git add .
+          git commit -m "Dados atualizados automaticamente" || echo "Sem mudanças"
           git push
